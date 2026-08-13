@@ -12,9 +12,38 @@ import AdminPortal from './components/AdminPortal.jsx';
 import PublicQRVerification from './components/PublicQRVerification.jsx';
 
 export default function App() {
-  // Views: 'landing' | 'gate' | 'citizen' | 'organization' | 'authority-gate' | 'authority' | 'admin-gate' | 'admin' | 'verify'
-  const [currentView, setCurrentView] = useState('landing');
-  const [authenticatedCitizen, setAuthenticatedCitizen] = useState(null);
+  // Persistent Authentication State across Browser Refresh
+  const [authenticatedCitizen, setAuthenticatedCitizen] = useState(() => {
+    try {
+      const saved = localStorage.getItem('civicone_session');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...parsed,
+          tier: parsed.tier || 'STANDARD',
+          goldPassStatus: parsed.goldPassStatus || 'standard'
+        };
+      }
+    } catch (e) {}
+    return null;
+  });
+
+  const [currentView, setCurrentView] = useState(() => {
+    const path = window.location.pathname;
+    const hash = window.location.hash;
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('token') || path.startsWith('/verify')) return 'verify';
+    if (hash === '#org' || path.startsWith('/org')) return 'organization';
+    if (hash === '#owner-admin' || hash === '#admin' || path.startsWith('/owner-admin')) return 'admin-gate';
+    if (path.startsWith('/authority') || hash === '#authority') return 'authority-gate';
+    
+    try {
+      const saved = localStorage.getItem('civicone_session');
+      if (saved) return 'citizen';
+    } catch (e) {}
+    return 'landing';
+  });
+
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState(null);
   const [authenticatedAdmin, setAuthenticatedAdmin] = useState(null);
   const [verifyToken, setVerifyToken] = useState('CIV-TOKEN-984210-SECURE-2026');
@@ -58,7 +87,15 @@ export default function App() {
 
   // Handle Citizen Login Authentication Completion
   const handleAuthSuccess = (citizenData) => {
-    setAuthenticatedCitizen(citizenData);
+    const sessionCitizen = {
+      ...citizenData,
+      tier: citizenData?.tier || 'STANDARD',
+      goldPassStatus: citizenData?.goldPassStatus || 'standard'
+    };
+    try {
+      localStorage.setItem('civicone_session', JSON.stringify(sessionCitizen));
+    } catch (e) {}
+    setAuthenticatedCitizen(sessionCitizen);
     setCurrentView('citizen');
   };
 
@@ -76,6 +113,9 @@ export default function App() {
 
   // Handle Logout
   const handleLogout = () => {
+    try {
+      localStorage.removeItem('civicone_session');
+    } catch (e) {}
     setAuthenticatedCitizen(null);
     setAuthenticatedOfficer(null);
     setAuthenticatedAdmin(null);
