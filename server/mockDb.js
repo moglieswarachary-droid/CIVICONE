@@ -772,6 +772,83 @@ export const db = {
     { id: "iss-2", officerName: "Dr. Alok Verma", department: "National Health Authority (NHA / ABHA)", badgeId: "NHA-OFFICER-1104", email: "alok.verma@nha.gov.in", status: "APPROVED", issuedCount: 9140 },
     { id: "iss-3", officerName: "Meenakshi Iyer", department: "Income Tax Department (ITD)", badgeId: "ITD-OFFICER-5521", email: "meenakshi.iyer@incometax.gov.in", status: "APPROVED", issuedCount: 12400 },
     { id: "iss-4", officerName: "Sanjay Kulkarni", department: "Passport Seva (MEA)", badgeId: "MEA-OFFICER-3390", email: "sanjay.k@passportindia.gov.in", status: "PENDING APPROVAL", issuedCount: 0 }
+  ],
+
+  voterRecord: {
+    id: "voter-01",
+    name: "Ananya Sharma",
+    epicNo: "EPIC-MH-904812",
+    dob: "14-08-1994",
+    gender: "Female",
+    fatherName: "Rajendra Sharma",
+    constituency: "168 - Chandivali Assembly Constituency",
+    parliamentaryConstituency: "Mumbai North East",
+    state: "Maharashtra",
+    pollingStation: "St. Anthony High School, Room No. 4, Sakinaka",
+    verificationStatus: "OFFICIALLY VERIFIED (ECI REFERENCE)",
+    issuingAuthority: "Election Commission of India",
+    verificationDate: "15-01-2024",
+    civiconeVerificationId: "CIV-VOTER-ECI-2026-904812",
+    accessHistory: [
+      { id: "vlog-1", accessor: "Self Access via CivicVault", date: "Today, 10:15 AM", purpose: "Identity Verification" },
+      { id: "vlog-2", accessor: "Passport Seva Verification Portal", date: "12 May 2026", purpose: "Address Proof Check" }
+    ]
+  },
+
+  organizations: [
+    { id: "org-1", name: "ABC University", category: "Education", regNo: "EDU-REG-9048", verified: true, contactEmail: "admissions@abc.edu.in" },
+    { id: "org-2", name: "XYZ University", category: "Education", regNo: "EDU-REG-1102", verified: true, contactEmail: "admissions@xyz.edu.in" },
+    { id: "org-3", name: "Apollo Hospitals", category: "Healthcare", regNo: "HEALTH-REG-4401", verified: true, contactEmail: "records@apollo.org" },
+    { id: "org-4", name: "HDFC Bank Ltd", category: "Finance", regNo: "BANK-REG-8820", verified: true, contactEmail: "kyc@hdfcbank.com" },
+    { id: "org-5", name: "Tata Consultancy Services", category: "Employment", regNo: "CORP-REG-9910", verified: true, contactEmail: "onboarding@tcs.com" }
+  ],
+
+  shareRequests: [
+    {
+      id: "req-101",
+      orgId: "org-1",
+      orgName: "ABC University",
+      citizenCivicId: "CIV-9048-1029-4821",
+      docId: "doc-7",
+      docName: "B.Tech Computer Science Degree",
+      purpose: "M.Tech Admission Verification",
+      accessType: "View + Verify",
+      requestedExpiry: "7 Days",
+      requestedAt: "13 Aug 2026, 09:30 AM",
+      status: "APPROVED"
+    },
+    {
+      id: "req-102",
+      orgId: "org-4",
+      orgName: "HDFC Bank Ltd",
+      citizenCivicId: "CIV-9048-1029-4821",
+      docId: "doc-1",
+      docName: "Aadhaar Card Reference",
+      purpose: "Home Loan KYC Verification",
+      accessType: "View + Verify",
+      requestedExpiry: "30 Days",
+      requestedAt: "12 Aug 2026, 02:15 PM",
+      status: "PENDING"
+    }
+  ],
+
+  consentRecords: [
+    {
+      id: "share-9041",
+      citizenId: "cit-101",
+      citizenCivicId: "CIV-9048-1029-4821",
+      docId: "doc-7",
+      docName: "B.Tech Computer Science Degree",
+      orgId: "org-1",
+      orgName: "ABC University",
+      purpose: "M.Tech Admission Verification",
+      accessType: "View + Verify",
+      createdAt: "13 Aug 2026, 09:35 AM",
+      expiryDate: "20 Aug 2026",
+      status: "ACTIVE", // ACTIVE | PENDING | EXPIRED | REVOKED | REJECTED
+      watermarkText: "CONFIDENTIAL — AUTHORIZED FOR ABC UNIVERSITY — M.TECH ADMISSION — 13 AUG 2026"
+    }
   ]
 };
+
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage.jsx';
 import PreEntryGate from './components/PreEntryGate.jsx';
 import CitizenDashboard from './components/CitizenDashboard.jsx';
+import OrganizationPortal from './components/OrganizationPortal.jsx';
 import AuthorityGate from './components/AuthorityGate.jsx';
 import AuthorityPortal from './components/AuthorityPortal.jsx';
 import AdminGate from './components/AdminGate.jsx';
@@ -11,7 +12,7 @@ import AdminPortal from './components/AdminPortal.jsx';
 import PublicQRVerification from './components/PublicQRVerification.jsx';
 
 export default function App() {
-  // Views: 'landing' | 'gate' | 'citizen' | 'authority-gate' | 'authority' | 'admin-gate' | 'admin' | 'verify'
+  // Views: 'landing' | 'gate' | 'citizen' | 'organization' | 'authority-gate' | 'authority' | 'admin-gate' | 'admin' | 'verify'
   const [currentView, setCurrentView] = useState('landing');
   const [authenticatedCitizen, setAuthenticatedCitizen] = useState(null);
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState(null);
@@ -26,7 +27,9 @@ export default function App() {
       const searchParams = new URLSearchParams(window.location.search);
       const token = searchParams.get('token');
 
-      if (hash === '#owner-admin' || hash === '#admin' || path.startsWith('/owner-admin')) {
+      if (hash === '#org' || path.startsWith('/org')) {
+        setCurrentView('organization');
+      } else if (hash === '#owner-admin' || hash === '#admin' || path.startsWith('/owner-admin')) {
         setCurrentView('admin-gate');
       } else if (path.startsWith('/authority') || hash === '#authority') {
         setCurrentView('authority-gate');
@@ -103,6 +106,13 @@ export default function App() {
         <PreEntryGate
           onAuthenticated={handleAuthSuccess}
           onGoBackToLanding={() => setCurrentView('landing')}
+        />
+      );
+
+    case 'organization':
+      return (
+        <OrganizationPortal
+          onReturnHome={() => setCurrentView('landing')}
         />
       );
 

@@ -6,6 +6,7 @@ import {
   FileText, Search, Plus, Download, Share2, Eye, CheckCircle2, Clock, AlertCircle, X,
   Lock, Sparkles, Star, ChevronRight, Activity, Filter, RefreshCw, ZoomIn, ZoomOut, Maximize2, FileCheck, ArrowUpRight
 } from 'lucide-react';
+import VoterIdVault from './VoterIdVault.jsx';
 
 export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
   const [documents, setDocuments] = useState(initialDocs || []);
@@ -67,6 +68,8 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
   }, []);
 
   const categories = [
+    { id: 'Voter ID', label: 'Voter ID Module', icon: Landmark, color: '#0284C7' },
+    { id: 'Consent', label: 'Who Has Access? (Consent)', icon: Lock, color: '#DC2626' },
     { id: 'Government', label: 'Government & Identity', icon: ShieldCheck, color: '#0B5ED7' },
     { id: 'Healthcare', label: 'Healthcare & Medical', icon: HeartPulse, color: '#E11D48' },
     { id: 'RTO', label: 'RTO & Vehicles', icon: Car, color: '#D97706' },
@@ -509,6 +512,16 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
           })}
         </div>
       </div>
+
+      {/* VOTER ID MODULE DISPLAY */}
+      {activeCategory === 'Voter ID' && (
+        <div style={{ marginBottom: '32px' }}>
+          <VoterIdVault
+            citizen={{ name: 'Ananya Sharma' }}
+            onOpenShareModal={(doc) => setShowShareModal(doc)}
+          />
+        </div>
+      )}
 
       {/* FILTER & SORT TOOLBAR */}
       <div style={{

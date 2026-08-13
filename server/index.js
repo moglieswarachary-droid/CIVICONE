@@ -600,6 +600,249 @@ app.post('/api/support/tickets', (req, res) => {
   return res.json({ success: true, ticket: newTkt });
 });
 
+// --- VOTER ID ENDPOINTS ---
+
+app.get('/api/voter-id/me', (req, res) => {
+  db.voterRecord.name = db.citizen.name;
+  return res.json({ success: true, voter: db.voterRecord });
+});
+
+// --- ORGANIZATIONS & CONSENT ENGINE ENDPOINTS ---
+
+app.get('/api/organizations', (req, res) => {
+  return res.json({ organizations: db.organizations });
+});
+
+// Organization creates document request
+app.post('/api/consent/request', (req, res) => {
+  const { orgId, citizenCivicId, docId, purpose, expiryDays } = req.body;
+  
+  const org = db.organizations.find(o => o.id === orgId);
+  const doc = db.documents.find(d => d.id === docId);
+
+  if (!org || !doc) {
+    return res.status(400).json({ error: "Invalid organization or document selection." });
+  }
+
+  const newReq = {
+    id: `req-${Date.now()}`,
+    orgId: org.id,
+    orgName: org.name,
+    citizenCivicId: citizenCivicId || db.citizen.civicId,
+    docId: doc.id,
+    docName: doc.name,
+    purpose: purpose || "Institutional Verification",
+    accessType: "View + Verify",
+    requestedExpiry: `${expiryDays || 7} Days`,
+    requestedAt: new Date().toLocaleString(),
+    status: "PENDING"
+  };
+
+  db.shareRequests.unshift(newReq);
+
+  // Notify citizen
+  db.notifications.unshift({
+    id: `notif-${Date.now()}`,
+    title: "New Document Access Request",
+    category: "Consent",
+    message: `${org.name} has requested access to your ${doc.name} for ${purpose || 'verification'}.`,
+    timestamp: "Just now",
+    read: false,
+    type: "info"
+  });
+
+  return res.json({ success: true, request: newReq });
+});
+
+// Citizen views pending access requests
+app.get('/api/consent/citizen-requests', (req, res) => {
+  return res.json({ requests: db.shareRequests });
+});
+
+// Citizen approves document request
+app.post('/api/consent/approve', (req, res) => {
+  const { requestId, expiryDays } = req.body;
+  const reqItem = db.shareRequests.find(r => r.id === requestId);
+
+  if (!reqItem) {
+    return res.status(404).json({ error: "Access request not found." });
+  }
+
+  reqItem.status = "APPROVED";
+
+  const expDays = parseInt(expiryDays) || 7;
+  const expDate = new Date();
+  expDate.setDate(expDate.getDate() + expDays);
+
+  const consentRecord = {
+    id: `share-${Date.now()}`,
+    citizenId: "cit-101",
+    citizenCivicId: db.citizen.civicId,
+    docId: reqItem.docId,
+    docName: reqItem.docName,
+    orgId: reqItem.orgId,
+    orgName: reqItem.orgName,
+    purpose: reqItem.purpose,
+    accessType: reqItem.accessType,
+    createdAt: new Date().toLocaleString(),
+    expiryDate: expDate.toLocaleDateString('en-GB'),
+    status: "ACTIVE",
+    watermarkText: `CONFIDENTIAL — AUTHORIZED FOR ${reqItem.orgName.toUpperCase()} — ${reqItem.purpose.toUpperCase()} — ${new Date().toLocaleDateString('en-GB')}`
+  };
+
+  db.consentRecords.unshift(consentRecord);
+
+  db.securityLogs.unshift({
+    id: `sec-${Date.now()}`,
+    event: `Consent Approved: ${reqItem.docName} shared with ${reqItem.orgName}`,
+    device: "Web Client",
+    location: "Mumbai, India",
+    ip: "49.37.142.90",
+    timestamp: new Date().toLocaleString(),
+    status: "SUCCESS"
+  });
+
+  return res.json({ success: true, consentRecord });
+});
+
+// Citizen creates direct share consent
+app.post('/api/consent/create-direct-share', (req, res) => {
+  const { orgId, docId, purpose, expiryDays, accessType } = req.body;
+  const org = db.organizations.find(o => o.id === orgId);
+  const doc = db.documents.find(d => d.id === docId);
+
+  if (!org || !doc) {
+    return res.status(400).json({ error: "Please select a valid organization and document." });
+  }
+
+  const expDays = parseInt(expiryDays) || 7;
+  const expDate = new Date();
+  expDate.setDate(expDate.getDate() + expDays);
+
+  const consentRecord = {
+    id: `share-${Date.now()}`,
+    citizenId: "cit-101",
+    citizenCivicId: db.citizen.civicId,
+    docId: doc.id,
+    docName: doc.name,
+    orgId: org.id,
+    orgName: org.name,
+    purpose: purpose || "Verification",
+    accessType: accessType || "View + Verify",
+    createdAt: new Date().toLocaleString(),
+    expiryDate: expDate.toLocaleDateString('en-GB'),
+    status: "ACTIVE",
+    watermarkText: `CONFIDENTIAL — AUTHORIZED FOR ${org.name.toUpperCase()} — ${(purpose || 'VERIFICATION').toUpperCase()} — ${new Date().toLocaleDateString('en-GB')}`
+  };
+
+  db.consentRecords.unshift(consentRecord);
+
+  db.securityLogs.unshift({
+    id: `sec-${Date.now()}`,
+    event: `Direct Share Consent Created: ${doc.name} for ${org.name}`,
+    device: "Web Client",
+    location: "Mumbai, India",
+    ip: "49.37.142.90",
+    timestamp: new Date().toLocaleString(),
+    status: "SUCCESS"
+  });
+
+  return res.json({ success: true, consentRecord });
+});
+
+// Citizen views active consent records ("Who Has Access?")
+app.get('/api/consent/active', (req, res) => {
+  return res.json({ consents: db.consentRecords });
+});
+
+// Citizen revokes consent instantly
+app.post('/api/consent/revoke/:shareId', (req, res) => {
+  const { shareId } = req.params;
+  const record = db.consentRecords.find(c => c.id === shareId);
+
+  if (!record) {
+    return res.status(404).json({ error: "Consent record not found." });
+  }
+
+  record.status = "REVOKED";
+
+  db.securityLogs.unshift({
+    id: `sec-${Date.now()}`,
+    event: `Consent Revoked: ${record.docName} access for ${record.orgName} terminated`,
+    device: "Web Client",
+    location: "Mumbai, India",
+    ip: "49.37.142.90",
+    timestamp: new Date().toLocaleString(),
+    status: "REVOKED"
+  });
+
+  return res.json({ success: true, record });
+});
+
+// Organization Document Access Verification Endpoint (BACKEND ENFORCED RECIPIENT-BOUND ACCESS)
+app.get('/api/consent/org-access/:shareId', (req, res) => {
+  const { shareId } = req.params;
+  const { requestingOrgId } = req.query;
+
+  const record = db.consentRecords.find(c => c.id === shareId);
+
+  if (!record) {
+    return res.status(404).json({
+      error: "Access Denied.",
+      message: "Invalid or nonexistent document authorization token."
+    });
+  }
+
+  // Check 1: Revocation Check
+  if (record.status === "REVOKED") {
+    return res.status(403).json({
+      error: "Access Denied.",
+      message: "Authorization has been REVOKED by the citizen."
+    });
+  }
+
+  // Check 2: Expiry Check
+  if (record.status === "EXPIRED") {
+    return res.status(403).json({
+      error: "Access Denied.",
+      message: "Authorization consent has EXPIRED."
+    });
+  }
+
+  // Check 3: Recipient Organization Binding Check! (ABC University permission != XYZ University permission)
+  if (requestingOrgId && record.orgId !== requestingOrgId) {
+    return res.status(403).json({
+      error: "Access Denied.",
+      message: "This authorization is strictly non-transferable and was granted exclusively for another organization."
+    });
+  }
+
+  const doc = db.documents.find(d => d.id === record.docId);
+
+  db.securityLogs.unshift({
+    id: `sec-${Date.now()}`,
+    event: `Authorized Organization View: ${record.orgName} viewed ${record.docName}`,
+    device: "Organization API Client",
+    location: "Mumbai, India",
+    ip: "49.37.142.90",
+    timestamp: new Date().toLocaleString(),
+    status: "SUCCESS"
+  });
+
+  return res.json({
+    success: true,
+    consentRecord: record,
+    document: doc || {
+      name: record.docName,
+      category: "Education",
+      issuer: "Indian Institute of Technology, Bombay",
+      status: "Verified",
+      refNo: "IITB-DEGREE-2014-CS-094",
+      securitySeal: "NAD-IITB-VERIFIED-CERT"
+    }
+  });
+});
+
 // --- ISOLATED AUTHORITY PORTAL API ---
 
 app.post('/api/authority/issue', (req, res) => {
