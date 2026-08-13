@@ -1,0 +1,341 @@
+/* src/index.css - CivicOne Premium Blue + White Visual System */
+
+:root {
+  --primary-blue: #0B5ED7;
+  --primary-blue-hover: #0a52be;
+  --deep-blue: #073B8C;
+  --navy: #0B1F3A;
+  --navy-light: #162c4d;
+  --white: #FFFFFF;
+  --light-blue: #EAF3FF;
+  --light-blue-hover: #dbe9fc;
+  --bg-main: #F6F9FC;
+  --bg-card: #FFFFFF;
+  --text-main: #0F172A;
+  --text-muted: #475569;
+  --text-light: #94A3B8;
+  --border-light: #E2E8F0;
+  --border-blue: #BFDBFE;
+
+  --success: #198754;
+  --success-bg: #D1E7DD;
+  --success-text: #0F5132;
+
+  --warning: #F59E0B;
+  --warning-bg: #FEF3C7;
+  --warning-text: #92400E;
+
+  --error: #DC3545;
+  --error-bg: #F8D7DA;
+  --error-text: #842029;
+
+  --shadow-sm: 0 1px 2px 0 rgba(11, 31, 58, 0.05);
+  --shadow-md: 0 4px 12px -2px rgba(11, 31, 58, 0.08), 0 2px 6px -1px rgba(11, 31, 58, 0.04);
+  --shadow-lg: 0 12px 28px -4px rgba(11, 31, 58, 0.12), 0 4px 12px -2px rgba(11, 31, 58, 0.06);
+  --shadow-blue: 0 8px 24px -4px rgba(11, 94, 215, 0.25);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+  --bg-main: #070F1E;
+  --bg-card: #0B192E;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-light: #64748B;
+  --border-light: #1E293B;
+  --border-blue: #1E3A8A;
+  --light-blue: #112240;
+  --light-blue-hover: #1A365D;
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--text-main);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input, select, textarea {
+  font-family: var(--font-body);
+  outline: none;
+}
+
+/* Glassmorphism Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+[data-theme="dark"] .glass-panel {
+  background: rgba(11, 25, 46, 0.85);
+  border-color: rgba(30, 41, 59, 0.8);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-verified {
+  background-color: var(--success-bg);
+  color: var(--success-text);
+}
+
+.badge-pending {
+  background-color: var(--warning-bg);
+  color: var(--warning-text);
+}
+
+.badge-failed {
+  background-color: var(--error-bg);
+  color: var(--error-text);
+}
+
+.badge-unverified {
+  background-color: #E2E8F0;
+  color: #475569;
+}
+
+/* CivicOne Virtual Card Shimmer & Flip Effect */
+.card-container-3d {
+  perspective: 1000px;
+}
+
+.card-inner-3d {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+.card-container-3d.flipped .card-inner-3d {
+  transform: rotateY(180deg);
+}
+
+.card-front-3d, .card-back-3d {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.card-back-3d {
+  transform: rotateY(180deg);
+}
+
+/* Holographic Overlays */
+.hologram-shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  transform: skewX(-25deg);
+  animation: shimmer 4s infinite ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  30% { left: 200%; }
+  100% { left: 200%; }
+}
+
+/* Fine Security Lines Background Pattern */
+.security-pattern-bg {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0, rgba(255, 255, 255, 0.03) 2px, transparent 0, transparent 8px);
+  background-size: 20px 20px, 100% 100%;
+}
+
+/* Pulse Glow Animation */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.03); }
+}
+
+.pulse-glow {
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+/* PREMIUM GOLD CARD STYLES */
+.card-gold-bg {
+  background: linear-gradient(135deg, #1C190D 0%, #3B2E09 30%, #856414 65%, #C5A038 90%, #E6C86E 100%) !important;
+  border: 1px solid rgba(254, 240, 138, 0.45) !important;
+  box-shadow: 0 16px 40px -8px rgba(197, 160, 56, 0.45), 0 0 25px rgba(230, 200, 110, 0.25) !important;
+}
+
+.gold-hologram-shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 235, 150, 0.45) 50%,
+    transparent 100%
+  );
+  transform: skewX(-25deg);
+  animation: shimmer 3.5s infinite ease-in-out;
+  pointer-events: none;
+}
+
+.gold-security-chip {
+  width: 28px;
+  height: 20px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #FFF7ED 0%, #FDE047 30%, #CA8A04 70%, #854D0E 100%);
+  border: 1px solid #FEF08A;
+  box-shadow: 0 0 8px rgba(253, 224, 71, 0.6);
+}
+
+.gold-vip-badge {
+  background: linear-gradient(135deg, rgba(202, 138, 4, 0.35) 0%, rgba(234, 179, 8, 0.25) 100%);
+  border: 1.5px solid #FACC15;
+  color: #FEF08A;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.725rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 10px rgba(234, 179, 8, 0.3);
+}
+
+.gold-border-glow {
+  box-shadow: 0 0 15px rgba(234, 179, 8, 0.5);
+}
+
+.gold-text-gradient {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FDE047 50%, #EAB308 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-btn {
+  background: linear-gradient(135deg, #EAB308 0%, #CA8A04 100%);
+  color: #000000;
+  font-weight: 800;
+  border: none;
+  box-shadow: 0 4px 14px rgba(202, 138, 4, 0.4);
+}
+
+.gold-btn:hover {
+  background: linear-gradient(135deg, #FACC15 0%, #EAB308 100%);
+  box-shadow: 0 6px 18px rgba(234, 179, 8, 0.5);
+  transform: translateY(-1px);
+}
+
+/* QUICK ACTION BAR / SHORTCUT DOCK */
+.quick-action-dock {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 8px 16px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+}
+
+[data-theme="dark"] .quick-action-dock {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(30, 41, 59, 0.9);
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-light);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.quick-action-btn:hover {
+  background-color: var(--light-blue);
+  border-color: var(--border-blue);
+  color: var(--primary-blue);
+  transform: translateY(-1px);
+}
+
