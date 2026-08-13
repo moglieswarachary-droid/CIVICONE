@@ -479,6 +479,122 @@ export const db = {
       status: "ACTIVE",
       watermarkText: "CONFIDENTIAL — AUTHORIZED FOR ABC UNIVERSITY — M.TECH ADMISSION — 13 AUG 2026"
     }
+  ],
+
+  // 7. OFFICIAL GOVERNMENT UPDATES (MINIMUM 6 RECENT DIRECTIVES)
+  govtUpdates: [
+    {
+      id: "gup-101",
+      title: "UIDAI Mandates Tokenized Aadhaar 2.0 & Biometric Locking Framework for Digital Vault Platforms",
+      category: "Identity & Security",
+      priority: "High",
+      date: "13 Aug 2026",
+      source: "Unique Identification Authority of India (UIDAI)",
+      unread: true,
+      content: "UIDAI has officially released the Aadhaar 2.0 Security Standard requiring tokenized reference numbers and biometric lock state synchronization across all authorized civic vault platforms. Citizens can generate dynamic virtual reference tokens without exposing 12-digit Aadhaar numbers."
+    },
+    {
+      id: "gup-102",
+      title: "MoRTH Enforces Digital Smart Driving Licence Standard via Parivahan & CivicOne Cryptographic Seal",
+      category: "Transport & RTO",
+      priority: "High",
+      date: "12 Aug 2026",
+      source: "Ministry of Road Transport & Highways (MoRTH)",
+      unread: true,
+      content: "All RTO authorities across 28 states have been instructed to accept Parivahan-certified digital smart driving licences stored in CivicOne Vault during traffic inspections and motor vehicle verification."
+    },
+    {
+      id: "gup-103",
+      title: "Universal ABHA Digital Health Account Integration Enabled Across 500+ Hospital Networks",
+      category: "Healthcare",
+      priority: "Medium",
+      date: "11 Aug 2026",
+      source: "National Health Authority (NHA)",
+      unread: false,
+      content: "The National Health Authority has finalized integration of Ayushman Bharat Health Account (ABHA) records into CivicOne Vault, allowing citizens to securely store diagnostic reports, prescriptions, and health insurance tokens with explicit consent controls."
+    },
+    {
+      id: "gup-104",
+      title: "Instant PAN-Aadhaar Digital Verification Gateway Activated for Seamless KYC & Tax Vault Filing",
+      category: "Finance & Tax",
+      priority: "Medium",
+      date: "10 Aug 2026",
+      source: "Income Tax Department, Govt of India",
+      unread: false,
+      content: "Taxpayers can now instantly verify Permanent Account Number (PAN) status and generate cryptographically signed Income Tax Return (ITR) reference certificates directly within the CivicOne Structured Vault."
+    },
+    {
+      id: "gup-105",
+      title: "Digital Elector Photo Identity Card (e-EPIC) Cryptographic Verification Protocol Released",
+      category: "Electoral & Civic",
+      priority: "High",
+      date: "09 Aug 2026",
+      source: "Election Commission of India (ECI)",
+      unread: false,
+      content: "The Election Commission of India has authorized the display of verified e-EPIC credentials in CivicOne Vault, complete with electoral roll polling station details and digital QR verification signatures."
+    },
+    {
+      id: "gup-106",
+      title: "National Data Privacy & Zero-Trust Infrastructure Mandate Issued for All Identity Platforms",
+      category: "Cyber Security",
+      priority: "High",
+      date: "08 Aug 2026",
+      source: "Ministry of Electronics & Information Technology (MeitY)",
+      unread: false,
+      content: "MeitY has issued comprehensive guidelines enforcing zero-trust data access, recipient-bound document sharing, and instant consent revocation mechanisms across all civic identity platforms."
+    }
+  ],
+
+  // 8. DAILY NEWS, MEDIA & GOLD PASS ANNOUNCEMENTS (MINIMUM 6 RECENT ARTICLES)
+  dailyNews: [
+    {
+      id: "news-201",
+      title: "CivicOne Unveils Premium Gold Pass Tier with Hardware Cryptographic Chip Verification & Priority Status",
+      category: "Gold Pass News",
+      source: "CivicOne Official Press Release",
+      date: "13 Aug 2026",
+      snippet: "CivicOne today introduced the Gold Pass Tier featuring an upgraded Virtual Identity Card, hardware-backed chip verification code, and VIP status badge. Gold citizens receive priority verification processing across 2,000+ institution partners."
+    },
+    {
+      id: "news-202",
+      title: "India's Digital Identity Transformation: CivicOne Platform Surpasses 10 Million Active Digital Vault Users",
+      category: "National News",
+      source: "Financial Express",
+      date: "13 Aug 2026",
+      snippet: "The CivicOne Structured Vault platform has achieved a landmark milestone of 10 million verified citizen accounts, processing over 500,000 secure document verification requests daily with 99.99% uptime."
+    },
+    {
+      id: "news-203",
+      title: "Why Banking & Education Partners Are Adopting CivicOne Gold Pass Tier for Zero-Latency KYC Onboarding",
+      category: "Gold Pass News",
+      source: "Economic Times",
+      date: "12 Aug 2026",
+      snippet: "Leading public banks and top universities have integrated CivicOne Gold Pass verification API, reducing customer onboarding and student degree verification time from 7 days to under 5 seconds."
+    },
+    {
+      id: "news-204",
+      title: "Smart Traffic Enforcement Goes Contactless: MoRTH Officers Verify Licences via CivicOne QR Scanner",
+      category: "Mobility & Transport",
+      source: "Times of India",
+      date: "11 Aug 2026",
+      snippet: "Traffic police across major metropolitan areas have begun using the official CivicOne Inspector Scanner app to instantaneously authenticate driving licences and vehicle insurance without holding physical documents."
+    },
+    {
+      id: "news-205",
+      title: "Recipient-Bound Digital Consent Engine: How CivicOne Eliminates Identity Theft and Data Leaks",
+      category: "Cyber Security & AI",
+      source: "TechCrunch",
+      date: "10 Aug 2026",
+      snippet: "CivicOne's non-transferable document sharing architecture ensures that documents shared with one bank cannot be forwarded or accessed by third parties, establishing a new global benchmark in digital privacy."
+    },
+    {
+      id: "news-206",
+      title: "ABHA Health Account Integration with CivicOne Vault Allows Citizens 100% Control Over Medical Records",
+      category: "Healthcare & Digital Health",
+      source: "The Hindu",
+      date: "09 Aug 2026",
+      snippet: "Patients can now store diagnostic lab reports, vaccination credentials, and medical fitness certificates in a dedicated Healthcare Vault, granting time-bound access to doctors with one-click revocation."
+    }
   ]
 };
 

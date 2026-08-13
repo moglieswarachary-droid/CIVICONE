@@ -70,19 +70,18 @@ app.post('/api/auth/identity-verify', (req, res) => {
     return res.status(400).json({ error: "Invalid identity verification OTP. Use 123456 for demo." });
   }
 
-  if (name && name.trim()) {
-    db.citizen.name = name.trim();
-    db.card.holderName = name.trim();
-  }
+  const activeCit = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
 
-  if (phone && phone.trim()) {
-    db.citizen.phone = phone.trim();
+  if (name && name.trim()) {
+    activeCit.fullName = name.trim();
+    activeCit.displayName = name.trim().split(' ')[0];
   }
 
   // Add audit log
-  db.securityLogs.unshift({
+  db.auditLogs.unshift({
     id: `sec-${Date.now()}`,
-    event: `Tokenized Identity Verification Completed for ${db.citizen.name}`,
+    citizenId: activeCit.citizenId,
+    event: `Tokenized Identity Verification Completed for ${activeCit.fullName}`,
     device: "Web Client",
     location: "Mumbai, India",
     ip: "49.37.142.90",
@@ -93,8 +92,8 @@ app.post('/api/auth/identity-verify', (req, res) => {
   return res.json({
     success: true,
     message: "Identity verified securely via UIDAI Authorized Token service.",
-    citizen: db.citizen,
-    maskedAadhaar: db.citizen.maskedAadhaar,
+    citizen: activeCit,
+    maskedAadhaar: activeCit.maskedAadhaar,
     identityStatus: "VERIFIED"
   });
 });
@@ -121,8 +120,9 @@ app.post('/api/auth/authority-login', (req, res) => {
     sessionToken: `GOVT-AUTH-${Date.now()}-SECURE`
   };
 
-  db.securityLogs.unshift({
+  db.auditLogs.unshift({
     id: `sec-${Date.now()}`,
+    citizenId: db.activeCitizenId,
     event: `Government Officer Login: ${email} (${department})`,
     device: "Web Client",
     location: "New Delhi, India",
@@ -294,12 +294,26 @@ app.post('/api/card/update-tier', (req, res) => {
   const { tier } = req.body;
   const newTier = tier === 'STANDARD' ? 'STANDARD' : 'GOLD';
 
-  db.card.tier = newTier;
-  db.card.tierBadge = newTier === 'GOLD' ? '👑 Premium Gold Citizen' : 'Verified Citizen';
-  db.card.securityChipId = newTier === 'GOLD' ? 'GOLD-CHIP-9984-SEC-ID' : 'CHIP-9984-SEC-ID';
+  const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
+  citizen.tier = newTier;
 
-  db.securityLogs.unshift({
+  const updatedCard = {
+    civicId: citizen.citizenId,
+    holderName: citizen.fullName,
+    tier: citizen.tier,
+    tierBadge: citizen.tier === 'GOLD' ? '👑 Premium Gold Citizen' : 'Verified Citizen',
+    status: "Verified Identity",
+    issueDate: "15 Jan 2024",
+    expiryDate: "14 Jan 2034",
+    securityChipId: citizen.tier === 'GOLD' ? `GOLD-CHIP-${citizen.citizenId}` : `CHIP-${citizen.citizenId}`,
+    verificationToken: `CIV-TOKEN-${citizen.citizenId}-SECURE-2026`,
+    qrSignature: `SHA256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`,
+    verificationUrl: `http://localhost:3001/verify?token=CIV-TOKEN-${citizen.citizenId}-SECURE-2026`
+  };
+
+  db.auditLogs.unshift({
     id: `sec-${Date.now()}`,
+    citizenId: citizen.citizenId,
     event: `Civic Card Tier Updated to ${newTier}`,
     device: "Web Client",
     location: "Mumbai, India",
@@ -311,7 +325,7 @@ app.post('/api/card/update-tier', (req, res) => {
   return res.json({
     success: true,
     message: `Civic Card successfully updated to ${newTier} tier.`,
-    card: db.card
+    card: updatedCard
   });
 });
 
@@ -656,12 +670,14 @@ app.post('/api/ai/query', (req, res) => {
 // --- SECURITY & NOTIFICATIONS ENDPOINTS ---
 
 app.get('/api/security/audit-logs', (req, res) => {
-  return res.json({ logs: db.securityLogs });
+  const activeLogs = db.auditLogs.filter(a => a.citizenId === db.activeCitizenId);
+  return res.json({ logs: activeLogs.length > 0 ? activeLogs : db.auditLogs });
 });
 
 app.post('/api/security/revoke-all', (req, res) => {
-  db.securityLogs.unshift({
+  db.auditLogs.unshift({
     id: `sec-${Date.now()}`,
+    citizenId: db.activeCitizenId,
     event: "Sign Out All Devices Executed",
     device: "Web Client",
     location: "Mumbai, India",
@@ -698,8 +714,21 @@ app.post('/api/support/tickets', (req, res) => {
 // --- VOTER ID ENDPOINTS ---
 
 app.get('/api/voter-id/me', (req, res) => {
-  db.voterRecord.name = db.citizen.name;
-  return res.json({ success: true, voter: db.voterRecord });
+  const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
+  const voterRecord = {
+    epicNumber: `EPIC-${citizen.citizenId.substring(4)}-9048`,
+    name: citizen.fullName,
+    fatherName: "Rajendra Kumar",
+    gender: citizen.gender,
+    dateOfBirth: citizen.dateOfBirth,
+    constituency: "168 - Chandivali Assembly Constituency",
+    parliamentaryConstituency: "Mumbai North East",
+    state: "Maharashtra",
+    pollingStation: "St. Anthony High School, Room 04, Mumbai",
+    verificationStatus: "VERIFIED (ECI Gazette 2026)",
+    qrToken: `ECI-QR-${citizen.citizenId}`
+  };
+  return res.json({ success: true, voter: voterRecord });
 });
 
 // --- ORGANIZATIONS & CONSENT ENGINE ENDPOINTS ---
@@ -787,8 +816,9 @@ app.post('/api/consent/approve', (req, res) => {
 
   db.consentRecords.unshift(consentRecord);
 
-  db.securityLogs.unshift({
+  db.auditLogs.unshift({
     id: `sec-${Date.now()}`,
+    citizenId: db.activeCitizenId,
     event: `Consent Approved: ${reqItem.docName} shared with ${reqItem.orgName}`,
     device: "Web Client",
     location: "Mumbai, India",
@@ -832,8 +862,9 @@ app.post('/api/consent/create-direct-share', (req, res) => {
 
   db.consentRecords.unshift(consentRecord);
 
-  db.securityLogs.unshift({
+  db.auditLogs.unshift({
     id: `sec-${Date.now()}`,
+    citizenId: db.activeCitizenId,
     event: `Direct Share Consent Created: ${doc.name} for ${org.name}`,
     device: "Web Client",
     location: "Mumbai, India",
@@ -861,8 +892,9 @@ app.post('/api/consent/revoke/:shareId', (req, res) => {
 
   record.status = "REVOKED";
 
-  db.securityLogs.unshift({
+  db.auditLogs.unshift({
     id: `sec-${Date.now()}`,
+    citizenId: db.activeCitizenId,
     event: `Consent Revoked: ${record.docName} access for ${record.orgName} terminated`,
     device: "Web Client",
     location: "Mumbai, India",
@@ -914,8 +946,9 @@ app.get('/api/consent/org-access/:shareId', (req, res) => {
 
   const doc = db.documents.find(d => d.id === record.docId);
 
-  db.securityLogs.unshift({
+  db.auditLogs.unshift({
     id: `sec-${Date.now()}`,
+    citizenId: db.activeCitizenId,
     event: `Authorized Organization View: ${record.orgName} viewed ${record.docName}`,
     device: "Organization API Client",
     location: "Mumbai, India",
@@ -994,8 +1027,8 @@ app.post('/api/admin/auth', (req, res) => {
     return res.json({
       authorized: true,
       adminToken: `ADMIN-ROOT-${Date.now()}-SECURE`,
-      stats: db.adminStats,
-      auditLogs: db.securityLogs
+      stats: { totalCitizens: db.citizens.length, verifiedDocuments: db.documents.length, activeConsentShares: db.consentRecords.length },
+      auditLogs: db.auditLogs
     });
   }
   return res.status(403).json({ error: "Access Denied.", message: "Administrative authorization required." });
@@ -1003,8 +1036,8 @@ app.post('/api/admin/auth', (req, res) => {
 
 app.get('/api/admin/stats', (req, res) => {
   return res.json({
-    stats: db.adminStats,
-    auditLogs: db.securityLogs
+    stats: { totalCitizens: db.citizens.length, verifiedDocuments: db.documents.length, activeConsentShares: db.consentRecords.length },
+    auditLogs: db.auditLogs
   });
 });
 
@@ -1064,10 +1097,9 @@ app.post('/api/admin/issuer/approve', (req, res) => {
 
 // Admin Emergency Platform Lockdown
 app.post('/api/admin/system/lockdown', (req, res) => {
-  db.adminStats.systemUptime = "99.99% (LOCKDOWN ACTIVE)";
-  
-  db.securityLogs.unshift({
+  db.auditLogs.unshift({
     id: `sec-${Date.now()}`,
+    citizenId: "SUPERADMIN",
     event: "CRITICAL: Super Admin Initiated Platform Emergency Lockdown",
     device: "Master Admin Console",
     location: "NIC National Command Center",
