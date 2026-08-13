@@ -154,30 +154,10 @@ export default function UpdatesAndNews({ govtUpdates: initialGovt, dailyNews: in
           >
             <Newspaper size={18} /> Daily News & Media ({dailyNews.length})
           </button>
-
-          <button
-            onClick={() => { setActiveTab('gold'); setSelectedCategory('All'); }}
-            style={{
-              backgroundColor: activeTab === 'gold' ? '#CA8A04' : 'transparent',
-              color: activeTab === 'gold' ? '#FFFFFF' : '#D97706',
-              border: activeTab === 'gold' ? 'none' : '1px solid #FCD34D',
-              borderRadius: '10px',
-              padding: '8px 16px',
-              fontSize: '0.95rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s'
-            }}
-          >
-            <Crown size={18} style={{ color: activeTab === 'gold' ? '#FFFFFF' : '#EAB308' }} /> Gold Pass News
-          </button>
         </div>
 
         <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-          {activeTab === 'govt' ? 'Official Department Press Releases' : activeTab === 'gold' ? '👑 VIP Tier Announcements' : 'Verified Media Outlets'}
+          {activeTab === 'govt' ? 'Official Department Press Releases' : 'Verified Media Outlets'}
         </span>
       </div>
 

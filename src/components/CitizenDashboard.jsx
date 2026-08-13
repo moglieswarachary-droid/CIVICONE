@@ -142,21 +142,21 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 width: '36px',
                 height: '36px',
                 borderRadius: '10px',
-                background: isGoldTier ? 'linear-gradient(135deg, #EAB308 0%, #CA8A04 100%)' : '#0B5ED7',
+                background: 'linear-gradient(135deg, #EAB308 0%, #CA8A04 100%)',
                 color: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: isGoldTier ? '0 4px 14px rgba(202, 138, 4, 0.4)' : '0 4px 12px rgba(11, 94, 215, 0.3)'
+                boxShadow: '0 4px 14px rgba(202, 138, 4, 0.4)'
               }}>
-                {isGoldTier ? <Crown size={20} /> : <ShieldCheck size={20} />}
+                <Crown size={20} />
               </div>
               <div>
                 <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>
                   CivicOne
                 </span>
-                <span style={{ display: 'block', fontSize: '0.6rem', fontWeight: 800, color: isGoldTier ? '#CA8A04' : '#0B5ED7', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '-4px' }}>
-                  {isGoldTier ? "👑 Gold Pass" : "Citizen Portal"}
+                <span style={{ display: 'block', fontSize: '0.6rem', fontWeight: 800, color: '#CA8A04', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '-4px' }}>
+                  National Identity Portal
                 </span>
               </div>
             </div>
