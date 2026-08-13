@@ -14,15 +14,16 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
   const [showNfcModal, setShowNfcModal] = useState(false);
   const [showTierModal, setShowTierModal] = useState(false);
   
-  // Card Tier State (Defaulting to GOLD for Premium Gold experience)
-  const [currentTier, setCurrentTier] = useState(card?.tier || 'GOLD');
+  // Card Tier State (Defaulting to STANDARD unless Gold Pass is ACTIVE)
+  const [currentTier, setCurrentTier] = useState(card?.tier || 'STANDARD');
   const [nfcScanning, setNfcScanning] = useState(false);
   const [nfcSuccess, setNfcSuccess] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [copied, setCopied] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
 
-  const isGold = currentTier === 'GOLD';
+  // Gold Pass styling is ONLY active if goldPassStatus === 'active' or explicitly verified GOLD
+  const isGold = (card?.goldPassStatus === 'active' || (card?.tier === 'GOLD' && card?.goldPassStatus !== 'standard' && card?.goldPassStatus !== 'pending'));
 
   // Toggle Card Tier (STANDARD <-> GOLD)
   const handleTierSwitch = async (newTier) => {

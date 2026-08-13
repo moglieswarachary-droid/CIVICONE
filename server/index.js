@@ -204,6 +204,148 @@ app.get('/api/citizen/me', (req, res) => {
   return res.json({ citizen, card: citizenCard });
 });
 
+// --- GOLD PASS ENTITLEMENT API ENDPOINTS ---
+
+// GET Gold Pass Status for current active citizen
+app.get('/api/goldpass/status', (req, res) => {
+  const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
+  const pendingReq = (db.goldPassRequests || []).find(r => r.citizenId === citizen.citizenId && r.status === "PENDING");
+  
+  let status = citizen.goldPassStatus || (citizen.tier === 'GOLD' ? 'active' : 'standard');
+  if (pendingReq) status = 'pending';
+
+  return res.json({
+    success: true,
+    citizenId: citizen.citizenId,
+    goldPassStatus: status,
+    validUntil: citizen.goldPassExpiry || "2027-08-14",
+    pendingRequest: pendingReq || null
+  });
+});
+
+// POST Citizen Purchase/Request Gold Pass (Flow: Standard -> Pending Verification)
+app.post('/api/goldpass/request', (req, res) => {
+  const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
+  const { plan, paymentRef } = req.body;
+
+  if (citizen.goldPassStatus === 'active') {
+    return res.status(400).json({ error: "Account already has an active Gold Pass entitlement." });
+  }
+
+  // Create pending verification record
+  const newRequest = {
+    id: `gpr-${Date.now()}`,
+    citizenId: citizen.citizenId,
+    citizenName: citizen.fullName,
+    appliedAt: new Date().toISOString(),
+    status: "PENDING",
+    plan: plan || "Annual Pass (₹499)",
+    paymentRef: paymentRef || `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
+    notes: "Awaiting Administrative / Webhook Entitlement Verification"
+  };
+
+  if (!db.goldPassRequests) db.goldPassRequests = [];
+  db.goldPassRequests.unshift(newRequest);
+  citizen.goldPassStatus = "pending";
+
+  db.securityLogs.unshift({
+    id: `sec-${Date.now()}`,
+    event: `Gold Pass Purchase Initiated (Ref: ${newRequest.paymentRef}) - Pending Admin Verification`,
+    device: "Web Client",
+    location: "Mumbai, India",
+    ip: "49.37.142.90",
+    timestamp: new Date().toLocaleString(),
+    status: "PENDING"
+  });
+
+  db.notifications.unshift({
+    id: `notif-${Date.now()}`,
+    title: "Gold Pass Application Submitted",
+    message: "Your Gold Pass purchase reference is received. Status: Pending Verification.",
+    type: "INFO",
+    read: false,
+    timestamp: new Date().toISOString()
+  });
+
+  return res.json({
+    success: true,
+    message: "Gold Pass payment reference recorded. Application is pending verification.",
+    request: newRequest,
+    goldPassStatus: "pending"
+  });
+});
+
+// GET Admin List of Pending Gold Pass Requests (Admin Access)
+app.get('/api/admin/goldpass/requests', (req, res) => {
+  return res.json({
+    success: true,
+    requests: db.goldPassRequests || []
+  });
+});
+
+// POST Admin Approve/Verify Gold Pass Entitlement
+app.post('/api/admin/goldpass/verify', (req, res) => {
+  const { requestId, citizenId, action } = req.body; // action: 'approve' | 'reject' | 'revoke'
+  
+  const targetCitizen = db.citizens.find(c => c.citizenId === (citizenId || db.activeCitizenId));
+  const reqItem = (db.goldPassRequests || []).find(r => r.id === requestId || r.citizenId === targetCitizen?.citizenId);
+
+  if (!targetCitizen) {
+    return res.status(404).json({ error: "Target citizen record not found." });
+  }
+
+  if (action === 'approve') {
+    targetCitizen.tier = 'GOLD';
+    targetCitizen.goldPassStatus = 'active';
+    targetCitizen.goldPassExpiry = '2027-08-14';
+    if (reqItem) reqItem.status = 'APPROVED';
+
+    db.notifications.unshift({
+      id: `notif-${Date.now()}`,
+      title: "Gold Pass Activated! 👑",
+      message: "Your Gold Pass entitlement has been verified and activated. Enjoy premium identity features!",
+      type: "SUCCESS",
+      read: false,
+      timestamp: new Date().toISOString()
+    });
+
+    db.securityLogs.unshift({
+      id: `sec-${Date.now()}`,
+      event: `Gold Pass Entitlement Verified & Granted for ${targetCitizen.fullName}`,
+      device: "Admin Portal",
+      location: "National Admin Desk",
+      ip: "164.100.1.1",
+      timestamp: new Date().toLocaleString(),
+      status: "SUCCESS"
+    });
+
+    return res.json({
+      success: true,
+      message: `Gold Pass approved and activated for ${targetCitizen.fullName}`,
+      goldPassStatus: 'active'
+    });
+  } else if (action === 'revoke') {
+    targetCitizen.tier = 'STANDARD';
+    targetCitizen.goldPassStatus = 'revoked';
+    if (reqItem) reqItem.status = 'REVOKED';
+
+    return res.json({
+      success: true,
+      message: `Gold Pass revoked for ${targetCitizen.fullName}`,
+      goldPassStatus: 'revoked'
+    });
+  } else {
+    targetCitizen.goldPassStatus = 'standard';
+    if (reqItem) reqItem.status = 'REJECTED';
+
+    return res.json({
+      success: true,
+      message: `Gold Pass request rejected for ${targetCitizen.fullName}`,
+      goldPassStatus: 'standard'
+    });
+  }
+});
+
 // GET Switchable Demo Citizens List
 app.get('/api/citizens/demo', (req, res) => {
   const demoList = db.citizens.slice(0, 5).map(c => ({

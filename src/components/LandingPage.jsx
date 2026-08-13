@@ -379,22 +379,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
         <div style={{ maxWidth: '1200px', margin: '16px auto 0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#64748B' }}>
           <div>© 2026 CivicOne National Identity Platform. All rights reserved.</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span>Strict Security Boundary & Authorized Encryption Enabled</span>
-            <button
-              onClick={onOpenOwnerAdmin}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#475569',
-                fontSize: '0.7rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                opacity: 0.6,
-                padding: 0
-              }}
-            >
-              ⚙️ Platform Console
-            </button>
+            <span>Strict Security Boundary &amp; Authorized Encryption Enabled</span>
           </div>
         </div>
       </footer>

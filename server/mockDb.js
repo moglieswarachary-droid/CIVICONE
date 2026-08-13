@@ -17,13 +17,14 @@ export const db = {
       mobileMasked: "+91 98765 43210",
       emailMasked: "rajesh.kumar@civicone.gov.in",
       addressSummary: "Flat 402, Green Valley Towers, Bandra West, Mumbai 400050",
-      trustLevel: "VIP Tier Gold",
+      trustLevel: "Standard Verified Citizen",
       verificationStatus: "VERIFIED",
       securityScore: 98,
       createdAt: "2026-01-15T09:30:00Z",
-      virtualCardId: "VCD-GOLD-100001",
+      virtualCardId: "VCD-STD-100001",
       virtualCardStatus: "ACTIVE",
-      tier: "GOLD",
+      tier: "STANDARD",
+      goldPassStatus: "standard",
       bloodGroup: "O+",
       emergencyContact: "+91 9812345678 (Spouse - Priya Kumar)",
       maskedAadhaar: "XXXX XXXX 8942"
@@ -478,6 +479,19 @@ export const db = {
       expiryDate: "20 Aug 2026",
       status: "ACTIVE",
       watermarkText: "CONFIDENTIAL — AUTHORIZED FOR ABC UNIVERSITY — M.TECH ADMISSION — 13 AUG 2026"
+    }
+  ],
+
+  goldPassRequests: [
+    {
+      id: "gpr-demo-01",
+      citizenId: "CIV-100001",
+      citizenName: "Rajesh Kumar",
+      appliedAt: "2026-08-13T10:00:00Z",
+      status: "PENDING",
+      plan: "Annual Pass (₹499)",
+      paymentRef: "TXN-984210-DEMO",
+      notes: "Pending Admin Verification"
     }
   ]
 };

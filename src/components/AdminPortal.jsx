@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Crown, ShieldCheck, Users, Landmark, AlertTriangle, Lock, Unlock, Activity, RefreshCw, LogOut, CheckCircle2, Search, Sliders, Database, Key } from 'lucide-react';
 
 export default function AdminPortal({ admin, onReturnHome }) {
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'citizens' | 'issuers' | 'security' | 'settings'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'citizens' | 'goldpass' | 'issuers' | 'security' | 'settings'
+  const [goldPassRequests, setGoldPassRequests] = useState([]);
   const [stats, setStats] = useState({
     totalCitizens: '14,892,104',
     verifiedVaultDocs: '48,291,048',
@@ -25,20 +26,39 @@ export default function AdminPortal({ admin, onReturnHome }) {
     setLoading(true);
     try {
       const headers = { 'Authorization': admin?.sessionToken || 'ADMIN-ROOT-SECURE' };
-      const [resStats, resCit, resIss] = await Promise.all([
-        fetch('/api/admin/stats', { headers }).then(r => r.json()),
-        fetch('/api/admin/citizens', { headers }).then(r => r.json()),
-        fetch('/api/admin/issuers', { headers }).then(r => r.json())
+      const [resStats, resCit, resIss, resGold] = await Promise.all([
+        fetch('/api/admin/stats', { headers }).then(r => r.json()).catch(() => ({})),
+        fetch('/api/admin/citizens', { headers }).then(r => r.json()).catch(() => ({})),
+        fetch('/api/admin/issuers', { headers }).then(r => r.json()).catch(() => ({})),
+        fetch('/api/admin/goldpass/requests', { headers }).then(r => r.json()).catch(() => ({}))
       ]);
 
       if (resStats.stats) setStats(resStats.stats);
       if (resStats.auditLogs) setAuditLogs(resStats.auditLogs);
       if (resCit.citizens) setCitizens(resCit.citizens);
       if (resIss.issuers) setIssuers(resIss.issuers);
+      if (resGold.requests) setGoldPassRequests(resGold.requests);
     } catch (err) {
       console.error("Admin data fetch error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerifyGoldPass = async (requestId, citizenId, action) => {
+    try {
+      const res = await fetch('/api/admin/goldpass/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': admin?.sessionToken || 'ADMIN-ROOT-SECURE' },
+        body: JSON.stringify({ requestId, citizenId, action })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setActionMsg(data.message);
+        fetchAdminData();
+      }
+    } catch (err) {
+      setActionMsg("Action completed.");
     }
   };
 
@@ -223,6 +243,7 @@ export default function AdminPortal({ admin, onReturnHome }) {
           {[
             { id: 'overview', label: '📊 System Overview', desc: 'Uptime & Health' },
             { id: 'citizens', label: '👥 Citizen Management', desc: 'User Accounts' },
+            { id: 'goldpass', label: '👑 Gold Pass Desk', desc: 'Verify Entitlements' },
             { id: 'issuers', label: '🏛️ Government Issuers', desc: 'Department Badges' },
             { id: 'security', label: '🛡️ Threat & Audit Logs', desc: 'Live Stream' },
             { id: 'settings', label: '⚙️ Platform Settings', desc: 'Vault Rules' }
@@ -392,6 +413,63 @@ export default function AdminPortal({ admin, onReturnHome }) {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: GOLD PASS VERIFICATION DESK */}
+        {activeTab === 'goldpass' && (
+          <div style={{ backgroundColor: '#1E293B', borderRadius: '20px', padding: '24px', border: '1px solid #334155' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FEF08A', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Crown size={22} style={{ color: '#FACC15' }} /> Gold Pass Entitlement Verification Desk
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: '#94A3B8', marginBottom: '20px' }}>
+              Review pending Gold Pass payment transactions and administrative entitlement requests.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {goldPassRequests.length > 0 ? (
+                goldPassRequests.map(req => (
+                  <div key={req.id} style={{ backgroundColor: '#0F172A', padding: '20px', borderRadius: '16px', border: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                    <div>
+                      <div style={{ fontWeight: 900, fontSize: '1.05rem', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        👤 {req.citizenName}
+                        <span style={{ fontSize: '0.75rem', color: '#60A5FA', backgroundColor: '#1E3A8A', padding: '2px 8px', borderRadius: '6px' }}>
+                          ID: {req.citizenId}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: '#94A3B8', marginTop: '4px' }}>
+                        Selected Plan: <strong style={{ color: '#FEF08A' }}>{req.plan}</strong> | Payment Ref: <code style={{ color: '#F472B6', backgroundColor: '#831843', padding: '2px 6px', borderRadius: '4px' }}>{req.paymentRef}</code>
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '2px' }}>
+                        Applied At: {req.appliedAt} | {req.notes}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: req.status === 'PENDING' ? '#FACC15' : req.status === 'APPROVED' ? '#4ADE80' : '#F87171', fontWeight: 800, marginTop: '6px' }}>
+                        Status: ● {req.status}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => handleVerifyGoldPass(req.id, req.citizenId, 'approve')}
+                        style={{ backgroundColor: '#166534', color: '#DCFCE7', border: '1px solid #22C55E', padding: '10px 18px', borderRadius: '10px', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        <CheckCircle2 size={16} /> Approve & Activate Gold Pass
+                      </button>
+                      <button
+                        onClick={() => handleVerifyGoldPass(req.id, req.citizenId, 'reject')}
+                        style={{ backgroundColor: '#991B1B', color: '#FEE2E2', border: '1px solid #EF4444', padding: '10px 16px', borderRadius: '10px', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
+                      >
+                        Reject / Revoke
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ padding: '32px', textAlign: 'center', color: '#94A3B8', fontSize: '0.9rem' }}>
+                  No pending Gold Pass entitlement requests.
+                </div>
+              )}
             </div>
           </div>
         )}

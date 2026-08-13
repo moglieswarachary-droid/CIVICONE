@@ -100,6 +100,8 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
     { id: 'card', label: 'My Civic Card', icon: Ticket },
     { id: 'vault', label: 'My Vault', icon: FolderClosed },
     { id: 'services', label: 'Services', icon: Grid },
+    { id: 'gold-pass', label: 'Gold Pass', icon: Crown },
+    { id: 'activity', label: 'My Activity', icon: ShieldCheck },
     { id: 'govt-updates', label: 'Govt Updates', icon: Landmark },
     { id: 'news', label: 'Daily News', icon: Newspaper },
     { id: 'security', label: 'Security Centre', icon: Shield },
@@ -108,7 +110,50 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   ];
 
   const unreadNotifCount = notifications.filter(n => !n.read).length;
-  const isGoldTier = cardData?.tier === 'GOLD' || !cardData;
+
+  // Account Entitlement State (Default: standard)
+  const [goldPassStatus, setGoldPassStatus] = useState(citizen?.goldPassStatus || cardData?.goldPassStatus || 'standard');
+  const [requestingGoldPass, setRequestingGoldPass] = useState(false);
+  const [goldPassMessage, setGoldPassMessage] = useState('');
+
+  // Fetch Gold Pass Status on mount
+  useEffect(() => {
+    async function checkGoldPass() {
+      try {
+        const res = await fetch('/api/goldpass/status');
+        const data = await res.json();
+        if (data.goldPassStatus) {
+          setGoldPassStatus(data.goldPassStatus);
+        }
+      } catch (err) {
+        console.log("Using default entitlement status");
+      }
+    }
+    checkGoldPass();
+  }, []);
+
+  const handleApplyGoldPass = async () => {
+    setRequestingGoldPass(true);
+    try {
+      const res = await fetch('/api/goldpass/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: 'Annual Pass (₹499)', paymentRef: `TXN-${Math.floor(100000 + Math.random() * 900000)}` })
+      });
+      const data = await res.json();
+      setRequestingGoldPass(false);
+      if (data.goldPassStatus) {
+        setGoldPassStatus(data.goldPassStatus);
+        setGoldPassMessage("Payment reference submitted. Your Gold Pass application is PENDING ADMINISTRATIVE VERIFICATION.");
+      }
+    } catch (err) {
+      setRequestingGoldPass(false);
+      setGoldPassStatus('pending');
+      setGoldPassMessage("Payment reference submitted. Application is PENDING VERIFICATION.");
+    }
+  };
+
+  const isGoldTier = goldPassStatus === 'active';
 
   const handleSelectTab = (tabId) => {
     setActiveTab(tabId);
@@ -325,54 +370,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
         </div>
       </header>
-
-      {/* DEMO CITIZEN SWITCHER BAR (SYNTHETIC DATASET MULTI-CITIZEN ISOLATION TEST) */}
-      <div style={{
-        backgroundColor: '#0F172A',
-        color: '#FFFFFF',
-        padding: '8px 16px',
-        borderBottom: '1px solid #1E293B',
-        fontSize: '0.75rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '8px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: '#FEF08A' }}>
-          <Sparkles size={14} style={{ color: '#FACC15' }} /> DEMO CITIZEN SWITCHER (SYNTHETIC RELATIONAL DATASETS):
-        </div>
-
-        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-          {demoCitizens.length > 0 ? (
-            demoCitizens.map((c, i) => {
-              const isActive = c.active || currentCitizen?.citizenId === c.citizenId;
-              return (
-                <button
-                  key={c.citizenId}
-                  onClick={() => handleSwitchDemoAccount(c.citizenId)}
-                  style={{
-                    backgroundColor: isActive ? '#0B5ED7' : '#1E293B',
-                    color: isActive ? '#FFFFFF' : '#94A3B8',
-                    border: isActive ? '1px solid #60A5FA' : '1px solid #334155',
-                    borderRadius: '8px',
-                    padding: '4px 10px',
-                    fontSize: '0.7rem',
-                    fontWeight: 700,
-                    whiteSpace: 'nowrap',
-                    cursor: 'pointer'
-                  }}
-                  title={`Switch to ${c.fullName} (${c.citizenId}) - ${c.docsCount} Vault Docs`}
-                >
-                  👤 DEMO 0{i + 1}: {c.displayName} ({c.citizenId})
-                </button>
-              );
-            })
-          ) : (
-            <span style={{ color: '#94A3B8', fontSize: '0.7rem' }}>Loading Demo Accounts...</span>
-          )}
-        </div>
-      </div>
 
       {/* MOBILE DRAWER SLIDE-OUT NAVIGATION */}
       {mobileMenuOpen && (
@@ -739,6 +736,119 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           {/* TAB 4: SERVICES */}
           {activeTab === 'services' && (
             <ServicesSection />
+          )}
+
+          {/* TAB: GOLD PASS ENTITLEMENT & UPGRADE */}
+          {activeTab === 'gold-pass' && (
+            <div style={{ maxWidth: '900px', margin: '0 auto', paddingTop: '12px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FEF3C7', color: '#92400E', padding: '6px 16px', borderRadius: '20px', fontWeight: 800, fontSize: '0.85rem', marginBottom: '12px' }}>
+                  <Crown size={18} style={{ color: '#D97706' }} /> CivicOne Gold Pass Entitlement
+                </div>
+                <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)' }}>
+                  Unlock Premium Identity Credentials
+                </h1>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Enhanced citizen card styling, priority verification engine, and advanced security capabilities.
+                </p>
+              </div>
+
+              {/* ENTITLEMENT STATUS BANNER */}
+              <div style={{
+                backgroundColor: goldPassStatus === 'active' ? '#FEF3C7' : goldPassStatus === 'pending' ? '#FEF9C3' : 'var(--bg-card)',
+                borderRadius: '20px', padding: '24px', border: goldPassStatus === 'active' ? '2px solid #FACC15' : '1px solid var(--border-light)',
+                marginBottom: '24px', boxShadow: 'var(--shadow-md)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-light)', textTransform: 'uppercase' }}>
+                      Account Entitlement Status:
+                    </div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: goldPassStatus === 'active' ? '#856414' : goldPassStatus === 'pending' ? '#854D0E' : 'var(--text-main)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {goldPassStatus === 'active' && <Crown size={24} style={{ color: '#CA8A04' }} />}
+                      {goldPassStatus === 'active' ? "Gold Pass Active 👑" : goldPassStatus === 'pending' ? "Application Pending Verification ⏳" : goldPassStatus === 'expired' ? "Gold Pass Expired" : "Standard CivicOne Account"}
+                    </div>
+                    <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                      {goldPassStatus === 'active' ? "Valid until 14 Aug 2027. Premium Gold Citizen features activated." : goldPassStatus === 'pending' ? "Payment reference received. Awaiting administrative entitlement verification." : "Standard verification features active. Upgrade anytime."}
+                    </p>
+                  </div>
+
+                  {goldPassStatus === 'standard' && (
+                    <button
+                      onClick={handleApplyGoldPass}
+                      disabled={requestingGoldPass}
+                      style={{
+                        backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 24px', borderRadius: '14px',
+                        fontWeight: 900, fontSize: '0.95rem', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(202, 138, 4, 0.4)'
+                      }}
+                    >
+                      {requestingGoldPass ? 'Submitting...' : 'Purchase Gold Pass (₹499/yr)'}
+                    </button>
+                  )}
+                </div>
+
+                {goldPassMessage && (
+                  <div style={{ marginTop: '16px', backgroundColor: '#FEF3C7', color: '#92400E', padding: '12px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700 }}>
+                    ⚡ {goldPassMessage}
+                  </div>
+                )}
+              </div>
+
+              {/* BENEFITS GRID */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+                {[
+                  { title: 'Gold Citizen Card', desc: 'Distinctive gold emblem, premium holographic styling & gold status badge.' },
+                  { title: 'Priority Verification', desc: 'Instant priority queue processing for all document verification requests.' },
+                  { title: 'Unlimited Consent Sharing', desc: 'Generate watermarked recipient-bound sharing tokens with no monthly limit.' },
+                  { title: 'Identity Concierge AI', desc: '24/7 priority support for document retrieval and government application guidance.' }
+                ].map((b, idx) => (
+                  <div key={idx} style={{ backgroundColor: 'var(--bg-card)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+                    <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)', marginBottom: '4px' }}>{b.title}</div>
+                    <div style={{ fontSize: '0.825rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>{b.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: MY ACTIVITY AUDIT LOGS */}
+          {activeTab === 'activity' && (
+            <div style={{ maxWidth: '1000px', margin: '0 auto', paddingTop: '12px' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-main)' }}>
+                  My Activity & Audit History
+                </h1>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Complete cryptographic audit trail of all logins, document accesses, consent decisions, and verification events.
+                </p>
+              </div>
+
+              <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '20px', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {[
+                    { id: 'act-01', event: 'Citizen Login — Identity Verified via OTP', device: 'Chrome Web Client (Windows)', location: 'Mumbai, MH', ip: '49.37.142.90', timestamp: 'Today, 09:00 AM', status: 'SUCCESS' },
+                    { id: 'act-02', event: 'CivicOne Vault Accessed', device: 'Chrome Web Client (Windows)', location: 'Mumbai, MH', ip: '49.37.142.90', timestamp: 'Today, 09:05 AM', status: 'SUCCESS' },
+                    { id: 'act-03', event: 'Driving Licence Credential Verified', device: 'Parivahan API Connector', location: 'New Delhi (MoRTH)', ip: '164.100.42.10', timestamp: 'Yesterday, 02:30 PM', status: 'VERIFIED' },
+                    { id: 'act-04', event: 'QR Verification Token Generated', device: 'Chrome Web Client (Windows)', location: 'Mumbai, MH', ip: '49.37.142.90', timestamp: '11 Aug 2026', status: 'SUCCESS' }
+                  ].map(log => (
+                    <div key={log.id} style={{ backgroundColor: 'var(--bg-main)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)' }}>{log.event}</div>
+                        <div style={{ fontSize: '0.775rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                          Device: {log.device} | Location: {log.location} | IP: <code>{log.ip}</code>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ backgroundColor: '#D1E7DD', color: '#0F5132', padding: '2px 8px', borderRadius: '6px', fontSize: '0.725rem', fontWeight: 800 }}>
+                          {log.status}
+                        </span>
+                        <div style={{ fontSize: '0.725rem', color: 'var(--text-light)', marginTop: '4px' }}>{log.timestamp}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
 
           {/* TAB 5 & 6: GOVERNMENT UPDATES & DAILY NEWS */}

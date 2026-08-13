@@ -172,19 +172,26 @@ export default function AiAgentFloating({ citizen, documents }) {
 
           {/* Quick Prompt Suggestions */}
           <div style={{ padding: '8px 12px', backgroundColor: '#FFFFFF', borderTop: '1px solid #E2E8F0', display: 'flex', gap: '6px', overflowX: 'auto' }}>
-            {["Licence Expiry", "Aadhaar Status", "Share Document"].map((txt, i) => (
+            {[
+              "How do I verify my document?",
+              "Where is my Voter ID?",
+              "How can I share my certificate?",
+              "What services are available?",
+              "What is CivicOne Gold Pass?"
+            ].map((txt, i) => (
               <button
                 key={i}
-                onClick={() => setPrompt(`When does my driving licence expire?`)}
+                onClick={() => setPrompt(txt)}
                 style={{
                   backgroundColor: '#EAF3FF',
-                  color: '#073B8C',
-                  border: 'none',
+                  color: '#0B5ED7',
+                  border: '1px solid #BFDBFE',
                   padding: '4px 10px',
                   borderRadius: '12px',
                   fontSize: '0.725rem',
-                  fontWeight: 600,
-                  whiteSpace: 'nowrap'
+                  fontWeight: 700,
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer'
                 }}
               >
                 {txt}

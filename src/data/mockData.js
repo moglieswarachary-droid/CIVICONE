@@ -13,7 +13,8 @@ export const DEMO_CITIZEN = {
   address: "42, MG Road, Bandra West, Mumbai, MH 400050",
   state: "Maharashtra",
   photo: null,
-  tier: "GOLD",
+  tier: "STANDARD",
+  goldPassStatus: "standard",
 };
 
 export const DEMO_CARD = {
@@ -21,7 +22,8 @@ export const DEMO_CARD = {
   holderName: "RAJESH KUMAR",
   civicId: "CIV-984210",
   maskedAadhaar: "XXXX XXXX 8942",
-  tier: "GOLD",
+  tier: "STANDARD",
+  goldPassStatus: "standard",
   status: "ACTIVE",
   issuedDate: "15-01-2024",
   expiryDate: "14-01-2029",
