@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Search, Bell, User, LayoutDashboard, Ticket, FolderClosed,
   Grid, Landmark, Newspaper, Shield, HelpCircle, LogOut, Sun, Moon, CheckCircle2,
-  ChevronRight, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, Zap, Radio, Share2
+  ChevronRight, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, Zap, Radio, Share2, FileText
 } from 'lucide-react';
 import VirtualCard from './VirtualCard.jsx';
 import CivicVault from './CivicVault.jsx';
@@ -21,7 +21,7 @@ import {
 } from '../data/mockData.js';
 
 export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification }) {
-  // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'govt-updates' | 'news' | 'security' | 'help' | 'profile'
+  // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'applications' | 'gold-pass' | 'activity' | 'govt-updates' | 'news' | 'security' | 'help' | 'profile'
   const [activeTab, setActiveTab] = useState('home');
   const [theme, setTheme] = useState('light');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -738,6 +738,88 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           {/* TAB 4: SERVICES */}
           {activeTab === 'services' && (
             <ServicesSection />
+          )}
+
+          {/* TAB: MY APPLICATIONS & SERVICE TRACKING */}
+          {activeTab === 'applications' && (
+            <div style={{ maxWidth: '1000px', margin: '0 auto', paddingTop: '12px' }}>
+              <div style={{ marginBottom: '24px' }}>
+                <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-main)' }}>
+                  My Service Applications &amp; Status Tracking
+                </h1>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Track active government service submissions, verification progress, and department clearance references.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {[
+                  {
+                    id: 'app-01',
+                    service: 'Driving Licence Renewal',
+                    provider: 'Parivahan Sewa — Ministry of Road Transport & Highways',
+                    refNo: 'RTO-REF-984210',
+                    appliedAt: '12 Aug 2026',
+                    status: 'SUBMITTED / IN PROGRESS',
+                    statusColor: '#0B5ED7',
+                    step: 2,
+                    notes: 'Authorized using verified Smart DL vault credential. Department verification in progress.'
+                  },
+                  {
+                    id: 'app-02',
+                    service: 'Voter ID E-EPIC Digital Download',
+                    provider: 'Election Commission of India',
+                    refNo: 'EPIC-REQ-421089',
+                    appliedAt: '10 Aug 2026',
+                    status: 'APPROVED & ISSUED',
+                    statusColor: '#0F5132',
+                    step: 3,
+                    notes: 'Digital EPIC record verified. Credential synced to your CivicOne Vault.'
+                  },
+                  {
+                    id: 'app-03',
+                    service: 'ABHA Health Account Sync',
+                    provider: 'National Health Authority (NHA)',
+                    refNo: 'ABHA-SYNC-984211',
+                    appliedAt: '08 Aug 2026',
+                    status: 'COMPLETED',
+                    statusColor: '#0F5132',
+                    step: 3,
+                    notes: 'Encrypted ABHA ID linked to profile with citizen consent.'
+                  }
+                ].map(app => (
+                  <div key={app.id} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '24px', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+                      <div>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>{app.service}</h3>
+                        <span style={{ fontSize: '0.8rem', color: '#0B5ED7', fontWeight: 700 }}>{app.provider}</span>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ backgroundColor: app.step === 3 ? '#D1E7DD' : '#CFE2FF', color: app.statusColor, padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800 }}>
+                          ● {app.status}
+                        </span>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginTop: '4px' }}>Tracking Ref: <code>{app.refNo}</code></div>
+                      </div>
+                    </div>
+
+                    <div style={{ backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '14px', border: '1px solid var(--border-light)', fontSize: '0.825rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                      💡 {app.notes}
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', fontSize: '0.725rem', fontWeight: 800 }}>
+                      <div style={{ padding: '6px', borderRadius: '8px', backgroundColor: '#D1E7DD', color: '#0F5132', textAlign: 'center' }}>✓ 1. Submitted</div>
+                      <div style={{ padding: '6px', borderRadius: '8px', backgroundColor: app.step >= 2 ? '#D1E7DD' : '#F1F5F9', color: app.step >= 2 ? '#0F5132' : '#64748B', textAlign: 'center' }}>
+                        {app.step >= 2 ? '✓ 2. Dept Processing' : '2. Dept Processing'}
+                      </div>
+                      <div style={{ padding: '6px', borderRadius: '8px', backgroundColor: app.step === 3 ? '#D1E7DD' : '#F1F5F9', color: app.step === 3 ? '#0F5132' : '#64748B', textAlign: 'center' }}>
+                        {app.step === 3 ? '✓ 3. Credential Issued' : '3. Credential Issued'}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
           {/* TAB: GOLD PASS ENTITLEMENT & UPGRADE */}
