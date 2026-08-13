@@ -175,12 +175,93 @@ app.post('/api/auth/admin-login', (req, res) => {
   });
 });
 
-// Get Current Session
+// Get Current Session & Active Citizen
 app.get('/api/auth/session', (req, res) => {
+  const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
   return res.json({
     authenticated: true,
-    citizen: db.citizen,
-    maskedAadhaar: db.citizen.maskedAadhaar
+    citizen,
+    maskedAadhaar: citizen.maskedAadhaar
+  });
+});
+
+// GET Active Citizen Profile & Card
+app.get('/api/citizen/me', (req, res) => {
+  const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
+  const citizenCard = {
+    civicId: citizen.citizenId,
+    holderName: citizen.fullName,
+    tier: citizen.tier,
+    tierBadge: citizen.tier === 'GOLD' ? '👑 Premium Gold Citizen' : 'Verified Citizen',
+    status: "Verified Identity",
+    issueDate: "15 Jan 2024",
+    expiryDate: "14 Jan 2034",
+    securityChipId: citizen.tier === 'GOLD' ? `GOLD-CHIP-${citizen.citizenId}` : `CHIP-${citizen.citizenId}`,
+    verificationToken: `CIV-TOKEN-${citizen.citizenId}-SECURE-2026`,
+    qrSignature: `SHA256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`,
+    verificationUrl: `http://localhost:3001/verify?token=CIV-TOKEN-${citizen.citizenId}-SECURE-2026`
+  };
+  return res.json({ citizen, card: citizenCard });
+});
+
+// GET Switchable Demo Citizens List
+app.get('/api/citizens/demo', (req, res) => {
+  const demoList = db.citizens.slice(0, 5).map(c => ({
+    citizenId: c.citizenId,
+    fullName: c.fullName,
+    displayName: c.displayName,
+    tier: c.tier,
+    maskedAadhaar: c.maskedAadhaar,
+    docsCount: db.documents.filter(d => d.citizenId === c.citizenId).length,
+    active: c.citizenId === db.activeCitizenId
+  }));
+  return res.json({ demoCitizens: demoList, activeCitizenId: db.activeCitizenId });
+});
+
+// POST Switch Active Demo Citizen Session
+app.post('/api/citizen/switch-demo', (req, res) => {
+  const { citizenId } = req.body;
+  const targetCitizen = db.citizens.find(c => c.citizenId === citizenId);
+  if (!targetCitizen) {
+    return res.status(404).json({ error: "Demo citizen not found." });
+  }
+
+  db.activeCitizenId = targetCitizen.citizenId;
+
+  // Append entry to audit logs
+  db.auditLogs.unshift({
+    id: `sec-${Date.now()}`,
+    citizenId: targetCitizen.citizenId,
+    event: `Switched Demo Session to ${targetCitizen.fullName} (${targetCitizen.citizenId})`,
+    device: "Web Client",
+    location: "Mumbai, India",
+    ip: "127.0.0.1",
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    status: "SUCCESS"
+  });
+
+  const citizenCard = {
+    civicId: targetCitizen.citizenId,
+    holderName: targetCitizen.fullName,
+    tier: targetCitizen.tier,
+    tierBadge: targetCitizen.tier === 'GOLD' ? '👑 Premium Gold Citizen' : 'Verified Citizen',
+    status: "Verified Identity",
+    issueDate: "15 Jan 2024",
+    expiryDate: "14 Jan 2034",
+    securityChipId: targetCitizen.tier === 'GOLD' ? `GOLD-CHIP-${targetCitizen.citizenId}` : `CHIP-${targetCitizen.citizenId}`,
+    verificationToken: `CIV-TOKEN-${targetCitizen.citizenId}-SECURE-2026`,
+    qrSignature: `SHA256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`,
+    verificationUrl: `http://localhost:3001/verify?token=CIV-TOKEN-${targetCitizen.citizenId}-SECURE-2026`
+  };
+
+  const docs = db.documents.filter(d => d.citizenId === targetCitizen.citizenId);
+
+  return res.json({
+    success: true,
+    message: `Switched active demo citizen to ${targetCitizen.fullName} (${targetCitizen.citizenId}).`,
+    citizen: targetCitizen,
+    card: citizenCard,
+    documents: docs
   });
 });
 
@@ -188,9 +269,23 @@ app.get('/api/auth/session', (req, res) => {
 
 // Get Virtual Card Details
 app.get('/api/card/me', (req, res) => {
+  const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
+  const citizenCard = {
+    civicId: citizen.citizenId,
+    holderName: citizen.fullName,
+    tier: citizen.tier,
+    tierBadge: citizen.tier === 'GOLD' ? '👑 Premium Gold Citizen' : 'Verified Citizen',
+    status: "Verified Identity",
+    issueDate: "15 Jan 2024",
+    expiryDate: "14 Jan 2034",
+    securityChipId: citizen.tier === 'GOLD' ? `GOLD-CHIP-${citizen.citizenId}` : `CHIP-${citizen.citizenId}`,
+    verificationToken: `CIV-TOKEN-${citizen.citizenId}-SECURE-2026`,
+    qrSignature: `SHA256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`,
+    verificationUrl: `http://localhost:3001/verify?token=CIV-TOKEN-${citizen.citizenId}-SECURE-2026`
+  };
   return res.json({
-    card: db.card,
-    citizen: db.citizen
+    card: citizenCard,
+    citizen
   });
 });
 

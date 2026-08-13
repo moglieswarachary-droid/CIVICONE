@@ -29,30 +29,61 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   const [cardData, setCardData] = useState(null);
   const [globalSearch, setGlobalSearch] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [demoCitizens, setDemoCitizens] = useState([]);
+  const [currentCitizen, setCurrentCitizen] = useState(citizen);
 
-  // Fetch initial dashboard data from REST API backend
+  // Fetch initial dashboard data & demo accounts from REST API backend
   useEffect(() => {
     async function loadDashboardData() {
       try {
-        const [cardRes, docsRes, notifRes, govtRes, newsRes] = await Promise.all([
+        const [cardRes, docsRes, notifRes, govtRes, newsRes, demoRes] = await Promise.all([
           fetch('/api/card/me').then(r => r.json()),
           fetch('/api/vault/documents').then(r => r.json()),
           fetch('/api/notifications').then(r => r.json()),
           fetch('/api/updates/govt').then(r => r.json()),
-          fetch('/api/updates/news').then(r => r.json())
+          fetch('/api/updates/news').then(r => r.json()),
+          fetch('/api/citizens/demo').then(r => r.json())
         ]);
 
+        if (cardRes.citizen) setCurrentCitizen(cardRes.citizen);
         if (cardRes.card) setCardData(cardRes.card);
         if (docsRes.documents) setDocuments(docsRes.documents);
         if (notifRes.notifications) setNotifications(notifRes.notifications);
         if (govtRes.updates) setGovtUpdates(govtRes.updates);
         if (newsRes.news) setDailyNews(newsRes.news);
+        if (demoRes.demoCitizens) setDemoCitizens(demoRes.demoCitizens);
       } catch (err) {
         console.log("Using cached/seed data fallback");
       }
     }
     loadDashboardData();
   }, []);
+
+  // Switch Demo Citizen Account Handler
+  const handleSwitchDemoAccount = async (citizenId) => {
+    try {
+      const res = await fetch('/api/citizen/switch-demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ citizenId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCurrentCitizen(data.citizen);
+        setCardData(data.card);
+        setDocuments(data.documents);
+        // Refresh notifications & demo status
+        const [notifRes, demoRes] = await Promise.all([
+          fetch('/api/notifications').then(r => r.json()),
+          fetch('/api/citizens/demo').then(r => r.json())
+        ]);
+        if (notifRes.notifications) setNotifications(notifRes.notifications);
+        if (demoRes.demoCitizens) setDemoCitizens(demoRes.demoCitizens);
+      }
+    } catch (err) {
+      console.log("Demo switch failed");
+    }
+  };
 
   // Sync theme attribute on root element
   useEffect(() => {
@@ -289,6 +320,54 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
         </div>
       </header>
+
+      {/* DEMO CITIZEN SWITCHER BAR (SYNTHETIC DATASET MULTI-CITIZEN ISOLATION TEST) */}
+      <div style={{
+        backgroundColor: '#0F172A',
+        color: '#FFFFFF',
+        padding: '8px 16px',
+        borderBottom: '1px solid #1E293B',
+        fontSize: '0.75rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '8px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: '#FEF08A' }}>
+          <Sparkles size={14} style={{ color: '#FACC15' }} /> DEMO CITIZEN SWITCHER (SYNTHETIC RELATIONAL DATASETS):
+        </div>
+
+        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+          {demoCitizens.length > 0 ? (
+            demoCitizens.map((c, i) => {
+              const isActive = c.active || currentCitizen?.citizenId === c.citizenId;
+              return (
+                <button
+                  key={c.citizenId}
+                  onClick={() => handleSwitchDemoAccount(c.citizenId)}
+                  style={{
+                    backgroundColor: isActive ? '#0B5ED7' : '#1E293B',
+                    color: isActive ? '#FFFFFF' : '#94A3B8',
+                    border: isActive ? '1px solid #60A5FA' : '1px solid #334155',
+                    borderRadius: '8px',
+                    padding: '4px 10px',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer'
+                  }}
+                  title={`Switch to ${c.fullName} (${c.citizenId}) - ${c.docsCount} Vault Docs`}
+                >
+                  👤 DEMO 0{i + 1}: {c.displayName} ({c.citizenId})
+                </button>
+              );
+            })
+          ) : (
+            <span style={{ color: '#94A3B8', fontSize: '0.7rem' }}>Loading Demo Accounts...</span>
+          )}
+        </div>
+      </div>
 
       {/* MOBILE DRAWER SLIDE-OUT NAVIGATION */}
       {mobileMenuOpen && (
