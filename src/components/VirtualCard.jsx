@@ -1,9 +1,9 @@
-// src/components/VirtualCard.jsx - Dynamic Premium Gold Virtual CivicOne Card & Interactive Features
+// src/components/VirtualCard.jsx - Official Canonical CivicOne Virtual Card
 
 import React, { useState } from 'react';
 import {
   ShieldCheck, QrCode, RotateCw, Share2, Download, History, Lock, CheckCircle2,
-  Copy, X, Sparkles, ShieldAlert, Fingerprint, Crown, Smartphone, Radio, Zap, Award
+  Copy, X, Sparkles, ShieldAlert, Fingerprint, Radio, Zap, ExternalLink, RefreshCw
 } from 'lucide-react';
 
 export default function VirtualCard({ citizen, card, onNavigateToVerification, onCardUpdate }) {
@@ -12,37 +12,41 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
   const [showShareModal, setShowShareModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showNfcModal, setShowNfcModal] = useState(false);
-  const [showTierModal, setShowTierModal] = useState(false);
   
-  // Card Tier State (Defaulting to GOLD for Premium Gold experience)
-  const [currentTier, setCurrentTier] = useState(card?.tier || 'GOLD');
   const [nfcScanning, setNfcScanning] = useState(false);
   const [nfcSuccess, setNfcSuccess] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [copied, setCopied] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const isGold = currentTier === 'GOLD';
+  // Active Citizen & Card Data Mapping
+  const holderName = citizen?.fullName || citizen?.name || card?.holderName || "Arjun Rao";
+  const civiconeId = citizen?.citizenId || card?.civicId || card?.civicone_id || "CVC-DEMO-1001";
+  const trustLevel = citizen?.trustLevel || card?.trust_level || "TRUST LEVEL 04";
+  const verificationStatus = citizen?.verificationStatus || card?.status || "VERIFIED";
+  const issueDate = card?.issued_at || card?.issueDate || "15 Jan 2024";
+  const expiryDate = card?.expires_at || card?.expiryDate || "14 Jan 2034";
+  const verificationToken = card?.qr_token || card?.verificationToken || `CVC-VERIFY-${civiconeId}`;
+  const verificationUrl = `/verify/card/${verificationToken}`;
 
-  // Toggle Card Tier (STANDARD <-> GOLD)
-  const handleTierSwitch = async (newTier) => {
-    setCurrentTier(newTier);
+  // Refresh Card Data State
+  const handleRefreshCard = async () => {
+    setRefreshing(true);
     try {
-      const res = await fetch('/api/card/update-tier', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tier: newTier })
-      });
+      const res = await fetch('/api/card/me');
       const data = await res.json();
-      if (data.success && onCardUpdate) {
+      if (data.card && onCardUpdate) {
         onCardUpdate(data.card);
       }
     } catch (err) {
-      console.log("Tier updated locally");
+      console.log("Card refreshed");
+    } finally {
+      setTimeout(() => setRefreshing(false), 600);
     }
   };
 
-  // Simulate NFC Tap Scan
+  // Simulate Wireless NFC Scan
   const handleTriggerNfc = () => {
     setShowNfcModal(true);
     setNfcScanning(true);
@@ -51,67 +55,67 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
     setTimeout(() => {
       setNfcScanning(false);
       setNfcSuccess(true);
-    }, 2200);
+    }, 2000);
   };
 
-  // Generate dynamic SVG QR Code pattern with theme accent
-  const renderQrSvg = (size = 140) => (
+  // Generate dynamic SVG QR Code pattern
+  const renderQrSvg = (size = 130) => (
     <svg width={size} height={size} viewBox="0 0 100 100" style={{ display: 'block', margin: '0 auto', background: '#FFFFFF', padding: '6px', borderRadius: '8px' }}>
       <rect width="100" height="100" fill="#FFFFFF" />
       {/* Corner Position Detection Squares */}
-      <rect x="5" y="5" width="26" height="26" fill={isGold ? "#856414" : "#0B1F3A"} />
+      <rect x="5" y="5" width="26" height="26" fill="#0B1F3A" />
       <rect x="9" y="9" width="18" height="18" fill="#FFFFFF" />
-      <rect x="13" y="13" width="10" height="10" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="13" y="13" width="10" height="10" fill="#0B5ED7" />
 
-      <rect x="69" y="5" width="26" height="26" fill={isGold ? "#856414" : "#0B1F3A"} />
+      <rect x="69" y="5" width="26" height="26" fill="#0B1F3A" />
       <rect x="73" y="9" width="18" height="18" fill="#FFFFFF" />
-      <rect x="77" y="13" width="10" height="10" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="77" y="13" width="10" height="10" fill="#0B5ED7" />
 
-      <rect x="5" y="69" width="26" height="26" fill={isGold ? "#856414" : "#0B1F3A"} />
+      <rect x="5" y="69" width="26" height="26" fill="#0B1F3A" />
       <rect x="9" y="73" width="18" height="18" fill="#FFFFFF" />
-      <rect x="13" y="77" width="10" height="10" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="13" y="77" width="10" height="10" fill="#0B5ED7" />
 
       {/* Dynamic Data Modules */}
-      <rect x="36" y="8" width="6" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="36" y="8" width="6" height="6" fill="#0B5ED7" />
       <rect x="46" y="8" width="6" height="6" fill="#0B1F3A" />
-      <rect x="56" y="8" width="6" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="56" y="8" width="6" height="6" fill="#0B5ED7" />
 
       <rect x="36" y="18" width="6" height="6" fill="#0B1F3A" />
-      <rect x="46" y="18" width="12" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="46" y="18" width="12" height="6" fill="#0B5ED7" />
 
       <rect x="8" y="36" width="6" height="6" fill="#0B1F3A" />
-      <rect x="18" y="36" width="6" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="18" y="36" width="6" height="6" fill="#0B5ED7" />
       <rect x="28" y="36" width="12" height="6" fill="#0B1F3A" />
-      <rect x="46" y="36" width="6" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="46" y="36" width="6" height="6" fill="#0B5ED7" />
       <rect x="56" y="36" width="12" height="6" fill="#0B1F3A" />
-      <rect x="74" y="36" width="6" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="74" y="36" width="6" height="6" fill="#0B5ED7" />
       <rect x="84" y="36" width="8" height="6" fill="#0B1F3A" />
 
-      <rect x="36" y="46" width="12" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="36" y="46" width="12" height="6" fill="#0B5ED7" />
       <rect x="54" y="46" width="6" height="6" fill="#0B1F3A" />
-      <rect x="66" y="46" width="12" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="66" y="46" width="12" height="6" fill="#0B5ED7" />
 
-      <rect x="8" y="56" width="6" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="8" y="56" width="6" height="6" fill="#0B5ED7" />
       <rect x="20" y="56" width="12" height="6" fill="#0B1F3A" />
-      <rect x="38" y="56" width="6" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="38" y="56" width="6" height="6" fill="#0B5ED7" />
       <rect x="48" y="56" width="12" height="6" fill="#0B1F3A" />
 
       <rect x="36" y="66" width="8" height="6" fill="#0B1F3A" />
-      <rect x="48" y="66" width="6" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="48" y="66" width="6" height="6" fill="#0B5ED7" />
       <rect x="60" y="66" width="14" height="6" fill="#0B1F3A" />
 
-      <rect x="36" y="78" width="6" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="36" y="78" width="6" height="6" fill="#0B5ED7" />
       <rect x="48" y="78" width="12" height="6" fill="#0B1F3A" />
-      <rect x="66" y="78" width="6" height="6" fill={isGold ? "#D4AF37" : "#0B5ED7"} />
+      <rect x="66" y="78" width="6" height="6" fill="#0B5ED7" />
       <rect x="78" y="78" width="14" height="6" fill="#0B1F3A" />
 
       {/* Center Symbol */}
       <circle cx="50" cy="50" r="8" fill="#FFFFFF" />
-      <circle cx="50" cy="50" r="6" fill={isGold ? "#CA8A04" : "#0B5ED7"} />
+      <circle cx="50" cy="50" r="6" fill="#0B5ED7" />
     </svg>
   );
 
-  // Trigger Credential Link Generation API
+  // Share Verification Link API
   const handleGenerateShareLink = async () => {
     setShareLoading(true);
     try {
@@ -129,7 +133,7 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
     } catch (err) {
       setShareLoading(false);
       setShareData({
-        shareUrl: `http://localhost:3000/verify?token=${card?.verificationToken || 'CIV-TOKEN-984210'}`,
+        shareUrl: `${window.location.origin}/verify?token=${verificationToken}`,
         expiresInHours: 24,
         passcode: "8942"
       });
@@ -144,802 +148,794 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
   };
 
   return (
-    <div style={{ maxWidth: '440px', width: '100%', margin: '0 auto' }}>
+    <div style={{ maxWidth: '460px', width: '100%', margin: '0 auto' }}>
 
-      {/* TOP TIER QUICK TOGGLE STRIP */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justify: 'space-between',
-        marginBottom: '10px',
-        padding: '6px 12px',
-        borderRadius: '12px',
-        backgroundColor: isGold ? 'rgba(234, 179, 8, 0.12)' : 'var(--light-blue)',
-        border: `1px solid ${isGold ? '#FACC15' : 'var(--border-blue)'}`
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {isGold ? <Crown size={18} style={{ color: '#EAB308' }} /> : <ShieldCheck size={18} style={{ color: '#0B5ED7' }} />}
-          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: isGold ? '#B45309' : '#0B5ED7' }}>
-            {isGold ? "👑 PREMIUM GOLD CARD ACTIVE" : "STANDARD DIGITAL CARD"}
-          </span>
-        </div>
-
-        <button
-          onClick={() => setShowTierModal(true)}
-          style={{
-            backgroundColor: isGold ? '#CA8A04' : '#0B5ED7',
-            color: '#FFFFFF',
-            fontSize: '0.7rem',
-            fontWeight: 700,
-            padding: '4px 10px',
-            borderRadius: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}
-        >
-          <Sparkles size={12} /> Switch Theme
-        </button>
-      </div>
-
-      {/* 3D CARD WRAPPER */}
-      <div
-        className={`card-container-3d ${isFlipped ? 'flipped' : ''}`}
-        style={{ width: '100%', minHeight: '230px', aspectRatio: '1.586', position: 'relative', cursor: 'pointer' }}
+      {/* CANONICAL CIVICONE VIRTUAL CARD CONTAINER */}
+      <div 
+        style={{
+          perspective: '1000px',
+          width: '100%',
+          margin: '0 auto 16px auto',
+          cursor: 'pointer'
+        }}
         onClick={() => setIsFlipped(!isFlipped)}
       >
-        <div className="card-inner-3d">
+        <div style={{
+          position: 'relative',
+          width: '100%',
+          aspectRatio: '1.586',
+          minHeight: '250px',
+          borderRadius: '20px',
+          transition: 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+          transformStyle: 'preserve-3d',
+          transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+          boxShadow: '0 20px 40px rgba(11, 31, 58, 0.35), 0 8px 16px rgba(11, 94, 215, 0.2)'
+        }}>
 
-          {/* FRONT OF VIRTUAL CIVICONE CARD */}
-          <div
-            className={`card-front-3d security-pattern-bg ${isGold ? 'card-gold-bg' : ''}`}
-            style={{
-              background: isGold
-                ? 'linear-gradient(135deg, #1C190D 0%, #3B2E09 30%, #856414 65%, #C5A038 90%, #E6C86E 100%)'
-                : 'linear-gradient(135deg, #0B1F3A 0%, #073B8C 50%, #0B5ED7 100%)',
-              padding: '16px 20px',
-              color: '#FFFFFF',
-              boxShadow: isGold
-                ? '0 16px 40px -8px rgba(197, 160, 56, 0.45), 0 0 25px rgba(230, 200, 110, 0.25)'
-                : '0 16px 36px -8px rgba(11, 31, 58, 0.35)',
-              display: 'flex',
-              flexDirection: 'column',
-              justify: 'space-between',
-              border: isGold ? '1.5px solid #FEF08A' : '1px solid rgba(255,255,255,0.2)'
-            }}
-          >
-            {/* Shimmer Overlay */}
-            <div className={isGold ? "gold-hologram-shimmer" : "hologram-shimmer"} />
+          {/* FRONT OF THE CIVICONE VIRTUAL CARD */}
+          <div style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            backfaceVisibility: 'hidden',
+            borderRadius: '20px',
+            background: 'linear-gradient(135deg, #0B1F3A 0%, #0F2B5B 55%, #1A365D 100%)',
+            border: '1.5px solid rgba(56, 189, 248, 0.3)',
+            padding: '20px',
+            color: '#FFFFFF',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            overflow: 'hidden',
+            boxSizing: 'border-box'
+          }}>
+            
+            {/* Background Holographic Micro-Pattern */}
+            <div style={{
+              position: 'absolute',
+              top: '-50%',
+              right: '-20%',
+              width: '280px',
+              height: '280px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, rgba(11, 94, 215, 0) 70%)',
+              pointerEvents: 'none'
+            }} />
 
-            {/* Card Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {/* Header: CIVICONE Logo & Subtitle */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 2 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '10px',
-                  backgroundColor: isGold ? 'rgba(254, 240, 138, 0.25)' : 'rgba(255,255,255,0.15)',
-                  border: isGold ? '1px solid #FEF08A' : 'none',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  background: 'linear-gradient(135deg, #0B5ED7 0%, #00F2FE 100%)',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(0, 242, 254, 0.4)'
                 }}>
-                  {isGold ? <Crown size={22} style={{ color: '#FDE047' }} /> : <ShieldCheck size={20} style={{ color: '#60A5FA' }} />}
+                  <ShieldCheck size={20} style={{ color: '#FFFFFF' }} />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 900, fontSize: '1.05rem', letterSpacing: '0.04em', lineHeight: 1, color: isGold ? '#FEF08A' : '#FFFFFF' }}>
-                    CivicOne {isGold ? "Gold" : ""}
+                  <div style={{ fontSize: '1.15rem', fontWeight: 900, letterSpacing: '0.05em', color: '#FFFFFF', lineHeight: 1 }}>
+                    CIVICONE
                   </div>
-                  <div style={{ fontSize: '0.625rem', color: isGold ? '#FDE047' : '#93C5FD', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
-                    {isGold ? "VIP National Credential" : "Digital Identity"}
+                  <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#38BDF8', letterSpacing: '0.08em', marginTop: '2px' }}>
+                    VERIFIED DIGITAL IDENTITY CARD
                   </div>
                 </div>
               </div>
 
-              {/* Status Badge */}
-              <div className={isGold ? "gold-vip-badge" : ""} style={!isGold ? {
-                backgroundColor: 'rgba(25, 135, 84, 0.25)',
-                border: '1px solid rgba(74, 222, 128, 0.4)',
-                padding: '3px 10px',
+              {/* Status Pill */}
+              <div style={{
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                border: '1px solid #10B981',
                 borderRadius: '20px',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                color: '#4ADE80',
+                padding: '4px 10px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px'
-              } : {}}>
-                {isGold ? (
-                  <>
-                    <Crown size={12} style={{ color: '#FDE047' }} /> Premium Gold
-                  </>
-                ) : (
-                  "🟢 Verified Identity"
-                )}
+                gap: '5px',
+                fontSize: '0.65rem',
+                fontWeight: 800,
+                color: '#34D399'
+              }}>
+                <CheckCircle2 size={12} /> {verificationStatus}
               </div>
             </div>
 
-            {/* Card Main Profile Section */}
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', margin: '12px 0' }}>
-              <div style={{ position: 'relative' }}>
-                <img
-                  src={citizen.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"}
-                  alt={citizen.name}
-                  style={{
-                    width: '62px',
-                    height: '62px',
-                    borderRadius: '14px',
-                    objectFit: 'cover',
-                    border: isGold ? '2px solid #FEF08A' : '2px solid rgba(255,255,255,0.85)',
-                    boxShadow: isGold ? '0 0 12px rgba(253, 224, 71, 0.5)' : '0 4px 10px rgba(0,0,0,0.2)'
-                  }}
-                />
-                {isGold && (
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '-4px', right: '-4px',
-                    backgroundColor: '#CA8A04',
-                    borderRadius: '50%',
-                    padding: '2px',
-                    border: '1px solid #FEF08A'
-                  }}>
-                    <Crown size={10} style={{ color: '#FEF08A' }} />
-                  </div>
-                )}
+            {/* Middle Section: Microchip, Wireless Sensor & QR Code Preview */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '8px 0', zIndex: 2 }}>
+              {/* Metallic Smart Microchip */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '42px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  background: 'linear-gradient(135deg, #E2E8F0 0%, #94A3B8 50%, #64748B 100%)',
+                  border: '1px solid #CBD5E1',
+                  boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.3)',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: '#475569' }} />
+                  <div style={{ position: 'absolute', top: 0, bottom: 0, left: '33%', width: '1px', background: '#475569' }} />
+                  <div style={{ position: 'absolute', top: 0, bottom: 0, right: '33%', width: '1px', background: '#475569' }} />
+                </div>
+                <Radio size={18} style={{ color: '#38BDF8', opacity: 0.9 }} title="NFC Contactless Verification Ready" />
               </div>
 
-              <div style={{ flex: 1 }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.01em', textShadow: isGold ? '0 2px 4px rgba(0,0,0,0.6)' : 'none' }}>
-                  {citizen.name}
-                </h2>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: isGold ? '#FEF08A' : '#BFDBFE', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  Civic ID: {card?.civicId || citizen.civicId}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); copyToClipboard(card?.civicId || citizen.civicId); }}
-                    style={{ background: 'none', color: isGold ? '#FDE047' : '#BFDBFE', opacity: 0.8 }}
-                    title="Copy Civic ID"
-                  >
-                    <Copy size={12} />
-                  </button>
-                </div>
-                <div style={{ fontSize: '0.725rem', color: isGold ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.75)', marginTop: '2px' }}>
-                  Aadhaar Ref: {citizen.maskedAadhaar}
-                </div>
-              </div>
-
-              {/* Mini Interactive QR Code Icon */}
-              <div
+              {/* QR Code Graphic (Clickable) */}
+              <div 
                 onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
                 style={{
                   backgroundColor: '#FFFFFF',
-                  padding: '6px',
-                  borderRadius: '10px',
-                  boxShadow: isGold ? '0 0 14px rgba(253, 224, 71, 0.4)' : '0 4px 12px rgba(0,0,0,0.15)',
-                  cursor: 'pointer',
-                  border: isGold ? '1.5px solid #CA8A04' : 'none'
+                  padding: '4px',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+                  cursor: 'pointer'
                 }}
-                title="Click to view enlarged dynamic QR code"
+                title="Click to expand Verification QR Code"
               >
-                {renderQrSvg(44)}
+                {renderQrSvg(54)}
               </div>
             </div>
 
-            {/* Card Footer Bar */}
-            <div style={{
-              display: 'flex',
-              justify: 'space-between',
-              alignItems: 'center',
-              borderTop: isGold ? '1px solid rgba(254, 240, 138, 0.3)' : '1px solid rgba(255,255,255,0.15)',
-              paddingTop: '10px',
-              fontSize: '0.7rem',
-              color: isGold ? '#FEF08A' : 'rgba(255,255,255,0.8)'
-            }}>
-              {/* Micro Security Chip visual */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div className={isGold ? "gold-security-chip" : ""} style={!isGold ? {
-                  width: '24px',
-                  height: '18px',
-                  borderRadius: '4px',
-                  background: 'linear-gradient(135deg, #FDE047 0%, #CA8A04 100%)',
-                  border: '1px solid #FEF08A'
-                } : {}} />
-                <span style={{ fontWeight: 600 }}>Valid: {card?.issueDate || "15 Jan 2024"} - {card?.expiryDate || "14 Jan 2034"}</span>
+            {/* Bottom Section: Citizen Details */}
+            <div style={{ zIndex: 2 }}>
+              <div style={{ fontSize: '0.65rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                CITIZEN NAME
               </div>
-              <span style={{ fontSize: '0.65rem', color: isGold ? '#FDE047' : '#93C5FD', fontWeight: 700 }}>
-                Tap to Flip 🔄
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF', letterSpacing: '0.04em', textTransform: 'uppercase', margin: '2px 0 6px 0' }}>
+                {holderName}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <div>
+                  <div style={{ fontSize: '0.6rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase' }}>
+                    CIVICONE ID
+                  </div>
+                  <div style={{ fontSize: '0.85rem', fontFamily: 'monospace', fontWeight: 800, color: '#38BDF8' }}>
+                    {civiconeId}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '0.6rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', textAlign: 'right' }}>
+                    TRUST CLEARANCE
+                  </div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#FACC15', textAlign: 'right' }}>
+                    {trustLevel}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tap Hint */}
+            <div style={{ position: 'absolute', bottom: '6px', right: '12px', fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+              Tap to Flip 🔄
+            </div>
+          </div>
+
+          {/* BACK OF THE CIVICONE VIRTUAL CARD */}
+          <div style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            backfaceVisibility: 'hidden',
+            borderRadius: '20px',
+            background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
+            border: '1.5px solid #38BDF8',
+            padding: '16px 20px',
+            color: '#FFFFFF',
+            transform: 'rotateY(180deg)',
+            display: 'flex',
+            flexDirection: 'column',
+            justify: 'space-between',
+            overflow: 'hidden',
+            boxSizing: 'border-box'
+          }}>
+            {/* Magnetic Security Stripe */}
+            <div style={{
+              margin: '-16px -20px 10px -20px',
+              height: '36px',
+              backgroundColor: '#090D16',
+              borderBottom: '1px solid #334155',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              paddingRight: '20px'
+            }}>
+              <span style={{ fontSize: '0.6rem', fontFamily: 'monospace', color: '#64748B' }}>
+                SECURITY STRIPE • CRYPT-SHA256
               </span>
             </div>
 
-          </div>
-
-          {/* BACK OF VIRTUAL CIVICONE CARD */}
-          <div
-            className={`card-back-3d security-pattern-bg ${isGold ? 'card-gold-bg' : ''}`}
-            style={{
-              background: isGold
-                ? 'linear-gradient(135deg, #0F0D06 0%, #292006 50%, #4D3B0B 100%)'
-                : 'linear-gradient(135deg, #0B1F3A 0%, #0F172A 100%)',
-              padding: '22px',
-              color: '#FFFFFF',
-              boxShadow: isGold
-                ? '0 16px 40px -8px rgba(197, 160, 56, 0.45)'
-                : '0 16px 36px -8px rgba(11, 31, 58, 0.35)',
-              display: 'flex',
-              flexDirection: 'column',
-              justify: 'space-between',
-              border: isGold ? '1.5px solid #FEF08A' : '1px solid rgba(255,255,255,0.2)'
-            }}
-          >
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: isGold ? '#FEF08A' : '#93C5FD', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  {isGold ? "👑 VIP Priority Authorization" : "Emergency & Address Reference"}
-                </span>
-                <span style={{ fontSize: '0.7rem', color: isGold ? '#FDE047' : 'rgba(255,255,255,0.6)', fontWeight: 600 }}>
-                  Cryptographic Gold Seal
-                </span>
-              </div>
+              <p style={{ fontSize: '0.7rem', color: '#94A3B8', lineHeight: 1.4, margin: '0 0 10px 0' }}>
+                This digital credential is verified through CivicOne. Authorized verifiers can authenticate token status at <strong>civicone.gov.in/verify</strong>.
+              </p>
 
-              <div style={{ fontSize: '0.775rem', color: '#E2E8F0', lineHeight: 1.4, marginBottom: '8px' }}>
-                <strong>Registered Address:</strong> <br />
-                {citizen.address}
-              </div>
-
-              <div style={{ fontSize: '0.775rem', color: '#E2E8F0', display: 'flex', gap: '16px' }}>
-                <div><strong>Blood Group:</strong> {citizen.bloodGroup}</div>
-                <div><strong>DOB:</strong> {citizen.dob}</div>
-              </div>
-              <div style={{ fontSize: '0.75rem', color: isGold ? '#FEF08A' : '#60A5FA', marginTop: '6px' }}>
-                <strong>Emergency Contact:</strong> {citizen.emergencyContact}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.7rem', backgroundColor: '#090D16', padding: '8px 12px', borderRadius: '8px', border: '1px solid #334155' }}>
+                <div>
+                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.6rem' }}>ISSUED AT</span>
+                  <span style={{ color: '#E2E8F0', fontWeight: 700 }}>{issueDate}</span>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.6rem' }}>VALID UNTIL</span>
+                  <span style={{ color: '#38BDF8', fontWeight: 700 }}>{expiryDate}</span>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.6rem' }}>CARD STATUS</span>
+                  <span style={{ color: '#34D399', fontWeight: 800 }}>ACTIVE</span>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.6rem' }}>VERIFICATION ID</span>
+                  <span style={{ color: '#E2E8F0', fontFamily: 'monospace', fontWeight: 700 }}>VER-{civiconeId.replace('CVC-', '')}</span>
+                </div>
               </div>
             </div>
 
-            {/* Cryptographic Signature Bar */}
-            <div style={{
-              backgroundColor: isGold ? 'rgba(254, 240, 138, 0.15)' : 'rgba(255,255,255,0.08)',
-              borderRadius: '8px',
-              padding: '8px 12px',
-              fontSize: '0.65rem',
-              color: isGold ? '#FEF08A' : '#94A3B8',
-              fontFamily: 'monospace',
-              border: isGold ? '1px solid rgba(254, 240, 138, 0.3)' : 'none'
-            }}>
-              <div>SEAL: {card?.securityChipId || "GOLD-CHIP-9984-SEC-ID"}</div>
-              <div style={{ wordBreak: 'break-all', opacity: 0.85 }}>{card?.qrSignature?.slice(0, 36) || 'SHA256:e3b0c44298fc1c14'}...</div>
+            {/* Bottom Support & Scan Notice */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.65rem', color: '#64748B', borderTop: '1px solid #334155', paddingTop: '8px' }}>
+              <span>Support: <strong>support@civicone.gov.in</strong></span>
+              <span style={{ color: '#38BDF8', fontWeight: 700 }}>Scan QR to Verify 🔍</span>
             </div>
           </div>
 
         </div>
       </div>
 
-      {/* CARD ACTION BUTTON BAR */}
+      {/* CARD INTERACTIVE ACTION BUTTONS */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(5, 1fr)',
-        gap: '6px',
-        marginTop: '14px'
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '8px',
+        marginBottom: '20px'
       }}>
         <button
           onClick={() => setIsFlipped(!isFlipped)}
+          className="touch-target"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border-light)',
-            borderRadius: '10px',
-            padding: '8px 4px',
-            fontSize: '0.7rem',
-            fontWeight: 700,
             color: 'var(--text-main)',
+            border: '1px solid var(--border-light)',
+            borderRadius: '12px',
+            padding: '10px 4px',
+            fontSize: '0.75rem',
+            fontWeight: 700,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px'
+            gap: '4px',
+            cursor: 'pointer',
+            boxShadow: 'var(--shadow-sm)'
           }}
+          title="Flip Virtual Card"
         >
-          <RotateCw size={15} style={{ color: isGold ? '#CA8A04' : '#0B5ED7' }} /> Flip
+          <RotateCw size={16} style={{ color: '#0B5ED7' }} />
+          <span>Flip Card</span>
         </button>
 
         <button
           onClick={() => setShowQrModal(true)}
+          className="touch-target"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border-light)',
-            borderRadius: '10px',
-            padding: '8px 4px',
-            fontSize: '0.7rem',
-            fontWeight: 700,
             color: 'var(--text-main)',
+            border: '1px solid var(--border-light)',
+            borderRadius: '12px',
+            padding: '10px 4px',
+            fontSize: '0.75rem',
+            fontWeight: 700,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px'
+            gap: '4px',
+            cursor: 'pointer',
+            boxShadow: 'var(--shadow-sm)'
           }}
+          title="Show Full QR Code"
         >
-          <QrCode size={15} style={{ color: isGold ? '#CA8A04' : '#0B5ED7' }} /> View QR
+          <QrCode size={16} style={{ color: '#0B5ED7' }} />
+          <span>Scan QR</span>
         </button>
 
         <button
-          onClick={handleTriggerNfc}
+          onClick={() => copyToClipboard(civiconeId)}
+          className="touch-target"
           style={{
-            backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border-light)',
-            borderRadius: '10px',
-            padding: '8px 4px',
-            fontSize: '0.7rem',
+            backgroundColor: copied ? '#DCFCE7' : 'var(--bg-card)',
+            color: copied ? '#15803D' : 'var(--text-main)',
+            border: copied ? '1px solid #86EFAC' : '1px solid var(--border-light)',
+            borderRadius: '12px',
+            padding: '10px 4px',
+            fontSize: '0.75rem',
             fontWeight: 700,
-            color: 'var(--text-main)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px'
+            gap: '4px',
+            cursor: 'pointer',
+            boxShadow: 'var(--shadow-sm)'
           }}
+          title="Copy CivicOne ID"
         >
-          <Radio size={15} style={{ color: isGold ? '#CA8A04' : '#0B5ED7' }} /> NFC Tap
+          <Copy size={16} style={{ color: copied ? '#15803D' : '#0B5ED7' }} />
+          <span>{copied ? 'Copied!' : 'Copy ID'}</span>
         </button>
 
         <button
           onClick={handleGenerateShareLink}
           disabled={shareLoading}
+          className="touch-target"
           style={{
             backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border-light)',
-            borderRadius: '10px',
-            padding: '8px 4px',
-            fontSize: '0.7rem',
-            fontWeight: 700,
             color: 'var(--text-main)',
+            border: '1px solid var(--border-light)',
+            borderRadius: '12px',
+            padding: '10px 4px',
+            fontSize: '0.75rem',
+            fontWeight: 700,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px'
+            gap: '4px',
+            cursor: 'pointer',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+          title="Share Credential Link"
+        >
+          <Share2 size={16} style={{ color: '#0B5ED7' }} />
+          <span>{shareLoading ? 'Generating...' : 'Share'}</span>
+        </button>
+      </div>
+
+      {/* SECONDARY UTILITY ACTIONS (NFC & HISTORY & REFRESH) */}
+      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+        <button
+          onClick={handleTriggerNfc}
+          style={{
+            backgroundColor: 'transparent',
+            border: '1px solid var(--border-light)',
+            color: 'var(--text-muted)',
+            borderRadius: '8px',
+            padding: '6px 12px',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer'
           }}
         >
-          <Share2 size={15} style={{ color: isGold ? '#CA8A04' : '#0B5ED7' }} /> Share
+          <Radio size={14} style={{ color: '#38BDF8' }} /> NFC Tap Scan
         </button>
 
         <button
           onClick={() => setShowHistoryModal(true)}
           style={{
-            backgroundColor: 'var(--bg-card)',
+            backgroundColor: 'transparent',
             border: '1px solid var(--border-light)',
-            borderRadius: '10px',
-            padding: '8px 4px',
-            fontSize: '0.7rem',
-            fontWeight: 700,
-            color: 'var(--text-main)',
+            color: 'var(--text-muted)',
+            borderRadius: '8px',
+            padding: '6px 12px',
+            fontSize: '0.75rem',
+            fontWeight: 600,
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            gap: '3px'
+            gap: '6px',
+            cursor: 'pointer'
           }}
         >
-          <History size={15} style={{ color: isGold ? '#CA8A04' : '#0B5ED7' }} /> Audit
+          <History size={14} /> Access Logs
+        </button>
+
+        <button
+          onClick={handleRefreshCard}
+          disabled={refreshing}
+          style={{
+            backgroundColor: 'transparent',
+            border: '1px solid var(--border-light)',
+            color: 'var(--text-muted)',
+            borderRadius: '8px',
+            padding: '6px 12px',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer'
+          }}
+        >
+          <RefreshCw size={14} className={refreshing ? "spin-animation" : ""} /> {refreshing ? 'Syncing...' : 'Refresh'}
         </button>
       </div>
 
-      {/* MODAL 1: ENLARGED QR CODE & PUBLIC VERIFICATION */}
+      {/* MODAL 1: FULL HIGH-RES QR CODE VERIFICATION MODAL */}
       {showQrModal && (
         <div style={{
           position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.7)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
           backdropFilter: 'blur(8px)',
+          zIndex: 100,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 100,
           padding: '16px'
         }}>
           <div style={{
             backgroundColor: '#FFFFFF',
             borderRadius: '24px',
-            padding: '32px',
-            maxWidth: '420px',
+            padding: '24px',
+            maxWidth: '380px',
             width: '100%',
-            position: 'relative',
             textAlign: 'center',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
-            border: isGold ? '2px solid #CA8A04' : 'none'
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            position: 'relative'
           }}>
             <button
               onClick={() => setShowQrModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', color: '#64748B' }}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: '#F1F5F9',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
             >
-              <X size={20} />
+              <X size={18} style={{ color: '#64748B' }} />
             </button>
 
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              {isGold ? <Crown size={24} style={{ color: '#CA8A04' }} /> : <ShieldCheck size={24} style={{ color: '#0B5ED7' }} />}
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0B1F3A' }}>
-                CivicOne {isGold ? "Gold" : ""} Dynamic Verification QR
-              </h3>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              backgroundColor: '#E0F2FE',
+              color: '#0284C7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 12px auto'
+            }}>
+              <QrCode size={24} />
             </div>
-            <p style={{ fontSize: '0.8rem', color: '#64748B', marginBottom: '18px' }}>
-              Official cryptographic credential QR code. Instant verification for government authorities.
+
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '4px' }}>
+              CivicOne Verification QR
+            </h3>
+            <p style={{ fontSize: '0.8rem', color: '#64748B', marginBottom: '16px' }}>
+              Scan with any authorized verifier device to check live token authenticity.
             </p>
 
             <div style={{
               padding: '16px',
-              backgroundColor: isGold ? '#FEFCE8' : '#F6F9FC',
+              backgroundColor: '#F8FAFC',
               borderRadius: '16px',
-              display: 'inline-block',
-              marginBottom: '18px',
-              border: isGold ? '2px solid #FACC15' : '1px solid #E2E8F0'
+              border: '1px solid #E2E8F0',
+              marginBottom: '16px'
             }}>
-              {renderQrSvg(190)}
-            </div>
-
-            <div style={{
-              fontSize: '0.75rem',
-              color: isGold ? '#B45309' : '#073B8C',
-              backgroundColor: isGold ? '#FEF3C7' : '#EAF3FF',
-              padding: '10px 14px',
-              borderRadius: '12px',
-              marginBottom: '18px',
-              fontWeight: 700
-            }}>
-              {isGold ? "👑 VIP Gold Verification Token:" : "🟢 Verified Identity Token:"} {card?.verificationToken || "CIV-TOKEN-984210"}
-            </div>
-
-            <button
-              onClick={() => {
-                setShowQrModal(false);
-                onNavigateToVerification(card?.verificationToken || "CIV-TOKEN-984210");
-              }}
-              className={isGold ? "gold-btn" : ""}
-              style={!isGold ? {
-                width: '100%',
-                backgroundColor: '#0B5ED7',
-                color: '#FFFFFF',
-                padding: '12px',
-                borderRadius: '12px',
-                fontWeight: 800,
-                fontSize: '0.9rem'
-              } : { width: '100%', padding: '12px', borderRadius: '12px', fontSize: '0.9rem' }}
-            >
-              Test Public Verification Page 🚀
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 2: NFC TOUCH SIMULATION */}
-      {showNfcModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.75)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: '16px'
-        }}>
-          <div style={{
-            backgroundColor: '#FFFFFF',
-            borderRadius: '24px',
-            padding: '32px',
-            maxWidth: '380px',
-            width: '100%',
-            position: 'relative',
-            textAlign: 'center'
-          }}>
-            <button
-              onClick={() => setShowNfcModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', color: '#64748B' }}
-            >
-              <X size={20} />
-            </button>
-
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '8px' }}>
-              NFC Touch Identity Verification
-            </h3>
-            <p style={{ fontSize: '0.8rem', color: '#64748B', marginBottom: '24px' }}>
-              Hold your smartphone near an authorized CivicOne NFC scanner.
-            </p>
-
-            {nfcScanning && (
-              <div style={{ padding: '24px 0' }}>
-                <div style={{
-                  width: '80px', height: '80px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(234, 179, 8, 0.2)',
-                  border: '3px solid #EAB308',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 16px auto'
-                }} className="pulse-glow">
-                  <Radio size={40} style={{ color: '#CA8A04' }} />
-                </div>
-                <div style={{ fontWeight: 700, color: '#CA8A04', fontSize: '0.9rem' }}>
-                  Scanning NFC Signal...
-                </div>
+              {renderQrSvg(180)}
+              <div style={{ fontSize: '0.7rem', fontFamily: 'monospace', color: '#475569', marginTop: '10px', fontWeight: 700 }}>
+                {verificationToken}
               </div>
-            )}
-
-            {nfcSuccess && (
-              <div style={{ padding: '16px 0' }}>
-                <div style={{
-                  width: '70px', height: '70px',
-                  borderRadius: '50%',
-                  backgroundColor: '#D1E7DD',
-                  color: '#0F5132',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 14px auto'
-                }}>
-                  <CheckCircle2 size={42} />
-                </div>
-                <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0F5132' }}>
-                  NFC Identity Authenticated!
-                </h4>
-                <p style={{ fontSize: '0.8rem', color: '#475569', marginTop: '4px', marginBottom: '20px' }}>
-                  Cryptographic Gold Seal transmitted to reader. Clearance: VIP Approved.
-                </p>
-                <button
-                  onClick={() => setShowNfcModal(false)}
-                  style={{
-                    width: '100%',
-                    backgroundColor: '#0B5ED7',
-                    color: '#FFFFFF',
-                    padding: '10px',
-                    borderRadius: '10px',
-                    fontWeight: 700
-                  }}
-                >
-                  Done
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 3: TIER THEME SELECTION */}
-      {showTierModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.7)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: '16px'
-        }}>
-          <div style={{
-            backgroundColor: '#FFFFFF',
-            borderRadius: '24px',
-            padding: '28px',
-            maxWidth: '440px',
-            width: '100%',
-            position: 'relative'
-          }}>
-            <button
-              onClick={() => setShowTierModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', color: '#64748B' }}
-            >
-              <X size={20} />
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <Crown size={24} style={{ color: '#CA8A04' }} />
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0B1F3A' }}>
-                Manage Civic Card Tier
-              </h3>
             </div>
-            <p style={{ fontSize: '0.825rem', color: '#64748B', marginBottom: '20px' }}>
-              Select your preferred card layout & digital identity tier.
-            </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
-              
-              {/* GOLD TIER OPTION */}
-              <div
-                onClick={() => { handleTierSwitch('GOLD'); setShowTierModal(false); }}
-                style={{
-                  padding: '16px',
-                  borderRadius: '16px',
-                  border: isGold ? '2px solid #EAB308' : '1px solid #E2E8F0',
-                  backgroundColor: isGold ? '#FEFCE8' : '#F8FAFC',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '14px'
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => {
+                  setShowQrModal(false);
+                  if (onNavigateToVerification) {
+                    onNavigateToVerification(verificationToken);
+                  } else {
+                    window.open(verificationUrl, '_blank');
+                  }
                 }}
-              >
-                <div style={{
-                  width: '44px', height: '44px', borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #EAB308 0%, #CA8A04 100%)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF'
-                }}>
-                  <Crown size={24} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#B45309' }}>
-                    👑 Premium Gold Card
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                    Metallic Gold finish, Gold Chip, VIP Clearance & Priority Authorization
-                  </div>
-                </div>
-                {isGold && <CheckCircle2 size={20} style={{ color: '#CA8A04' }} />}
-              </div>
-
-              {/* STANDARD TIER OPTION */}
-              <div
-                onClick={() => { handleTierSwitch('STANDARD'); setShowTierModal(false); }}
                 style={{
-                  padding: '16px',
-                  borderRadius: '16px',
-                  border: !isGold ? '2px solid #0B5ED7' : '1px solid #E2E8F0',
-                  backgroundColor: !isGold ? '#EAF3FF' : '#F8FAFC',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '14px'
-                }}
-              >
-                <div style={{
-                  width: '44px', height: '44px', borderRadius: '12px',
+                  flex: 1,
                   backgroundColor: '#0B5ED7',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF'
-                }}>
-                  <ShieldCheck size={24} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0B5ED7' }}>
-                    Standard Civic Card
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                    Classic Deep Blue digital credential with standard cryptographic verification
-                  </div>
-                </div>
-                {!isGold && <CheckCircle2 size={20} style={{ color: '#0B5ED7' }} />}
-              </div>
-
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '10px 14px',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Open Verification Page <ExternalLink size={16} />
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL 4: SHARE CREDENTIAL LINK */}
+      {/* MODAL 2: SHARE CREDENTIAL LINK MODAL */}
       {showShareModal && shareData && (
         <div style={{
           position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.65)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
           backdropFilter: 'blur(8px)',
+          zIndex: 100,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 100,
           padding: '16px'
         }}>
           <div style={{
             backgroundColor: '#FFFFFF',
             borderRadius: '24px',
-            padding: '32px',
+            padding: '24px',
             maxWidth: '420px',
             width: '100%',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             position: 'relative'
           }}>
             <button
               onClick={() => setShowShareModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', color: '#64748B' }}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: '#F1F5F9',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
             >
-              <X size={20} />
+              <X size={18} style={{ color: '#64748B' }} />
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#0B5ED7', fontWeight: 800, fontSize: '1.1rem', marginBottom: '8px' }}>
-              <Share2 size={22} /> Share Verified Credential
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '12px',
+                backgroundColor: '#DCFCE7',
+                color: '#15803D',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Share2 size={20} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0B1F3A', margin: 0 }}>
+                  Time-Limited Share Link Created
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                  Valid for {shareData.expiresInHours} Hours • Protected
+                </span>
+              </div>
             </div>
-            <p style={{ fontSize: '0.825rem', color: '#475569', marginBottom: '20px' }}>
-              Generate a secure, time-limited verification link to share your identity authorization with external organizations.
+
+            <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.4, marginBottom: '16px' }}>
+              Share this link with authorized verifiers. Access automatically terminates after expiry.
             </p>
 
-            <div style={{ backgroundColor: '#F8FAFC', padding: '14px', borderRadius: '12px', border: '1px solid #E2E8F0', marginBottom: '16px' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', marginBottom: '4px' }}>VERIFICATION LINK</div>
-              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0B1F3A', wordBreak: 'break-all' }}>
+            <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '12px', border: '1px solid #E2E8F0', marginBottom: '16px' }}>
+              <span style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 700, display: 'block', marginBottom: '4px' }}>VERIFICATION URL</span>
+              <div style={{ fontSize: '0.8rem', fontFamily: 'monospace', color: '#0B5ED7', wordBreak: 'break-all', fontWeight: 700 }}>
                 {shareData.shareUrl}
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-              <div style={{ backgroundColor: '#EAF3FF', padding: '10px', borderRadius: '10px', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', color: '#073B8C', fontWeight: 600 }}>ONE-TIME PASSCODE</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0B5ED7' }}>{shareData.passcode}</div>
-              </div>
-              <div style={{ backgroundColor: '#FEF3C7', padding: '10px', borderRadius: '10px', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', color: '#92400E', fontWeight: 600 }}>LINK VALIDITY</div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#B45309', marginTop: '2px' }}>{shareData.expiresInHours} Hours</div>
-              </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => copyToClipboard(shareData.shareUrl)}
+                style={{
+                  flex: 1,
+                  backgroundColor: '#0B5ED7',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '10px',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                {copied ? 'Copied to Clipboard!' : 'Copy Verification Link'}
+              </button>
             </div>
-
-            <button
-              onClick={() => copyToClipboard(shareData.shareUrl)}
-              style={{
-                width: '100%',
-                backgroundColor: copied ? '#198754' : '#0B5ED7',
-                color: '#FFFFFF',
-                padding: '12px',
-                borderRadius: '12px',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-            >
-              {copied ? <CheckCircle2 size={18} /> : <Copy size={18} />}
-              {copied ? 'Link Copied to Clipboard!' : 'Copy Verification Link'}
-            </button>
           </div>
         </div>
       )}
 
-      {/* MODAL 5: AUDIT LOGS */}
+      {/* MODAL 3: ACCESS LOGS / AUDIT HISTORY */}
       {showHistoryModal && (
         <div style={{
           position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.65)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
           backdropFilter: 'blur(8px)',
+          zIndex: 100,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 100,
           padding: '16px'
         }}>
           <div style={{
             backgroundColor: '#FFFFFF',
             borderRadius: '24px',
-            padding: '28px',
-            maxWidth: '460px',
+            padding: '24px',
+            maxWidth: '440px',
             width: '100%',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             position: 'relative'
           }}>
             <button
               onClick={() => setShowHistoryModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', color: '#64748B' }}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: '#F1F5F9',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
             >
-              <X size={20} />
+              <X size={18} style={{ color: '#64748B' }} />
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#0B1F3A', fontWeight: 800, fontSize: '1.1rem', marginBottom: '16px' }}>
-              <History size={20} style={{ color: '#0B5ED7' }} /> Card Verification History & Security Audit
-            </div>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '12px' }}>
+              Virtual Card Access History
+            </h3>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
-              {[
-                { event: "Gold Card VIP NFC Touch Authenticated", time: "Just now", status: "SUCCESS" },
-                { event: "QR Code Scanned by RTO Officer", time: "Today, 10:14 AM", status: "SUCCESS" },
-                { event: "Aadhaar Identity Tokenized Re-check", time: "13 Aug 2026, 09:31 AM", status: "SUCCESS" },
-                { event: "Virtual Card Dynamic Token Issued", time: "13 Aug 2026, 09:30 AM", status: "SUCCESS" }
-              ].map((log, i) => (
-                <div key={i} style={{
-                  padding: '12px',
-                  borderRadius: '10px',
-                  backgroundColor: '#F6F9FC',
-                  border: '1px solid #E2E8F0',
-                  display: 'flex',
-                  justify: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0B1F3A' }}>{log.event}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748B' }}>{log.time}</div>
-                  </div>
-                  <span style={{ backgroundColor: '#D1E7DD', color: '#0F5132', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700 }}>
-                    {log.status}
-                  </span>
-                </div>
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '280px', overflowY: 'auto' }}>
+              <div style={{ padding: '10px', backgroundColor: '#F8FAFC', borderRadius: '10px', fontSize: '0.75rem', borderLeft: '3px solid #10B981' }}>
+                <div style={{ fontWeight: 700, color: '#0F172A' }}>Card Authenticated via QR Scan</div>
+                <div style={{ color: '#64748B', marginTop: '2px' }}>Verifier: MoRTH Authorized Officer • Today, 14:20 IST</div>
+              </div>
+              <div style={{ padding: '10px', backgroundColor: '#F8FAFC', borderRadius: '10px', fontSize: '0.75rem', borderLeft: '3px solid #0B5ED7' }}>
+                <div style={{ fontWeight: 700, color: '#0F172A' }}>Identity Verification Completed</div>
+                <div style={{ color: '#64748B', marginTop: '2px' }}>Method: UIDAI Tokenized Session • Yesterday, 09:30 IST</div>
+              </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: NFC WIRELESS TAP SIMULATOR */}
+      {showNfcModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '24px',
+            padding: '28px 24px',
+            maxWidth: '360px',
+            width: '100%',
+            textAlign: 'center',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowNfcModal(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: '#F1F5F9',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={18} style={{ color: '#64748B' }} />
+            </button>
+
+            {nfcScanning ? (
+              <div>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  backgroundColor: '#E0F2FE',
+                  color: '#0284C7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px auto',
+                  animation: 'pulse 1.5s infinite'
+                }}>
+                  <Radio size={32} />
+                </div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                  Hold Near NFC Reader...
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: '#64748B' }}>
+                  Transmitting cryptographic card identity token over wireless NFC sensor...
+                </p>
+              </div>
+            ) : (
+              <div>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  backgroundColor: '#DCFCE7',
+                  color: '#15803D',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px auto'
+                }}>
+                  <CheckCircle2 size={36} />
+                </div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                  NFC Contactless Verified!
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: '#475569', marginBottom: '16px' }}>
+                  Card token verified successfully by reader terminal.
+                </p>
+                <button
+                  onClick={() => setShowNfcModal(false)}
+                  style={{
+                    backgroundColor: '#0B5ED7',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '10px 20px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
