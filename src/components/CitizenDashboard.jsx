@@ -115,15 +115,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   const [goldPassStatus, setGoldPassStatus] = useState(citizen?.goldPassStatus || cardData?.goldPassStatus || 'standard');
   const [requestingGoldPass, setRequestingGoldPass] = useState(false);
   const [goldPassMessage, setGoldPassMessage] = useState('');
-  
-  // Payment Checkout Modal State (Indian Gateway Simulator)
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('upi'); // 'upi' | 'card' | 'netbanking'
-  const [upiIdInput, setUpiIdInput] = useState('rajesh.kumar@gpay');
-  const [cardInput, setCardInput] = useState('4532 8942 1057 4821');
-  const [bankSelect, setBankSelect] = useState('HDFC Bank');
-  const [submittingPayment, setSubmittingPayment] = useState(false);
-  const [lastTxnId, setLastTxnId] = useState('TXN-IN-894210');
 
   // Fetch Gold Pass Status on mount
   useEffect(() => {
@@ -133,7 +124,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         const data = await res.json();
         if (data.goldPassStatus) {
           setGoldPassStatus(data.goldPassStatus);
-          if (data.pendingRequest) setLastTxnId(data.pendingRequest.paymentRef);
         }
       } catch (err) {
         console.log("Using default entitlement status");
@@ -142,57 +132,24 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
     checkGoldPass();
   }, []);
 
-  const handleOpenCheckout = () => {
-    setShowPaymentModal(true);
-  };
-
-  const handleProcessCheckout = async () => {
-    setSubmittingPayment(true);
+  const handleApplyGoldPass = async () => {
+    setRequestingGoldPass(true);
     try {
-      const res = await fetch('/api/goldpass/checkout', {
+      const res = await fetch('/api/goldpass/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          paymentMethod,
-          upiId: upiIdInput,
-          cardMasked: cardInput.replace(/\d(?=\d{4})/g, "X"),
-          bankName: bankSelect,
-          amount: '₹499'
-        })
+        body: JSON.stringify({ plan: 'Annual Pass (₹499)', paymentRef: `TXN-${Math.floor(100000 + Math.random() * 900000)}` })
       });
       const data = await res.json();
-      setSubmittingPayment(false);
-      setShowPaymentModal(false);
+      setRequestingGoldPass(false);
       if (data.goldPassStatus) {
         setGoldPassStatus(data.goldPassStatus);
-        setLastTxnId(data.txnId);
-        setGoldPassMessage(`Payment reference (${data.txnId}) submitted via ${paymentMethod.toUpperCase()}. Status: PENDING GATEWAY / ADMIN VERIFICATION.`);
+        setGoldPassMessage("Payment reference submitted. Your Gold Pass application is PENDING ADMINISTRATIVE VERIFICATION.");
       }
     } catch (err) {
-      setSubmittingPayment(false);
-      setShowPaymentModal(false);
-      const fallbackTxn = `TXN-IN-${Math.floor(100000 + Math.random() * 900000)}`;
-      setLastTxnId(fallbackTxn);
+      setRequestingGoldPass(false);
       setGoldPassStatus('pending');
-      setGoldPassMessage(`Payment reference (${fallbackTxn}) submitted. Status: PENDING VERIFICATION.`);
-    }
-  };
-
-  const handleSimulateWebhookApprove = async () => {
-    try {
-      const res = await fetch('/api/goldpass/payment-verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ txnId: lastTxnId || 'TXN-IN-DEMO' })
-      });
-      const data = await res.json();
-      if (data.goldPassStatus) {
-        setGoldPassStatus(data.goldPassStatus);
-        setGoldPassMessage("Payment verified by Gateway Webhook! Gold Pass entitlement activated! 👑");
-      }
-    } catch (err) {
-      setGoldPassStatus('active');
-      setGoldPassMessage("Payment verified! Gold Pass activated! 👑");
+      setGoldPassMessage("Payment reference submitted. Application is PENDING VERIFICATION.");
     }
   };
 
@@ -628,8 +585,8 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                   Quick Shortcuts:
                 </span>
 
-                <button className="quick-action-btn" onClick={() => handleSelectTab(goldPassStatus === 'active' ? 'card' : 'gold-pass')}>
-                  <Crown size={16} style={{ color: '#CA8A04' }} /> {goldPassStatus === 'active' ? 'View Gold Card' : goldPassStatus === 'pending' ? 'Payment Verification' : 'Get Gold Pass'}
+                <button className="quick-action-btn" onClick={() => handleSelectTab('card')}>
+                  <Crown size={16} style={{ color: '#CA8A04' }} /> Gold Card
                 </button>
 
                 <button className="quick-action-btn" onClick={() => handleSelectTab('vault')}>
@@ -637,11 +594,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 </button>
 
                 <button className="quick-action-btn" onClick={() => handleSelectTab('services')}>
-                  <Grid size={16} style={{ color: '#10B981' }} /> Access Hub
-                </button>
-
-                <button className="quick-action-btn" onClick={() => handleSelectTab('activity')}>
-                  <ShieldCheck size={16} style={{ color: '#6366F1' }} /> Audit Log
+                  <Grid size={16} style={{ color: '#10B981' }} /> Public Services
                 </button>
 
                 <button className="quick-action-btn" onClick={() => { setTourStep(1); setShowTourModal(true); }}>
@@ -750,29 +703,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 </div>
               </div>
 
-              {/* RECOMMENDED FOR YOU PERSONALIZED SECTION */}
-              <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '20px', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)', marginTop: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                  <Sparkles size={18} style={{ color: '#8B5CF6' }} />
-                  <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)' }}>Recommended for You</h2>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-                  {[
-                    { title: 'Add Voter ID', desc: 'Link Election Commission EPIC details to your Vault.', tab: 'services', icon: Landmark, color: '#0284C7' },
-                    { title: 'Verify Education Credential', desc: 'Securely verify your B.Tech Computer Science degree.', tab: 'services', icon: GraduationCap, color: '#7C3AED' },
-                    { title: 'Enable Device Security', desc: 'Set up MFA device authorization & biometric session control.', tab: 'security', icon: Shield, color: '#10B981' },
-                    { title: goldPassStatus === 'active' ? 'Gold Pass Active 👑' : 'Upgrade to Gold Pass', desc: 'Unlock priority verification engine & Gold Card.', tab: 'gold-pass', icon: Crown, color: '#CA8A04' }
-                  ].map((item, idx) => (
-                    <div key={idx} onClick={() => handleSelectTab(item.tab)} style={{ backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '14px', border: '1px solid var(--border-light)', cursor: 'pointer', transition: 'all 0.2s' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: item.color, fontWeight: 800, fontSize: '0.85rem' }}>
-                        <item.icon size={16} /> {item.title}
-                      </div>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.4 }}>{item.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
             </div>
           )}
 
@@ -845,31 +775,15 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
                   {goldPassStatus === 'standard' && (
                     <button
-                      onClick={handleOpenCheckout}
+                      onClick={handleApplyGoldPass}
+                      disabled={requestingGoldPass}
                       style={{
                         backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 24px', borderRadius: '14px',
                         fontWeight: 900, fontSize: '0.95rem', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(202, 138, 4, 0.4)'
                       }}
                     >
-                      Purchase Gold Pass (₹499/yr)
+                      {requestingGoldPass ? 'Submitting...' : 'Purchase Gold Pass (₹499/yr)'}
                     </button>
-                  )}
-
-                  {goldPassStatus === 'pending' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#854D0E', fontWeight: 800 }}>
-                        Ref: {lastTxnId}
-                      </span>
-                      <button
-                        onClick={handleSimulateWebhookApprove}
-                        style={{
-                          backgroundColor: '#166534', color: '#DCFCE7', padding: '10px 18px', borderRadius: '12px',
-                          fontWeight: 800, fontSize: '0.85rem', border: '1px solid #22C55E', cursor: 'pointer'
-                        }}
-                      >
-                        ⚡ Simulate Payment Verification Webhook
-                      </button>
-                    </div>
                   )}
                 </div>
 
@@ -1161,118 +1075,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 </button>
               )}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: INDIAN PAYMENT GATEWAY CHECKOUT MODAL */}
-      {showPaymentModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.82)', backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '16px'
-        }}>
-          <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '24px', padding: '32px', maxWidth: '480px', width: '100%', position: 'relative', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-lg)' }}>
-            <button onClick={() => setShowPaymentModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', color: 'var(--text-muted)' }}>
-              <X size={20} />
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: '#CA8A04', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Crown size={24} />
-              </div>
-              <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)' }}>CivicOne Gold Pass Checkout</h3>
-                <span style={{ fontSize: '0.75rem', color: '#CA8A04', fontWeight: 800 }}>Amount: ₹499 / Year (Inclusive of Taxes)</span>
-              </div>
-            </div>
-
-            {/* Payment Method Selector Tabs */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', backgroundColor: 'var(--bg-main)', padding: '4px', borderRadius: '12px', border: '1px solid var(--border-light)' }}>
-              {[
-                { id: 'upi', label: 'UPI / VPA' },
-                { id: 'card', label: 'Cards' },
-                { id: 'netbanking', label: 'Net Banking' }
-              ].map(m => (
-                <button
-                  key={m.id}
-                  onClick={() => setPaymentMethod(m.id)}
-                  style={{
-                    flex: 1, padding: '8px', borderRadius: '8px', border: 'none',
-                    backgroundColor: paymentMethod === m.id ? '#0B5ED7' : 'transparent',
-                    color: paymentMethod === m.id ? '#FFFFFF' : 'var(--text-muted)',
-                    fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer'
-                  }}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Payment Input Body */}
-            {paymentMethod === 'upi' && (
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px' }}>
-                  Enter VPA / UPI ID (e.g. GPay, PhonePe, Paytm, BHIM):
-                </label>
-                <input
-                  type="text"
-                  value={upiIdInput}
-                  onChange={(e) => setUpiIdInput(e.target.value)}
-                  placeholder="citizen@upi"
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 700 }}
-                />
-              </div>
-            )}
-
-            {paymentMethod === 'card' && (
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px' }}>
-                  Card Number (RuPay, Visa, MasterCard):
-                </label>
-                <input
-                  type="text"
-                  value={cardInput}
-                  onChange={(e) => setCardInput(e.target.value)}
-                  placeholder="4532 XXXX XXXX 4821"
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 700 }}
-                />
-              </div>
-            )}
-
-            {paymentMethod === 'netbanking' && (
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px' }}>
-                  Select Indian Partner Bank:
-                </label>
-                <select
-                  value={bankSelect}
-                  onChange={(e) => setBankSelect(e.target.value)}
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-light)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: 700 }}
-                >
-                  <option value="HDFC Bank">HDFC Bank Ltd</option>
-                  <option value="State Bank of India">State Bank of India (SBI)</option>
-                  <option value="ICICI Bank">ICICI Bank Ltd</option>
-                  <option value="Axis Bank">Axis Bank Ltd</option>
-                  <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
-                </select>
-              </div>
-            )}
-
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginBottom: '20px', lineHeight: 1.4 }}>
-              🔒 Payment is processed via Authorized Indian Gateway Sandbox. Submitting creates a verified transaction reference.
-            </div>
-
-            <button
-              onClick={handleProcessCheckout}
-              disabled={submittingPayment}
-              style={{
-                width: '100%', backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px', borderRadius: '12px',
-                fontWeight: 900, fontSize: '0.95rem', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(202, 138, 4, 0.4)'
-              }}
-            >
-              {submittingPayment ? 'Processing Transaction...' : 'Pay ₹499 & Submit Verification'}
-            </button>
           </div>
         </div>
       )}

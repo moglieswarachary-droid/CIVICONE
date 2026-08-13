@@ -181,9 +181,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
           civicId: "CIV-984210",
           phone: `+91 ${phone}`,
           maskedAadhaar: "XXXX XXXX 8942",
-          identityStatus: "VERIFIED",
-          tier: "STANDARD",
-          goldPassStatus: "standard"
+          identityStatus: "VERIFIED"
         });
       }, 2200);
     }

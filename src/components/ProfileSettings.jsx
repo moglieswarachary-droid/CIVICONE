@@ -11,7 +11,7 @@ export default function ProfileSettings({ citizen, onLogout, card, onCardUpdate 
     govtAnnouncements: true
   });
 
-  const isGold = (card?.goldPassStatus === 'active' || (card?.tier === 'GOLD' && card?.goldPassStatus !== 'standard' && card?.goldPassStatus !== 'pending'));
+  const isGold = card?.tier === 'GOLD' || !card;
 
   const handleToggleTier = async (newTier) => {
     try {

@@ -223,34 +223,25 @@ app.get('/api/goldpass/status', (req, res) => {
   });
 });
 
-// POST Gold Pass Checkout (UPI, Card, NetBanking Payment Submission)
-app.post('/api/goldpass/checkout', (req, res) => {
+// POST Citizen Purchase/Request Gold Pass (Flow: Standard -> Pending Verification)
+app.post('/api/goldpass/request', (req, res) => {
   const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
-  const { paymentMethod, upiId, cardMasked, bankName, amount } = req.body;
+  const { plan, paymentRef } = req.body;
 
   if (citizen.goldPassStatus === 'active') {
     return res.status(400).json({ error: "Account already has an active Gold Pass entitlement." });
   }
 
-  const txnId = `TXN-IN-${Math.floor(100000 + Math.random() * 900000)}`;
-  const paymentDetails = {
-    method: paymentMethod || 'UPI',
-    upiId: upiId || 'citizen@upi',
-    cardMasked: cardMasked || 'XXXX-XXXX-XXXX-4821',
-    bankName: bankName || 'HDFC Bank',
-    amount: amount || '₹499'
-  };
-
+  // Create pending verification record
   const newRequest = {
     id: `gpr-${Date.now()}`,
     citizenId: citizen.citizenId,
     citizenName: citizen.fullName,
     appliedAt: new Date().toISOString(),
-    status: "PAYMENT_PENDING",
-    plan: "Annual Pass (₹499)",
-    paymentRef: txnId,
-    paymentDetails,
-    notes: `Submitted via Indian Payment Gateway (${paymentDetails.method}). Pending Gateway Webhook Verification.`
+    status: "PENDING",
+    plan: plan || "Annual Pass (₹499)",
+    paymentRef: paymentRef || `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
+    notes: "Awaiting Administrative / Webhook Entitlement Verification"
   };
 
   if (!db.goldPassRequests) db.goldPassRequests = [];
@@ -259,61 +250,30 @@ app.post('/api/goldpass/checkout', (req, res) => {
 
   db.securityLogs.unshift({
     id: `sec-${Date.now()}`,
-    event: `Gold Pass Checkout Initiated (${paymentDetails.method} - ${txnId})`,
+    event: `Gold Pass Purchase Initiated (Ref: ${newRequest.paymentRef}) - Pending Admin Verification`,
     device: "Web Client",
     location: "Mumbai, India",
     ip: "49.37.142.90",
     timestamp: new Date().toLocaleString(),
-    status: "PAYMENT_PENDING"
+    status: "PENDING"
   });
-
-  return res.json({
-    success: true,
-    message: "Payment transaction recorded. Awaiting Gateway Webhook / Admin Verification.",
-    txnId,
-    goldPassStatus: "pending",
-    request: newRequest
-  });
-});
-
-// POST Sandbox Verification Endpoint (Simulate Instant Gateway Webhook Verification)
-app.post('/api/goldpass/payment-verify', (req, res) => {
-  const { txnId } = req.body;
-  const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
-  const reqItem = (db.goldPassRequests || []).find(r => r.paymentRef === txnId || r.citizenId === citizen.citizenId);
-
-  if (reqItem) reqItem.status = 'APPROVED';
-  citizen.tier = 'GOLD';
-  citizen.goldPassStatus = 'active';
-  citizen.goldPassExpiry = '2027-08-14';
 
   db.notifications.unshift({
     id: `notif-${Date.now()}`,
-    title: "Payment Verified — Gold Pass Active! 👑",
-    message: `Payment reference ${txnId || 'TXN'} successfully verified. Gold Pass entitlement unlocked!`,
-    type: "SUCCESS",
+    title: "Gold Pass Application Submitted",
+    message: "Your Gold Pass purchase reference is received. Status: Pending Verification.",
+    type: "INFO",
     read: false,
     timestamp: new Date().toISOString()
   });
 
-  db.securityLogs.unshift({
-    id: `sec-${Date.now()}`,
-    event: `Gateway Webhook Verified Payment ${txnId || ''} - Gold Pass Activated`,
-    device: "Payment Webhook",
-    location: "National Gateway Hub",
-    ip: "164.100.1.1",
-    timestamp: new Date().toLocaleString(),
-    status: "SUCCESS"
-  });
-
   return res.json({
     success: true,
-    message: "Payment verified successfully. Gold Pass activated!",
-    goldPassStatus: 'active'
+    message: "Gold Pass payment reference recorded. Application is pending verification.",
+    request: newRequest,
+    goldPassStatus: "pending"
   });
 });
-
-// GET Admin List of Pending Gold Pass Requests (Admin Access)
 
 // GET Admin List of Pending Gold Pass Requests (Admin Access)
 app.get('/api/admin/goldpass/requests', (req, res) => {

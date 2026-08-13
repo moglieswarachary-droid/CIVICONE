@@ -493,7 +493,201 @@ export const db = {
       paymentRef: "TXN-984210-DEMO",
       notes: "Pending Admin Verification"
     }
-  ]
+  ],
+
+  // 6. LOGS & NOTIFICATIONS ALIASES
+  securityLogs: [
+    {
+      id: "sec-101",
+      citizenId: "CIV-100001",
+      event: "Pre-Entry OTP Authenticated",
+      device: "Chrome Web Client (Windows)",
+      location: "Mumbai, India",
+      ip: "49.37.142.90",
+      timestamp: "13 Aug 2026, 09:30 AM",
+      status: "SUCCESS"
+    },
+    {
+      id: "sec-102",
+      citizenId: "CIV-100001",
+      event: "Smart Driving Licence Verified",
+      device: "Chrome Web Client (Windows)",
+      location: "Mumbai, India",
+      ip: "49.37.142.90",
+      timestamp: "13 Aug 2026, 09:42 AM",
+      status: "SUCCESS"
+    }
+  ],
+
+  // 7. SERVICES & WORKFLOWS
+  services: [
+    { id: "srv-01", title: "Aadhaar Identity Linkage", category: "Government", provider: "UIDAI", fee: "Free", timeframe: "Instant", requiredDocs: ["doc-101"] },
+    { id: "srv-02", title: "Driving Licence Renewal", category: "RTO", provider: "Parivahan Sewa (MoRTH)", fee: "₹200", timeframe: "1-2 Days", requiredDocs: ["doc-103"] },
+    { id: "srv-03", title: "PAN Card Instant Link", category: "Finance", provider: "Income Tax Department", fee: "Free", timeframe: "Instant", requiredDocs: ["doc-102"] },
+    { id: "srv-04", title: "ABHA Health Account Sync", category: "Healthcare", provider: "National Health Authority", fee: "Free", timeframe: "Instant", requiredDocs: ["doc-106"] },
+    { id: "srv-05", title: "Voter ID E-EPIC Download", category: "Government", provider: "Election Commission of India", fee: "Free", timeframe: "Instant", requiredDocs: ["doc-104"] }
+  ],
+
+  categoryServices: {
+    government: {
+      category: "Government & Identity",
+      provider: "UIDAI, ITD, MEA & Election Commission",
+      lastSynced: "Today, 10:42 AM",
+      records: [
+        { id: "rec-gov-01", name: "Aadhaar Identity Reference", issuer: "UIDAI", maskedId: "XXXX XXXX 8942", status: "Verified" },
+        { id: "rec-gov-02", name: "Permanent Account Number (PAN)", issuer: "Income Tax Dept", maskedId: "ABCDE1234F", status: "Verified" },
+        { id: "rec-gov-03", name: "Digital Voter ID Card (EPIC)", issuer: "Election Commission of India", maskedId: "MH/07/008/421899", status: "Verified" }
+      ]
+    },
+    healthcare: {
+      category: "Healthcare & Medical",
+      provider: "National Health Authority (NHA)",
+      lastSynced: "Today, 09:15 AM",
+      records: [
+        { id: "rec-hlth-01", name: "ABHA Health Account Number", issuer: "National Health Authority", maskedId: "23-4521-8761-0043", status: "Verified" }
+      ]
+    },
+    rto: {
+      category: "RTO & Vehicles",
+      provider: "Ministry of Road Transport and Highways",
+      lastSynced: "Today, 11:30 AM",
+      vehicles: [
+        { regNo: "MH02CA0094321", model: "Maruti Swift Dzire (White)", rto: "MH02 - Mumbai West", status: "Active", validUntil: "10-03-2026" }
+      ],
+      records: [
+        { id: "rec-rto-01", name: "Smart Driving Licence", issuer: "Parivahan Sewa (MoRTH)", maskedId: "MH02 20180094821", status: "Verified" }
+      ]
+    },
+    finance: {
+      category: "Banking & Finance",
+      provider: "Income Tax Department & Reserve Bank Gateway",
+      lastSynced: "Yesterday, 04:20 PM",
+      records: [
+        { id: "rec-fin-01", name: "Form 16 TDS Statement", issuer: "Income Tax Dept", maskedId: "FY-2023-24", status: "Verified" }
+      ]
+    },
+    education: {
+      category: "Education & Academic",
+      provider: "National Academic Depository (NAD)",
+      lastSynced: "10 Aug 2026",
+      qualificationTimeline: [
+        { year: "2001", level: "10th SSC Board", board: "Maharashtra State Board (85.6%)" },
+        { year: "2003", level: "12th HSC Board", board: "Maharashtra State Board (Science)" },
+        { year: "2007", level: "B.Tech Computer Science", board: "University of Mumbai" }
+      ],
+      records: [
+        { id: "rec-edu-01", name: "B.Tech Degree Certificate", issuer: "University of Mumbai", maskedId: "MU-ENG-2007-984210", status: "Verified" }
+      ]
+    }
+  },
+
+  serviceActivities: [
+    {
+      id: "act-101",
+      serviceTitle: "Driving Licence Renewal",
+      provider: "Parivahan Sewa (MoRTH)",
+      status: "Submitted / In Progress",
+      appliedAt: "12 Aug 2026",
+      referenceNo: "RTO-REF-984210",
+      notes: "Application submitted securely using verified CivicOne vault document."
+    }
+  ],
+
+  govtUpdates: [
+    {
+      id: "gov-001",
+      title: "DigiLocker Integration with CivicOne — Official Notice",
+      department: "Ministry of Electronics & IT (MeitY)",
+      source: "Ministry of Electronics & IT (MeitY)",
+      category: "Technology",
+      content: "Citizens can now link DigiLocker credentials to their CivicOne Vault for unified digital identity access across government portals.",
+      summary: "Citizens can link DigiLocker credentials to their CivicOne Vault.",
+      publishedAt: "2026-08-12T09:00:00Z",
+      date: "12 Aug 2026",
+      unread: true,
+      priority: "High"
+    },
+    {
+      id: "gov-002",
+      title: "Vehicle RC Renewal via Parivahan Online Service",
+      department: "Parivahan Sewa — MoRTH",
+      source: "Parivahan Sewa — MoRTH",
+      category: "RTO",
+      content: "Online renewal of vehicle registration certificates is now fully active through the Parivahan portal.",
+      summary: "Online renewal of vehicle RCs active via Parivahan portal.",
+      publishedAt: "2026-08-11T11:30:00Z",
+      date: "11 Aug 2026",
+      unread: true,
+      priority: "Medium"
+    }
+  ],
+
+  dailyNews: [
+    {
+      id: "news-001",
+      title: "India Advances National Digital ID Framework",
+      headline: "India Advances National Digital ID Framework",
+      source: "CivicOne News Network",
+      category: "Technology",
+      snippet: "India continues to strengthen its digital identity ecosystem with unified verified credential portals.",
+      summary: "India continues to strengthen its digital identity ecosystem.",
+      publishedAt: "2026-08-13T07:30:00Z",
+      date: "13 Aug 2026",
+      readingTime: "3 min"
+    }
+  ],
+
+  supportTickets: [],
+
+  voterRecord: {
+    name: "Rajesh Kumar",
+    epicNo: "MH/07/008/421899",
+    constituency: "Bandra West (Assembly Constituency 165)",
+    state: "Maharashtra",
+    pollingStation: "St. Stanislaus High School, Room 4",
+    status: "Active Voter Record",
+    verifiedAt: "2026-01-15",
+    qrToken: "VOTER-TOKEN-984210-SECURE"
+  },
+
+  shareRequests: [],
+
+  adminStats: {
+    totalCitizens: "14,892,104",
+    verifiedVaultDocs: "48,291,048",
+    activeIssuingAuthorities: "1,240",
+    systemUptime: "99.99%",
+    securityThreatsBlocked: "42,910",
+    serverLoad: "18% CPU / 4.2 GB RAM"
+  },
+
+  issuers: [
+    { id: "iss-01", name: "Parivahan Sewa (MoRTH)", department: "Transport", officer: "Rakesh Sharma", status: "VERIFIED", issuedDocs: "12,482" },
+    { id: "iss-02", name: "UIDAI National Desk", department: "Identity", officer: "Priya Menon", status: "VERIFIED", issuedDocs: "48,910" },
+    { id: "iss-03", name: "National Health Authority", department: "Healthcare", officer: "Dr. A. K. Verma", status: "VERIFIED", issuedDocs: "9,210" }
+  ],
+
+  // Getters for single citizen/card access
+  get citizen() {
+    return this.citizens.find(c => c.citizenId === this.activeCitizenId) || this.citizens[0];
+  },
+  get card() {
+    const c = this.citizen;
+    return {
+      civicId: c.citizenId,
+      holderName: c.fullName,
+      tier: c.tier || 'STANDARD',
+      goldPassStatus: c.goldPassStatus || 'standard',
+      tierBadge: c.goldPassStatus === 'active' ? '👑 Premium Gold Citizen' : 'Verified Citizen',
+      status: "Verified Identity",
+      issueDate: "15 Jan 2024",
+      expiryDate: "14 Jan 2034",
+      securityChipId: `CHIP-${c.citizenId}`,
+      verificationToken: `CIV-TOKEN-${c.citizenId}-SECURE-2026`,
+      qrSignature: "SHA256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      verificationUrl: `http://localhost:3001/verify?token=CIV-TOKEN-${c.citizenId}-SECURE-2026`
+    };
+  }
 };
 
 // HELPER DATA SERVICE METRIC GETTERS
