@@ -353,13 +353,36 @@ export default function ServicesSection({ services: initialServices }) {
       {/* VIEW 2: 8 CATEGORY SERVICE ENTRY POINTS GRID (Default Overview) */}
       {!activeCategoryKey && (
         <>
-          <div style={{ marginBottom: '32px' }}>
-            <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em', marginBottom: '4px' }}>
-              CivicOne Department Services & Record Hubs
-            </h1>
-            <p style={{ fontSize: '0.9rem', color: '#475569' }}>
-              Select a service category to authenticate session, grant consent & enter dedicated department dashboard.
-            </p>
+          <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em', marginBottom: '4px' }}>
+                CivicOne Access Hub &amp; Service Marketplace
+              </h1>
+              <p style={{ fontSize: '0.9rem', color: '#475569' }}>
+                Search and launch authorized department services, identity verification &amp; credential requests.
+              </p>
+            </div>
+
+            {/* Service Search Bar */}
+            <div style={{ position: 'relative', width: '100%', maxWidth: '380px' }}>
+              <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#64748B' }} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search Voter ID, Driving Licence, Education, PAN..."
+                style={{
+                  width: '100%',
+                  padding: '10px 14px 10px 42px',
+                  borderRadius: '12px',
+                  border: '1.5px solid #CBD5E1',
+                  backgroundColor: '#FFFFFF',
+                  color: '#0F172A',
+                  fontSize: '0.875rem',
+                  fontWeight: 600
+                }}
+              />
+            </div>
           </div>
 
           {/* 8 Category Entry Cards */}
