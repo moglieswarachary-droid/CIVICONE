@@ -441,7 +441,7 @@ export default function ServicesSection({ services: initialServices }) {
               Execute Department Workflow Applications
             </h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
               {services.map(srv => (
                 <div key={srv.id} style={{ backgroundColor: '#F8FAFC', borderRadius: '16px', padding: '20px', border: '1px solid #E2E8F0' }}>
                   <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0B1F3A' }}>{srv.title}</div>

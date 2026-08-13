@@ -185,7 +185,7 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
       {/* 3D CARD WRAPPER */}
       <div
         className={`card-container-3d ${isFlipped ? 'flipped' : ''}`}
-        style={{ width: '100%', height: '265px', position: 'relative', cursor: 'pointer' }}
+        style={{ width: '100%', minHeight: '230px', aspectRatio: '1.586', position: 'relative', cursor: 'pointer' }}
         onClick={() => setIsFlipped(!isFlipped)}
       >
         <div className="card-inner-3d">
@@ -197,7 +197,7 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
               background: isGold
                 ? 'linear-gradient(135deg, #1C190D 0%, #3B2E09 30%, #856414 65%, #C5A038 90%, #E6C86E 100%)'
                 : 'linear-gradient(135deg, #0B1F3A 0%, #073B8C 50%, #0B5ED7 100%)',
-              padding: '22px',
+              padding: '16px 20px',
               color: '#FFFFFF',
               boxShadow: isGold
                 ? '0 16px 40px -8px rgba(197, 160, 56, 0.45), 0 0 25px rgba(230, 200, 110, 0.25)'

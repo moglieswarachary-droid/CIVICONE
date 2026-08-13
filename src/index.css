@@ -1,4 +1,4 @@
-/* src/index.css - CivicOne Premium Blue + White Visual System */
+/* src/index.css - CivicOne Premium Blue + White Visual System & Cross-Platform Responsive Architecture */
 
 :root {
   --primary-blue: #0B5ED7;
@@ -41,6 +41,12 @@
 
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
+
+  /* iOS Safe Area Insets */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 
 /* Dark Theme Variables */
@@ -62,15 +68,18 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  touch-action: manipulation;
 }
 
-body {
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   font-family: var(--font-body);
   background-color: var(--bg-main);
   color: var(--text-main);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -86,11 +95,22 @@ button {
   border: none;
   outline: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 44px;
 }
 
 input, select, textarea {
   font-family: var(--font-body);
   outline: none;
+  min-height: 44px;
+}
+
+/* TOUCH TARGET MINIMUM SIZE */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Glassmorphism Utilities */
@@ -339,3 +359,86 @@ input, select, textarea {
   transform: translateY(-1px);
 }
 
+/* MOBILE BOTTOM NAVIGATION BAR & DRAWER KEYFRAMES */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(64px + var(--sab));
+  padding-bottom: var(--sab);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 90;
+}
+
+[data-theme="dark"] .mobile-bottom-nav {
+  background: rgba(11, 25, 46, 0.96);
+  border-color: #1E293B;
+}
+
+.mobile-bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: #64748B;
+  font-size: 0.675rem;
+  font-weight: 700;
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  min-height: 48px;
+}
+
+.mobile-bottom-nav-item.active {
+  color: #0B5ED7;
+}
+
+@keyframes slideDrawerIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.drawer-slide-in {
+  animation: slideDrawerIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* RESPONSIVE MEDIA QUERIES */
+
+/* Desktop Only Utility */
+@media (max-width: 768px) {
+  .hidden-mobile {
+    display: none !important;
+  }
+}
+
+/* Mobile Only Utility */
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* Tablet & Mobile Adjustments */
+@media (max-width: 1024px) {
+  .desktop-sidebar-layout {
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.1rem !important; }
+  
+  .responsive-padding {
+    padding: 16px 12px !important;
+  }
+}

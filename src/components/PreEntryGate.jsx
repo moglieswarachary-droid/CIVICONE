@@ -387,7 +387,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
             </div>
 
             {/* OTP Input Boxes */}
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginBottom: '24px', flexWrap: 'nowrap' }}>
               {otp.map((digit, idx) => (
                 <input
                   key={idx}
@@ -398,13 +398,14 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
                   onChange={(e) => handleOtpChange(idx, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(idx, e)}
                   style={{
-                    width: '46px',
-                    height: '52px',
+                    width: '100%',
+                    maxWidth: '44px',
+                    height: '48px',
                     borderRadius: '10px',
                     border: digit ? '2px solid #0B5ED7' : '1.5px solid #CBD5E1',
                     backgroundColor: digit ? '#EAF3FF' : '#FFFFFF',
                     textAlign: 'center',
-                    fontSize: '1.25rem',
+                    fontSize: '1.15rem',
                     fontWeight: 700,
                     color: '#0B1F3A'
                   }}
@@ -530,7 +531,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
               </p>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginBottom: '20px', flexWrap: 'nowrap' }}>
               {identityOtp.map((digit, idx) => (
                 <input
                   key={idx}
@@ -541,13 +542,14 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
                   onChange={(e) => handleOtpChange(idx, e.target.value, true)}
                   onKeyDown={(e) => handleKeyDown(idx, e, true)}
                   style={{
-                    width: '46px',
-                    height: '52px',
+                    width: '100%',
+                    maxWidth: '44px',
+                    height: '48px',
                     borderRadius: '10px',
                     border: digit ? '2px solid #0B5ED7' : '1.5px solid #CBD5E1',
                     backgroundColor: digit ? '#EAF3FF' : '#FFFFFF',
                     textAlign: 'center',
-                    fontSize: '1.25rem',
+                    fontSize: '1.15rem',
                     fontWeight: 700,
                     color: '#0B1F3A'
                   }}
