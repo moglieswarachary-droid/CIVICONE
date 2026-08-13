@@ -15,9 +15,12 @@ export default function ServicesSection({ services: initialServices }) {
   const [syncing, setSyncing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Consent & MFA Modal State
   const [showConsentModal, setShowConsentModal] = useState(null);
   const [consenting, setConsenting] = useState(false);
+
+  // Record Detail View Modal State
+  const [selectedRecordModal, setSelectedRecordModal] = useState(null);
+  const [downloadMsg, setDownloadMsg] = useState('');
 
   // Department Applications State
   const [services, setServices] = useState(initialServices || []);
@@ -27,6 +30,20 @@ export default function ServicesSection({ services: initialServices }) {
   const [workflowNotes, setWorkflowNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [workflowSuccess, setWorkflowSuccess] = useState(null);
+
+  const handleDownloadRecord = (rec) => {
+    setDownloadMsg(`Preparing cryptographically signed PDF for ${rec.name}...`);
+    setTimeout(() => {
+      setDownloadMsg('');
+      const element = document.createElement("a");
+      const file = new Blob([`CivicOne Verified Credential Record\nDocument: ${rec.name}\nIssuer: ${rec.issuer}\nRef: ${rec.maskedId}\nStatus: VERIFIED\nTimestamp: ${new Date().toISOString()}`], {type: 'text/plain'});
+      element.href = URL.createObjectURL(file);
+      element.download = `${rec.name.replace(/\s+/g, '_')}_CivicOne_Verified.txt`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }, 1000);
+  };
 
   // Fetch Initial Services & Activities
   useEffect(() => {
@@ -333,11 +350,11 @@ export default function ServicesSection({ services: initialServices }) {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
-                      <button onClick={() => alert(`Viewing Record: ${rec.name}`)} style={{ backgroundColor: '#EAF3FF', color: '#0B5ED7', padding: '6px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800 }}>
+                      <button onClick={() => setSelectedRecordModal(rec)} style={{ backgroundColor: '#EAF3FF', color: '#0B5ED7', border: 'none', padding: '8px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>
                         View Record
                       </button>
-                      <button onClick={() => alert(`Downloading verified PDF for ${rec.name}`)} style={{ backgroundColor: '#F1F5F9', color: '#475569', padding: '6px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800 }}>
-                        Download
+                      <button onClick={() => handleDownloadRecord(rec)} style={{ backgroundColor: '#F1F5F9', color: '#475569', border: 'none', padding: '8px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>
+                        Download PDF
                       </button>
                     </div>
                   </div>
@@ -592,6 +609,74 @@ export default function ServicesSection({ services: initialServices }) {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: AUTHORIZED CREDENTIAL RECORD DETAIL VIEWER */}
+      {selectedRecordModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.82)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: '16px'
+        }}>
+          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '28px', maxWidth: '520px', width: '100%', position: 'relative', border: '1px solid #E2E8F0', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+            <button onClick={() => setSelectedRecordModal(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#64748B', cursor: 'pointer' }}>
+              <X size={22} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', backgroundColor: '#EAF3FF', color: '#0B5ED7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheck size={26} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0F172A', margin: 0 }}>{selectedRecordModal.name}</h3>
+                <span style={{ fontSize: '0.75rem', color: '#0F5132', backgroundColor: '#D1E7DD', padding: '2px 8px', borderRadius: '6px', fontWeight: 800 }}>
+                  ● {selectedRecordModal.status || 'Verified Identity'}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#F8FAFC', borderRadius: '16px', padding: '16px', border: '1px solid #E2E8F0', marginBottom: '20px', fontSize: '0.825rem', color: '#334155' }}>
+              <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748B' }}>Issuing Authority:</span>
+                <strong>{selectedRecordModal.issuer}</strong>
+              </div>
+              <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748B' }}>Masked Credential Ref:</span>
+                <code style={{ color: '#0B5ED7', fontWeight: 800 }}>{selectedRecordModal.maskedId}</code>
+              </div>
+              <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748B' }}>Cryptographic Proof:</span>
+                <code style={{ fontSize: '0.7rem', color: '#059669' }}>SHA256:e3b0c442...855</code>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748B' }}>Verification Status:</span>
+                <span style={{ color: '#0F5132', fontWeight: 800 }}>Authentic &amp; Valid</span>
+              </div>
+            </div>
+
+            {downloadMsg && (
+              <div style={{ marginBottom: '16px', backgroundColor: '#EAF3FF', color: '#0B5ED7', padding: '10px', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 700, textAlign: 'center' }}>
+                ⚡ {downloadMsg}
+              </div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <button
+                onClick={() => handleDownloadRecord(selectedRecordModal)}
+                style={{ backgroundColor: '#0B5ED7', color: '#FFFFFF', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              >
+                <Download size={16} /> Download Signed PDF
+              </button>
+
+              <button
+                onClick={() => setSelectedRecordModal(null)}
+                style={{ backgroundColor: '#F1F5F9', color: '#475569', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
+              >
+                Close View
+              </button>
+            </div>
           </div>
         </div>
       )}

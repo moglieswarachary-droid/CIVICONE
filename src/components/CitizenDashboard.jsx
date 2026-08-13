@@ -14,6 +14,7 @@ import SecurityCentre from './SecurityCentre.jsx';
 import HelpCentre from './HelpCentre.jsx';
 import ProfileSettings from './ProfileSettings.jsx';
 import AiAgentFloating from './AiAgentFloating.jsx';
+import GoldPassPaymentModal from './GoldPassPaymentModal.jsx';
 import {
   DEMO_CARD, DEMO_DOCUMENTS, DEMO_GOVT_UPDATES, DEMO_NEWS,
   DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST
@@ -23,6 +24,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'govt-updates' | 'news' | 'security' | 'help' | 'profile'
   const [activeTab, setActiveTab] = useState('home');
   const [theme, setTheme] = useState('light');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   // Initialize with mock data so dashboard always shows content even without backend
   const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
@@ -775,14 +777,13 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
                   {goldPassStatus === 'standard' && (
                     <button
-                      onClick={handleApplyGoldPass}
-                      disabled={requestingGoldPass}
+                      onClick={() => setShowPaymentModal(true)}
                       style={{
                         backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 24px', borderRadius: '14px',
                         fontWeight: 900, fontSize: '0.95rem', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(202, 138, 4, 0.4)'
                       }}
                     >
-                      {requestingGoldPass ? 'Submitting...' : 'Purchase Gold Pass (₹499/yr)'}
+                      Get Gold Pass (₹499/yr)
                     </button>
                   )}
                 </div>
@@ -1081,6 +1082,21 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
       {/* FLOATING CIVICONE AI ASSISTANT */}
       <AiAgentFloating citizen={citizen} documents={documents} />
+
+      {/* GOLD PASS SECURE CHECKOUT PAYMENT MODAL */}
+      <GoldPassPaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onPaymentSuccess={(entitlement) => {
+          setGoldPassStatus('active');
+          setCardData(prev => ({
+            ...(prev || DEMO_CARD),
+            tier: 'GOLD',
+            goldPassStatus: 'active'
+          }));
+          setGoldPassMessage("Payment Verified! Your account is now upgraded to CivicOne Gold Pass 👑.");
+        }}
+      />
 
     </div>
   );

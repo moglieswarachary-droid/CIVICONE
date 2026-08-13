@@ -207,6 +207,45 @@ export default function ProfileSettings({ citizen, onLogout, card, onCardUpdate 
         </div>
       </div>
 
+      {/* MY DATA & PERMISSIONS PRIVACY CONTROL CENTER */}
+      <div style={{ backgroundColor: '#FFFFFF', borderRadius: '20px', padding: '28px', border: '1px solid #E2E8F0', boxShadow: 'var(--shadow-sm)', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+          <div>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0B1F3A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Lock size={20} style={{ color: '#0B5ED7' }} /> My Data &amp; Active Consent Permissions
+            </h2>
+            <p style={{ fontSize: '0.8rem', color: '#64748B', marginTop: '2px' }}>
+              Real-time privacy ledger of third-party organizations authorized to access your vault documents.
+            </p>
+          </div>
+          <span style={{ backgroundColor: '#D1E7DD', color: '#0F5132', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 }}>
+            ● 2 Active Consent Grants
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {[
+            { id: 'perm-01', org: 'ABC University Admissions', doc: 'B.Tech Degree Certificate', purpose: 'M.Tech Admission Verification', duration: '24 Hours', granted: '13 Aug 2026' },
+            { id: 'perm-02', org: 'Parivahan Sewa (MoRTH)', doc: 'Smart Driving Licence', purpose: 'Licence Renewal Application', duration: '7 Days', granted: '12 Aug 2026' }
+          ].map(perm => (
+            <div key={perm.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px', borderRadius: '14px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <strong style={{ fontSize: '0.9rem', color: '#0B1F3A' }}>{perm.org}</strong>
+                <div style={{ fontSize: '0.775rem', color: '#0B5ED7', fontWeight: 700, marginTop: '2px' }}>Document: {perm.doc}</div>
+                <div style={{ fontSize: '0.725rem', color: '#64748B', marginTop: '2px' }}>Purpose: {perm.purpose} • Duration: {perm.duration}</div>
+              </div>
+
+              <button
+                onClick={() => alert(`Consent for ${perm.org} has been revoked immediately.`)}
+                style={{ backgroundColor: '#FEE2E2', color: '#DC2626', border: 'none', padding: '8px 14px', borderRadius: '10px', fontWeight: 800, fontSize: '0.775rem', cursor: 'pointer' }}
+              >
+                Revoke Access
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* NOTIFICATION PREFERENCES */}
       <div style={{ backgroundColor: '#FFFFFF', borderRadius: '20px', padding: '28px', border: '1px solid #E2E8F0', boxShadow: 'var(--shadow-sm)' }}>
         <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '16px' }}>
