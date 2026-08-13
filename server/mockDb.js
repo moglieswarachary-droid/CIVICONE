@@ -481,119 +481,131 @@ export const db = {
     }
   ],
 
-  // 7. OFFICIAL GOVERNMENT UPDATES (MINIMUM 6 RECENT DIRECTIVES)
+  // 7. OFFICIAL GOVERNMENT DIRECTIVES & PRESS RELEASES (Recent Timestamps)
   govtUpdates: [
     {
-      id: "gup-101",
-      title: "UIDAI Mandates Tokenized Aadhaar 2.0 & Biometric Locking Framework for Digital Vault Platforms",
-      category: "Identity & Security",
+      id: "gov-upd-101",
+      title: "MeitY Mandates Tokenized Zero-Knowledge Verification across 450+ Public Utilities",
+      category: "Government Policy & Digital Infrastructure",
       priority: "High",
-      date: "13 Aug 2026",
-      source: "Unique Identification Authority of India (UIDAI)",
-      unread: true,
-      content: "UIDAI has officially released the Aadhaar 2.0 Security Standard requiring tokenized reference numbers and biometric lock state synchronization across all authorized civic vault platforms. Citizens can generate dynamic virtual reference tokens without exposing 12-digit Aadhaar numbers."
-    },
-    {
-      id: "gup-102",
-      title: "MoRTH Enforces Digital Smart Driving Licence Standard via Parivahan & CivicOne Cryptographic Seal",
-      category: "Transport & RTO",
-      priority: "High",
-      date: "12 Aug 2026",
-      source: "Ministry of Road Transport & Highways (MoRTH)",
-      unread: true,
-      content: "All RTO authorities across 28 states have been instructed to accept Parivahan-certified digital smart driving licences stored in CivicOne Vault during traffic inspections and motor vehicle verification."
-    },
-    {
-      id: "gup-103",
-      title: "Universal ABHA Digital Health Account Integration Enabled Across 500+ Hospital Networks",
-      category: "Healthcare",
-      priority: "Medium",
-      date: "11 Aug 2026",
-      source: "National Health Authority (NHA)",
-      unread: false,
-      content: "The National Health Authority has finalized integration of Ayushman Bharat Health Account (ABHA) records into CivicOne Vault, allowing citizens to securely store diagnostic reports, prescriptions, and health insurance tokens with explicit consent controls."
-    },
-    {
-      id: "gup-104",
-      title: "Instant PAN-Aadhaar Digital Verification Gateway Activated for Seamless KYC & Tax Vault Filing",
-      category: "Finance & Tax",
-      priority: "Medium",
-      date: "10 Aug 2026",
-      source: "Income Tax Department, Govt of India",
-      unread: false,
-      content: "Taxpayers can now instantly verify Permanent Account Number (PAN) status and generate cryptographically signed Income Tax Return (ITR) reference certificates directly within the CivicOne Structured Vault."
-    },
-    {
-      id: "gup-105",
-      title: "Digital Elector Photo Identity Card (e-EPIC) Cryptographic Verification Protocol Released",
-      category: "Electoral & Civic",
-      priority: "High",
-      date: "09 Aug 2026",
-      source: "Election Commission of India (ECI)",
-      unread: false,
-      content: "The Election Commission of India has authorized the display of verified e-EPIC credentials in CivicOne Vault, complete with electoral roll polling station details and digital QR verification signatures."
-    },
-    {
-      id: "gup-106",
-      title: "National Data Privacy & Zero-Trust Infrastructure Mandate Issued for All Identity Platforms",
-      category: "Cyber Security",
-      priority: "High",
-      date: "08 Aug 2026",
+      date: "13 Aug 2026, 18:30 IST (Just Now)",
       source: "Ministry of Electronics & Information Technology (MeitY)",
+      content: "The Ministry has officially directed all central and state public utilities to mandate ZK-SNARK tokenized verification via CivicOne. Citizens will no longer be required to hand over physical document photocopies for government services.",
+      unread: true,
+      isGoldPass: false
+    },
+    {
+      id: "gov-upd-102",
+      title: "👑 CivicOne Gold Pass Fast-Track Passport & Express Clearance Rollout",
+      category: "Gold Pass Priority Services",
+      priority: "High",
+      date: "13 Aug 2026, 16:15 IST (2 Hours Ago)",
+      source: "Ministry of External Affairs & Passport Seva Division",
+      content: "Gold Pass verified citizens can now access dedicated express queues at 38 Regional Passport Offices nationwide. Identity validation is completed in under 45 seconds via dynamic cryptographic QR credentials.",
+      unread: true,
+      isGoldPass: true
+    },
+    {
+      id: "gov-upd-103",
+      title: "MoRTH E-DL & Smart Vehicle RC Auto-Sync Protocol Live",
+      category: "RTO & Transport Logistics",
+      priority: "Medium",
+      date: "13 Aug 2026, 12:45 IST",
+      source: "Ministry of Road Transport & Highways (MoRTH)",
+      content: "All active driving licences and vehicle registration certificates issued by state RTOs are now automatically synchronized into the citizen's Civic Vault with real-time PUC and insurance verification flags.",
       unread: false,
-      content: "MeitY has issued comprehensive guidelines enforcing zero-trust data access, recipient-bound document sharing, and instant consent revocation mechanisms across all civic identity platforms."
+      isGoldPass: false
+    },
+    {
+      id: "gov-upd-104",
+      title: "National Health Authority Integrates ABHA 2.0 Tele-Health Vault Credentials",
+      category: "Healthcare & Medical Vault",
+      priority: "Medium",
+      date: "12 Aug 2026, 19:20 IST",
+      source: "National Health Authority (NHA)",
+      content: "ABHA 2.0 digital health accounts are officially linked with CivicOne structured vault. Diagnostic reports, pathology lab results, and vaccination records can now be shared securely with instant time-limited consent.",
+      unread: false,
+      isGoldPass: false
+    },
+    {
+      id: "gov-upd-105",
+      title: "👑 Gold Pass Exclusive Priority Banking KYC Sync Approved by RBI",
+      category: "Gold Pass Banking Privileges",
+      priority: "High",
+      date: "12 Aug 2026, 14:10 IST",
+      source: "Reserve Bank of India (RBI) Financial Cell",
+      content: "Gold Pass verified citizens enjoy automatic multi-bank KYC synchronization across all Tier-1 banks without re-submitting financial documents or attending physical branch verification visits.",
+      unread: false,
+      isGoldPass: true
+    },
+    {
+      id: "gov-upd-106",
+      title: "Election Commission Approves E-EPIC Digital Voter Card Instant Verification",
+      category: "Electoral Governance",
+      priority: "High",
+      date: "11 Aug 2026, 14:00 IST",
+      source: "Election Commission of India (ECI)",
+      content: "The ECI has integrated digital voter ID records into CivicOne. Citizens can verify constituency polling stations and generate cryptographic elector proofs directly from their virtual card.",
+      unread: false,
+      isGoldPass: false
     }
   ],
 
-  // 8. DAILY NEWS, MEDIA & GOLD PASS ANNOUNCEMENTS (MINIMUM 6 RECENT ARTICLES)
+  // 8. DAILY NEWS & MEDIA (With Gold Pass Special Coverage)
   dailyNews: [
     {
       id: "news-201",
-      title: "CivicOne Unveils Premium Gold Pass Tier with Hardware Cryptographic Chip Verification & Priority Status",
+      title: "👑 CivicOne Unveils Next-Gen Gold Pass VIP Portal for Premium Identity Holders",
       category: "Gold Pass News",
-      source: "CivicOne Official Press Release",
-      date: "13 Aug 2026",
-      snippet: "CivicOne today introduced the Gold Pass Tier featuring an upgraded Virtual Identity Card, hardware-backed chip verification code, and VIP status badge. Gold citizens receive priority verification processing across 2,000+ institution partners."
+      source: "Economic Times Tech",
+      date: "13 Aug 2026, 19:10 IST (Recent)",
+      snippet: "CivicOne's new Gold Pass tier introduces instant airport security e-gates, priority banking KYC synchronization, and 24/7 dedicated identity concierges for high-trust verified citizens.",
+      isGoldPass: true
     },
     {
       id: "news-202",
-      title: "India's Digital Identity Transformation: CivicOne Platform Surpasses 10 Million Active Digital Vault Users",
-      category: "National News",
-      source: "Financial Express",
-      date: "13 Aug 2026",
-      snippet: "The CivicOne Structured Vault platform has achieved a landmark milestone of 10 million verified citizen accounts, processing over 500,000 secure document verification requests daily with 99.99% uptime."
+      title: "India's Digital Vault Infrastructure Handles 10 Million Paperless Verifications in Q3",
+      category: "Tech & Innovation",
+      source: "Business Standard Digital",
+      date: "13 Aug 2026, 17:30 IST",
+      snippet: "CivicOne platform records a 400% surge in paperless credential verifications as universities, banks, and healthcare providers adopt end-to-end tokenized document sharing.",
+      isGoldPass: false
     },
     {
       id: "news-203",
-      title: "Why Banking & Education Partners Are Adopting CivicOne Gold Pass Tier for Zero-Latency KYC Onboarding",
-      category: "Gold Pass News",
-      source: "Economic Times",
-      date: "12 Aug 2026",
-      snippet: "Leading public banks and top universities have integrated CivicOne Gold Pass verification API, reducing customer onboarding and student degree verification time from 7 days to under 5 seconds."
+      title: "👑 Gold Pass Priority Airport E-Gates Launched at Delhi, Mumbai & Bengaluru Air Hubs",
+      category: "Gold Pass Privilege",
+      source: "The Hindu Business Line",
+      date: "13 Aug 2026, 15:00 IST",
+      snippet: "Airports Authority of India implements seamless biometric e-gate entry for CivicOne Gold Pass holders, reducing security queue waiting times from 25 minutes to under 15 seconds.",
+      isGoldPass: true
     },
     {
       id: "news-204",
-      title: "Smart Traffic Enforcement Goes Contactless: MoRTH Officers Verify Licences via CivicOne QR Scanner",
-      category: "Mobility & Transport",
-      source: "Times of India",
-      date: "11 Aug 2026",
-      snippet: "Traffic police across major metropolitan areas have begun using the official CivicOne Inspector Scanner app to instantaneously authenticate driving licences and vehicle insurance without holding physical documents."
+      title: "Cybersecurity Agency Certifies CivicOne Zero-Knowledge Encryption Standard",
+      category: "Security & Privacy",
+      source: "Financial Express Security",
+      date: "12 Aug 2026, 21:00 IST",
+      snippet: "National Critical Information Infrastructure Protection Centre (NCIIPC) awards top-tier security compliance to CivicOne's hardware-backed AES-256 identity vault.",
+      isGoldPass: false
     },
     {
       id: "news-205",
-      title: "Recipient-Bound Digital Consent Engine: How CivicOne Eliminates Identity Theft and Data Leaks",
-      category: "Cyber Security & AI",
-      source: "TechCrunch",
-      date: "10 Aug 2026",
-      snippet: "CivicOne's non-transferable document sharing architecture ensures that documents shared with one bank cannot be forwarded or accessed by third parties, establishing a new global benchmark in digital privacy."
+      title: "Top 100 Indian Universities Enable One-Click Degree Verification via Civic Vault",
+      category: "Education & Employment",
+      source: "Mint Education",
+      date: "12 Aug 2026, 10:30 IST",
+      snippet: "Leading IITs, IIMs, and central universities migrate to digital degree tokens, eliminating counterfeit credentials and reducing employment background check times from 2 weeks to 3 seconds.",
+      isGoldPass: false
     },
     {
       id: "news-206",
-      title: "ABHA Health Account Integration with CivicOne Vault Allows Citizens 100% Control Over Medical Records",
-      category: "Healthcare & Digital Health",
-      source: "The Hindu",
-      date: "09 Aug 2026",
-      snippet: "Patients can now store diagnostic lab reports, vaccination credentials, and medical fitness certificates in a dedicated Healthcare Vault, granting time-bound access to doctors with one-click revocation."
+      title: "HDFC Bank & ICICI Introduce Instant Zero-Paper Home Loans for CivicOne Verified Users",
+      category: "Finance & Housing",
+      source: "NDTV Profit",
+      date: "11 Aug 2026, 16:45 IST",
+      snippet: "Major retail banks announce instant pre-approved mortgage loans for citizens with high trust scores on CivicOne, requiring zero physical document submissions.",
+      isGoldPass: false
     }
   ]
 };
