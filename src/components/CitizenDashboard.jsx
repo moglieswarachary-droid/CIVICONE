@@ -14,22 +14,27 @@ import SecurityCentre from './SecurityCentre.jsx';
 import HelpCentre from './HelpCentre.jsx';
 import ProfileSettings from './ProfileSettings.jsx';
 import AiAgentFloating from './AiAgentFloating.jsx';
+import {
+  DEMO_CARD, DEMO_DOCUMENTS, DEMO_GOVT_UPDATES, DEMO_NEWS,
+  DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST
+} from '../data/mockData.js';
 
 export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification }) {
   // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'govt-updates' | 'news' | 'security' | 'help' | 'profile'
   const [activeTab, setActiveTab] = useState('home');
   const [theme, setTheme] = useState('light');
-  const [notifications, setNotifications] = useState([]);
+  // Initialize with mock data so dashboard always shows content even without backend
+  const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [showTourModal, setShowTourModal] = useState(false);
   const [tourStep, setTourStep] = useState(1);
-  const [documents, setDocuments] = useState([]);
-  const [govtUpdates, setGovtUpdates] = useState([]);
-  const [dailyNews, setDailyNews] = useState([]);
-  const [cardData, setCardData] = useState(null);
+  const [documents, setDocuments] = useState(DEMO_DOCUMENTS);
+  const [govtUpdates, setGovtUpdates] = useState(DEMO_GOVT_UPDATES);
+  const [dailyNews, setDailyNews] = useState(DEMO_NEWS);
+  const [cardData, setCardData] = useState(DEMO_CARD);
   const [globalSearch, setGlobalSearch] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [demoCitizens, setDemoCitizens] = useState([]);
+  const [demoCitizens, setDemoCitizens] = useState(DEMO_CITIZENS_LIST);
   const [currentCitizen, setCurrentCitizen] = useState(citizen);
 
   // Fetch initial dashboard data & demo accounts from REST API backend
@@ -103,6 +108,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   ];
 
   const unreadNotifCount = notifications.filter(n => !n.read).length;
+  const isGoldTier = cardData?.tier === 'GOLD' || !cardData;
 
   const handleSelectTab = (tabId) => {
     setActiveTab(tabId);
@@ -141,21 +147,21 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 width: '36px',
                 height: '36px',
                 borderRadius: '10px',
-                background: '#0B5ED7',
+                background: isGoldTier ? 'linear-gradient(135deg, #EAB308 0%, #CA8A04 100%)' : '#0B5ED7',
                 color: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(11, 94, 215, 0.3)'
+                boxShadow: isGoldTier ? '0 4px 14px rgba(202, 138, 4, 0.4)' : '0 4px 12px rgba(11, 94, 215, 0.3)'
               }}>
-                <ShieldCheck size={22} />
+                {isGoldTier ? <Crown size={20} /> : <ShieldCheck size={20} />}
               </div>
               <div>
                 <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>
                   CivicOne
                 </span>
-                <span style={{ display: 'block', fontSize: '0.6rem', fontWeight: 800, color: '#0B5ED7', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '-4px' }}>
-                  Citizen Portal
+                <span style={{ display: 'block', fontSize: '0.6rem', fontWeight: 800, color: isGoldTier ? '#CA8A04' : '#0B5ED7', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '-4px' }}>
+                  {isGoldTier ? "👑 Gold Pass" : "Citizen Portal"}
                 </span>
               </div>
             </div>
@@ -613,14 +619,12 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     </button>
                   </div>
                   
-                  {cardData && (
-                    <VirtualCard
-                      citizen={citizen}
-                      card={cardData}
-                      onNavigateToVerification={onNavigateToVerification}
-                      onCardUpdate={(updatedCard) => setCardData(updatedCard)}
-                    />
-                  )}
+                  <VirtualCard
+                    citizen={citizen}
+                    card={cardData || DEMO_CARD}
+                    onNavigateToVerification={onNavigateToVerification}
+                    onCardUpdate={(updatedCard) => setCardData(updatedCard)}
+                  />
                 </div>
 
                 {/* QUICK VAULT STATS & EXPIRY ALERTS */}
@@ -706,21 +710,21 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           )}
 
           {/* TAB 2: VIRTUAL CIVICONE CARD FULL VIEW */}
-          {activeTab === 'card' && cardData && (
+          {activeTab === 'card' && (
             <div style={{ maxWidth: '520px', margin: '0 auto', paddingTop: '12px' }}>
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                   {isGoldTier ? <Crown size={26} style={{ color: '#CA8A04' }} /> : <ShieldCheck size={26} style={{ color: '#0B5ED7' }} />}
-                  {isGoldTier ? "Premium Gold Card" : "CivicOne Digital Card"}
+                  CivicOne Digital Card
                 </h1>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Tamper-proof national digital identity credential with NFC & Dynamic QR verification.
+                  Tamper-proof national digital identity credential with NFC &amp; Dynamic QR verification.
                 </p>
               </div>
 
               <VirtualCard
                 citizen={citizen}
-                card={cardData}
+                card={cardData || DEMO_CARD}
                 onNavigateToVerification={onNavigateToVerification}
                 onCardUpdate={(updatedCard) => setCardData(updatedCard)}
               />
@@ -739,7 +743,11 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* TAB 5 & 6: GOVERNMENT UPDATES & DAILY NEWS */}
           {(activeTab === 'govt-updates' || activeTab === 'news') && (
-            <UpdatesAndNews govtUpdates={govtUpdates} dailyNews={dailyNews} />
+            <UpdatesAndNews
+              govtUpdates={govtUpdates}
+              dailyNews={dailyNews}
+              initialTab={activeTab === 'news' ? 'news' : 'govt'}
+            />
           )}
 
           {/* TAB 7: SECURITY CENTRE */}

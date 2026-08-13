@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Lock, Smartphone, LogOut, CheckCircle2, History, AlertTriangle, Key, ShieldAlert, RefreshCw } from 'lucide-react';
+import { DEMO_SECURITY_LOGS } from '../data/mockData.js';
 
 export default function SecurityCentre({ securityLogs: initialLogs }) {
-  const [logs, setLogs] = useState(initialLogs || []);
+  const [logs, setLogs] = useState(initialLogs || DEMO_SECURITY_LOGS);
   const [revoking, setRevoking] = useState(false);
   const [revokeMessage, setRevokeMessage] = useState('');
 

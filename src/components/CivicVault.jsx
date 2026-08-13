@@ -7,9 +7,10 @@ import {
   Lock, Sparkles, Star, ChevronRight, Activity, Filter, RefreshCw, ZoomIn, ZoomOut, Maximize2, FileCheck, ArrowUpRight
 } from 'lucide-react';
 import VoterIdVault from './VoterIdVault.jsx';
+import { DEMO_DOCUMENTS } from '../data/mockData.js';
 
 export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
-  const [documents, setDocuments] = useState(initialDocs || []);
+  const [documents, setDocuments] = useState(initialDocs && initialDocs.length > 0 ? initialDocs : DEMO_DOCUMENTS);
   const [summary, setSummary] = useState({
     totalDocuments: 14,
     verifiedDocuments: 12,
@@ -72,12 +73,12 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
     { id: 'Consent', label: 'Who Has Access? (Consent)', icon: Lock, color: '#DC2626' },
     { id: 'Government', label: 'Government & Identity', icon: ShieldCheck, color: '#0B5ED7' },
     { id: 'Healthcare', label: 'Healthcare & Medical', icon: HeartPulse, color: '#E11D48' },
-    { id: 'RTO', label: 'RTO & Vehicles', icon: Car, color: '#D97706' },
+    { id: 'RTO & Vehicles', label: 'RTO & Vehicles', icon: Car, color: '#D97706' },
     { id: 'Finance', label: 'Banking & Finance', icon: Landmark, color: '#059669' },
     { id: 'Education', label: 'Education & Academic', icon: GraduationCap, color: '#7C3AED' },
     { id: 'Professional', label: 'Professional & Career', icon: Briefcase, color: '#2563EB' },
-    { id: 'Organization', label: 'Organization & Membership', icon: Building2, color: '#4B5563' },
-    { id: 'Personal', label: 'Personal Documents', icon: User, color: '#6B7280' }
+    { id: 'Organizations', label: 'Organizations & Membership', icon: Building2, color: '#4B5563' },
+    { id: 'Personal Documents', label: 'Personal Documents', icon: User, color: '#6B7280' }
   ];
 
   // Calculate Category Counts
