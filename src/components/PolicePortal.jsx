@@ -1,13 +1,16 @@
-// src/components/PolicePortal.jsx - Dedicated Police & Law Enforcement Portal
+// src/components/PolicePortal.jsx - Dedicated Police & Law Enforcement Portal with All States/UTs Selection
 
 import React, { useState } from 'react';
 import {
   ShieldAlert, Search, FileCheck, CheckCircle2, AlertCircle, Clock, FileText,
   UserCheck, ArrowLeft, Building2, Lock, History, FileSearch, ShieldCheck, Filter
 } from 'lucide-react';
+import { INDIA_STATES_AND_UTS } from '../data/mockData.js';
 
-export default function PolicePortal({ officer, onReturnHome }) {
-  const [selectedState, setSelectedState] = useState('Demo Police Organization (All States)');
+export default function PolicePortal({ officer, initialState, onReturnHome }) {
+  const [selectedState, setSelectedState] = useState(
+    initialState ? `${initialState} Police` : 'Demo Police Organization (All States)'
+  );
   const [searchCivicId, setSearchCivicId] = useState('CIV-DEMO-10001');
   const [caseRefNo, setCaseRefNo] = useState('FIR-2026-904812');
   const [purpose, setPurpose] = useState('Official Law Enforcement Verification');
@@ -16,18 +19,9 @@ export default function PolicePortal({ officer, onReturnHome }) {
   const [verificationData, setVerificationData] = useState(null);
   const [activeTab, setActiveTab] = useState('verify'); // 'verify' | 'audit' | 'requests'
 
-  const indianStatesPolice = [
+  const allPoliceOrgs = [
     'Demo Police Organization (All States)',
-    'Andhra Pradesh Police', 'Telangana Police', 'Tamil Nadu Police', 'Karnataka Police',
-    'Kerala Police', 'Maharashtra Police', 'Delhi Police', 'Gujarat Police',
-    'Rajasthan Police', 'Uttar Pradesh Police', 'West Bengal Police', 'Odisha Police',
-    'Punjab Police', 'Haryana Police', 'Bihar Police', 'Jharkhand Police',
-    'Chhattisgarh Police', 'Madhya Pradesh Police', 'Goa Police', 'Assam Police',
-    'Arunachal Pradesh Police', 'Manipur Police', 'Meghalaya Police', 'Mizoram Police',
-    'Nagaland Police', 'Sikkim Police', 'Tripura Police', 'Uttarakhand Police',
-    'Himachal Pradesh Police', 'Jammu & Kashmir Police', 'Ladakh Police',
-    'Andaman & Nicobar Police', 'Chandigarh Police', 'Dadra & Nagar Haveli and Daman & Diu Police',
-    'Lakshadweep Police', 'Puducherry Police'
+    ...INDIA_STATES_AND_UTS.map(st => `${st} Police`)
   ];
 
   const [auditLogs, setAuditLogs] = useState([
@@ -58,8 +52,8 @@ export default function PolicePortal({ officer, onReturnHome }) {
           maskedAadhaar: "XXXX XXXX 1001",
           identityStatus: "Verified",
           drivingLicence: "DEMO-DL-10001 (Valid until 14-10-2028)",
-          vehicleRC: "MH 02 CD 4589 (Active)",
-          addressStatus: "Verified — Bandra West, Mumbai, MH",
+          vehicleRC: "AP-DEMO-1001 (Active)",
+          addressStatus: "Verified — MG Road, Vijayawada, AP",
           caseReference: caseRefNo
         }
       });
@@ -79,178 +73,238 @@ export default function PolicePortal({ officer, onReturnHome }) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#091527', color: '#FFFFFF', padding: '24px 16px' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        
-        {/* HEADER */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid #1E293B', paddingBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '14px', backgroundColor: '#1E3A8A', color: '#60A5FA', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid #3B82F6' }}>
-              <ShieldAlert size={28} />
+    <div style={{ minHeight: '100vh', backgroundColor: '#0B132B', color: '#FFFFFF', fontFamily: 'var(--font-body)' }}>
+
+      {/* POLICE TOP HEADER */}
+      <header style={{
+        backgroundColor: '#1C2541',
+        borderBottom: '1px solid #3A506B',
+        padding: '16px 28px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50
+      }}>
+        <div style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: '#DC2626', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px rgba(220, 38, 38, 0.4)' }}>
+              <ShieldAlert size={26} />
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#FFFFFF' }}>CivicOne Law Enforcement Portal</h1>
-                <span style={{ backgroundColor: '#FEF3C7', color: '#92400E', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>
-                  DEMO POLICE ORGANIZATION
-                </span>
+              <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                CivicOne Law Enforcement &amp; Police Verification Workspace
               </div>
-              <p style={{ fontSize: '0.8rem', color: '#94A3B8', marginTop: '2px' }}>
-                Authorized Police Access Desk — Purpose-based legal identity verification
-              </p>
+              <div style={{ fontSize: '0.75rem', color: '#6FFFE9' }}>
+                Authorized Police Portal — All 28 States &amp; 8 Union Territories
+              </div>
             </div>
           </div>
 
-          <button
-            onClick={onReturnHome}
-            style={{ backgroundColor: '#1E293B', color: '#FFFFFF', padding: '10px 18px', borderRadius: '12px', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <ArrowLeft size={16} /> Exit Police Portal
-          </button>
-        </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            {/* State Police Organization Selector */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8' }}>State Police Dept:</span>
+              <select
+                value={selectedState}
+                onChange={(e) => setSelectedState(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1.5px solid #3A506B',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
+                  color: '#FFFFFF',
+                  backgroundColor: '#0B132B'
+                }}
+              >
+                {allPoliceOrgs.map(st => (
+                  <option key={st} value={st}>{st}</option>
+                ))}
+              </select>
+            </div>
 
-        {/* STATE POLICE ORGANIZATION SELECTOR DROPDOWN */}
-        <div style={{ backgroundColor: '#0F2342', borderRadius: '16px', padding: '16px 20px', border: '1px solid #1E3A8A', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#93C5FD', textTransform: 'uppercase' }}>Select State / UT Police Department:</span>
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF', marginTop: '2px' }}>{selectedState}</div>
+            <button
+              onClick={onReturnHome}
+              style={{
+                backgroundColor: '#3A506B',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <ArrowLeft size={14} /> Exit Police Portal
+            </button>
           </div>
 
-          <select
-            value={selectedState}
-            onChange={(e) => setSelectedState(e.target.value)}
-            style={{
-              backgroundColor: '#091527',
-              color: '#FFFFFF',
-              border: '1.5px solid #3B82F6',
-              padding: '10px 16px',
-              borderRadius: '12px',
-              fontWeight: 800,
-              fontSize: '0.85rem'
-            }}
-          >
-            {indianStatesPolice.map(st => (
-              <option key={st} value={st}>{st}</option>
-            ))}
-          </select>
+        </div>
+      </header>
+
+      {/* POLICE WORKSPACE MAIN CONTENT */}
+      <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '32px 24px' }}>
+
+        {/* HERO BADGE & DISCLOSURE */}
+        <div style={{ backgroundColor: '#1C2541', borderRadius: '20px', border: '1px solid #3A506B', padding: '28px', marginBottom: '28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(220, 38, 38, 0.2)', color: '#FF6B6B', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px' }}>
+              <ShieldAlert size={14} /> AUTHORIZED LAW ENFORCEMENT PORTAL
+            </div>
+            <h1 style={{ fontSize: '1.6rem', fontWeight: 900, marginTop: '2px', marginBottom: '6px', color: '#FFFFFF' }}>
+              {selectedState}
+            </h1>
+            <div style={{ fontSize: '0.85rem', color: '#94A3B8' }}>
+              Officer Session: <span style={{ color: '#6FFFE9', fontWeight: 800 }}>{officer?.name || 'Authorized Inspector'}</span> | Clearance: <span style={{ color: '#FF6B6B', fontWeight: 800 }}>LEGAL POLICE VERIFICATION</span>
+            </div>
+          </div>
+
+          <div style={{ backgroundColor: '#0B132B', padding: '12px 18px', borderRadius: '12px', border: '1px solid #3A506B', fontSize: '0.8rem', color: '#94A3B8' }}>
+            🔒 Strict Purpose-Based Verification Protocol Active
+          </div>
         </div>
 
-        {/* WORKSPACE NAVIGATION TABS */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
-          <button
-            onClick={() => setActiveTab('verify')}
-            style={{ padding: '10px 20px', borderRadius: '12px', fontWeight: 800, fontSize: '0.85rem', backgroundColor: activeTab === 'verify' ? '#2563EB' : '#0F2342', color: '#FFFFFF' }}
-          >
-            🔍 Citizen Identity Search &amp; Audit
-          </button>
-          <button
-            onClick={() => setActiveTab('audit')}
-            style={{ padding: '10px 20px', borderRadius: '12px', fontWeight: 800, fontSize: '0.85rem', backgroundColor: activeTab === 'audit' ? '#2563EB' : '#0F2342', color: '#FFFFFF' }}
-          >
-            📜 Police Audit Logs ({auditLogs.length})
-          </button>
+        {/* TAB BAR */}
+        <div style={{ display: 'flex', gap: '10px', borderBottom: '2px solid #3A506B', marginBottom: '24px', paddingBottom: '10px' }}>
+          {[
+            { id: 'verify', label: '🔍 Purpose-Based Citizen Verification' },
+            { id: 'audit', label: '📜 Police Audit Trail Logs' },
+            { id: 'requests', label: '📋 Pending Verification Requests' }
+          ].map(t => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              style={{
+                padding: '10px 18px',
+                borderRadius: '10px',
+                border: 'none',
+                backgroundColor: activeTab === t.id ? '#DC2626' : '#1C2541',
+                color: '#FFFFFF',
+                fontWeight: 800,
+                fontSize: '0.875rem',
+                cursor: 'pointer'
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
+        {/* TAB 1: PURPOSE-BASED CITIZEN VERIFICATION */}
         {activeTab === 'verify' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '28px' }}>
             
-            {/* SEARCH & AUTHORIZATION FORM */}
-            <div style={{ backgroundColor: '#0F2342', borderRadius: '20px', padding: '24px', border: '1px solid #1E3A8A' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileSearch size={20} style={{ color: '#60A5FA' }} /> Execute Legal Access Request
-              </h2>
+            {/* Form */}
+            <div style={{ backgroundColor: '#1C2541', borderRadius: '20px', border: '1px solid #3A506B', padding: '28px' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '8px' }}>
+                Execute Authorized Verification Request
+              </h3>
+              <p style={{ fontSize: '0.825rem', color: '#94A3B8', marginBottom: '20px' }}>
+                Enter the citizen's Civic ID and official FIR / Case Reference Number to query verified identity records.
+              </p>
 
               <form onSubmit={handleExecutePoliceVerification}>
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'block', fontSize: '0.775rem', fontWeight: 700, color: '#93C5FD', marginBottom: '4px' }}>Citizen CivicOne ID *</label>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#6FFFE9', marginBottom: '6px' }}>
+                    Citizen Civic ID Number
+                  </label>
                   <input
                     type="text"
-                    required
                     value={searchCivicId}
                     onChange={(e) => setSearchCivicId(e.target.value)}
                     placeholder="e.g. CIV-DEMO-10001"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #334155', backgroundColor: '#091527', color: '#FFFFFF', fontSize: '0.9rem', fontWeight: 700 }}
+                    style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #3A506B', backgroundColor: '#0B132B', color: '#FFFFFF', fontSize: '0.9rem', fontWeight: 700 }}
+                    required
                   />
                 </div>
 
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'block', fontSize: '0.775rem', fontWeight: 700, color: '#93C5FD', marginBottom: '4px' }}>FIR / Case Reference Number *</label>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#6FFFE9', marginBottom: '6px' }}>
+                    FIR / Case Reference Number
+                  </label>
                   <input
                     type="text"
-                    required
                     value={caseRefNo}
                     onChange={(e) => setCaseRefNo(e.target.value)}
                     placeholder="e.g. FIR-2026-904812"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #334155', backgroundColor: '#091527', color: '#FFFFFF', fontSize: '0.9rem' }}
+                    style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #3A506B', backgroundColor: '#0B132B', color: '#FFFFFF', fontSize: '0.9rem', fontWeight: 700 }}
+                    required
                   />
                 </div>
 
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'block', fontSize: '0.775rem', fontWeight: 700, color: '#93C5FD', marginBottom: '4px' }}>Investigation Purpose *</label>
-                  <input
-                    type="text"
-                    required
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#6FFFE9', marginBottom: '6px' }}>
+                    Legal Purpose for Verification
+                  </label>
+                  <select
                     value={purpose}
                     onChange={(e) => setPurpose(e.target.value)}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #334155', backgroundColor: '#091527', color: '#FFFFFF', fontSize: '0.85rem' }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', fontSize: '0.775rem', fontWeight: 700, color: '#93C5FD', marginBottom: '4px' }}>Access Duration</label>
-                  <select
-                    value={accessDuration}
-                    onChange={(e) => setAccessDuration(e.target.value)}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #334155', backgroundColor: '#091527', color: '#FFFFFF', fontSize: '0.85rem', fontWeight: 700 }}
+                    style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #3A506B', backgroundColor: '#0B132B', color: '#FFFFFF', fontSize: '0.9rem', fontWeight: 700 }}
                   >
-                    <option value="1 hour">1 Hour</option>
-                    <option value="24 hours">24 Hours</option>
-                    <option value="7 days">7 Days</option>
+                    <option value="Official Law Enforcement Verification">Official Law Enforcement Verification</option>
+                    <option value="Vehicle Registration Check">Vehicle Registration &amp; RTO Verification</option>
+                    <option value="Identity Status Verification">Identity &amp; Address Verification</option>
                   </select>
                 </div>
 
                 <button
                   type="submit"
                   disabled={verifying}
-                  style={{ width: '100%', backgroundColor: '#2563EB', color: '#FFFFFF', padding: '12px', borderRadius: '12px', fontWeight: 900, fontSize: '0.9rem' }}
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#DC2626',
+                    color: '#FFFFFF',
+                    padding: '14px',
+                    borderRadius: '12px',
+                    fontWeight: 900,
+                    fontSize: '0.95rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
                 >
-                  {verifying ? "Executing Purpose Audit..." : "Request Purpose-Based Verification"}
+                  {verifying ? 'Querying Police Database...' : 'Execute Authorized Police Check 🚨'}
                 </button>
               </form>
             </div>
 
-            {/* AUTHORIZED DATA DISPLAY PANEL */}
-            <div style={{ backgroundColor: '#0F2342', borderRadius: '20px', padding: '24px', border: '1px solid #1E3A8A' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '16px' }}>
-                Authorized Verification Output
-              </h2>
+            {/* Results Display Panel */}
+            <div style={{ backgroundColor: '#1C2541', borderRadius: '20px', border: '1px solid #3A506B', padding: '28px' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px' }}>
+                Verification Output &amp; Audit Status
+              </h3>
 
-              {verificationData ? (
-                <div>
-                  <div style={{ backgroundColor: '#064E3B', border: '1px solid #059669', color: '#A7F3D0', padding: '12px 16px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <CheckCircle2 size={18} /> Purpose-Based Authorization Granted
-                  </div>
-
-                  <div style={{ backgroundColor: '#091527', padding: '16px', borderRadius: '14px', border: '1px solid #1E3A8A', fontSize: '0.825rem', color: '#E2E8F0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div><span style={{ color: '#94A3B8' }}>Citizen:</span> <strong>{verificationData.data.fullName}</strong></div>
-                    <div><span style={{ color: '#94A3B8' }}>Civic ID:</span> <strong>{verificationData.data.citizenId}</strong></div>
-                    <div><span style={{ color: '#94A3B8' }}>Requesting Org:</span> <strong>{selectedState}</strong></div>
-                    <div><span style={{ color: '#94A3B8' }}>FIR / Case Ref:</span> <strong>{caseRefNo}</strong></div>
-                    <div><span style={{ color: '#94A3B8' }}>Aadhaar Ref:</span> <strong>{verificationData.data.maskedAadhaar}</strong></div>
-                    <div><span style={{ color: '#94A3B8' }}>Identity Status:</span> <strong style={{ color: '#34D399' }}>{verificationData.data.identityStatus}</strong></div>
-                    <div><span style={{ color: '#94A3B8' }}>Driving Licence:</span> <strong>{verificationData.data.drivingLicence}</strong></div>
-                    <div><span style={{ color: '#94A3B8' }}>Vehicle RC:</span> <strong>{verificationData.data.vehicleRC}</strong></div>
-                    <div><span style={{ color: '#94A3B8' }}>Address KYC:</span> <strong>{verificationData.data.addressStatus}</strong></div>
-                  </div>
-
-                  <div style={{ marginTop: '16px', fontSize: '0.75rem', color: '#FCD34D', backgroundColor: '#78350F', padding: '10px 14px', borderRadius: '10px' }}>
-                    🔒 Audit Trail Enforced: Event recorded with Authorization ID <code>AUTH-{Math.floor(100000 + Math.random() * 900000)}</code>.
-                  </div>
+              {!verificationData ? (
+                <div style={{ padding: '40px 20px', textAlign: 'center', color: '#94A3B8' }}>
+                  Enter Civic ID and FIR Reference to fetch verified law enforcement record.
                 </div>
               ) : (
-                <div style={{ textAlign: 'center', padding: '48px 16px', color: '#64748B', border: '1px dashed #334155', borderRadius: '16px' }}>
-                  <UserCheck size={42} style={{ marginBottom: '12px', color: '#3B82F6' }} />
-                  <p style={{ fontSize: '0.85rem' }}>Enter citizen CivicOne ID and FIR case reference to execute purpose-based verification.</p>
+                <div>
+                  <div style={{ backgroundColor: '#0B132B', borderRadius: '14px', padding: '16px', border: '1px solid #3A506B', marginBottom: '16px' }}>
+                    <div style={{ color: '#4ADE80', fontWeight: 800, fontSize: '0.9rem', marginBottom: '8px' }}>
+                      ✓ VERIFICATION AUTHORIZED &amp; LOGGED
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: '#94A3B8', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div>Citizen Civic ID: <strong style={{ color: '#FFFFFF' }}>{searchCivicId}</strong></div>
+                      <div>Citizen Name: <strong style={{ color: '#FFFFFF' }}>Aarav Kumar</strong></div>
+                      <div>Identity Status: <strong style={{ color: '#4ADE80' }}>Verified</strong></div>
+                      <div>Driving Licence: <strong style={{ color: '#6FFFE9' }}>DEMO-DL-10001 (Valid)</strong></div>
+                      <div>Vehicle Registration: <strong style={{ color: '#6FFFE9' }}>AP-DEMO-1001 (Active)</strong></div>
+                      <div>Address Status: <strong style={{ color: '#FFFFFF' }}>Verified — Vijayawada, AP</strong></div>
+                      <div>FIR Reference: <strong style={{ color: '#FEF08A' }}>{caseRefNo}</strong></div>
+                    </div>
+                  </div>
+
+                  <div style={{ fontSize: '0.75rem', color: '#94A3B8', fontStyle: 'italic' }}>
+                    🔒 Logged in Police National Audit Log for state department: {selectedState}
+                  </div>
                 </div>
               )}
             </div>
@@ -258,27 +312,24 @@ export default function PolicePortal({ officer, onReturnHome }) {
           </div>
         )}
 
+        {/* TAB 2: POLICE AUDIT TRAIL LOGS */}
         {activeTab === 'audit' && (
-          <div style={{ backgroundColor: '#0F2342', borderRadius: '20px', padding: '24px', border: '1px solid #1E3A8A' }}>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '16px' }}>
-              Law Enforcement Verification Audit Logs
-            </h2>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ backgroundColor: '#1C2541', borderRadius: '20px', border: '1px solid #3A506B', padding: '28px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px' }}>
+              Police Verification Audit Log History
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {auditLogs.map(log => (
-                <div key={log.id} style={{ backgroundColor: '#091527', padding: '14px 18px', borderRadius: '12px', border: '1px solid #1E3A8A', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '0.825rem' }}>
+                <div key={log.id} style={{ padding: '16px', borderRadius: '12px', backgroundColor: '#0B132B', border: '1px solid #3A506B', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontWeight: 800, color: '#FFFFFF' }}>{log.officer} — {log.stateOrg}</div>
-                    <div style={{ color: '#94A3B8', marginTop: '2px' }}>
-                      Citizen ID: <code>{log.citizenId}</code> | Purpose: {log.purpose} | Case Ref: <strong>{log.caseRef}</strong>
+                    <div style={{ fontWeight: 800, color: '#6FFFE9' }}>{log.stateOrg} — {log.purpose}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#94A3B8', marginTop: '2px' }}>
+                      Officer: {log.officer} | Citizen: {log.citizenId} | FIR Ref: {log.caseRef}
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ backgroundColor: '#064E3B', color: '#34D399', padding: '2px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>
-                      {log.status}
-                    </span>
-                    <div style={{ fontSize: '0.725rem', color: '#64748B', marginTop: '4px' }}>{log.timestamp}</div>
-                  </div>
+                  <span style={{ backgroundColor: 'rgba(74, 222, 128, 0.2)', color: '#4ADE80', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.75rem' }}>
+                    {log.status}
+                  </span>
                 </div>
               ))}
             </div>
@@ -286,6 +337,7 @@ export default function PolicePortal({ officer, onReturnHome }) {
         )}
 
       </div>
+
     </div>
   );
 }

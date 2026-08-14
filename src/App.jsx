@@ -1,4 +1,4 @@
-// src/App.jsx - Main Application Router & Portal Separation Gateway
+// src/App.jsx - Main Application Router & State-Wise Organization Portal Gateway
 
 import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage.jsx';
@@ -19,6 +19,7 @@ export default function App() {
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState(null);
   const [authenticatedAdmin, setAuthenticatedAdmin] = useState(null);
   const [verifyToken, setVerifyToken] = useState('CIV-TOKEN-CIV-DEMO-10001-SECURE-2026');
+  const [selectedOrgConfig, setSelectedOrgConfig] = useState(null);
 
   // Handle URL Hash, Path Routing, and Owner Keyboard Shortcut (Ctrl + Shift + A)
   useEffect(() => {
@@ -89,6 +90,15 @@ export default function App() {
     setCurrentView('landing');
   };
 
+  const handleOpenOrgPortal = (config) => {
+    setSelectedOrgConfig(config);
+    if (config.orgType === 'police' || config.roleCode === 'POLICE_ADMIN') {
+      setCurrentView('police');
+    } else {
+      setCurrentView('organization');
+    }
+  };
+
   // Render Current Portal Experience
   switch (currentView) {
     case 'gate':
@@ -119,6 +129,7 @@ export default function App() {
     case 'organization':
       return (
         <OrganizationPortal
+          initialOrgConfig={selectedOrgConfig}
           onReturnHome={() => setCurrentView('landing')}
         />
       );
@@ -148,6 +159,7 @@ export default function App() {
       return (
         <PolicePortal
           officer={authenticatedOfficer}
+          initialState={selectedOrgConfig?.state}
           onReturnHome={handleLogout}
         />
       );
@@ -194,6 +206,7 @@ export default function App() {
           onAccessCivicOne={() => setCurrentView('gate')}
           onOpenAuthorityPortal={() => setCurrentView('authority-gate')}
           onOpenOwnerAdmin={() => setCurrentView('admin-gate')}
+          onOpenOrgPortal={handleOpenOrgPortal}
         />
       );
   }

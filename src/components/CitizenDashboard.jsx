@@ -1,11 +1,11 @@
-// src/components/CitizenDashboard.jsx - Main Authenticated Citizen Portal Layout with Premium Navigation & Grouped Collapsible Dock
+// src/components/CitizenDashboard.jsx - Main Authenticated Citizen Portal Layout with Document Expiry Alerts & Attention Widget
 
 import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Search, Bell, User, LayoutDashboard, Ticket, FolderClosed,
   Grid, Landmark, Newspaper, Shield, HelpCircle, LogOut, Sun, Moon, CheckCircle2,
   ChevronRight, ChevronDown, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, Zap, Radio, Share2, FileText,
-  Lock, Compass, Plane, MoreHorizontal, Activity, Eye
+  Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw
 } from 'lucide-react';
 import VirtualCard from './VirtualCard.jsx';
 import CivicVault from './CivicVault.jsx';
@@ -21,7 +21,7 @@ import TourismGuide from './TourismGuide.jsx';
 import TravelBookingHub from './TravelBookingHub.jsx';
 import {
   DEMO_CARD, DEMO_DOCUMENTS, DEMO_GOVT_UPDATES, DEMO_NEWS,
-  DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST
+  DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST, calculateDocExpiryStatus
 } from '../data/mockData.js';
 
 export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification }) {
@@ -110,7 +110,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Sidebar Grouped Structure (Requirement 2)
+  // Sidebar Grouped Structure (Requirement 15)
   const navigationGroups = [
     {
       key: 'main',
@@ -144,10 +144,11 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
     },
     {
       key: 'support',
-      title: 'SUPPORT & SECURITY',
+      title: 'SECURITY & SUPPORT',
       items: [
         { id: 'security', label: 'Security Centre', icon: Shield },
         { id: 'privacy', label: 'Privacy Centre', icon: Lock },
+        { id: 'help', label: 'CivicOne AI', icon: Sparkles },
         { id: 'help', label: 'Help Centre', icon: HelpCircle }
       ]
     },
@@ -163,7 +164,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   const unreadNotifCount = notifications.filter(n => !n.read).length;
 
   const [goldPassStatus, setGoldPassStatus] = useState(currentCitizen?.goldPassStatus || cardData?.goldPassStatus || 'standard');
-  const [goldPassMessage, setGoldPassMessage] = useState('');
 
   useEffect(() => {
     async function checkGoldPass() {
@@ -187,6 +187,12 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
     setMobileMoreDrawerOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Requirement 22: Documents Requiring Attention Widget Calculation
+  const docsRequiringAttention = documents.filter(d => {
+    const expInfo = calculateDocExpiryStatus(d);
+    return expInfo.status === 'EXPIRING SOON' || expInfo.status === 'EXPIRED';
+  });
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', display: 'flex', flexDirection: 'column' }}>
@@ -328,7 +334,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>Notifications</strong>
-                    <button onClick={() => setShowNotifPopover(false)} style={{ background: 'none', color: 'var(--text-light)' }}><X size={16} /></button>
+                    <button onClick={() => setShowNotifPopover(false)} style={{ background: 'none', color: 'var(--text-light)', border: 'none' }}><X size={16} /></button>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '250px', overflowY: 'auto' }}>
                     {notifications.map(n => (
@@ -350,7 +356,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       {/* MAIN CONTENT AREA WITH COLLAPSIBLE SIDEBAR */}
       <div style={{ flex: 1, display: 'flex', maxWidth: '1400px', width: '100%', margin: '0 auto', paddingBottom: '70px' }}>
         
-        {/* DESKTOP SIDEBAR WITH COLLAPSIBLE GROUPS (Requirement 2) */}
+        {/* DESKTOP SIDEBAR WITH COLLAPSIBLE GROUPS */}
         <aside style={{
           width: '260px',
           borderRight: '1px solid var(--border-light)',
@@ -367,7 +373,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
               const isOpen = openGroups[group.key];
               return (
                 <div key={group.key}>
-                  {/* Collapsible Header */}
                   <button
                     onClick={() => toggleGroup(group.key)}
                     style={{
@@ -390,7 +395,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     <ChevronDown size={14} style={{ transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.2s' }} />
                   </button>
 
-                  {/* Group Nav Items */}
                   {isOpen && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '6px' }}>
                       {group.items.map(item => {
@@ -410,7 +414,9 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                               display: 'flex',
                               alignItems: 'center',
                               gap: '12px',
-                              textAlign: 'left'
+                              textAlign: 'left',
+                              border: 'none',
+                              cursor: 'pointer'
                             }}
                           >
                             <Icon size={18} /> {item.label}
@@ -436,7 +442,8 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                marginTop: '12px'
+                marginTop: '12px',
+                cursor: 'pointer'
               }}
             >
               <LogOut size={16} /> Sign Out Session
@@ -448,7 +455,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         {/* MAIN DISPLAY PANEL */}
         <main style={{ flex: 1, padding: '20px 14px', overflowY: 'auto', width: '100%' }}>
           
-          {/* TAB 1: CITIZEN HOME DASHBOARD (Requirements 4, 5, 6) */}
+          {/* TAB 1: CITIZEN HOME DASHBOARD (Requirement 16 & 22) */}
           {activeTab === 'home' && (
             <div>
               
@@ -458,7 +465,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 <span>Profile: <strong>{currentCitizen.fullName} ({currentCitizen.citizenId})</strong></span>
               </div>
 
-              {/* Requirement 4: Top Greeting Section */}
+              {/* Requirement 16: Top Greeting Section */}
               <div style={{
                 background: isGoldTier
                   ? 'linear-gradient(135deg, #1C190D 0%, #3B2E09 60%, #856414 100%)'
@@ -502,7 +509,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                   {!isGoldTier ? (
                     <button
                       onClick={() => handleSelectTab('gold-pass')}
-                      style={{ backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 20px', borderRadius: '14px', fontWeight: 900, fontSize: '0.875rem', boxShadow: '0 4px 14px rgba(202, 138, 4, 0.4)' }}
+                      style={{ backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 20px', borderRadius: '14px', fontWeight: 900, fontSize: '0.875rem', boxShadow: '0 4px 14px rgba(202, 138, 4, 0.4)', border: 'none', cursor: 'pointer' }}
                     >
                       👑 Upgrade to Gold Pass
                     </button>
@@ -515,7 +522,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 </div>
               </div>
 
-              {/* Requirement 5: Clean Large Touch-Friendly Quick Actions */}
+              {/* Requirement 17: Clean Large Touch-Friendly Quick Actions */}
               <div style={{ marginBottom: '24px' }}>
                 <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
                   Quick Actions:
@@ -557,7 +564,50 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 </div>
               </div>
 
-              {/* Requirement 6: Important Citizen Information Widgets */}
+              {/* REQUIREMENT 22: DOCUMENTS REQUIRING ATTENTION WIDGET */}
+              {docsRequiringAttention.length > 0 && (
+                <div style={{ backgroundColor: '#FFFBEB', borderRadius: '18px', border: '1.5px solid #FDE68A', padding: '20px', marginBottom: '24px', boxShadow: '0 4px 16px rgba(217, 119, 6, 0.08)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <AlertTriangle size={20} color="#D97706" />
+                      <h3 style={{ fontSize: '1rem', fontWeight: 900, color: '#92400E' }}>
+                        DOCUMENTS REQUIRING ATTENTION ({docsRequiringAttention.length})
+                      </h3>
+                    </div>
+                    <button onClick={() => handleSelectTab('vault')} style={{ backgroundColor: '#D97706', color: '#FFFFFF', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
+                      View All in Vault →
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+                    {docsRequiringAttention.map(doc => {
+                      const expInfo = calculateDocExpiryStatus(doc);
+                      const isExpired = expInfo.status === 'EXPIRED';
+
+                      return (
+                        <div key={doc.id} style={{ backgroundColor: '#FFFFFF', padding: '14px', borderRadius: '12px', border: isExpired ? '1px solid #FCA5A5' : '1px solid #FCD34D', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div>
+                            <strong style={{ fontSize: '0.875rem', color: '#0B1F3A', display: 'block' }}>{doc.name}</strong>
+                            <div style={{ fontSize: '0.75rem', color: isExpired ? '#991B1B' : '#C2410C', fontWeight: 800, marginTop: '2px' }}>
+                              {isExpired ? `⚠️ EXPIRED on ${doc.expiryDate}` : `⏰ Expires in ${expInfo.daysRemaining} days (${doc.expiryDate})`}
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button onClick={() => handleSelectTab('vault')} style={{ backgroundColor: '#EAF3FF', color: '#0B5ED7', padding: '6px 10px', borderRadius: '6px', fontSize: '0.725rem', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
+                              View
+                            </button>
+                            <button onClick={() => alert(`Initiating renewal for ${doc.name}`)} style={{ backgroundColor: isExpired ? '#DC2626' : '#D97706', color: '#FFFFFF', padding: '6px 10px', borderRadius: '6px', fontSize: '0.725rem', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
+                              {isExpired ? 'Renew' : 'Update'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Requirement 16: Important Citizen Information Widgets */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '28px' }}>
                 <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)' }}>
                   <span style={{ fontSize: '0.725rem', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase' }}>Identity Verification</span>
@@ -678,7 +728,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                   {goldPassStatus !== 'active' && (
                     <button
                       onClick={() => setShowPaymentModal(true)}
-                      style={{ backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 24px', borderRadius: '14px', fontWeight: 900, fontSize: '0.95rem' }}
+                      style={{ backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 24px', borderRadius: '14px', fontWeight: 900, fontSize: '0.95rem', border: 'none', cursor: 'pointer' }}
                     >
                       Get Gold Pass (₹499/yr)
                     </button>
@@ -711,7 +761,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         </main>
       </div>
 
-      {/* Requirement 3: MOBILE BOTTOM NAVIGATION (Home | Vault | Card | Services | More) */}
+      {/* Requirement 37: MOBILE BOTTOM NAVIGATION (Home | Vault | Card | Services | More) */}
       <nav className="mobile-bottom-nav mobile-only">
         <button className={`mobile-bottom-nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => handleSelectTab('home')}>
           <LayoutDashboard size={20} />
@@ -739,7 +789,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         </button>
       </nav>
 
-      {/* MOBILE "MORE" DRAWER MENU (Requirement 3) */}
+      {/* MOBILE "MORE" DRAWER MENU */}
       {mobileMoreDrawerOpen && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -753,7 +803,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <strong style={{ fontSize: '1.1rem', color: 'var(--text-main)' }}>CivicOne Features</strong>
-                <button onClick={() => setMobileMoreDrawerOpen(false)} style={{ background: 'none', color: 'var(--text-muted)' }}><X size={22} /></button>
+                <button onClick={() => setMobileMoreDrawerOpen(false)} style={{ background: 'none', color: 'var(--text-muted)', border: 'none' }}><X size={22} /></button>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -777,7 +827,8 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                       padding: '12px 14px', borderRadius: '10px', fontWeight: 700, fontSize: '0.875rem',
                       display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left',
                       backgroundColor: activeTab === item.id ? '#0B5ED7' : 'transparent',
-                      color: activeTab === item.id ? '#FFFFFF' : 'var(--text-main)'
+                      color: activeTab === item.id ? '#FFFFFF' : 'var(--text-main)',
+                      border: 'none', cursor: 'pointer'
                     }}
                   >
                     <item.icon size={18} /> {item.label}
@@ -790,7 +841,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
               onClick={onLogout}
               style={{
                 backgroundColor: '#DC3545', color: '#FFFFFF', padding: '12px', borderRadius: '12px',
-                fontWeight: 800, fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '20px'
+                fontWeight: 800, fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '20px', border: 'none', cursor: 'pointer'
               }}
             >
               <LogOut size={18} /> Sign Out
@@ -801,23 +852,18 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         </div>
       )}
 
-      {/* FLOATING AI ASSISTANT */}
-      <AiAgentFloating citizen={currentCitizen} documents={documents} />
+      {/* GOLD PASS PAYMENT MODAL */}
+      {showPaymentModal && (
+        <GoldPassPaymentModal
+          onClose={() => setShowPaymentModal(false)}
+          onSuccess={() => {
+            setGoldPassStatus('active');
+            setShowPaymentModal(false);
+          }}
+        />
+      )}
 
-      {/* GOLD PASS SECURE CHECKOUT PAYMENT MODAL */}
-      <GoldPassPaymentModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        onPaymentSuccess={(entitlement) => {
-          setGoldPassStatus('active');
-          setCardData(prev => ({
-            ...(prev || DEMO_CARD),
-            tier: 'GOLD',
-            goldPassStatus: 'active'
-          }));
-          setGoldPassMessage("Payment Verified! Your account is now upgraded to CivicOne Gold Pass 👑.");
-        }}
-      />
+      <AiAgentFloating />
 
     </div>
   );

@@ -1,21 +1,27 @@
-// src/components/OrganizationPortal.jsx - Independent Organization Portal Workspace with Role-Based Access Control
+// src/components/OrganizationPortal.jsx - Independent Organization Portal Workspace with Reusable State & Role-Based Access Control
 
 import React, { useState, useEffect } from 'react';
-import { Building2, ShieldCheck, Search, PlusCircle, CheckCircle2, Lock, Eye, AlertCircle, ArrowLeft, RefreshCw, FileText, ExternalLink, Calendar, LogOut, UserCheck, ShieldAlert, Award } from 'lucide-react';
+import {
+  Building2, ShieldCheck, Search, PlusCircle, CheckCircle2, Lock, Eye, AlertCircle,
+  ArrowLeft, RefreshCw, FileText, ExternalLink, Calendar, LogOut, UserCheck, ShieldAlert, Award, MapPin
+} from 'lucide-react';
 import DocumentViewerModal from './DocumentViewerModal.jsx';
 import { orgService } from '../services/api.js';
+import { INDIA_STATES_AND_UTS, ORGANIZATION_TYPES } from '../data/mockData.js';
 
-export default function OrganizationPortal({ onReturnHome }) {
+export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
   const [organizations, setOrganizations] = useState([]);
+  const [selectedState, setSelectedState] = useState(initialOrgConfig?.state || 'Andhra Pradesh');
   const [selectedOrg, setSelectedOrg] = useState({
-    id: 'org-college',
-    roleCode: 'COLLEGE_ACCESS_ADMIN',
-    name: 'CivicOne Demo College',
-    category: 'Education',
+    id: initialOrgConfig?.orgType ? `org-${initialOrgConfig.orgType}` : 'org-college',
+    roleCode: initialOrgConfig?.roleCode || 'COLLEGE_ACCESS_ADMIN',
+    name: initialOrgConfig?.name || 'CivicOne Demo College',
+    category: initialOrgConfig?.orgType || 'Education',
     regNo: 'EDU-COLLEGE-9048',
     accessLevel: 'VIEW ONLY',
-    badgeText: 'VIEW ONLY — ACADEMIC CREDENTIALS'
+    badgeText: initialOrgConfig?.badgeText || 'VIEW ONLY — ACADEMIC CREDENTIALS'
   });
+
   const [requests, setRequests] = useState([]);
   const [consents, setConsents] = useState([]);
   const [activeTab, setActiveTab] = useState('locker'); // 'locker' | 'request' | 'history'
@@ -131,13 +137,35 @@ export default function OrganizationPortal({ onReturnHome }) {
                 CivicOne Organization Access Portal
               </div>
               <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                Recipient-Bound Verification &amp; Least-Privilege Authorized Workspace
+                Recipient-Bound Verification &amp; Least-Privilege Authorized Workspace ({selectedState})
               </div>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            {/* Organization Selector */}
+            {/* Reusable State Selector Dropdown */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <MapPin size={16} color="#0B5ED7" />
+              <select
+                value={selectedState}
+                onChange={(e) => setSelectedState(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1.5px solid #CBD5E1',
+                  fontWeight: 800,
+                  fontSize: '0.825rem',
+                  color: '#0B1F3A',
+                  backgroundColor: '#FFFFFF'
+                }}
+              >
+                {INDIA_STATES_AND_UTS.map(st => (
+                  <option key={st} value={st}>{st}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Organization Role Selector */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B' }}>Active Org Role:</span>
               <select
@@ -202,10 +230,10 @@ export default function OrganizationPortal({ onReturnHome }) {
               <ShieldCheck size={14} /> {selectedOrg.badgeText || selectedOrg.accessLevel}
             </div>
             <h1 style={{ fontSize: '1.6rem', fontWeight: 900, marginTop: '2px', marginBottom: '6px' }}>
-              {selectedOrg.name}
+              {selectedOrg.name} — {selectedState}
             </h1>
             <div style={{ fontSize: '0.85rem', color: '#94A3B8' }}>
-              Registration Ref: <span style={{ fontFamily: 'monospace', color: '#FEF08A' }}>{selectedOrg.regNo}</span> | Role: <span style={{ color: '#60A5FA', fontWeight: 800 }}>{selectedOrg.roleCode}</span>
+              Registration Ref: <span style={{ fontFamily: 'monospace', color: '#FEF08A' }}>{selectedOrg.regNo}</span> | Role: <span style={{ color: '#60A5FA', fontWeight: 800 }}>{selectedOrg.roleCode}</span> | State: <span style={{ color: '#FEF08A', fontWeight: 800 }}>{selectedState}</span>
             </div>
           </div>
 
@@ -234,7 +262,7 @@ export default function OrganizationPortal({ onReturnHome }) {
         {/* ROLE PRIVILEGE RESTRICTIONS BOX */}
         <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px', marginBottom: '28px' }}>
           <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShieldAlert size={16} color="#0B5ED7" /> Least-Privilege Data Access Scope for {selectedOrg.name}:
+            <ShieldAlert size={16} color="#0B5ED7" /> Least-Privilege Data Access Scope for {selectedOrg.name} ({selectedState}):
           </h4>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', fontSize: '0.825rem' }}>
             <div style={{ backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', padding: '12px', borderRadius: '10px', color: '#065F46' }}>
