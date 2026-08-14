@@ -1,40 +1,40 @@
-// src/components/AuthorityGate.jsx - Dedicated Government Officer Login Gate
+// src/components/AuthorityGate.jsx - Dedicated Government Officer Login Gate (5-Step Officer Verification Flow)
 
 import React, { useState } from 'react';
-import { Landmark, ShieldCheck, Lock, AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Key, Building2 } from 'lucide-react';
+import { Landmark, ShieldCheck, Lock, AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, Key, Building2, MapPin } from 'lucide-react';
+import { INDIA_STATES_AND_UTS, GOVERNMENT_DEPARTMENTS } from '../data/mockData.js';
 
 export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
-  const [email, setEmail] = useState('');
-  const [department, setDepartment] = useState('Parivahan Sewa (MoRTH)');
-  const [badgeId, setBadgeId] = useState('');
-  const [passcode, setPasscode] = useState('');
+  const [selectedState, setSelectedState] = useState('Andhra Pradesh');
+  const [selectedDept, setSelectedDept] = useState('Transport (RTO)');
+  const [officeName, setOfficeName] = useState('Demo RTO Regional Headquarters — Vijayawada');
+  const [officerId, setOfficerId] = useState('GOVT-OFFICER-8942');
+  const [password, setPassword] = useState('govt123');
+  const [otp, setOtp] = useState('123456');
+  const [step, setStep] = useState(1); // Step 1: State & Dept | Step 2: Credentials & MFA
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const departments = [
-    'State Police Department (Police Access)',
-    'Parivahan Sewa (MoRTH / RTO)',
-    'National Health Authority (NHA / ABHA)',
-    'Income Tax Department (ITD)',
-    'Ministry of External Affairs (MEA)',
-    'National Academic Depository (NAD / UGC)',
-    'State Revenue & Land Records Dept'
-  ];
-
   // Quick Demo Credentials Fill
   const handleFillDemo = () => {
-    setEmail('officer.sharma@parivahan.gov.in');
-    setDepartment('Parivahan Sewa (MoRTH / RTO)');
-    setBadgeId('GOVT-OFFICER-8942');
-    setPasscode('govt123');
+    setSelectedState('Andhra Pradesh');
+    setSelectedDept('Transport (RTO)');
+    setOfficeName('Demo RTO Regional Headquarters — Vijayawada');
+    setOfficerId('GOVT-OFFICER-8942');
+    setPassword('govt123');
+    setOtp('123456');
     setErrorMsg('');
   };
 
   // Submit Officer Authentication
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !department) {
-      setErrorMsg('Please enter official email and select department.');
+    if (!officerId || !password) {
+      setErrorMsg('Please enter valid Officer ID and Password.');
+      return;
+    }
+    if (otp !== '123456') {
+      setErrorMsg('Invalid MFA / OTP code. Use 123456 for demo.');
       return;
     }
 
@@ -42,10 +42,10 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/authority-login', {
+      const res = await fetch('/api/auth/govt-officer-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, department, badgeId, passcode })
+        body: JSON.stringify({ state: selectedState, department: selectedDept, office: officeName, officerId, password, otp })
       });
       const data = await res.json();
       setLoading(false);
@@ -58,13 +58,18 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
     } catch (err) {
       setLoading(false);
       // Fallback officer session for dev
-      const isPolice = department.includes('Police');
+      const isPolice = selectedDept.includes('Police');
       onAuthenticated({
-        officerId: badgeId || (isPolice ? 'POLICE-OFFICER-1001' : 'GOVT-OFFICER-8942'),
-        email: email || (isPolice ? 'inspector.kumar@police.gov.in' : 'officer.sharma@parivahan.gov.in'),
-        department: department || 'Parivahan Sewa (MoRTH / RTO)',
-        role: isPolice ? 'POLICE_ADMIN' : 'Government Officer / Issuer',
-        clearanceLevel: 'LEVEL-3 VERIFIED'
+        officerId: officerId || 'GOVT-OFFICER-8942',
+        name: isPolice ? 'Inspector R. Verma' : 'Officer K. Sharma',
+        email: isPolice ? 'inspector.verma@police.gov.in' : 'officer.sharma@parivahan.gov.in',
+        department: selectedDept || 'Transport (RTO)',
+        state: selectedState || 'Andhra Pradesh',
+        office: officeName || 'Demo RTO Regional Headquarters — Vijayawada',
+        roleLevel: isPolice ? 2 : 1,
+        roleTitle: isPolice ? 'LEVEL 2 — DEPARTMENT SUPERVISOR' : 'LEVEL 1 — GOVERNMENT OFFICER',
+        clearanceStatus: 'LEVEL-3 VERIFIED',
+        securityStatus: 'LOCK-PROTECTED LEVEL-3'
       });
     }
   };
@@ -78,12 +83,12 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '24px 16px'
-    }} className="security-pattern-bg">
+    }}>
 
       <div style={{
         backgroundColor: '#FFFFFF',
         borderRadius: '24px',
-        maxWidth: '480px',
+        maxWidth: '520px',
         width: '100%',
         padding: '40px 32px',
         boxShadow: '0 25px 60px -15px rgba(0,0,0,0.5)',
@@ -108,7 +113,7 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
           <ArrowLeft size={16} /> Return to Main Landing Page
         </button>
 
-        {/* Badge Icon */}
+        {/* Header Icon */}
         <div style={{
           width: '60px', height: '60px', borderRadius: '18px',
           backgroundColor: '#EAF3FF', color: '#0B5ED7',
@@ -118,11 +123,11 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
           <Landmark size={32} />
         </div>
 
-        <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em', marginBottom: '6px' }}>
-          Government Authority Gate
+        <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em', marginBottom: '4px' }}>
+          Government Officer Portal
         </h1>
         <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '24px' }}>
-          Official Issuing Authority & Department Portal Verification Gateway.
+          Authorized government administration and supervision.
         </p>
 
         {/* Demo Fill Alert Button */}
@@ -137,7 +142,7 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
           alignItems: 'center'
         }}>
           <div style={{ fontSize: '0.775rem', color: '#92400E', fontWeight: 700 }}>
-            ⚡ Testing Demo Mode Available
+            ⚡ Demo Government Officer Mode
           </div>
           <button
             type="button"
@@ -177,37 +182,68 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* Official Email */}
+          
+          {/* STEP 1: STATE, DEPT & OFFICE SELECTION */}
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 700, color: '#0B1F3A', marginBottom: '6px' }}>
-              Official Govt Email Address
+            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+              1. Select State / Union Territory (28 States + 8 UTs)
             </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. officer.sharma@parivahan.gov.in"
+            <select
+              value={selectedState}
+              onChange={(e) => setSelectedState(e.target.value)}
               style={{
                 width: '100%',
                 padding: '12px 14px',
                 borderRadius: '12px',
                 border: '1.5px solid #CBD5E1',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                color: '#0F172A'
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                color: '#0F172A',
+                backgroundColor: '#FFFFFF'
               }}
-              required
-            />
+            >
+              {INDIA_STATES_AND_UTS.map(st => (
+                <option key={st} value={st}>{st}</option>
+              ))}
+            </select>
           </div>
 
-          {/* Department Selection */}
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 700, color: '#0B1F3A', marginBottom: '6px' }}>
-              Selecting Department Authority
+            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+              2. Select Government Department
             </label>
             <select
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
+              value={selectedDept}
+              onChange={(e) => {
+                setSelectedDept(e.target.value);
+                setOfficeName(`Demo ${e.target.value} Office — ${selectedState}`);
+              }}
+              style={{
+                width: '100%',
+                padding: '12px 14px',
+                borderRadius: '12px',
+                border: '1.5px solid #CBD5E1',
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                color: '#0F172A',
+                backgroundColor: '#FFFFFF'
+              }}
+            >
+              {GOVERNMENT_DEPARTMENTS.map(d => (
+                <option key={d.id} value={d.name}>{d.name} ({d.code})</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+              3. Assigned Government Office / Headquarters
+            </label>
+            <input
+              type="text"
+              value={officeName}
+              onChange={(e) => setOfficeName(e.target.value)}
+              placeholder="e.g. Demo RTO Regional Headquarters — Vijayawada"
               style={{
                 width: '100%',
                 padding: '12px 14px',
@@ -215,54 +251,74 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
                 border: '1.5px solid #CBD5E1',
                 fontSize: '0.875rem',
                 fontWeight: 600,
-                color: '#0F172A',
-                backgroundColor: '#FFFFFF'
+                color: '#0F172A'
               }}
-            >
-              {departments.map((dept, idx) => (
-                <option key={idx} value={dept}>{dept}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Badge ID */}
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 700, color: '#0B1F3A', marginBottom: '6px' }}>
-              Officer Badge / Token ID (Optional)
-            </label>
-            <input
-              type="text"
-              value={badgeId}
-              onChange={(e) => setBadgeId(e.target.value)}
-              placeholder="e.g. GOVT-OFFICER-8942"
-              style={{
-                width: '100%',
-                padding: '12px 14px',
-                borderRadius: '12px',
-                border: '1.5px solid #CBD5E1',
-                fontSize: '0.9rem',
-                fontWeight: 600
-              }}
+              required
             />
           </div>
 
-          {/* Officer Security Passcode */}
+          {/* CREDENTIALS */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                Officer ID
+              </label>
+              <input
+                type="text"
+                value={officerId}
+                onChange={(e) => setOfficerId(e.target.value)}
+                placeholder="GOVT-OFFICER-8942"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #CBD5E1',
+                  fontSize: '0.85rem',
+                  fontWeight: 700
+                }}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="govt123"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #CBD5E1',
+                  fontSize: '0.85rem',
+                  fontWeight: 700
+                }}
+                required
+              />
+            </div>
+          </div>
+
+          {/* MFA / OTP SIMULATION */}
           <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 700, color: '#0B1F3A', marginBottom: '6px' }}>
-              Department Security Passcode (Demo: govt123)
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+              MFA / 6-Digit Security OTP (Demo: 123456)
             </label>
             <input
-              type="password"
-              value={passcode}
-              onChange={(e) => setPasscode(e.target.value)}
-              placeholder="Enter officer passcode (govt123)"
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="123456"
               style={{
                 width: '100%',
                 padding: '12px 14px',
                 borderRadius: '12px',
                 border: '1.5px solid #CBD5E1',
                 fontSize: '0.9rem',
-                fontWeight: 600
+                fontWeight: 700,
+                letterSpacing: '0.1em'
               }}
               required
             />
@@ -289,12 +345,12 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
               gap: '8px'
             }}
           >
-            {loading ? 'Authenticating Officer...' : 'Authenticate & Enter Authority Portal 🏛️'}
+            {loading ? 'Authenticating Officer Session...' : 'Authenticate Government Officer Session 🏛️'}
           </button>
         </form>
 
         <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.75rem', color: '#64748B' }}>
-          🔒 Protected National Information Security System | Level-3 Clearance
+          🔒 Protected Government Information Infrastructure | Department Authorization Active
         </div>
       </div>
 

@@ -1,10 +1,10 @@
-// src/components/LandingPage.jsx - Premium Public Gateway, Marketing Page & State-Wise Organization Access Hub
+// src/components/LandingPage.jsx - Premium Public Gateway, Marketing Page, 3-Level Access Hub & State-Wise Organization Access
 
 import React, { useState } from 'react';
 import {
   ShieldCheck, Lock, ArrowRight, Award, FileCheck, Landmark, HeartPulse, Car,
   GraduationCap, Building2, CheckCircle2, ChevronRight, ShieldAlert, Smartphone,
-  Tablet, BookOpen, Briefcase, Search, MapPin, UserCheck, AlertTriangle
+  BookOpen, Briefcase, Search, MapPin, UserCheck, AlertTriangle, Key
 } from 'lucide-react';
 import { INDIA_STATES_AND_UTS, ORGANIZATION_TYPES } from '../data/mockData.js';
 
@@ -12,8 +12,6 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
   const [selectedOrgTypeId, setSelectedOrgTypeId] = useState('police');
   const [selectedState, setSelectedState] = useState('Andhra Pradesh');
   const [stateSearch, setStateSearch] = useState('');
-  const [selectedOrgName, setSelectedOrgName] = useState('');
-  const [showOrgModal, setShowOrgModal] = useState(false);
 
   // Filtered States/UTs search
   const filteredStates = INDIA_STATES_AND_UTS.filter(st =>
@@ -51,7 +49,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
         borderBottom: '1px solid #E2E8F0',
         padding: '16px 24px'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
           
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -79,52 +77,64 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
           </div>
 
           {/* Navigation Links */}
-          <nav style={{ display: 'flex', alignItems: 'center', gap: '28px' }} className="hidden-mobile">
-            <a href="#home" style={{ textDecoration: 'none', color: '#0B1F3A', fontWeight: 600, fontSize: '0.9rem' }}>Home</a>
-            <a href="#organization-access" style={{ textDecoration: 'none', color: '#0B5ED7', fontWeight: 800, fontSize: '0.9rem' }}>Organization Access</a>
-            <a href="#services" style={{ textDecoration: 'none', color: '#475569', fontWeight: 600, fontSize: '0.9rem' }}>Services</a>
-            <a href="#security" style={{ textDecoration: 'none', color: '#475569', fontWeight: 600, fontSize: '0.9rem' }}>Security</a>
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '24px' }} className="hidden-mobile">
+            <a href="#home" style={{ textDecoration: 'none', color: '#0B1F3A', fontWeight: 600, fontSize: '0.875rem' }}>Home</a>
+            <a href="#access-gateway" style={{ textDecoration: 'none', color: '#0B5ED7', fontWeight: 800, fontSize: '0.875rem' }}>Portal Access Gateway</a>
+            <a href="#organization-access" style={{ textDecoration: 'none', color: '#475569', fontWeight: 600, fontSize: '0.875rem' }}>Organization Access</a>
+            <a href="#govt-officer-access" style={{ textDecoration: 'none', color: '#475569', fontWeight: 600, fontSize: '0.875rem' }}>Government Officers</a>
           </nav>
 
-          {/* Portal Login Gate CTA Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <a
-              href="#organization-access"
+          {/* Quick Header Access CTAs */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={() => {
+                const orgSec = document.getElementById('organization-access');
+                if (orgSec) orgSec.scrollIntoView({ behavior: 'smooth' });
+              }}
               style={{
                 backgroundColor: '#FFFFFF',
                 color: '#073B8C',
                 border: '1px solid #BFDBFE',
-                padding: '8px 14px',
+                padding: '8px 12px',
                 borderRadius: '10px',
                 fontWeight: 700,
                 fontSize: '0.8rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                textDecoration: 'none'
+                cursor: 'pointer'
               }}
             >
-              🏢 Organization Access
-            </a>
+              🏢 Organization
+            </button>
+
+            <button
+              onClick={onOpenAuthorityPortal}
+              style={{
+                backgroundColor: '#1E293B',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '8px 12px',
+                borderRadius: '10px',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                cursor: 'pointer'
+              }}
+            >
+              🏛️ Govt Officer
+            </button>
 
             <button
               onClick={onAccessCivicOne}
               style={{
                 backgroundColor: '#0B5ED7',
                 color: '#FFFFFF',
-                padding: '9px 18px',
+                padding: '9px 16px',
                 borderRadius: '10px',
                 fontWeight: 800,
-                fontSize: '0.875rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: '0 4px 14px rgba(11, 94, 215, 0.3)',
+                fontSize: '0.85rem',
                 border: 'none',
                 cursor: 'pointer'
               }}
             >
-              Citizen Login <ArrowRight size={16} />
+              Citizen Login
             </button>
           </div>
 
@@ -133,12 +143,12 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
 
       {/* HERO SECTION */}
       <section id="home" style={{
-        padding: '70px 24px 80px 24px',
+        padding: '60px 24px 70px 24px',
         position: 'relative',
         overflow: 'hidden',
         background: 'linear-gradient(180deg, #FFFFFF 0%, #F6F9FC 100%)'
       }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
           
           <div style={{
             display: 'inline-flex',
@@ -150,19 +160,19 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
             borderRadius: '20px',
             fontSize: '0.825rem',
             fontWeight: 700,
-            marginBottom: '24px',
+            marginBottom: '20px',
             border: '1px solid #BFDBFE'
           }}>
-            <ShieldCheck size={16} /> Unified Identity + Vault + Verification + State-Wise Org Access
+            <ShieldCheck size={16} /> Unified Identity + Document Vault + Purpose Verification + Government Supervision
           </div>
 
           <h1 style={{
             fontFamily: 'var(--font-heading)',
-            fontSize: '3.4rem',
-            fontWeight: 800,
+            fontSize: '3.2rem',
+            fontWeight: 900,
             color: '#0B1F3A',
             lineHeight: 1.15,
-            marginBottom: '24px',
+            marginBottom: '20px',
             letterSpacing: '-0.03em'
           }}>
             Your Digital Identity. <br />
@@ -171,77 +181,180 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
           </h1>
 
           <p style={{
-            fontSize: '1.1rem',
+            fontSize: '1.05rem',
             color: '#475569',
             lineHeight: 1.6,
             marginBottom: '36px',
-            maxWidth: '660px',
+            maxWidth: '680px',
             margin: '0 auto 36px auto'
           }}>
-            Securely access your verified digital credentials, official document vault, and state-wise organization verification services from one unified platform.
+            Securely manage verified digital credentials, access document vault records, execute purpose-bound organization verifications, and empower authorized government supervision.
           </p>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <button
-              onClick={onAccessCivicOne}
-              style={{
-                backgroundColor: '#0B5ED7',
-                color: '#FFFFFF',
-                padding: '14px 32px',
-                borderRadius: '14px',
-                fontWeight: 800,
-                fontSize: '1.05rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                boxShadow: '0 8px 24px rgba(11, 94, 215, 0.35)',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              Get Started as Citizen <ArrowRight size={18} />
-            </button>
+          {/* REQUIREMENT 2 & 35: THREE-LEVEL ACCESS GATEWAY ON LANDING PAGE */}
+          <div id="access-gateway" style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '24px',
+            padding: '32px',
+            border: '1px solid #E2E8F0',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.06)',
+            marginBottom: '40px'
+          }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '8px' }}>
+              CivicOne Three-Level Portal Access Gateway
+            </h3>
+            <p style={{ fontSize: '0.875rem', color: '#64748B', marginBottom: '28px' }}>
+              Select your authorized portal role to continue.
+            </p>
 
-            <a
-              href="#organization-access"
-              style={{
-                backgroundColor: '#073B8C',
-                color: '#FFFFFF',
-                padding: '14px 28px',
-                borderRadius: '14px',
-                fontWeight: 800,
-                fontSize: '0.95rem',
-                textDecoration: 'none',
-                boxShadow: '0 4px 14px rgba(7, 59, 140, 0.25)',
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', textAlign: 'left' }}>
+              
+              {/* CARD 1: CITIZEN PORTAL */}
+              <div style={{
+                backgroundColor: '#F8FAFC',
+                borderRadius: '18px',
+                padding: '24px',
+                border: '1.5px solid #CBD5E1',
                 display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              🏢 Organization Access Gateway
-            </a>
-          </div>
+                flexDirection: 'column',
+                justify: 'space-between'
+              }}>
+                <div>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', backgroundColor: '#EAF3FF', color: '#0B5ED7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+                    <ShieldCheck size={24} />
+                  </div>
+                  <h4 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '6px' }}>
+                    Citizen Portal
+                  </h4>
+                  <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.5, marginBottom: '20px' }}>
+                    For citizens to manage their CivicOne identity, documents, services and consent.
+                  </p>
+                </div>
 
-          {/* Quick Metrics */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '48px', marginTop: '48px', paddingTop: '28px', borderTop: '1px solid #E2E8F0', flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0B1F3A' }}>14M+</div>
-              <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 600 }}>Verified Citizens</div>
+                <button
+                  onClick={onAccessCivicOne}
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#0B5ED7',
+                    color: '#FFFFFF',
+                    padding: '12px',
+                    borderRadius: '12px',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  Citizen Login <ArrowRight size={16} />
+                </button>
+              </div>
+
+              {/* CARD 2: ORGANIZATION PORTAL */}
+              <div style={{
+                backgroundColor: '#F8FAFC',
+                borderRadius: '18px',
+                padding: '24px',
+                border: '1.5px solid #CBD5E1',
+                display: 'flex',
+                flexDirection: 'column',
+                justify: 'space-between'
+              }}>
+                <div>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', backgroundColor: '#FEF3C7', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+                    <Building2 size={24} />
+                  </div>
+                  <h4 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '6px' }}>
+                    Organization Portal
+                  </h4>
+                  <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.5, marginBottom: '20px' }}>
+                    For authorized organizations to verify information according to their permitted purpose.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    const orgSec = document.getElementById('organization-access');
+                    if (orgSec) orgSec.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#073B8C',
+                    color: '#FFFFFF',
+                    padding: '12px',
+                    borderRadius: '12px',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  Organization Login 🏢
+                </button>
+              </div>
+
+              {/* CARD 3: GOVERNMENT OFFICER PORTAL */}
+              <div style={{
+                backgroundColor: '#F8FAFC',
+                borderRadius: '18px',
+                padding: '24px',
+                border: '1.5px solid #CBD5E1',
+                display: 'flex',
+                flexDirection: 'column',
+                justify: 'space-between'
+              }}>
+                <div>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', backgroundColor: '#E2E8F0', color: '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
+                    <Landmark size={24} />
+                  </div>
+                  <h4 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '6px' }}>
+                    Government Officer Portal
+                  </h4>
+                  <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.5, marginBottom: '20px' }}>
+                    For authorized government officers to supervise, verify and manage government-level CivicOne services.
+                  </p>
+                </div>
+
+                <button
+                  onClick={onOpenAuthorityPortal}
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#1E293B',
+                    color: '#FFFFFF',
+                    padding: '12px',
+                    borderRadius: '12px',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  Government Officer Login 🏛️
+                </button>
+              </div>
+
             </div>
-            <div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0B5ED7' }}>36 States/UTs</div>
-              <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 600 }}>Organization Coverage</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#198754' }}>100%</div>
-              <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 600 }}>Encryption &amp; Consent</div>
+
+            <div style={{ marginTop: '20px', fontSize: '0.75rem', color: '#64748B', fontStyle: 'italic', textAlign: 'center' }}>
+              🔒 Protected by role-based authorization matrix. Super Admin access remains private and protected.
             </div>
           </div>
 
         </div>
       </section>
 
-      {/* REQUIREMENT 2 & 31: UPGRADED LANDING PAGE — ORGANIZATION ACCESS SECTION */}
+      {/* REQUIREMENT 36: ORGANIZATION ACCESS SECTION */}
       <section id="organization-access" style={{ padding: '80px 24px', backgroundColor: '#FFFFFF', borderTop: '1px solid #E2E8F0' }}>
         <div style={{ maxWidth: '1240px', margin: '0 auto' }}>
           
@@ -257,7 +370,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
             </p>
           </div>
 
-          {/* CLEAN 3-STEP SELECTION SYSTEM (Requirement 31) */}
+          {/* 3-STEP SELECTION SYSTEM */}
           <div style={{ backgroundColor: '#F8FAFC', borderRadius: '24px', padding: '32px', border: '1px solid #E2E8F0', boxShadow: '0 8px 30px rgba(0,0,0,0.03)', marginBottom: '48px' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '20px', textAlign: 'center' }}>
               Interactive Organization Access Gateway:
@@ -351,7 +464,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
             </div>
           </div>
 
-          {/* 10 ORGANIZATION CARDS GRID WITH DETAILS (Requirement 2) */}
+          {/* 10 ORGANIZATION CARDS GRID WITH DETAILS */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
             
             {ORGANIZATION_TYPES.map((org) => (
@@ -365,10 +478,8 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
                   boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
                   display: 'flex',
                   flexDirection: 'column',
-                  justify: 'space-between',
-                  transition: 'transform 0.2s, box-shadow 0.2s'
+                  justify: 'space-between'
                 }}
-                className="hover-card"
               >
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
@@ -421,25 +532,6 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
                   >
                     Login Portal
                   </button>
-
-                  <button
-                    onClick={() => {
-                      setSelectedOrgTypeId(org.id);
-                      alert(`Scope details for ${org.name}:\nAllowed: ${org.allowed.join(', ')}\nRestricted: ${org.disallowed.join(', ')}`);
-                    }}
-                    style={{
-                      backgroundColor: '#F1F5F9',
-                      color: '#475569',
-                      padding: '10px 14px',
-                      borderRadius: '10px',
-                      fontWeight: 700,
-                      fontSize: '0.825rem',
-                      border: 'none',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Learn More
-                  </button>
                 </div>
 
               </div>
@@ -447,130 +539,71 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
 
           </div>
 
-          <div style={{ marginTop: '32px', textAlign: 'center', fontSize: '0.8rem', color: '#64748B', fontStyle: 'italic' }}>
-            ℹ️ Demo Disclaimer: CivicOne provides synthetic organization test access for development. No official affiliation is claimed without active partner API integration.
-          </div>
-
         </div>
       </section>
 
-      {/* TRUSTED VAULT CATEGORIES SECTION */}
-      <section id="services" style={{ padding: '80px 24px', backgroundColor: '#F6F9FC' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      {/* REQUIREMENT 37: DEDICATED GOVERNMENT OFFICER ACCESS SECTION */}
+      <section id="govt-officer-access" style={{ padding: '80px 24px', backgroundColor: '#0B1F3A', color: '#FFFFFF' }}>
+        <div style={{ maxWidth: '1240px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '32px' }}>
           
-          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-            <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '12px' }}>
-              Structured Digital Document Vault
+          <div style={{ maxWidth: '680px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(255,255,255,0.1)', color: '#60A5FA', padding: '6px 16px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '16px' }}>
+              <Landmark size={16} /> ELEVATED AUTHORIZED GOVERNMENT ACCESS
+            </div>
+            <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginBottom: '12px', color: '#FFFFFF' }}>
+              GOVERNMENT OFFICER ACCESS
             </h2>
-            <p style={{ fontSize: '1rem', color: '#475569', maxWidth: '600px', margin: '0 auto' }}>
-              All your official credentials organized cleanly into verified government categories.
+            <p style={{ fontSize: '1.05rem', color: '#94A3B8', lineHeight: 1.6, marginBottom: '24px' }}>
+              Dedicated access for authorized government officers and supervisors across all 28 States &amp; 8 Union Territories.
             </p>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
-            {[
-              { title: 'Government IDs', desc: 'Aadhaar, PAN Card, Voter ID & Official Credentials', icon: Landmark, color: '#0B5ED7' },
-              { title: 'Healthcare Records', desc: 'ABHA Health Card, Lab Reports & Vaccination Tokens', icon: HeartPulse, color: '#198754' },
-              { title: 'RTO & Vehicle Docs', desc: 'Driving Licence, RC, Vehicle Insurance & PUC', icon: Car, color: '#F59E0B' },
-              { title: 'Education & Academic', desc: 'Degrees, CBSE Marksheets & Skill Certifications', icon: GraduationCap, color: '#6366F1' },
-              { title: 'Professional Records', desc: 'Employment Proof, Tax Forms & Industry Credentials', icon: Building2, color: '#073B8C' },
-              { title: 'Organization Membership', desc: 'Institutional Authorizations & Club Credentials', icon: Award, color: '#8B5CF6' }
-            ].map((cat, idx) => (
-              <div key={idx} style={{
-                backgroundColor: '#FFFFFF',
-                borderRadius: '16px',
-                padding: '24px',
-                border: '1px solid #E2E8F0'
-              }} className="hover-card">
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
-                  backgroundColor: `${cat.color}15`,
-                  color: cat.color,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '16px'
-                }}>
-                  <cat.icon size={24} />
-                </div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0B1F3A', marginBottom: '8px' }}>
-                  {cat.title}
-                </h3>
-                <p style={{ fontSize: '0.875rem', color: '#475569', lineHeight: 1.5 }}>
-                  {cat.desc}
-                </p>
+            <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '16px 20px', borderRadius: '14px', fontSize: '0.85rem', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Lock size={20} color="#60A5FA" style={{ flexShrink: 0 }} />
+              <div>
+                <strong style={{ color: '#FFFFFF', display: 'block', marginBottom: '2px' }}>Security Statement:</strong>
+                Access is restricted to authorized government personnel and protected by role-based authentication.
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECURITY HIGHLIGHT SECTION */}
-      <section id="security" style={{ padding: '80px 24px', backgroundColor: '#FFFFFF' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', alignItems: 'center' }}>
-          <div>
-            <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '16px' }}>
-              Built for Maximum Trust &amp; Protection
-            </h2>
-            <p style={{ fontSize: '1rem', color: '#475569', marginBottom: '32px', lineHeight: 1.6 }}>
-              CivicOne enforces strict server-side authorization boundaries, explicit citizen consent controls, and cryptographic reference masking.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {[
-                "Tokenized Aadhaar & UIDAI-compatible authorization layer",
-                "256-Bit TLS End-to-End Cryptographic Encryption",
-                "Explicit Citizen Consent required for document sharing",
-                "Complete audit trails & active session control"
-              ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <CheckCircle2 size={20} style={{ color: '#198754', flexShrink: 0 }} />
-                  <span style={{ fontSize: '0.95rem', fontWeight: 600, color: '#0B1F3A' }}>{item}</span>
-                </div>
-              ))}
             </div>
           </div>
 
-          <div style={{
-            backgroundColor: '#0B1F3A',
-            borderRadius: '24px',
-            padding: '40px',
-            color: '#FFFFFF',
-            boxShadow: '0 12px 32px rgba(11, 31, 58, 0.2)'
-          }}>
-            <Lock size={40} style={{ color: '#60A5FA', marginBottom: '20px' }} />
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '12px' }}>
-              Citizen Data Privacy Promise
+          <div style={{ backgroundColor: '#1E293B', borderRadius: '24px', padding: '36px', border: '1px solid #334155', minWidth: '320px', boxShadow: '0 12px 40px rgba(0,0,0,0.3)' }}>
+            <div style={{ fontSize: '0.8rem', color: '#60A5FA', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px' }}>
+              OFFICIAL GOVERNMENT GATEWAY
+            </div>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '12px' }}>
+              Authenticate Officer Portal
             </h3>
-            <p style={{ fontSize: '0.9rem', color: '#94A3B8', lineHeight: 1.6, marginBottom: '24px' }}>
-              Your sensitive personal identity numbers are never exposed in plaintext. Every document transaction generates a cryptographically signed verification receipt.
+            <p style={{ fontSize: '0.825rem', color: '#94A3B8', marginBottom: '24px' }}>
+              State $\rightarrow$ Department $\rightarrow$ Office $\rightarrow$ Officer ID $\rightarrow$ MFA
             </p>
+
             <button
-              onClick={onAccessCivicOne}
+              onClick={onOpenAuthorityPortal}
               style={{
+                width: '100%',
                 backgroundColor: '#0B5ED7',
                 color: '#FFFFFF',
-                padding: '12px 24px',
-                borderRadius: '10px',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
+                padding: '14px',
+                borderRadius: '12px',
+                fontWeight: 900,
+                fontSize: '0.95rem',
                 border: 'none',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
               }}
             >
-              Verify Your Identity Now <ChevronRight size={16} />
+              Government Officer Login 🏛️
             </button>
           </div>
+
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer style={{ backgroundColor: '#0B1F3A', color: '#FFFFFF', padding: '48px 24px 24px 24px', borderTop: '1px solid #1E293B' }}>
+      <footer style={{ backgroundColor: '#07152B', color: '#FFFFFF', padding: '48px 24px 24px 24px', borderTop: '1px solid #1E293B' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '24px', paddingBottom: '32px', borderBottom: '1px solid #1E293B' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
@@ -584,24 +617,22 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
 
           <div style={{ display: 'flex', gap: '48px', flexWrap: 'wrap' }}>
             <div>
-              <h4 style={{ fontSize: '0.9rem', color: '#FFFFFF', marginBottom: '12px' }}>Citizen Vault</h4>
-              <ul style={{ listStyle: 'none', fontSize: '0.825rem', color: '#94A3B8', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <li>My Civic Card</li>
-                <li>Government IDs</li>
-                <li>RTO Credentials</li>
-                <li>Health Records</li>
-              </ul>
-            </div>
-
-            <div>
               <h4 style={{ fontSize: '0.9rem', color: '#FFFFFF', marginBottom: '12px' }}>Authorized Logins</h4>
               <ul style={{ listStyle: 'none', fontSize: '0.825rem', color: '#94A3B8', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <li>
+                  <button
+                    onClick={onAccessCivicOne}
+                    style={{ background: 'none', border: 'none', color: '#60A5FA', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
+                  >
+                    📱 Citizen Login
+                  </button>
+                </li>
                 <li>
                   <button
                     onClick={onOpenAuthorityPortal}
                     style={{ background: 'none', border: 'none', color: '#60A5FA', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
                   >
-                    🏛️ Government Officer Portal
+                    🏛️ Government Officer Login
                   </button>
                 </li>
               </ul>

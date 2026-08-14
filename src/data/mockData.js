@@ -570,3 +570,158 @@ export const DEMO_SECURITY_LOGS = [
     status: "SUCCESS",
   }
 ];
+
+export const GOVERNMENT_DEPARTMENTS = [
+  { id: "home", name: "Home Affairs", code: "DEPT-HOME", icon: "ShieldAlert" },
+  { id: "police", name: "Police Department", code: "DEPT-POLICE", icon: "ShieldCheck" },
+  { id: "revenue", name: "Revenue & Land Records", code: "DEPT-REV", icon: "FileText" },
+  { id: "transport", name: "Transport (RTO)", code: "DEPT-RTO", icon: "Car" },
+  { id: "higher_edu", name: "Higher Education", code: "DEPT-HEDU", icon: "GraduationCap" },
+  { id: "school_edu", name: "School Education", code: "DEPT-SEDU", icon: "BookOpen" },
+  { id: "health", name: "Health & Family Welfare", code: "DEPT-HLTH", icon: "Activity" },
+  { id: "municipal", name: "Municipal Administration", code: "DEPT-MUNI", icon: "Building2" },
+  { id: "social_welfare", name: "Social Welfare", code: "DEPT-SWEL", icon: "Users" },
+  { id: "civil_supplies", name: "Civil Supplies & Consumer Affairs", code: "DEPT-CSUP", icon: "ShoppingBag" },
+  { id: "labour", name: "Labour & Employment", code: "DEPT-LABR", icon: "Briefcase" },
+  { id: "it_dept", name: "Information Technology & Electronics", code: "DEPT-ITD", icon: "Cpu" },
+  { id: "rural_dev", name: "Rural Development", code: "DEPT-RDEV", icon: "TreePine" },
+  { id: "urban_dev", name: "Urban Development", code: "DEPT-UDEV", icon: "Building" },
+  { id: "other_govt", name: "Other Government Departments", code: "DEPT-OGOV", icon: "Landmark" }
+];
+
+export const GOVERNMENT_OFFICER_LEVELS = [
+  { level: 1, title: "LEVEL 1 — GOVERNMENT OFFICER", code: "GOVT_OFFICER_L1", description: "Can manage authorized services within assigned jurisdiction." },
+  { level: 2, title: "LEVEL 2 — DEPARTMENT SUPERVISOR", code: "GOVT_SUPERVISOR_L2", description: "Can supervise authorized officers within the assigned department." },
+  { level: 3, title: "LEVEL 3 — STATE SUPERVISOR", code: "GOVT_STATE_SUPERVISOR_L3", description: "Can supervise authorized department activity within the assigned state." },
+  { level: 4, title: "LEVEL 4 — NATIONAL / CENTRAL SUPERVISOR", code: "GOVT_NATIONAL_SUPERVISOR_L4", description: "If enabled, can view authorized cross-state CivicOne government activity." },
+  { level: 5, title: "LEVEL 5 — CIVICONE SUPER ADMIN", code: "SUPER_ADMIN", description: "Platform-level control & master root supervision." }
+];
+
+export const DEMO_GOVERNMENT_OFFICERS = [
+  {
+    id: "OFF-1001",
+    officerId: "GOVT-OFFICER-8942",
+    name: "Officer K. Sharma",
+    email: "officer.sharma@parivahan.gov.in",
+    department: "Transport (RTO)",
+    deptCode: "DEPT-RTO",
+    state: "Andhra Pradesh",
+    office: "Demo RTO Regional Headquarters — Vijayawada",
+    roleLevel: 1,
+    roleTitle: "LEVEL 1 — GOVERNMENT OFFICER",
+    status: "APPROVED",
+    clearance: "LEVEL-3 VERIFIED",
+    lastLogin: "Today, 09:30 AM",
+    demoLabel: "DEMO DATA — NOT A REAL GOVERNMENT OFFICER"
+  },
+  {
+    id: "OFF-1002",
+    officerId: "GOVT-SUP-9012",
+    name: "Inspector R. Verma",
+    email: "inspector.verma@police.gov.in",
+    department: "Police Department",
+    deptCode: "DEPT-POLICE",
+    state: "Maharashtra",
+    office: "Demo Police Headquarters — Mumbai",
+    roleLevel: 2,
+    roleTitle: "LEVEL 2 — DEPARTMENT SUPERVISOR",
+    status: "APPROVED",
+    clearance: "LEVEL-4 CLEARANCE",
+    lastLogin: "Today, 10:15 AM",
+    demoLabel: "DEMO DATA — NOT A REAL GOVERNMENT OFFICER"
+  },
+  {
+    id: "OFF-1003",
+    officerId: "GOVT-STATE-7710",
+    name: "Director S. Kulkarni",
+    email: "director.kulkarni@education.gov.in",
+    department: "Higher Education",
+    deptCode: "DEPT-HEDU",
+    state: "Karnataka",
+    office: "Demo State Education Directorate — Bengaluru",
+    roleLevel: 3,
+    roleTitle: "LEVEL 3 — STATE SUPERVISOR",
+    status: "APPROVED",
+    clearance: "STATE DIRECTED",
+    lastLogin: "Yesterday, 04:45 PM",
+    demoLabel: "DEMO DATA — NOT A REAL GOVERNMENT OFFICER"
+  },
+  {
+    id: "OFF-1004",
+    officerId: "GOVT-NAT-0001",
+    name: "Commissioner A. Roy",
+    email: "commissioner.roy@gov.in",
+    department: "Home Affairs",
+    deptCode: "DEPT-HOME",
+    state: "Delhi",
+    office: "Demo Central Secretariat — New Delhi",
+    roleLevel: 4,
+    roleTitle: "LEVEL 4 — NATIONAL / CENTRAL SUPERVISOR",
+    status: "APPROVED",
+    clearance: "NATIONAL CLEARANCE",
+    lastLogin: "Today, 08:00 AM",
+    demoLabel: "DEMO DATA — NOT A REAL GOVERNMENT OFFICER"
+  }
+];
+
+export const DEMO_GLOBAL_ACCESS_LOGS = [
+  {
+    id: "LOG-GLOB-901",
+    timestamp: "10:42 AM",
+    organization: "CivicOne Demo College",
+    orgType: "College",
+    state: "Andhra Pradesh",
+    citizenId: "CIV-DEMO-10001",
+    requestedData: "Student Education Verification (12th & TC)",
+    purpose: "Academic Admission Verification",
+    result: "APPROVED",
+    accessType: "VIEW ONLY"
+  },
+  {
+    id: "LOG-GLOB-902",
+    timestamp: "10:35 AM",
+    organization: "CivicOne Demo Police",
+    orgType: "Police",
+    state: "Maharashtra",
+    citizenId: "CIV-DEMO-10002",
+    requestedData: "Identity Status & Driving Licence",
+    purpose: "FIR Reference FIR-2026-904812 Check",
+    result: "APPROVED",
+    accessType: "AUTHORIZED POLICE VIEW"
+  },
+  {
+    id: "LOG-GLOB-903",
+    timestamp: "10:10 AM",
+    organization: "CivicOne Demo Hotel",
+    orgType: "Hotel",
+    state: "Karnataka",
+    citizenId: "CIV-DEMO-10003",
+    requestedData: "Guest Name & ID Verification Badge",
+    purpose: "Hotel Guest Check-in Verification",
+    result: "APPROVED",
+    accessType: "LIMITED VIEW ONLY"
+  },
+  {
+    id: "LOG-GLOB-904",
+    timestamp: "09:55 AM",
+    organization: "CivicOne Demo Electronics Store",
+    orgType: "Electronics",
+    state: "Delhi",
+    citizenId: "CIV-DEMO-10004",
+    requestedData: "Minimum KYC Verification (Identity & Address)",
+    purpose: "High Value Gadget Purchase KYC",
+    result: "APPROVED",
+    accessType: "MINIMUM KYC VIEW ONLY"
+  }
+];
+
+export const ROLE_PERMISSION_MATRIX = [
+  { role: "Citizen", citizenData: "Own Data Only", orgMgmt: "No", officerMgmt: "No", platformMgmt: "No" },
+  { role: "Organization", citizenData: "Purpose-Authorized Only", orgMgmt: "Own Org", officerMgmt: "No", platformMgmt: "No" },
+  { role: "Level 1 Government Officer", citizenData: "Authorized Jurisdiction", orgMgmt: "Assigned Orgs", officerMgmt: "Limited", platformMgmt: "No" },
+  { role: "Level 2 Department Supervisor", citizenData: "Authorized Jurisdiction", orgMgmt: "Dept Orgs", officerMgmt: "Assigned Officers", platformMgmt: "No" },
+  { role: "Level 3 State Supervisor", citizenData: "Authorized State", orgMgmt: "State Orgs", officerMgmt: "State Officers", platformMgmt: "No" },
+  { role: "Level 4 National Supervisor", citizenData: "Cross-State Authorized", orgMgmt: "Cross-State Orgs", officerMgmt: "National Officers", platformMgmt: "No" },
+  { role: "Level 5 CivicOne Super Admin", citizenData: "Platform Authorized Audit", orgMgmt: "All Organizations", officerMgmt: "All Officers", platformMgmt: "Full Control" }
+];
+
