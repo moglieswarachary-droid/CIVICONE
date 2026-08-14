@@ -1,29 +1,38 @@
-// src/components/OrganizationPortal.jsx - Independent Organization Portal Workspace
+// src/components/OrganizationPortal.jsx - Independent Organization Portal Workspace with Role-Based Access Control
 
 import React, { useState, useEffect } from 'react';
-import { Building2, ShieldCheck, Search, PlusCircle, CheckCircle2, Lock, Eye, AlertCircle, ArrowLeft, RefreshCw, FileText, ExternalLink, Calendar, LogOut } from 'lucide-react';
+import { Building2, ShieldCheck, Search, PlusCircle, CheckCircle2, Lock, Eye, AlertCircle, ArrowLeft, RefreshCw, FileText, ExternalLink, Calendar, LogOut, UserCheck, ShieldAlert, Award } from 'lucide-react';
 import DocumentViewerModal from './DocumentViewerModal.jsx';
+import { orgService } from '../services/api.js';
 
 export default function OrganizationPortal({ onReturnHome }) {
-  const [selectedOrg, setSelectedOrg] = useState({ id: 'org-1', name: 'ABC University', category: 'Education', regNo: 'EDU-REG-9048' });
   const [organizations, setOrganizations] = useState([]);
+  const [selectedOrg, setSelectedOrg] = useState({
+    id: 'org-college',
+    roleCode: 'COLLEGE_ACCESS_ADMIN',
+    name: 'CivicOne Demo College',
+    category: 'Education',
+    regNo: 'EDU-COLLEGE-9048',
+    accessLevel: 'VIEW ONLY',
+    badgeText: 'VIEW ONLY — ACADEMIC CREDENTIALS'
+  });
   const [requests, setRequests] = useState([]);
   const [consents, setConsents] = useState([]);
   const [activeTab, setActiveTab] = useState('locker'); // 'locker' | 'request' | 'history'
   
   // Request Form State
-  const [citizenCivicId, setCitizenCivicId] = useState('CIV-9048-1029-4821');
-  const [docId, setDocId] = useState('doc-7');
-  const [purpose, setPurpose] = useState('M.Tech Admission Verification');
+  const [citizenCivicId, setCitizenCivicId] = useState('CIV-DEMO-10001');
+  const [docId, setDocId] = useState('doc-aarav-08');
+  const [purpose, setPurpose] = useState('Academic Enrollment Verification');
   const [expiryDays, setExpiryDays] = useState('7');
   const [requestMsg, setRequestMsg] = useState('');
 
   // Document Viewer Modal State
   const [viewingDoc, setViewingDoc] = useState(null);
   const [viewingConsent, setViewingConsent] = useState(null);
+  const [authorizedData, setAuthorizedData] = useState(null);
   const [accessError, setAccessError] = useState('');
 
-  // Fetch Data
   const fetchOrgData = async () => {
     try {
       const [resOrgs, resReqs, resCons] = await Promise.all([
@@ -44,7 +53,6 @@ export default function OrganizationPortal({ onReturnHome }) {
     fetchOrgData();
   }, []);
 
-  // Submit Document Access Request to Citizen
   const handleCreateRequest = async (e) => {
     e.preventDefault();
     setRequestMsg('');
@@ -73,16 +81,23 @@ export default function OrganizationPortal({ onReturnHome }) {
     }
   };
 
-  // Attempt to view authorized document with BACKEND RECIPIENT-BOUND ACCESS CHECK
   const handleViewAuthorizedDoc = async (shareId) => {
     setAccessError('');
     try {
-      const res = await fetch(`/api/consent/org-access/${shareId}?requestingOrgId=${selectedOrg.id}`);
-      const data = await res.json();
+      const data = await orgService.verifyOrgAccess(shareId, selectedOrg.roleCode);
 
-      if (res.ok && data.success) {
-        setViewingDoc(data.document);
+      if (data.success) {
+        setAuthorizedData(data.authorizedData);
         setViewingConsent(data.consentRecord);
+        setViewingDoc(data.authorizedData.academicDocument || data.authorizedData.document || {
+          name: data.consentRecord.docName,
+          category: selectedOrg.category,
+          issuer: selectedOrg.name,
+          status: "Verified",
+          refNo: "REF-AUTH-2026",
+          securitySeal: "RECIPIENT-BOUND-VERIFIED-SEAL",
+          description: data.authorizedData.notice || data.authorizedData.educationNotice || "Authorized least-privilege view"
+        });
       } else {
         setAccessError(data.message || 'Access Denied by Backend Authorization Engine.');
       }
@@ -91,8 +106,7 @@ export default function OrganizationPortal({ onReturnHome }) {
     }
   };
 
-  // Filtered Authorized Consents for THIS selected organization
-  const authorizedConsents = consents.filter(c => c.orgId === selectedOrg.id);
+  const authorizedConsents = consents.filter(c => c.orgId === selectedOrg.id || c.roleCode === selectedOrg.roleCode);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC', color: '#0F172A', fontFamily: 'var(--font-body)' }}>
@@ -106,7 +120,7 @@ export default function OrganizationPortal({ onReturnHome }) {
         top: 0,
         zIndex: 50
       }}>
-        <div style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ maxWidth: '1300px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: '#073B8C', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -114,18 +128,18 @@ export default function OrganizationPortal({ onReturnHome }) {
             </div>
             <div>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em' }}>
-                CivicOne Organization Portal
+                CivicOne Organization Access Portal
               </div>
               <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                Recipient-Bound Verification & Authorized Credential Workspace
+                Recipient-Bound Verification &amp; Least-Privilege Authorized Workspace
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             {/* Organization Selector */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B' }}>Active Org:</span>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B' }}>Active Org Role:</span>
               <select
                 value={selectedOrg.id}
                 onChange={(e) => {
@@ -143,7 +157,7 @@ export default function OrganizationPortal({ onReturnHome }) {
                 }}
               >
                 {organizations.map(o => (
-                  <option key={o.id} value={o.id}>{o.name} ({o.category})</option>
+                  <option key={o.id} value={o.id}>{o.name} ({o.accessLevel})</option>
                 ))}
               </select>
             </div>
@@ -181,17 +195,17 @@ export default function OrganizationPortal({ onReturnHome }) {
       {/* WORKSPACE CONTENT */}
       <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '32px 24px' }}>
 
-        {/* ORG HERO SUMMARY CARD */}
+        {/* ORG HERO SUMMARY CARD WITH SPECIFIC ROLE BADGE */}
         <div style={{ backgroundColor: '#0B1F3A', borderRadius: '20px', color: '#FFFFFF', padding: '28px', marginBottom: '28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
           <div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#60A5FA', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              Verified Partner Organization
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(96, 165, 250, 0.2)', color: '#60A5FA', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px' }}>
+              <ShieldCheck size={14} /> {selectedOrg.badgeText || selectedOrg.accessLevel}
             </div>
             <h1 style={{ fontSize: '1.6rem', fontWeight: 900, marginTop: '2px', marginBottom: '6px' }}>
               {selectedOrg.name}
             </h1>
             <div style={{ fontSize: '0.85rem', color: '#94A3B8' }}>
-              Registration Ref: <span style={{ fontFamily: 'monospace', color: '#FEF08A' }}>{selectedOrg.regNo}</span> | Status: 🟢 Verified Partner
+              Registration Ref: <span style={{ fontFamily: 'monospace', color: '#FEF08A' }}>{selectedOrg.regNo}</span> | Role: <span style={{ color: '#60A5FA', fontWeight: 800 }}>{selectedOrg.roleCode}</span>
             </div>
           </div>
 
@@ -214,6 +228,23 @@ export default function OrganizationPortal({ onReturnHome }) {
             >
               <PlusCircle size={16} /> Request Document Access
             </button>
+          </div>
+        </div>
+
+        {/* ROLE PRIVILEGE RESTRICTIONS BOX */}
+        <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '20px', marginBottom: '28px' }}>
+          <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ShieldAlert size={16} color="#0B5ED7" /> Least-Privilege Data Access Scope for {selectedOrg.name}:
+          </h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', fontSize: '0.825rem' }}>
+            <div style={{ backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', padding: '12px', borderRadius: '10px', color: '#065F46' }}>
+              <strong>Allowed Access Scope:</strong> <br />
+              {selectedOrg.allowedCategories ? selectedOrg.allowedCategories.join(', ') : 'Authorized Categories Only'}
+            </div>
+            <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', padding: '12px', borderRadius: '10px', color: '#991B1B' }}>
+              <strong>Strictly Excluded Data:</strong> <br />
+              {selectedOrg.disallowedCategories ? selectedOrg.disallowedCategories.join(', ') : 'Unrelated Personal/Financial/Medical Vault Records'}
+            </div>
           </div>
         </div>
 
@@ -248,7 +279,7 @@ export default function OrganizationPortal({ onReturnHome }) {
         {activeTab === 'locker' && (
           <div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '16px' }}>
-              Citizen Documents Authorized for {selectedOrg.name}
+              Citizen Documents Authorized for {selectedOrg.name} ({selectedOrg.accessLevel})
             </h3>
 
             {authorizedConsents.length === 0 ? (
@@ -335,7 +366,7 @@ export default function OrganizationPortal({ onReturnHome }) {
                   type="text"
                   value={citizenCivicId}
                   onChange={(e) => setCitizenCivicId(e.target.value)}
-                  placeholder="e.g. CIV-9048-1029-4821"
+                  placeholder="e.g. CIV-DEMO-10001"
                   style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontSize: '0.9rem', fontWeight: 700 }}
                   required
                 />
@@ -350,11 +381,11 @@ export default function OrganizationPortal({ onReturnHome }) {
                   onChange={(e) => setDocId(e.target.value)}
                   style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontSize: '0.9rem', fontWeight: 700 }}
                 >
-                  <option value="doc-7">B.Tech Computer Science Degree (Education)</option>
-                  <option value="doc-8">Class XII Senior School Marksheet (Education)</option>
-                  <option value="doc-1">Aadhaar Card Reference (Identity)</option>
-                  <option value="doc-2">Permanent Account Number PAN (Finance)</option>
-                  <option value="doc-9">TCS Systems Engineer Experience Certificate (Professional)</option>
+                  <option value="doc-aarav-08">B.Tech Course Admission Record (Education)</option>
+                  <option value="doc-aarav-06">Intermediate Class XII Marksheet (Education)</option>
+                  <option value="doc-aarav-07">School Transfer Certificate TC (Education)</option>
+                  <option value="doc-aarav-01">Tokenized Aadhaar Record (Identity / KYC)</option>
+                  <option value="doc-aarav-04">Indian Passport (Travel / Hotel Guest ID)</option>
                 </select>
               </div>
 
@@ -366,7 +397,7 @@ export default function OrganizationPortal({ onReturnHome }) {
                   type="text"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
-                  placeholder="e.g. M.Tech Admission / Home Loan Verification"
+                  placeholder="e.g. Academic Enrollment / Hotel Check-in Verification"
                   style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontSize: '0.9rem', fontWeight: 700 }}
                   required
                 />
@@ -411,7 +442,7 @@ export default function OrganizationPortal({ onReturnHome }) {
         {activeTab === 'history' && (
           <div style={{ backgroundColor: '#FFFFFF', borderRadius: '20px', border: '1px solid #E2E8F0', padding: '28px' }}>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '16px' }}>
-              Verification & Request History Logs
+              Verification &amp; Request History Logs
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -437,7 +468,11 @@ export default function OrganizationPortal({ onReturnHome }) {
         <DocumentViewerModal
           document={viewingDoc}
           consentRecord={viewingConsent}
-          onClose={() => setViewingDoc(null)}
+          authorizedData={authorizedData}
+          onClose={() => {
+            setViewingDoc(null);
+            setAuthorizedData(null);
+          }}
         />
       )}
 

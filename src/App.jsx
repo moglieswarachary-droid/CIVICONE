@@ -7,17 +7,18 @@ import CitizenDashboard from './components/CitizenDashboard.jsx';
 import OrganizationPortal from './components/OrganizationPortal.jsx';
 import AuthorityGate from './components/AuthorityGate.jsx';
 import AuthorityPortal from './components/AuthorityPortal.jsx';
+import PolicePortal from './components/PolicePortal.jsx';
 import AdminGate from './components/AdminGate.jsx';
 import AdminPortal from './components/AdminPortal.jsx';
 import PublicQRVerification from './components/PublicQRVerification.jsx';
 
 export default function App() {
-  // Views: 'landing' | 'gate' | 'citizen' | 'organization' | 'authority-gate' | 'authority' | 'admin-gate' | 'admin' | 'verify'
+  // Views: 'landing' | 'gate' | 'citizen' | 'organization' | 'authority-gate' | 'authority' | 'police' | 'admin-gate' | 'admin' | 'verify'
   const [currentView, setCurrentView] = useState('landing');
   const [authenticatedCitizen, setAuthenticatedCitizen] = useState(null);
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState(null);
   const [authenticatedAdmin, setAuthenticatedAdmin] = useState(null);
-  const [verifyToken, setVerifyToken] = useState('CIV-TOKEN-984210-SECURE-2026');
+  const [verifyToken, setVerifyToken] = useState('CIV-TOKEN-CIV-DEMO-10001-SECURE-2026');
 
   // Handle URL Hash, Path Routing, and Owner Keyboard Shortcut (Ctrl + Shift + A)
   useEffect(() => {
@@ -31,6 +32,8 @@ export default function App() {
         setCurrentView('organization');
       } else if (hash === '#owner-admin' || hash === '#admin' || path.startsWith('/owner-admin')) {
         setCurrentView('admin-gate');
+      } else if (hash === '#police' || path.startsWith('/police')) {
+        setCurrentView('police');
       } else if (path.startsWith('/authority') || hash === '#authority') {
         setCurrentView('authority-gate');
       } else if (path.startsWith('/verify') || token) {
@@ -65,7 +68,11 @@ export default function App() {
   // Handle Officer Login Authentication Completion
   const handleOfficerAuthSuccess = (officerData) => {
     setAuthenticatedOfficer(officerData);
-    setCurrentView('authority');
+    if (officerData.role === 'POLICE_ADMIN' || officerData.department?.includes('Police')) {
+      setCurrentView('police');
+    } else {
+      setCurrentView('authority');
+    }
   };
 
   // Handle Admin Login Authentication Completion
@@ -134,6 +141,14 @@ export default function App() {
         <AuthorityGate
           onAuthenticated={handleOfficerAuthSuccess}
           onGoBackToLanding={() => setCurrentView('landing')}
+        />
+      );
+
+    case 'police':
+      return (
+        <PolicePortal
+          officer={authenticatedOfficer}
+          onReturnHome={handleLogout}
         />
       );
 

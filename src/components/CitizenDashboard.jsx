@@ -1,10 +1,11 @@
-// src/components/CitizenDashboard.jsx - Main Authenticated Citizen Portal Layout with Premium Gold Card & Responsive Cross-Platform Navigation
+// src/components/CitizenDashboard.jsx - Main Authenticated Citizen Portal Layout with Premium Navigation & Grouped Collapsible Dock
 
 import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Search, Bell, User, LayoutDashboard, Ticket, FolderClosed,
   Grid, Landmark, Newspaper, Shield, HelpCircle, LogOut, Sun, Moon, CheckCircle2,
-  ChevronRight, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, Zap, Radio, Share2, FileText
+  ChevronRight, ChevronDown, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, Zap, Radio, Share2, FileText,
+  Lock, Compass, Plane, MoreHorizontal, Activity, Eye
 } from 'lucide-react';
 import VirtualCard from './VirtualCard.jsx';
 import CivicVault from './CivicVault.jsx';
@@ -15,29 +16,43 @@ import HelpCentre from './HelpCentre.jsx';
 import ProfileSettings from './ProfileSettings.jsx';
 import AiAgentFloating from './AiAgentFloating.jsx';
 import GoldPassPaymentModal from './GoldPassPaymentModal.jsx';
+import PrivacyCenter from './PrivacyCenter.jsx';
+import TourismGuide from './TourismGuide.jsx';
+import TravelBookingHub from './TravelBookingHub.jsx';
 import {
   DEMO_CARD, DEMO_DOCUMENTS, DEMO_GOVT_UPDATES, DEMO_NEWS,
   DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST
 } from '../data/mockData.js';
 
 export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification }) {
-  // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'applications' | 'gold-pass' | 'activity' | 'govt-updates' | 'news' | 'security' | 'help' | 'profile'
+  // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'gold-pass' | 'activity' | 'privacy' | 'notifications' | 'tourism' | 'travel' | 'govt-updates' | 'news' | 'security' | 'help' | 'ai' | 'profile'
   const [activeTab, setActiveTab] = useState('home');
   const [theme, setTheme] = useState('light');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  // Initialize with mock data so dashboard always shows content even without backend
   const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
-  const [showTourModal, setShowTourModal] = useState(false);
-  const [tourStep, setTourStep] = useState(1);
   const [documents, setDocuments] = useState(DEMO_DOCUMENTS);
   const [govtUpdates, setGovtUpdates] = useState(DEMO_GOVT_UPDATES);
   const [dailyNews, setDailyNews] = useState(DEMO_NEWS);
   const [cardData, setCardData] = useState(DEMO_CARD);
   const [globalSearch, setGlobalSearch] = useState('');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMoreDrawerOpen, setMobileMoreDrawerOpen] = useState(false);
   const [demoCitizens, setDemoCitizens] = useState(DEMO_CITIZENS_LIST);
   const [currentCitizen, setCurrentCitizen] = useState(citizen);
+  const [targetTravelCity, setTargetTravelCity] = useState('');
+
+  // Collapsible Group States for Desktop Sidebar
+  const [openGroups, setOpenGroups] = useState({
+    main: true,
+    myCivicOne: true,
+    explore: true,
+    support: true,
+    account: true
+  });
+
+  const toggleGroup = (groupKey) => {
+    setOpenGroups(prev => ({ ...prev, [groupKey]: !prev[groupKey] }));
+  };
 
   // Fetch initial dashboard data & demo accounts from REST API backend
   useEffect(() => {
@@ -79,7 +94,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         setCurrentCitizen(data.citizen);
         setCardData(data.card);
         setDocuments(data.documents);
-        // Refresh notifications & demo status
         const [notifRes, demoRes] = await Promise.all([
           fetch('/api/notifications').then(r => r.json()),
           fetch('/api/citizens/demo').then(r => r.json())
@@ -92,33 +106,65 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
     }
   };
 
-  // Sync theme attribute on root element
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  const navItems = [
-    { id: 'home', label: 'Home', icon: LayoutDashboard },
-    { id: 'card', label: 'My Civic Card', icon: Ticket },
-    { id: 'vault', label: 'My Vault', icon: FolderClosed },
-    { id: 'services', label: 'Services', icon: Grid },
-    { id: 'gold-pass', label: 'Gold Pass', icon: Crown },
-    { id: 'activity', label: 'My Activity', icon: ShieldCheck },
-    { id: 'govt-updates', label: 'Govt Updates', icon: Landmark },
-    { id: 'news', label: 'Daily News', icon: Newspaper },
-    { id: 'security', label: 'Security Centre', icon: Shield },
-    { id: 'help', label: 'Help Centre', icon: HelpCircle },
-    { id: 'profile', label: 'Profile Settings', icon: User }
+  // Sidebar Grouped Structure (Requirement 2)
+  const navigationGroups = [
+    {
+      key: 'main',
+      title: 'MAIN',
+      items: [
+        { id: 'home', label: 'Home', icon: LayoutDashboard },
+        { id: 'card', label: 'My Civic Card', icon: Ticket },
+        { id: 'vault', label: 'My Vault', icon: FolderClosed },
+        { id: 'services', label: 'Services', icon: Grid },
+        { id: 'gold-pass', label: 'Gold Pass', icon: Crown }
+      ]
+    },
+    {
+      key: 'myCivicOne',
+      title: 'MY CIVICONE',
+      items: [
+        { id: 'activity', label: 'My Activity', icon: Activity },
+        { id: 'privacy', label: 'My Access & Consent', icon: Lock },
+        { id: 'notifications', label: 'Notifications', icon: Bell }
+      ]
+    },
+    {
+      key: 'explore',
+      title: 'EXPLORE',
+      items: [
+        { id: 'tourism', label: 'CivicOne World', icon: Compass },
+        { id: 'travel', label: 'Travel & Bookings', icon: Plane },
+        { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
+        { id: 'news', label: 'Daily News', icon: Newspaper }
+      ]
+    },
+    {
+      key: 'support',
+      title: 'SUPPORT & SECURITY',
+      items: [
+        { id: 'security', label: 'Security Centre', icon: Shield },
+        { id: 'privacy', label: 'Privacy Centre', icon: Lock },
+        { id: 'help', label: 'Help Centre', icon: HelpCircle }
+      ]
+    },
+    {
+      key: 'account',
+      title: 'ACCOUNT',
+      items: [
+        { id: 'profile', label: 'Profile Settings', icon: User }
+      ]
+    }
   ];
 
   const unreadNotifCount = notifications.filter(n => !n.read).length;
 
-  // Account Entitlement State (Default: standard)
-  const [goldPassStatus, setGoldPassStatus] = useState(citizen?.goldPassStatus || cardData?.goldPassStatus || 'standard');
-  const [requestingGoldPass, setRequestingGoldPass] = useState(false);
+  const [goldPassStatus, setGoldPassStatus] = useState(currentCitizen?.goldPassStatus || cardData?.goldPassStatus || 'standard');
   const [goldPassMessage, setGoldPassMessage] = useState('');
 
-  // Fetch Gold Pass Status on mount
   useEffect(() => {
     async function checkGoldPass() {
       try {
@@ -132,34 +178,13 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       }
     }
     checkGoldPass();
-  }, []);
-
-  const handleApplyGoldPass = async () => {
-    setRequestingGoldPass(true);
-    try {
-      const res = await fetch('/api/goldpass/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: 'Annual Pass (₹499)', paymentRef: `TXN-${Math.floor(100000 + Math.random() * 900000)}` })
-      });
-      const data = await res.json();
-      setRequestingGoldPass(false);
-      if (data.goldPassStatus) {
-        setGoldPassStatus(data.goldPassStatus);
-        setGoldPassMessage("Payment reference submitted. Your Gold Pass application is PENDING ADMINISTRATIVE VERIFICATION.");
-      }
-    } catch (err) {
-      setRequestingGoldPass(false);
-      setGoldPassStatus('pending');
-      setGoldPassMessage("Payment reference submitted. Application is PENDING VERIFICATION.");
-    }
-  };
+  }, [currentCitizen]);
 
   const isGoldTier = goldPassStatus === 'active';
 
   const handleSelectTab = (tabId) => {
     setActiveTab(tabId);
-    setMobileMenuOpen(false);
+    setMobileMoreDrawerOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -176,19 +201,10 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         padding: '12px 16px',
         boxShadow: 'var(--shadow-sm)'
       }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
           
-          {/* Logo & Mobile Menu Hamburger Trigger */}
+          {/* Logo & Brand */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="mobile-only touch-target"
-              style={{ background: 'none', color: 'var(--text-main)', padding: '4px' }}
-              title="Open Navigation Menu"
-            >
-              <Menu size={24} />
-            </button>
-
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => handleSelectTab('home')}>
               <div style={{
                 width: '36px',
@@ -208,15 +224,39 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                   CivicOne
                 </span>
                 <span style={{ display: 'block', fontSize: '0.6rem', fontWeight: 800, color: isGoldTier ? '#CA8A04' : '#0B5ED7', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '-4px' }}>
-                  {isGoldTier ? "👑 Gold Pass" : "Citizen Portal"}
+                  {isGoldTier ? "👑 Gold Pass Active" : "Citizen Portal"}
                 </span>
               </div>
             </div>
           </div>
 
+          {/* Demo Citizen Profile Switcher */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748B' }}>Active Citizen:</span>
+            <select
+              value={currentCitizen.citizenId}
+              onChange={(e) => handleSwitchDemoAccount(e.target.value)}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '8px',
+                border: '1.5px solid #CBD5E1',
+                fontWeight: 800,
+                fontSize: '0.8rem',
+                color: '#0B1F3A',
+                backgroundColor: '#FFFFFF'
+              }}
+            >
+              {demoCitizens.map(c => (
+                <option key={c.citizenId} value={c.citizenId}>
+                  {c.fullName} ({c.citizenId}) {c.tier === 'GOLD' ? '👑' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Global Search Bar */}
-          <div style={{ flex: '1', maxWidth: '480px', position: 'relative' }} className="hidden-mobile">
-            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+          <div style={{ flex: '1', maxWidth: '360px', position: 'relative' }} className="hidden-mobile">
+            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
             <input
               type="text"
               value={globalSearch}
@@ -224,68 +264,21 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 setGlobalSearch(e.target.value);
                 if (e.target.value) setActiveTab('vault');
               }}
-              placeholder="Global Search vault documents, Driving Licence, ABHA, services..."
+              placeholder="Search vault documents, DL, ABHA..."
               style={{
                 width: '100%',
-                padding: '10px 14px 10px 42px',
+                padding: '8px 12px 8px 36px',
                 borderRadius: '10px',
                 border: '1.5px solid var(--border-light)',
                 backgroundColor: 'var(--bg-main)',
                 color: 'var(--text-main)',
-                fontSize: '0.875rem'
+                fontSize: '0.85rem'
               }}
             />
           </div>
 
-          {/* Right Header Actions */}
+          {/* Header Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            
-            {/* Gold Tier / Security Badge */}
-            <div style={{
-              backgroundColor: isGoldTier ? '#FEF3C7' : '#D1E7DD',
-              color: isGoldTier ? '#92400E' : '#0F5132',
-              border: `1px solid ${isGoldTier ? '#FDE68A' : '#A3E635'}`,
-              padding: '4px 10px',
-              borderRadius: '20px',
-              fontSize: '0.725rem',
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }} className="hidden-mobile">
-              {isGoldTier ? (
-                <>
-                  <Crown size={14} style={{ color: '#D97706' }} /> Premium Gold VIP
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 size={14} /> 🟢 Verified
-                </>
-              )}
-            </div>
-
-            {/* Guided Tour Trigger */}
-            <button
-              onClick={() => { setTourStep(1); setShowTourModal(true); }}
-              className="touch-target"
-              style={{
-                backgroundColor: 'var(--light-blue)',
-                color: '#0B5ED7',
-                border: '1px solid var(--border-blue)',
-                borderRadius: '10px',
-                padding: '6px 10px',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-              title="Open Easy Guided Tour"
-            >
-              <Sparkles size={16} /> <span className="hidden-mobile">Portal Tour</span>
-            </button>
-
-            {/* Dark Mode Toggle */}
             <button
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
               className="touch-target"
@@ -296,12 +289,11 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 padding: '8px',
                 color: 'var(--text-main)'
               }}
-              title="Toggle Light / Dark Theme"
             >
               {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
-            {/* Notifications Dropdown */}
+            {/* Notifications */}
             <div style={{ position: 'relative' }}>
               <button
                 onClick={() => setShowNotifPopover(!showNotifPopover)}
@@ -318,39 +310,21 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 <Bell size={18} />
                 {unreadNotifCount > 0 && (
                   <span style={{
-                    position: 'absolute',
-                    top: '-4px',
-                    right: '-4px',
-                    width: '18px',
-                    height: '18px',
-                    borderRadius: '50%',
-                    backgroundColor: '#DC3545',
-                    color: '#FFFFFF',
-                    fontSize: '0.65rem',
-                    fontWeight: 800,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    position: 'absolute', top: '-4px', right: '-4px',
+                    width: '18px', height: '18px', borderRadius: '50%',
+                    backgroundColor: '#DC3545', color: '#FFFFFF', fontSize: '0.65rem', fontWeight: 800,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
                   }}>
                     {unreadNotifCount}
                   </span>
                 )}
               </button>
 
-              {/* Notifications Popover */}
               {showNotifPopover && (
                 <div style={{
-                  position: 'absolute',
-                  top: '48px',
-                  right: 0,
-                  width: '300px',
-                  maxHeight: '380px',
-                  backgroundColor: 'var(--bg-card)',
-                  borderRadius: '16px',
-                  boxShadow: 'var(--shadow-lg)',
-                  border: '1px solid var(--border-light)',
-                  padding: '16px',
-                  zIndex: 100
+                  position: 'absolute', top: '48px', right: 0, width: '300px', maxHeight: '380px',
+                  backgroundColor: 'var(--bg-card)', borderRadius: '16px', boxShadow: 'var(--shadow-lg)',
+                  border: '1px solid var(--border-light)', padding: '16px', zIndex: 100
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>Notifications</strong>
@@ -373,155 +347,118 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         </div>
       </header>
 
-      {/* MOBILE DRAWER SLIDE-OUT NAVIGATION */}
-      {mobileMenuOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.75)',
-          backdropFilter: 'blur(6px)',
-          zIndex: 200,
-          display: 'flex'
-        }}>
-          <div className="drawer-slide-in" style={{
-            width: '280px',
-            height: '100%',
-            backgroundColor: 'var(--bg-card)',
-            padding: '24px 16px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            boxShadow: 'var(--shadow-lg)'
-          }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Crown size={22} style={{ color: '#CA8A04' }} />
-                  <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-main)' }}>CivicOne Menu</span>
-                </div>
-                <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', color: 'var(--text-muted)', padding: '6px' }}>
-                  <X size={22} />
-                </button>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {navItems.map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleSelectTab(item.id)}
-                    style={{
-                      backgroundColor: activeTab === item.id ? (isGoldTier ? '#CA8A04' : '#0B5ED7') : 'transparent',
-                      color: activeTab === item.id ? '#FFFFFF' : 'var(--text-muted)',
-                      padding: '12px 14px',
-                      borderRadius: '10px',
-                      fontWeight: 700,
-                      fontSize: '0.9rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      textAlign: 'left'
-                    }}
-                  >
-                    <item.icon size={20} /> {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={onLogout}
-              style={{
-                backgroundColor: '#DC3545',
-                color: '#FFFFFF',
-                padding: '12px',
-                borderRadius: '12px',
-                fontWeight: 800,
-                fontSize: '0.9rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-            >
-              <LogOut size={18} /> Sign Out Session
-            </button>
-          </div>
-
-          <div style={{ flex: 1 }} onClick={() => setMobileMenuOpen(false)} />
-        </div>
-      )}
-
-      {/* MAIN CONTENT AREA WITH SIDEBAR */}
+      {/* MAIN CONTENT AREA WITH COLLAPSIBLE SIDEBAR */}
       <div style={{ flex: 1, display: 'flex', maxWidth: '1400px', width: '100%', margin: '0 auto', paddingBottom: '70px' }}>
         
-        {/* DESKTOP SIDEBAR NAVIGATION */}
+        {/* DESKTOP SIDEBAR WITH COLLAPSIBLE GROUPS (Requirement 2) */}
         <aside style={{
-          width: '240px',
+          width: '260px',
           borderRight: '1px solid var(--border-light)',
           backgroundColor: 'var(--bg-card)',
-          padding: '24px 16px',
+          padding: '20px 14px',
           display: 'flex',
           flexDirection: 'column',
           justify: 'space-between',
           flexShrink: 0
         }} className="hidden-mobile">
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 12px 8px 12px' }}>
-              Citizen Portal Navigation
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', maxHeight: 'calc(100vh - 120px)' }}>
+            {navigationGroups.map(group => {
+              const isOpen = openGroups[group.key];
+              return (
+                <div key={group.key}>
+                  {/* Collapsible Header */}
+                  <button
+                    onClick={() => toggleGroup(group.key)}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      justify: 'space-between',
+                      alignItems: 'center',
+                      padding: '4px 10px',
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '0.7rem',
+                      fontWeight: 800,
+                      color: 'var(--text-light)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.08em',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <span>{group.title}</span>
+                    <ChevronDown size={14} style={{ transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.2s' }} />
+                  </button>
 
-            {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => handleSelectTab(item.id)}
-                style={{
-                  backgroundColor: activeTab === item.id ? (isGoldTier ? '#CA8A04' : '#0B5ED7') : 'transparent',
-                  color: activeTab === item.id ? '#FFFFFF' : 'var(--text-muted)',
-                  padding: '10px 14px',
-                  borderRadius: '10px',
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  textAlign: 'left'
-                }}
-              >
-                <item.icon size={18} /> {item.label}
-              </button>
-            ))}
+                  {/* Group Nav Items */}
+                  {isOpen && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '6px' }}>
+                      {group.items.map(item => {
+                        const Icon = item.icon;
+                        const isSelected = activeTab === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => handleSelectTab(item.id)}
+                            style={{
+                              backgroundColor: isSelected ? (isGoldTier ? '#CA8A04' : '#0B5ED7') : 'transparent',
+                              color: isSelected ? '#FFFFFF' : 'var(--text-muted)',
+                              padding: '10px 14px',
+                              borderRadius: '10px',
+                              fontWeight: 700,
+                              fontSize: '0.85rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '12px',
+                              textAlign: 'left'
+                            }}
+                          >
+                            <Icon size={18} /> {item.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            <button
+              onClick={onLogout}
+              style={{
+                backgroundColor: 'var(--bg-main)',
+                color: '#DC3545',
+                border: '1px solid var(--border-light)',
+                padding: '10px 14px',
+                borderRadius: '10px',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                marginTop: '12px'
+              }}
+            >
+              <LogOut size={16} /> Sign Out Session
+            </button>
           </div>
 
-          {/* Logout Button */}
-          <button
-            onClick={onLogout}
-            style={{
-              backgroundColor: 'var(--bg-main)',
-              color: '#DC3545',
-              border: '1px solid var(--border-light)',
-              padding: '10px 14px',
-              borderRadius: '10px',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              marginTop: '24px'
-            }}
-          >
-            <LogOut size={16} /> Sign Out Session
-          </button>
         </aside>
 
         {/* MAIN DISPLAY PANEL */}
         <main style={{ flex: 1, padding: '20px 14px', overflowY: 'auto', width: '100%' }}>
           
-          {/* TAB 1: HOME DASHBOARD OVERVIEW */}
+          {/* TAB 1: CITIZEN HOME DASHBOARD (Requirements 4, 5, 6) */}
           {activeTab === 'home' && (
             <div>
               
-              {/* Main Greeting Banner */}
+              {/* Synthetic Data Notice Banner */}
+              <div style={{ backgroundColor: '#FEF3C7', border: '1px solid #FDE68A', padding: '8px 16px', borderRadius: '12px', color: '#92400E', fontSize: '0.8rem', fontWeight: 800, marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>⚠️ {currentCitizen.demoLabel || "DEMO DATA — NOT A REAL CITIZEN"}</span>
+                <span>Profile: <strong>{currentCitizen.fullName} ({currentCitizen.citizenId})</strong></span>
+              </div>
+
+              {/* Requirement 4: Top Greeting Section */}
               <div style={{
                 background: isGoldTier
                   ? 'linear-gradient(135deg, #1C190D 0%, #3B2E09 60%, #856414 100%)'
@@ -542,187 +479,137 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     {isGoldTier && <Crown size={22} style={{ color: '#FDE047' }} />}
                     <h1 style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: isGoldTier ? '#FEF08A' : 'var(--text-main)' }}>
-                      Good morning, {citizen.name}
+                      Welcome back, {currentCitizen.fullName}
                     </h1>
                   </div>
-                  <p style={{ fontSize: '0.9rem', color: isGoldTier ? '#FDE047' : '#0B5ED7', fontWeight: 700, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <CheckCircle2 size={18} style={{ color: isGoldTier ? '#FACC15' : '#198754' }} />
-                    {isGoldTier ? "Premium Gold VIP Clearance Active" : "Your digital identity is secure and verified."}
+                  <p style={{ fontSize: '0.85rem', color: isGoldTier ? 'rgba(255,255,255,0.9)' : 'var(--text-light)', marginTop: '2px' }}>
+                    CivicOne ID: <strong>{currentCitizen.citizenId}</strong> | Aadhaar Ref: <strong>{currentCitizen.maskedAadhaar}</strong>
                   </p>
-                  <p style={{ fontSize: '0.775rem', color: isGoldTier ? 'rgba(255,255,255,0.85)' : 'var(--text-light)', marginTop: '4px' }}>
-                    CivicOne ID: <strong>{citizen.civicId}</strong> | Aadhaar Ref: <strong>{citizen.maskedAadhaar}</strong>
-                  </p>
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+                    <span style={{ backgroundColor: isGoldTier ? '#CA8A04' : '#D1E7DD', color: isGoldTier ? '#FFFFFF' : '#0F5132', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <CheckCircle2 size={12} /> Identity: Verified
+                    </span>
+                    <span style={{ backgroundColor: '#DBEAFE', color: '#1E40AF', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <Shield size={12} /> Security: Protected
+                    </span>
+                    <span style={{ backgroundColor: isGoldTier ? '#FEF3C7' : '#F1F5F9', color: isGoldTier ? '#92400E' : '#475569', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800 }}>
+                      Status: {isGoldTier ? "GOLD PASS ACTIVE 👑" : "STANDARD"}
+                    </span>
+                  </div>
                 </div>
 
-                <button
-                  onClick={() => handleSelectTab('card')}
-                  className={isGoldTier ? "gold-btn" : ""}
-                  style={!isGoldTier ? {
-                    backgroundColor: '#0B5ED7',
-                    color: '#FFFFFF',
-                    padding: '10px 18px',
-                    borderRadius: '12px',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    boxShadow: '0 4px 14px rgba(11, 94, 215, 0.3)'
-                  } : {
-                    padding: '10px 18px',
-                    borderRadius: '12px',
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  <Ticket size={18} /> {isGoldTier ? "View Gold Card" : "View Civic Card"}
-                </button>
-              </div>
-
-              {/* USER-FRIENDLY QUICK ACTION BAR / SHORTCUT DOCK */}
-              <div className="quick-action-dock" style={{ marginBottom: '24px' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Quick Shortcuts:
-                </span>
-
-                <button className="quick-action-btn" onClick={() => handleSelectTab('card')}>
-                  <Crown size={16} style={{ color: '#CA8A04' }} /> Gold Card
-                </button>
-
-                <button className="quick-action-btn" onClick={() => handleSelectTab('vault')}>
-                  <FolderClosed size={16} style={{ color: '#0B5ED7' }} /> My Vault ({documents.length})
-                </button>
-
-                <button className="quick-action-btn" onClick={() => handleSelectTab('services')}>
-                  <Grid size={16} style={{ color: '#10B981' }} /> Public Services
-                </button>
-
-                <button className="quick-action-btn" onClick={() => { setTourStep(1); setShowTourModal(true); }}>
-                  <Sparkles size={16} style={{ color: '#8B5CF6' }} /> Guided Tour 💡
-                </button>
-              </div>
-
-              {/* TWO COLUMN GRID: VIRTUAL CARD PREVIEW + QUICK STATS */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '28px' }}>
-                
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {isGoldTier ? <Crown size={18} style={{ color: '#CA8A04' }} /> : <Ticket size={18} style={{ color: '#0B5ED7' }} />}
-                      {isGoldTier ? "Premium Gold Card" : "Virtual Civic Card"}
-                    </h2>
-                    <button onClick={() => handleSelectTab('card')} style={{ background: 'none', color: isGoldTier ? '#CA8A04' : '#0B5ED7', fontSize: '0.8rem', fontWeight: 800 }}>
-                      Manage <ChevronRight size={14} style={{ display: 'inline' }} />
+                  {!isGoldTier ? (
+                    <button
+                      onClick={() => handleSelectTab('gold-pass')}
+                      style={{ backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 20px', borderRadius: '14px', fontWeight: 900, fontSize: '0.875rem', boxShadow: '0 4px 14px rgba(202, 138, 4, 0.4)' }}
+                    >
+                      👑 Upgrade to Gold Pass
                     </button>
-                  </div>
-                  
-                  <VirtualCard
-                    citizen={citizen}
-                    card={cardData || DEMO_CARD}
-                    onNavigateToVerification={onNavigateToVerification}
-                    onCardUpdate={(updatedCard) => setCardData(updatedCard)}
-                  />
-                </div>
-
-                {/* QUICK VAULT STATS & EXPIRY ALERTS */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                      Vault Summary
-                    </h2>
-                    <button onClick={() => handleSelectTab('vault')} style={{ background: 'none', color: '#0B5ED7', fontSize: '0.8rem', fontWeight: 700 }}>
-                      View All ({documents.length}) <ChevronRight size={14} style={{ display: 'inline' }} />
-                    </button>
-                  </div>
-
-                  <div style={{
-                    backgroundColor: 'var(--bg-card)',
-                    borderRadius: '16px',
-                    padding: '16px',
-                    border: '1px solid var(--border-light)',
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '12px'
-                  }}>
-                    <div style={{ backgroundColor: 'var(--bg-main)', padding: '12px', borderRadius: '12px' }}>
-                      <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0B5ED7' }}>
-                        {documents.filter(d => d.status === 'Verified').length}
-                      </div>
-                      <div style={{ fontSize: '0.725rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                        Verified Credentials
-                      </div>
+                  ) : (
+                    <div style={{ textAlign: 'right', fontSize: '0.8rem', color: '#FDE047', fontWeight: 700 }}>
+                      <div>Activated: 14 Aug 2026</div>
+                      <div>Valid: 14 Aug 2027</div>
                     </div>
-
-                    <div style={{ backgroundColor: 'var(--bg-main)', padding: '12px', borderRadius: '12px' }}>
-                      <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#F59E0B' }}>
-                        {documents.filter(d => d.status === 'Pending Verification').length}
-                      </div>
-                      <div style={{ fontSize: '0.725rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                        Pending Audit
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Document Expiry Alert Banner */}
-                  <div style={{
-                    backgroundColor: '#FEF3C7',
-                    border: '1px solid #FDE68A',
-                    borderRadius: '16px',
-                    padding: '14px',
-                    color: '#92400E',
-                    fontSize: '0.825rem'
-                  }}>
-                    <strong style={{ display: 'block', fontSize: '0.85rem', marginBottom: '2px' }}>
-                      ⚡ Document Validity Alert
-                    </strong>
-                    Driving Licence (MH02 20180094821) is active and valid until 14-10-2028.
-                  </div>
+                  )}
                 </div>
-
               </div>
 
-              {/* QUICK RECENT DOCUMENTS PREVIEW */}
-              <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '20px', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                  <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                    Recent Credentials
-                  </h2>
-                  <button onClick={() => handleSelectTab('vault')} style={{ background: 'none', color: '#0B5ED7', fontSize: '0.8rem', fontWeight: 700 }}>
-                    Open Vault
-                  </button>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-                  {documents.slice(0, 3).map(doc => (
-                    <div key={doc.id} style={{ backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-light)' }}>
-                      <div style={{ fontSize: '0.725rem', color: '#0B5ED7', fontWeight: 700 }}>{doc.category}</div>
-                      <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-main)', marginTop: '2px' }}>{doc.name}</div>
-                      <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', marginTop: '4px' }}>Issuer: {doc.issuer}</div>
-                    </div>
+              {/* Requirement 5: Clean Large Touch-Friendly Quick Actions */}
+              <div style={{ marginBottom: '24px' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
+                  Quick Actions:
+                </span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
+                  {[
+                    { label: 'View Civic Card', icon: Ticket, action: () => handleSelectTab('card'), color: '#0B5ED7' },
+                    { label: 'Open Vault', icon: FolderClosed, action: () => handleSelectTab('vault'), color: '#059669' },
+                    { label: 'Verify Document', icon: CheckCircle2, action: () => handleSelectTab('vault'), color: '#7C3AED' },
+                    { label: 'Share Access', icon: Share2, action: () => handleSelectTab('privacy'), color: '#DC2626' },
+                    { label: 'Check Services', icon: Grid, action: () => handleSelectTab('services'), color: '#D97706' },
+                    { label: 'Travel', icon: Plane, action: () => handleSelectTab('travel'), color: '#0284C7' },
+                    { label: 'CivicOne World', icon: Compass, action: () => handleSelectTab('tourism'), color: '#166534' },
+                    { label: 'Ask AI', icon: Sparkles, action: () => handleSelectTab('help'), color: '#8B5CF6' }
+                  ].map((act, i) => (
+                    <button
+                      key={i}
+                      onClick={act.action}
+                      style={{
+                        backgroundColor: 'var(--bg-card)',
+                        border: '1px solid var(--border-light)',
+                        borderRadius: '16px',
+                        padding: '14px 10px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        cursor: 'pointer',
+                        boxShadow: 'var(--shadow-sm)',
+                        minHeight: '84px'
+                      }}
+                      className="hover-card"
+                    >
+                      <act.icon size={22} style={{ color: act.color }} />
+                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-main)', textAlign: 'center' }}>{act.label}</span>
+                    </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Requirement 6: Important Citizen Information Widgets */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '28px' }}>
+                <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)' }}>
+                  <span style={{ fontSize: '0.725rem', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase' }}>Identity Verification</span>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#059669', marginTop: '4px' }}>🟢 Verified</div>
+                </div>
+
+                <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)' }}>
+                  <span style={{ fontSize: '0.725rem', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase' }}>Vault Credentials</span>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0B5ED7', marginTop: '4px' }}>{documents.length} Verified Docs</div>
+                </div>
+
+                <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)' }}>
+                  <span style={{ fontSize: '0.725rem', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase' }}>Security Status</span>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#1E40AF', marginTop: '4px' }}>🔒 Protected</div>
+                </div>
+
+                <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)' }}>
+                  <span style={{ fontSize: '0.725rem', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase' }}>Active Org Access</span>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#D97706', marginTop: '4px' }}>2 Authorized Orgs</div>
+                </div>
+
+                <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)' }}>
+                  <span style={{ fontSize: '0.725rem', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase' }}>Notifications</span>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#DC2626', marginTop: '4px' }}>{unreadNotifCount} Unread</div>
+                </div>
+
+                <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)' }}>
+                  <span style={{ fontSize: '0.725rem', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase' }}>Gold Pass Status</span>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: isGoldTier ? '#CA8A04' : '#64748B', marginTop: '4px' }}>
+                    {isGoldTier ? "Active 👑" : "Not Active"}
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD PREVIEW */}
+              <div style={{ maxWidth: '540px', margin: '0 auto' }}>
+                <VirtualCard
+                  citizen={currentCitizen}
+                  card={cardData || DEMO_CARD}
+                  onNavigateToVerification={onNavigateToVerification}
+                  onCardUpdate={(updatedCard) => setCardData(updatedCard)}
+                />
               </div>
 
             </div>
           )}
 
-          {/* TAB 2: VIRTUAL CIVICONE CARD FULL VIEW */}
+          {/* TAB 2: VIRTUAL CIVIC CARD */}
           {activeTab === 'card' && (
             <div style={{ maxWidth: '520px', margin: '0 auto', paddingTop: '12px' }}>
-              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  {isGoldTier ? <Crown size={26} style={{ color: '#CA8A04' }} /> : <ShieldCheck size={26} style={{ color: '#0B5ED7' }} />}
-                  CivicOne Digital Card
-                </h1>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Tamper-proof national digital identity credential with NFC &amp; Dynamic QR verification.
-                </p>
-              </div>
-
               <VirtualCard
-                citizen={citizen}
+                citizen={currentCitizen}
                 card={cardData || DEMO_CARD}
                 onNavigateToVerification={onNavigateToVerification}
                 onCardUpdate={(updatedCard) => setCardData(updatedCard)}
@@ -730,99 +617,37 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
             </div>
           )}
 
-          {/* TAB 3: MY CIVIC VAULT */}
+          {/* TAB 3: DIGITAL VAULT */}
           {activeTab === 'vault' && (
             <CivicVault documents={documents} />
           )}
 
-          {/* TAB 4: SERVICES */}
+          {/* TAB 4: PRIVACY & ACCESS CONSENT */}
+          {activeTab === 'privacy' && (
+            <PrivacyCenter citizen={currentCitizen} />
+          )}
+
+          {/* TAB 5: CIVICONE WORLD TOURISM GUIDE */}
+          {activeTab === 'tourism' && (
+            <TourismGuide
+              onSelectTravelBooking={(city) => {
+                setTargetTravelCity(city);
+                setActiveTab('travel');
+              }}
+            />
+          )}
+
+          {/* TAB 6: BOOK & TRAVEL GLOBAL HUB */}
+          {activeTab === 'travel' && (
+            <TravelBookingHub citizen={currentCitizen} initialDestination={targetTravelCity} />
+          )}
+
+          {/* TAB 7: PUBLIC SERVICES */}
           {activeTab === 'services' && (
             <ServicesSection />
           )}
 
-          {/* TAB: MY APPLICATIONS & SERVICE TRACKING */}
-          {activeTab === 'applications' && (
-            <div style={{ maxWidth: '1000px', margin: '0 auto', paddingTop: '12px' }}>
-              <div style={{ marginBottom: '24px' }}>
-                <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-main)' }}>
-                  My Service Applications &amp; Status Tracking
-                </h1>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Track active government service submissions, verification progress, and department clearance references.
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {[
-                  {
-                    id: 'app-01',
-                    service: 'Driving Licence Renewal',
-                    provider: 'Parivahan Sewa — Ministry of Road Transport & Highways',
-                    refNo: 'RTO-REF-984210',
-                    appliedAt: '12 Aug 2026',
-                    status: 'SUBMITTED / IN PROGRESS',
-                    statusColor: '#0B5ED7',
-                    step: 2,
-                    notes: 'Authorized using verified Smart DL vault credential. Department verification in progress.'
-                  },
-                  {
-                    id: 'app-02',
-                    service: 'Voter ID E-EPIC Digital Download',
-                    provider: 'Election Commission of India',
-                    refNo: 'EPIC-REQ-421089',
-                    appliedAt: '10 Aug 2026',
-                    status: 'APPROVED & ISSUED',
-                    statusColor: '#0F5132',
-                    step: 3,
-                    notes: 'Digital EPIC record verified. Credential synced to your CivicOne Vault.'
-                  },
-                  {
-                    id: 'app-03',
-                    service: 'ABHA Health Account Sync',
-                    provider: 'National Health Authority (NHA)',
-                    refNo: 'ABHA-SYNC-984211',
-                    appliedAt: '08 Aug 2026',
-                    status: 'COMPLETED',
-                    statusColor: '#0F5132',
-                    step: 3,
-                    notes: 'Encrypted ABHA ID linked to profile with citizen consent.'
-                  }
-                ].map(app => (
-                  <div key={app.id} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '24px', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
-                      <div>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>{app.service}</h3>
-                        <span style={{ fontSize: '0.8rem', color: '#0B5ED7', fontWeight: 700 }}>{app.provider}</span>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ backgroundColor: app.step === 3 ? '#D1E7DD' : '#CFE2FF', color: app.statusColor, padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800 }}>
-                          ● {app.status}
-                        </span>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginTop: '4px' }}>Tracking Ref: <code>{app.refNo}</code></div>
-                      </div>
-                    </div>
-
-                    <div style={{ backgroundColor: 'var(--bg-main)', padding: '14px', borderRadius: '14px', border: '1px solid var(--border-light)', fontSize: '0.825rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
-                      💡 {app.notes}
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', fontSize: '0.725rem', fontWeight: 800 }}>
-                      <div style={{ padding: '6px', borderRadius: '8px', backgroundColor: '#D1E7DD', color: '#0F5132', textAlign: 'center' }}>✓ 1. Submitted</div>
-                      <div style={{ padding: '6px', borderRadius: '8px', backgroundColor: app.step >= 2 ? '#D1E7DD' : '#F1F5F9', color: app.step >= 2 ? '#0F5132' : '#64748B', textAlign: 'center' }}>
-                        {app.step >= 2 ? '✓ 2. Dept Processing' : '2. Dept Processing'}
-                      </div>
-                      <div style={{ padding: '6px', borderRadius: '8px', backgroundColor: app.step === 3 ? '#D1E7DD' : '#F1F5F9', color: app.step === 3 ? '#0F5132' : '#64748B', textAlign: 'center' }}>
-                        {app.step === 3 ? '✓ 3. Credential Issued' : '3. Credential Issued'}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB: GOLD PASS ENTITLEMENT & UPGRADE */}
+          {/* TAB 8: GOLD PASS ENTITLEMENT */}
           {activeTab === 'gold-pass' && (
             <div style={{ maxWidth: '900px', margin: '0 auto', paddingTop: '12px' }}>
               <div style={{ textAlign: 'center', marginBottom: '24px' }}>
@@ -832,338 +657,152 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)' }}>
                   Unlock Premium Identity Credentials
                 </h1>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Enhanced citizen card styling, priority verification engine, and advanced security capabilities.
-                </p>
               </div>
 
-              {/* ENTITLEMENT STATUS BANNER */}
               <div style={{
-                backgroundColor: goldPassStatus === 'active' ? '#FEF3C7' : goldPassStatus === 'pending' ? '#FEF9C3' : 'var(--bg-card)',
+                backgroundColor: goldPassStatus === 'active' ? '#FEF3C7' : 'var(--bg-card)',
                 borderRadius: '20px', padding: '24px', border: goldPassStatus === 'active' ? '2px solid #FACC15' : '1px solid var(--border-light)',
                 marginBottom: '24px', boxShadow: 'var(--shadow-md)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                   <div>
                     <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-light)', textTransform: 'uppercase' }}>
-                      Account Entitlement Status:
+                      Account Status:
                     </div>
-                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: goldPassStatus === 'active' ? '#856414' : goldPassStatus === 'pending' ? '#854D0E' : 'var(--text-main)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: goldPassStatus === 'active' ? '#856414' : 'var(--text-main)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {goldPassStatus === 'active' && <Crown size={24} style={{ color: '#CA8A04' }} />}
-                      {goldPassStatus === 'active' ? "Gold Pass Active 👑" : goldPassStatus === 'pending' ? "Application Pending Verification ⏳" : goldPassStatus === 'expired' ? "Gold Pass Expired" : "Standard CivicOne Account"}
+                      {goldPassStatus === 'active' ? "GOLD PASS ACTIVE 👑" : "STANDARD ACCOUNT"}
                     </div>
-                    <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      {goldPassStatus === 'active' ? "Valid until 14 Aug 2027. Premium Gold Citizen features activated." : goldPassStatus === 'pending' ? "Payment reference received. Awaiting administrative entitlement verification." : "Standard verification features active. Upgrade anytime."}
-                    </p>
                   </div>
 
-                  {goldPassStatus === 'standard' && (
+                  {goldPassStatus !== 'active' && (
                     <button
                       onClick={() => setShowPaymentModal(true)}
-                      style={{
-                        backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 24px', borderRadius: '14px',
-                        fontWeight: 900, fontSize: '0.95rem', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(202, 138, 4, 0.4)'
-                      }}
+                      style={{ backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 24px', borderRadius: '14px', fontWeight: 900, fontSize: '0.95rem' }}
                     >
                       Get Gold Pass (₹499/yr)
                     </button>
                   )}
                 </div>
-
-                {goldPassMessage && (
-                  <div style={{ marginTop: '16px', backgroundColor: '#FEF3C7', color: '#92400E', padding: '12px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 700 }}>
-                    ⚡ {goldPassMessage}
-                  </div>
-                )}
-              </div>
-
-              {/* BENEFITS GRID */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-                {[
-                  { title: 'Gold Citizen Card', desc: 'Distinctive gold emblem, premium holographic styling & gold status badge.' },
-                  { title: 'Priority Verification', desc: 'Instant priority queue processing for all document verification requests.' },
-                  { title: 'Unlimited Consent Sharing', desc: 'Generate watermarked recipient-bound sharing tokens with no monthly limit.' },
-                  { title: 'Identity Concierge AI', desc: '24/7 priority support for document retrieval and government application guidance.' }
-                ].map((b, idx) => (
-                  <div key={idx} style={{ backgroundColor: 'var(--bg-card)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-                    <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)', marginBottom: '4px' }}>{b.title}</div>
-                    <div style={{ fontSize: '0.825rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>{b.desc}</div>
-                  </div>
-                ))}
               </div>
             </div>
           )}
 
-          {/* TAB: MY ACTIVITY AUDIT LOGS */}
-          {activeTab === 'activity' && (
-            <div style={{ maxWidth: '1000px', margin: '0 auto', paddingTop: '12px' }}>
-              <div style={{ marginBottom: '24px' }}>
-                <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-main)' }}>
-                  My Activity & Audit History
-                </h1>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Complete cryptographic audit trail of all logins, document accesses, consent decisions, and verification events.
-                </p>
-              </div>
-
-              <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '20px', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {[
-                    { id: 'act-01', event: 'Citizen Login — Identity Verified via OTP', device: 'Chrome Web Client (Windows)', location: 'Mumbai, MH', ip: '49.37.142.90', timestamp: 'Today, 09:00 AM', status: 'SUCCESS' },
-                    { id: 'act-02', event: 'CivicOne Vault Accessed', device: 'Chrome Web Client (Windows)', location: 'Mumbai, MH', ip: '49.37.142.90', timestamp: 'Today, 09:05 AM', status: 'SUCCESS' },
-                    { id: 'act-03', event: 'Driving Licence Credential Verified', device: 'Parivahan API Connector', location: 'New Delhi (MoRTH)', ip: '164.100.42.10', timestamp: 'Yesterday, 02:30 PM', status: 'VERIFIED' },
-                    { id: 'act-04', event: 'QR Verification Token Generated', device: 'Chrome Web Client (Windows)', location: 'Mumbai, MH', ip: '49.37.142.90', timestamp: '11 Aug 2026', status: 'SUCCESS' }
-                  ].map(log => (
-                    <div key={log.id} style={{ backgroundColor: 'var(--bg-main)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)' }}>{log.event}</div>
-                        <div style={{ fontSize: '0.775rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                          Device: {log.device} | Location: {log.location} | IP: <code>{log.ip}</code>
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ backgroundColor: '#D1E7DD', color: '#0F5132', padding: '2px 8px', borderRadius: '6px', fontSize: '0.725rem', fontWeight: 800 }}>
-                          {log.status}
-                        </span>
-                        <div style={{ fontSize: '0.725rem', color: 'var(--text-light)', marginTop: '4px' }}>{log.timestamp}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 5 & 6: GOVERNMENT UPDATES & DAILY NEWS */}
+          {/* TAB: GOVT UPDATES & DAILY NEWS */}
           {(activeTab === 'govt-updates' || activeTab === 'news') && (
-            <UpdatesAndNews
-              govtUpdates={govtUpdates}
-              dailyNews={dailyNews}
-              initialTab={activeTab === 'news' ? 'news' : 'govt'}
-            />
+            <UpdatesAndNews govtUpdates={govtUpdates} dailyNews={dailyNews} initialTab={activeTab === 'news' ? 'news' : 'govt'} />
           )}
 
-          {/* TAB 7: SECURITY CENTRE */}
+          {/* TAB: SECURITY CENTRE */}
           {activeTab === 'security' && (
             <SecurityCentre />
           )}
 
-          {/* TAB 8: HELP CENTRE */}
+          {/* TAB: HELP CENTRE */}
           {activeTab === 'help' && (
             <HelpCentre />
           )}
 
-          {/* TAB 9: PROFILE SETTINGS */}
+          {/* TAB: PROFILE SETTINGS */}
           {activeTab === 'profile' && (
-            <ProfileSettings citizen={citizen} onLogout={onLogout} card={cardData} onCardUpdate={(updatedCard) => setCardData(updatedCard)} />
+            <ProfileSettings citizen={currentCitizen} onLogout={onLogout} card={cardData} onCardUpdate={(updatedCard) => setCardData(updatedCard)} />
           )}
 
         </main>
       </div>
 
-      {/* MOBILE BOTTOM NAVIGATION BAR (MOBILE ONLY) */}
+      {/* Requirement 3: MOBILE BOTTOM NAVIGATION (Home | Vault | Card | Services | More) */}
       <nav className="mobile-bottom-nav mobile-only">
-        <button
-          className={`mobile-bottom-nav-item ${activeTab === 'home' ? 'active' : ''}`}
-          onClick={() => handleSelectTab('home')}
-        >
+        <button className={`mobile-bottom-nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => handleSelectTab('home')}>
           <LayoutDashboard size={20} />
           <span>Home</span>
         </button>
 
-        <button
-          className={`mobile-bottom-nav-item ${activeTab === 'vault' ? 'active' : ''}`}
-          onClick={() => handleSelectTab('vault')}
-        >
+        <button className={`mobile-bottom-nav-item ${activeTab === 'vault' ? 'active' : ''}`} onClick={() => handleSelectTab('vault')}>
           <FolderClosed size={20} />
           <span>Vault</span>
         </button>
 
-        <button
-          className={`mobile-bottom-nav-item ${activeTab === 'card' ? 'active' : ''}`}
-          onClick={() => handleSelectTab('card')}
-        >
+        <button className={`mobile-bottom-nav-item ${activeTab === 'card' ? 'active' : ''}`} onClick={() => handleSelectTab('card')}>
           <Ticket size={20} style={{ color: isGoldTier ? '#CA8A04' : '#0B5ED7' }} />
-          <span style={{ color: isGoldTier ? '#CA8A04' : '' }}>Card</span>
+          <span>Card</span>
         </button>
 
-        <button
-          className={`mobile-bottom-nav-item ${activeTab === 'services' ? 'active' : ''}`}
-          onClick={() => handleSelectTab('services')}
-        >
+        <button className={`mobile-bottom-nav-item ${activeTab === 'services' ? 'active' : ''}`} onClick={() => handleSelectTab('services')}>
           <Grid size={20} />
           <span>Services</span>
         </button>
 
-        <button
-          className={`mobile-bottom-nav-item ${activeTab === 'profile' ? 'active' : ''}`}
-          onClick={() => handleSelectTab('profile')}
-        >
-          <User size={20} />
-          <span>Profile</span>
+        <button className={`mobile-bottom-nav-item ${mobileMoreDrawerOpen ? 'active' : ''}`} onClick={() => setMobileMoreDrawerOpen(true)}>
+          <MoreHorizontal size={20} />
+          <span>More</span>
         </button>
       </nav>
 
-      {/* EASY GUIDED TOUR MODAL */}
-      {showTourModal && (
+      {/* MOBILE "MORE" DRAWER MENU (Requirement 3) */}
+      {mobileMoreDrawerOpen && (
         <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.75)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: '16px'
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(11, 31, 58, 0.8)', backdropFilter: 'blur(8px)',
+          zIndex: 200, display: 'flex', justifyContent: 'flex-end'
         }}>
-          <div style={{
-            backgroundColor: '#FFFFFF',
-            borderRadius: '24px',
-            padding: '24px',
-            maxWidth: '440px',
-            width: '100%',
-            position: 'relative'
+          <div className="drawer-slide-in" style={{
+            width: '300px', height: '100%', backgroundColor: 'var(--bg-card)', padding: '24px 16px',
+            display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflowY: 'auto'
           }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <strong style={{ fontSize: '1.1rem', color: 'var(--text-main)' }}>CivicOne Features</strong>
+                <button onClick={() => setMobileMoreDrawerOpen(false)} style={{ background: 'none', color: 'var(--text-muted)' }}><X size={22} /></button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {[
+                  { id: 'gold-pass', label: 'Gold Pass', icon: Crown },
+                  { id: 'activity', label: 'My Activity', icon: Activity },
+                  { id: 'privacy', label: 'Access & Consent', icon: Lock },
+                  { id: 'tourism', label: 'CivicOne World', icon: Compass },
+                  { id: 'travel', label: 'Travel & Bookings', icon: Plane },
+                  { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
+                  { id: 'news', label: 'Daily News', icon: Newspaper },
+                  { id: 'security', label: 'Security Centre', icon: Shield },
+                  { id: 'privacy', label: 'Privacy Centre', icon: Lock },
+                  { id: 'help', label: 'Help Centre', icon: HelpCircle },
+                  { id: 'profile', label: 'Profile Settings', icon: User }
+                ].map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleSelectTab(item.id)}
+                    style={{
+                      padding: '12px 14px', borderRadius: '10px', fontWeight: 700, fontSize: '0.875rem',
+                      display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left',
+                      backgroundColor: activeTab === item.id ? '#0B5ED7' : 'transparent',
+                      color: activeTab === item.id ? '#FFFFFF' : 'var(--text-main)'
+                    }}
+                  >
+                    <item.icon size={18} /> {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
-              onClick={() => setShowTourModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', color: '#64748B' }}
+              onClick={onLogout}
+              style={{
+                backgroundColor: '#DC3545', color: '#FFFFFF', padding: '12px', borderRadius: '12px',
+                fontWeight: 800, fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '20px'
+              }}
             >
-              <X size={20} />
+              <LogOut size={18} /> Sign Out
             </button>
-
-            {/* TOUR STEP 1 */}
-            {tourStep === 1 && (
-              <div style={{ textAlign: 'center' }}>
-                <div style={{
-                  width: '56px', height: '56px', borderRadius: '18px',
-                  background: 'linear-gradient(135deg, #EAB308 0%, #CA8A04 100%)',
-                  color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 14px auto', boxShadow: '0 8px 20px rgba(202, 138, 4, 0.3)'
-                }}>
-                  <Crown size={28} />
-                </div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '8px' }}>
-                  Welcome to Premium Gold CivicOne!
-                </h3>
-                <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.5, marginBottom: '20px' }}>
-                  Your portal features the **Premium Gold Virtual Card** tier, giving you VIP priority clearance and encrypted digital credentials.
-                </p>
-              </div>
-            )}
-
-            {/* TOUR STEP 2 */}
-            {tourStep === 2 && (
-              <div style={{ textAlign: 'center' }}>
-                <div style={{
-                  width: '56px', height: '56px', borderRadius: '18px',
-                  backgroundColor: '#0B5ED7', color: '#FFFFFF',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 14px auto', boxShadow: '0 8px 20px rgba(11, 94, 215, 0.3)'
-                }}>
-                  <FolderClosed size={28} />
-                </div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '8px' }}>
-                  My Civic Vault Storage
-                </h3>
-                <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.5, marginBottom: '20px' }}>
-                  Store & organize all your official documents (Aadhaar, PAN, Driving Licence, ABHA, Degrees) with cryptographic verification.
-                </p>
-              </div>
-            )}
-
-            {/* TOUR STEP 3 */}
-            {tourStep === 3 && (
-              <div style={{ textAlign: 'center' }}>
-                <div style={{
-                  width: '56px', height: '56px', borderRadius: '18px',
-                  backgroundColor: '#10B981', color: '#FFFFFF',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 14px auto', boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3)'
-                }}>
-                  <Radio size={28} />
-                </div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '8px' }}>
-                  Instant NFC & QR Verification
-                </h3>
-                <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.5, marginBottom: '20px' }}>
-                  Tap your phone via NFC or display your dynamic QR code for instant zero-paper identity verification.
-                </p>
-              </div>
-            )}
-
-            {/* TOUR STEP 4 */}
-            {tourStep === 4 && (
-              <div style={{ textAlign: 'center' }}>
-                <div style={{
-                  width: '56px', height: '56px', borderRadius: '18px',
-                  backgroundColor: '#8B5CF6', color: '#FFFFFF',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 14px auto', boxShadow: '0 8px 20px rgba(139, 92, 246, 0.3)'
-                }}>
-                  <Share2 size={28} />
-                </div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '8px' }}>
-                  Passcoded Credential Sharing
-                </h3>
-                <p style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.5, marginBottom: '20px' }}>
-                  Share time-limited, passcoded links with banks, employers, or RTO without revealing raw document numbers.
-                </p>
-              </div>
-            )}
-
-            {/* PROGRESS DOTS */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '18px' }}>
-              {[1, 2, 3, 4].map(step => (
-                <div key={step} style={{
-                  width: '8px', height: '8px', borderRadius: '50%',
-                  backgroundColor: tourStep === step ? '#0B5ED7' : '#E2E8F0'
-                }} />
-              ))}
-            </div>
-
-            {/* TOUR CONTROLS */}
-            <div style={{ display: 'flex', gap: '10px' }}>
-              {tourStep > 1 && (
-                <button
-                  onClick={() => setTourStep(tourStep - 1)}
-                  style={{
-                    flex: 1, backgroundColor: '#F1F5F9', color: '#475569',
-                    padding: '10px', borderRadius: '12px', fontWeight: 700
-                  }}
-                >
-                  Back
-                </button>
-              )}
-              {tourStep < 4 ? (
-                <button
-                  onClick={() => setTourStep(tourStep + 1)}
-                  style={{
-                    flex: 1, backgroundColor: '#0B5ED7', color: '#FFFFFF',
-                    padding: '10px', borderRadius: '12px', fontWeight: 800,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
-                  }}
-                >
-                  Next <ArrowRight size={16} />
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowTourModal(false)}
-                  style={{
-                    flex: 1, backgroundColor: '#10B981', color: '#FFFFFF',
-                    padding: '10px', borderRadius: '12px', fontWeight: 800
-                  }}
-                >
-                  Explore 🚀
-                </button>
-              )}
-            </div>
           </div>
+
+          <div style={{ flex: 1 }} onClick={() => setMobileMoreDrawerOpen(false)} />
         </div>
       )}
 
-      {/* FLOATING CIVICONE AI ASSISTANT */}
-      <AiAgentFloating citizen={citizen} documents={documents} />
+      {/* FLOATING AI ASSISTANT */}
+      <AiAgentFloating citizen={currentCitizen} documents={documents} />
 
       {/* GOLD PASS SECURE CHECKOUT PAYMENT MODAL */}
       <GoldPassPaymentModal

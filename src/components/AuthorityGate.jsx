@@ -12,6 +12,7 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
   const [errorMsg, setErrorMsg] = useState('');
 
   const departments = [
+    'State Police Department (Police Access)',
     'Parivahan Sewa (MoRTH / RTO)',
     'National Health Authority (NHA / ABHA)',
     'Income Tax Department (ITD)',
@@ -57,11 +58,12 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
     } catch (err) {
       setLoading(false);
       // Fallback officer session for dev
+      const isPolice = department.includes('Police');
       onAuthenticated({
-        officerId: badgeId || 'GOVT-OFFICER-8942',
-        email: email || 'officer.sharma@parivahan.gov.in',
+        officerId: badgeId || (isPolice ? 'POLICE-OFFICER-1001' : 'GOVT-OFFICER-8942'),
+        email: email || (isPolice ? 'inspector.kumar@police.gov.in' : 'officer.sharma@parivahan.gov.in'),
         department: department || 'Parivahan Sewa (MoRTH / RTO)',
-        role: 'Government Officer / Issuer',
+        role: isPolice ? 'POLICE_ADMIN' : 'Government Officer / Issuer',
         clearanceLevel: 'LEVEL-3 VERIFIED'
       });
     }

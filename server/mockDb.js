@@ -1,656 +1,1020 @@
-// server/mockDb.js - Relational In-Memory Multi-Citizen Database & Verification State Engine
+// server/mockDb.js - Relational Synthetic In-Memory Multi-Citizen Database & Access Control Engine
 
 export const db = {
-  // Active Authenticated Citizen ID (Default: CIV-100001 - Rajesh Kumar)
-  activeCitizenId: "CIV-100001",
+  // Active Authenticated Citizen ID (Default: CIV-DEMO-10001 - Aarav Kumar)
+  activeCitizenId: "CIV-DEMO-10001",
 
-  // 1. MASTER CITIZEN DATASET (20 Relational Citizens)
+  // 1. MASTER SYNTHETIC CITIZEN DATASET (Clearly Marked Synthetic / Demo Records)
   citizens: [
     {
-      id: "cit-101",
-      citizenId: "CIV-100001",
-      fullName: "Rajesh Kumar",
-      displayName: "Rajesh",
-      dateOfBirth: "15-08-1992",
+      id: "cit-demo-10001",
+      citizenId: "CIV-DEMO-10001",
+      fullName: "Aarav Kumar",
+      displayName: "Aarav",
+      dateOfBirth: "15-07-2004",
       gender: "Male",
-      profileImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400",
-      mobileMasked: "+91 98765 43210",
-      emailMasked: "rajesh.kumar@civicone.gov.in",
-      addressSummary: "Flat 402, Green Valley Towers, Bandra West, Mumbai 400050",
-      trustLevel: "Standard Verified Citizen",
-      verificationStatus: "VERIFIED",
-      securityScore: 98,
-      createdAt: "2026-01-15T09:30:00Z",
-      virtualCardId: "VCD-STD-100001",
+      profileImage: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=400",
+      mobile: "+91-90000-00001",
+      mobileMasked: "+91 90000 00001",
+      email: "aarav.demo@civicone.example",
+      emailMasked: "aarav.demo@civicone.example",
+      address: "Door 4-12, MG Road, Vijayawada, Andhra Pradesh 520002",
+      addressSummary: "Vijayawada, Andhra Pradesh",
+      state: "Andhra Pradesh",
+      trustLevel: "Verified Demo Citizen",
+      verificationStatus: "Verified Demo",
+      securityScore: 99,
+      createdAt: "2026-01-10T08:00:00Z",
+      virtualCardId: "VCD-STD-10001",
       virtualCardStatus: "ACTIVE",
       tier: "STANDARD",
       goldPassStatus: "standard",
       bloodGroup: "O+",
-      emergencyContact: "+91 9812345678 (Spouse - Priya Kumar)",
-      maskedAadhaar: "XXXX XXXX 8942"
+      emergencyContact: "+91 90000 00099 (Parent - Ramesh Kumar)",
+      maskedAadhaar: "XXXX XXXX 1001",
+      isDemo: true,
+      demoLabel: "DEMO DATA — NOT A REAL CITIZEN",
+      educationInfo: {
+        institution: "CivicOne Demo Institute",
+        course: "B.Tech Computer Science",
+        year: "2023–2027",
+        status: "Pursuing",
+        school: "CivicOne Model School",
+        transferCertificate: "Available",
+        marksheets: "Available"
+      },
+      governmentInfo: {
+        voterId: "DEMO-VOTER-10001",
+        drivingLicence: "DEMO-DL-10001"
+      },
+      rtoInfo: {
+        vehicleRegistration: "AP-DEMO-1001",
+        vehicleModel: "TVS Jupiter 125 (Blue)",
+        validUntil: "2028-12-31"
+      },
+      healthcareInfo: {
+        abhaId: "ABHA-DEMO-10001-90",
+        bloodGroup: "O+",
+        allergies: "None Reported (Synthetic Record)",
+        lastHealthCheck: "15 Jan 2026"
+      },
+      travelInfo: {
+        passport: "DEMO-PASS-10001",
+        passportExpiry: "2034-05-20"
+      }
     },
     {
-      id: "cit-102",
-      citizenId: "CIV-100002",
-      fullName: "Ananya Sharma",
-      displayName: "Ananya",
-      dateOfBirth: "14-08-1994",
+      id: "cit-demo-10002",
+      citizenId: "CIV-DEMO-10002",
+      fullName: "Priya Sharma",
+      displayName: "Priya",
+      dateOfBirth: "22-09-2002",
       gender: "Female",
       profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
-      mobileMasked: "+91 98123 45678",
-      emailMasked: "ananya.sharma@civicone.gov.in",
-      addressSummary: "Flat 12B, Ocean View Apts, Worli, Mumbai 400018",
-      trustLevel: "VIP Tier Gold",
-      verificationStatus: "VERIFIED",
-      securityScore: 96,
-      createdAt: "2026-01-20T10:15:00Z",
-      virtualCardId: "VCD-GOLD-100002",
+      mobile: "+91-90000-00002",
+      mobileMasked: "+91 90000 00002",
+      email: "priya.demo@civicone.example",
+      emailMasked: "priya.demo@civicone.example",
+      address: "Flat 302, Cyber Heights, Gachibowli, Hyderabad, Telangana 500032",
+      addressSummary: "Hyderabad, Telangana",
+      state: "Telangana",
+      trustLevel: "Verified Demo Citizen",
+      verificationStatus: "Verified Demo",
+      securityScore: 97,
+      createdAt: "2026-01-12T10:30:00Z",
+      virtualCardId: "VCD-GOLD-10002",
       virtualCardStatus: "ACTIVE",
       tier: "GOLD",
+      goldPassStatus: "active",
+      goldPassExpiry: "2027-08-14",
       bloodGroup: "A+",
-      emergencyContact: "+91 9898765432 (Father - Rajendra Sharma)",
-      maskedAadhaar: "XXXX XXXX 1029"
+      emergencyContact: "+91 90000 00088 (Father - S. Sharma)",
+      maskedAadhaar: "XXXX XXXX 1002",
+      isDemo: true,
+      demoLabel: "DEMO DATA — NOT A REAL CITIZEN",
+      educationInfo: {
+        institution: "CivicOne Tech University",
+        course: "M.Tech Data Science",
+        year: "2024–2026",
+        status: "Graduated",
+        school: "Hyderabad Public Model School",
+        transferCertificate: "Available",
+        marksheets: "Available"
+      },
+      governmentInfo: {
+        voterId: "DEMO-VOTER-10002",
+        drivingLicence: "DEMO-DL-10002"
+      },
+      rtoInfo: {
+        vehicleRegistration: "TS-DEMO-1002",
+        vehicleModel: "Hyundai i20 (White)",
+        validUntil: "2029-06-30"
+      },
+      healthcareInfo: {
+        abhaId: "ABHA-DEMO-10002-88",
+        bloodGroup: "A+",
+        allergies: "Penicillin (Synthetic Record)",
+        lastHealthCheck: "02 Feb 2026"
+      },
+      travelInfo: {
+        passport: "DEMO-PASS-10002",
+        passportExpiry: "2033-11-10"
+      }
     },
     {
-      id: "cit-103",
-      citizenId: "CIV-100003",
-      fullName: "Vikramaditya Rao",
-      displayName: "Vikram",
-      dateOfBirth: "02-11-1988",
+      id: "cit-demo-10003",
+      citizenId: "CIV-DEMO-10003",
+      fullName: "Rajesh Patel",
+      displayName: "Rajesh",
+      dateOfBirth: "10-04-1995",
       gender: "Male",
       profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
-      mobileMasked: "+91 97654 32109",
-      emailMasked: "vikram.rao@civicone.gov.in",
-      addressSummary: "House 45, Indiranagar 100ft Road, Bengaluru 560038",
-      trustLevel: "Standard Verified",
-      verificationStatus: "VERIFIED",
-      securityScore: 91,
-      createdAt: "2026-02-01T11:20:00Z",
-      virtualCardId: "VCD-STD-100003",
+      mobile: "+91-90000-00003",
+      mobileMasked: "+91 90000 00003",
+      email: "rajesh.demo@civicone.example",
+      emailMasked: "rajesh.demo@civicone.example",
+      address: "Plot 88, CG Road, Navrangpura, Ahmedabad, Gujarat 380009",
+      addressSummary: "Ahmedabad, Gujarat",
+      state: "Gujarat",
+      trustLevel: "Verified Demo Citizen",
+      verificationStatus: "Verified Demo",
+      securityScore: 95,
+      createdAt: "2026-01-15T14:20:00Z",
+      virtualCardId: "VCD-STD-10003",
       virtualCardStatus: "ACTIVE",
       tier: "STANDARD",
+      goldPassStatus: "standard",
       bloodGroup: "B+",
-      emergencyContact: "+91 9711223344 (Brother - Karthik Rao)",
-      maskedAadhaar: "XXXX XXXX 3301"
+      emergencyContact: "+91 90000 00077 (Spouse - Meena Patel)",
+      maskedAadhaar: "XXXX XXXX 1003",
+      isDemo: true,
+      demoLabel: "DEMO DATA — NOT A REAL CITIZEN",
+      educationInfo: {
+        institution: "Gujarat Engineering College",
+        course: "B.E Mechanical",
+        year: "2013–2017",
+        status: "Graduated",
+        school: "Ahmedabad Model School",
+        transferCertificate: "Available",
+        marksheets: "Available"
+      },
+      governmentInfo: {
+        voterId: "DEMO-VOTER-10003",
+        drivingLicence: "DEMO-DL-10003"
+      },
+      rtoInfo: {
+        vehicleRegistration: "GJ-DEMO-1003",
+        vehicleModel: "Honda City (Silver)",
+        validUntil: "2027-04-15"
+      },
+      healthcareInfo: {
+        abhaId: "ABHA-DEMO-10003-77",
+        bloodGroup: "B+",
+        allergies: "Dust (Synthetic Record)",
+        lastHealthCheck: "10 Mar 2026"
+      },
+      travelInfo: {
+        passport: "DEMO-PASS-10003",
+        passportExpiry: "2031-08-05"
+      }
     },
     {
-      id: "cit-104",
-      citizenId: "CIV-100004",
-      fullName: "Priya Sundaram",
-      displayName: "Priya",
-      dateOfBirth: "22-05-1996",
+      id: "cit-demo-10004",
+      citizenId: "CIV-DEMO-10004",
+      fullName: "Ananya Verma",
+      displayName: "Ananya",
+      dateOfBirth: "05-11-2003",
       gender: "Female",
-      profileImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400",
-      mobileMasked: "+91 96543 21098",
-      emailMasked: "priya.sundaram@civicone.gov.in",
-      addressSummary: "Apt 501, Jubilee Hills, Hyderabad 500033",
-      trustLevel: "VIP Tier Gold",
-      verificationStatus: "VERIFIED",
-      securityScore: 97,
-      createdAt: "2026-02-15T14:40:00Z",
-      virtualCardId: "VCD-GOLD-100004",
+      profileImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400",
+      mobile: "+91-90000-00004",
+      mobileMasked: "+91 90000 00004",
+      address: "House 12, Connaught Place, New Delhi, Delhi 110001",
+      addressSummary: "New Delhi, Delhi",
+      state: "Delhi",
+      trustLevel: "Verified Demo Citizen",
+      verificationStatus: "Verified Demo",
+      securityScore: 98,
+      createdAt: "2026-01-18T09:00:00Z",
+      virtualCardId: "VCD-GOLD-10004",
       virtualCardStatus: "ACTIVE",
       tier: "GOLD",
+      goldPassStatus: "active",
+      goldPassExpiry: "2027-08-14",
       bloodGroup: "AB+",
-      emergencyContact: "+91 9600112233 (Mother - Sundaram M)",
-      maskedAadhaar: "XXXX XXXX 4019"
+      emergencyContact: "+91 90000 00066 (Mother - S. Verma)",
+      maskedAadhaar: "XXXX XXXX 1004",
+      isDemo: true,
+      demoLabel: "DEMO DATA — NOT A REAL CITIZEN",
+      educationInfo: {
+        institution: "CivicOne School of Planning",
+        course: "B.Arch Architecture",
+        year: "2021–2026",
+        status: "Pursuing",
+        school: "Delhi Public Convent School",
+        transferCertificate: "Available",
+        marksheets: "Available"
+      },
+      governmentInfo: {
+        voterId: "DEMO-VOTER-10004",
+        drivingLicence: "DEMO-DL-10004"
+      },
+      rtoInfo: {
+        vehicleRegistration: "DL-DEMO-1004",
+        vehicleModel: "Tata Nexon EV (Teal)",
+        validUntil: "2030-01-15"
+      },
+      healthcareInfo: {
+        abhaId: "ABHA-DEMO-10004-66",
+        bloodGroup: "AB+",
+        allergies: "None Reported (Synthetic Record)",
+        lastHealthCheck: "12 Apr 2026"
+      },
+      travelInfo: {
+        passport: "DEMO-PASS-10004",
+        passportExpiry: "2035-02-14"
+      }
     },
     {
-      id: "cit-105",
-      citizenId: "CIV-100005",
-      fullName: "Devendra Patel",
-      displayName: "Dev",
-      dateOfBirth: "10-01-1990",
+      id: "cit-demo-10005",
+      citizenId: "CIV-DEMO-10005",
+      fullName: "Vikram Singh",
+      displayName: "Vikram",
+      dateOfBirth: "18-02-1998",
       gender: "Male",
       profileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400",
-      mobileMasked: "+91 95432 10987",
-      emailMasked: "devendra.patel@civicone.gov.in",
-      addressSummary: "Plot 88, CG Road, Navrangpura, Ahmedabad 380009",
-      trustLevel: "Standard Verified",
-      verificationStatus: "VERIFIED",
-      securityScore: 89,
-      createdAt: "2026-03-01T09:10:00Z",
-      virtualCardId: "VCD-STD-100005",
+      mobile: "+91-90000-00005",
+      mobileMasked: "+91 90000 00005",
+      address: "No 77, Indiranagar 100ft Road, Bengaluru, Karnataka 560038",
+      addressSummary: "Bengaluru, Karnataka",
+      state: "Karnataka",
+      trustLevel: "Verified Demo Citizen",
+      verificationStatus: "Verified Demo",
+      securityScore: 96,
+      createdAt: "2026-01-20T11:00:00Z",
+      virtualCardId: "VCD-STD-10005",
       virtualCardStatus: "ACTIVE",
       tier: "STANDARD",
+      goldPassStatus: "standard",
       bloodGroup: "O-",
-      emergencyContact: "+91 9588776655 (Spouse - Meena Patel)",
-      maskedAadhaar: "XXXX XXXX 7734"
+      emergencyContact: "+91 90000 00055 (Brother - K. Singh)",
+      maskedAadhaar: "XXXX XXXX 1005",
+      isDemo: true,
+      demoLabel: "DEMO DATA — NOT A REAL CITIZEN",
+      educationInfo: {
+        institution: "CivicOne Institute of Technology",
+        course: "M.Tech Mechanical Engineering",
+        year: "2020–2022",
+        status: "Graduated",
+        school: "Bengaluru Army School",
+        transferCertificate: "Available",
+        marksheets: "Available"
+      },
+      governmentInfo: {
+        voterId: "DEMO-VOTER-10005",
+        drivingLicence: "DEMO-DL-10005"
+      },
+      rtoInfo: {
+        vehicleRegistration: "KA-DEMO-1005",
+        vehicleModel: "Royal Enfield Himalayan (Black)",
+        validUntil: "2032-11-20"
+      },
+      healthcareInfo: {
+        abhaId: "ABHA-DEMO-10005-55",
+        bloodGroup: "O-",
+        allergies: "Pollen (Synthetic Record)",
+        lastHealthCheck: "20 May 2026"
+      },
+      travelInfo: {
+        passport: "DEMO-PASS-10005",
+        passportExpiry: "2032-09-01"
+      }
     }
   ],
 
-  // 2. RELATIONAL DOCUMENTS DATASET (Tied by citizenId)
+  // 2. STRUCTURED DIGITAL VAULT RECORDS (Tied by citizenId across all required categories)
   documents: [
-    // --- CITIZEN 1: CIV-100001 (Rajesh Kumar) ---
+    // --- CITIZEN 1: CIV-DEMO-10001 (Aarav Kumar) ---
+    // Category 1: Identity
     {
-      id: "doc-101",
-      citizenId: "CIV-100001",
-      name: "Tokenized Aadhaar Reference",
-      category: "Government",
-      issuer: "UIDAI",
+      id: "doc-aarav-01",
+      citizenId: "CIV-DEMO-10001",
+      name: "Tokenized Aadhaar Record",
+      category: "Identity",
+      issuer: "UIDAI — Unique Identification Authority of India",
       status: "Verified",
-      issueDate: "12-05-2016",
+      issueDate: "15-07-2020",
       expiryDate: "Lifetime",
-      refNo: "XXXX XXXX 8942",
+      refNo: "DEMO-AADHAAR-10001",
       fileType: "PDF",
       fileSize: "1.2 MB",
       icon: "ShieldCheck",
-      description: "Official Tokenized Aadhaar Identity Card Reference",
-      securitySeal: "CRYPT-UIDAI-SEAL-2026-OK",
+      description: "Official Tokenized Synthetic Aadhaar Identity Record.",
+      securitySeal: "UIDAI-SYNTHETIC-SEAL-VERIFIED",
       isFavorite: true,
-      tags: ["Identity", "Government", "Important"]
+      tags: ["Identity", "Aadhaar", "Demo"],
+      isDemo: true
     },
     {
-      id: "doc-102",
-      citizenId: "CIV-100001",
+      id: "doc-aarav-02",
+      citizenId: "CIV-DEMO-10001",
       name: "Permanent Account Number (PAN)",
-      category: "Government",
-      issuer: "Income Tax Department, Govt of India",
+      category: "Identity",
+      issuer: "Income Tax Department — GoI",
       status: "Verified",
-      issueDate: "18-09-2017",
+      issueDate: "10-08-2022",
       expiryDate: "N/A",
-      refNo: "ABCDE1234F",
+      refNo: "DEMO-PAN-10001",
       fileType: "PDF",
       fileSize: "850 KB",
       icon: "FileText",
-      description: "Verified Tax Identity & Financial Document",
-      securitySeal: "ITD-PAN-VERIFIED-HASH-092",
+      description: "Verified Synthetic PAN Identity Card Record.",
+      securitySeal: "ITD-PAN-SYNTHETIC-SEAL",
       isFavorite: true,
-      tags: ["Finance", "Tax", "Identity"]
+      tags: ["Identity", "PAN", "Demo"],
+      isDemo: true
     },
     {
-      id: "doc-103",
-      citizenId: "CIV-100001",
-      name: "Smart Driving Licence",
-      category: "RTO",
-      issuer: "Regional Transport Office (MH-02 Mumbai)",
+      id: "doc-aarav-03",
+      citizenId: "CIV-DEMO-10001",
+      name: "National Voter ID Card (EPIC)",
+      category: "Identity",
+      issuer: "Election Commission of India",
       status: "Verified",
-      issueDate: "15-10-2018",
-      expiryDate: "14-10-2028",
-      refNo: "MH02 20180094821",
+      issueDate: "01-01-2023",
+      expiryDate: "Permanent",
+      refNo: "DEMO-VOTER-10001",
+      fileType: "PDF",
+      fileSize: "1.1 MB",
+      icon: "Vote",
+      description: "Synthetic Voter ID Card Registered in Vijayawada Constituency.",
+      securitySeal: "ECI-EPIC-DEMO-SEAL",
+      tags: ["Identity", "Voter ID", "Demo"],
+      isDemo: true
+    },
+    {
+      id: "doc-aarav-04",
+      citizenId: "CIV-DEMO-10001",
+      name: "Indian Passport",
+      category: "Identity",
+      issuer: "Ministry of External Affairs — Passport Seva",
+      status: "Verified",
+      issueDate: "21-05-2024",
+      expiryDate: "20-05-2034",
+      refNo: "DEMO-PASS-10001",
+      fileType: "PDF",
+      fileSize: "2.1 MB",
+      icon: "Plane",
+      description: "Synthetic Passport Identity Document for Travel Verification.",
+      securitySeal: "MEA-PASS-DEMO-VERIFIED",
+      isPrivate: true,
+      tags: ["Identity", "Passport", "Travel", "Demo"],
+      isDemo: true
+    },
+    // Category 2: Education
+    {
+      id: "doc-aarav-05",
+      citizenId: "CIV-DEMO-10001",
+      name: "Class X Secondary Marksheet",
+      category: "Education",
+      issuer: "CivicOne Model School / Board of Secondary Education",
+      status: "Verified",
+      issueDate: "10-06-2020",
+      expiryDate: "N/A",
+      refNo: "DEMO-SSC-2020-10001",
+      fileType: "PDF",
+      fileSize: "1.4 MB",
+      icon: "GraduationCap",
+      description: "10th Standard Secondary Marksheet Record (94.2% Aggregate).",
+      securitySeal: "BSE-BOARD-SYNTHETIC-VERIFIED",
+      isFavorite: true,
+      tags: ["Education", "Marksheet", "10th", "Demo"],
+      isDemo: true
+    },
+    {
+      id: "doc-aarav-06",
+      citizenId: "CIV-DEMO-10001",
+      name: "Intermediate Class XII Certificate",
+      category: "Education",
+      issuer: "CivicOne Model School / Board of Intermediate Education",
+      status: "Verified",
+      issueDate: "05-06-2022",
+      expiryDate: "N/A",
+      refNo: "DEMO-HSC-2022-10001",
+      fileType: "PDF",
+      fileSize: "1.6 MB",
+      icon: "GraduationCap",
+      description: "12th Standard Intermediate Marksheet & Pass Certificate.",
+      securitySeal: "BIE-BOARD-SYNTHETIC-VERIFIED",
+      tags: ["Education", "Intermediate", "12th", "Demo"],
+      isDemo: true
+    },
+    {
+      id: "doc-aarav-07",
+      citizenId: "CIV-DEMO-10001",
+      name: "School Transfer Certificate (TC)",
+      category: "Education",
+      issuer: "CivicOne Model School",
+      status: "Verified",
+      issueDate: "15-06-2023",
+      expiryDate: "N/A",
+      refNo: "DEMO-TC-2023-10001",
+      fileType: "PDF",
+      fileSize: "950 KB",
+      icon: "FileCheck",
+      description: "Official School Transfer Certificate & Conduct Clearance.",
+      securitySeal: "SCHOOL-TC-SYNTHETIC-AUTHENTIC",
+      tags: ["Education", "TC", "Admission", "Demo"],
+      isDemo: true
+    },
+    {
+      id: "doc-aarav-08",
+      citizenId: "CIV-DEMO-10001",
+      name: "B.Tech Computer Science Course Admission Record",
+      category: "Education",
+      issuer: "CivicOne Demo Institute",
+      status: "Verified",
+      issueDate: "01-08-2023",
+      expiryDate: "31-07-2027",
+      refNo: "DEMO-ADM-2023-CS101",
       fileType: "PDF",
       fileSize: "1.8 MB",
-      icon: "Car",
-      description: "Motor Vehicle Driving Authorization & Transport ID",
-      securitySeal: "RTO-MH-DL-AUTHENTICATED",
-      isFavorite: true,
-      vehicleNo: "MH 02 CD 4589",
-      tags: ["RTO", "Transport", "Important"]
+      icon: "BookOpen",
+      description: "B.Tech Computer Science & Engineering Enrollment & Identity Record.",
+      securitySeal: "INSTITUTE-ADM-VERIFIED-HASH",
+      tags: ["Education", "Degree", "College", "Demo"],
+      isDemo: true
+    },
+    // Category 3: Government
+    {
+      id: "doc-aarav-09",
+      citizenId: "CIV-DEMO-10001",
+      name: "State Income Certificate",
+      category: "Government",
+      issuer: "Revenue Department, Govt of AP",
+      status: "Verified",
+      issueDate: "12-04-2025",
+      expiryDate: "11-04-2026",
+      refNo: "DEMO-INC-2025-10001",
+      fileType: "PDF",
+      fileSize: "1.0 MB",
+      icon: "Landmark",
+      description: "Official State Revenue Income Certificate Record.",
+      securitySeal: "REV-AP-INCOME-SEAL",
+      tags: ["Government", "Income", "Demo"],
+      isDemo: true
     },
     {
-      id: "doc-104",
-      citizenId: "CIV-100001",
-      name: "ABHA Health Account Card",
+      id: "doc-aarav-10",
+      citizenId: "CIV-DEMO-10001",
+      name: "Residence & Domicile Certificate",
+      category: "Government",
+      issuer: "Revenue Department, Govt of AP",
+      status: "Verified",
+      issueDate: "15-05-2023",
+      expiryDate: "Lifetime",
+      refNo: "DEMO-DOM-2023-10001",
+      fileType: "PDF",
+      fileSize: "1.1 MB",
+      icon: "Home",
+      description: "State Residence & Domicile Verification Record.",
+      securitySeal: "REV-AP-DOMICILE-SEAL",
+      tags: ["Government", "Residence", "Demo"],
+      isDemo: true
+    },
+    // Category 4: Vehicle/RTO
+    {
+      id: "doc-aarav-11",
+      citizenId: "CIV-DEMO-10001",
+      name: "Smart Driving Licence",
+      category: "Vehicle/RTO",
+      issuer: "Regional Transport Office (RTO AP-16 Vijayawada)",
+      status: "Verified",
+      issueDate: "10-10-2022",
+      expiryDate: "09-10-2042",
+      refNo: "DEMO-DL-10001",
+      fileType: "PDF",
+      fileSize: "1.5 MB",
+      icon: "Car",
+      description: "Motor Transport Driving Licence for LMV & Motorcycle with Gear.",
+      securitySeal: "RTO-AP-DL-AUTHENTICATED",
+      isFavorite: true,
+      tags: ["Vehicle/RTO", "Driving Licence", "Demo"],
+      isDemo: true
+    },
+    {
+      id: "doc-aarav-12",
+      citizenId: "CIV-DEMO-10001",
+      name: "Vehicle Registration Certificate (RC)",
+      category: "Vehicle/RTO",
+      issuer: "Parivahan Sewa — RTO AP-16",
+      status: "Verified",
+      issueDate: "05-11-2023",
+      expiryDate: "04-11-2038",
+      refNo: "AP-DEMO-1001",
+      fileType: "PDF",
+      fileSize: "1.3 MB",
+      icon: "Shield",
+      description: "Registration Certificate for TVS Jupiter 125 (Blue).",
+      securitySeal: "PARIVAHAN-RC-SYNTHETIC-OK",
+      tags: ["Vehicle/RTO", "RC", "Demo"],
+      isDemo: true
+    },
+    // Category 5: Healthcare
+    {
+      id: "doc-aarav-13",
+      citizenId: "CIV-DEMO-10001",
+      name: "ABHA Synthetic Digital Health Record",
       category: "Healthcare",
       issuer: "National Health Authority (NHA)",
       status: "Verified",
-      issueDate: "05-11-2022",
+      issueDate: "10-01-2024",
       expiryDate: "N/A",
-      refNo: "ABHA-91-8493-2049-11",
+      refNo: "ABHA-DEMO-10001-90",
       fileType: "PDF",
       fileSize: "920 KB",
       icon: "HeartPulse",
-      description: "Universal Digital Health Ecosystem Identifier",
-      securitySeal: "NHA-ABHA-HEALTH-AUTHENTIC",
+      description: "Universal ABHA Digital Health Identifier & Synthetic Vaccination Summary.",
+      securitySeal: "NHA-ABHA-SYNTHETIC-AUTHENTIC",
       isPrivate: true,
-      tags: ["Healthcare", "Private"]
+      tags: ["Healthcare", "ABHA", "Private", "Demo"],
+      isDemo: true
     },
+    // Category 6: Travel
     {
-      id: "doc-105",
-      citizenId: "CIV-100001",
-      name: "B.Tech Computer Science Degree",
-      category: "Education",
-      issuer: "Indian Institute of Technology, Bombay",
+      id: "doc-aarav-14",
+      citizenId: "CIV-DEMO-10001",
+      name: "Travel Identity Verification & Booking Token",
+      category: "Travel",
+      issuer: "CivicOne Travel Gateway",
       status: "Verified",
-      issueDate: "10-06-2014",
-      expiryDate: "N/A",
-      refNo: "IITB-DEGREE-2014-CS-094",
+      issueDate: "01-08-2026",
+      expiryDate: "31-08-2026",
+      refNo: "DEMO-TRV-2026-9001",
       fileType: "PDF",
-      fileSize: "3.4 MB",
-      icon: "GraduationCap",
-      description: "First Class Honors Degree in Computer Science",
-      securitySeal: "NAD-IITB-VERIFIED-CERT",
-      isFavorite: true,
-      tags: ["Education", "Degree"]
-    },
-    {
-      id: "doc-106",
-      citizenId: "CIV-100001",
-      name: "HDFC Bank Verified Account Statement",
-      category: "Finance",
-      issuer: "HDFC Bank Ltd",
-      status: "Verified",
-      issueDate: "01-04-2026",
-      expiryDate: "N/A",
-      refNo: "XXXX XXXX 4567 (HDFC)",
-      fileType: "PDF",
-      fileSize: "2.4 MB",
-      icon: "Landmark",
-      description: "Masked Annual Financial KYC & Account Verification Document",
-      securitySeal: "HDFC-BANK-CRYPT-SEAL",
-      isPrivate: true,
-      tags: ["Finance", "Banking", "Masked"]
-    },
-    {
-      id: "doc-107",
-      citizenId: "CIV-100001",
-      name: "AWS Certified Solutions Architect Token",
-      category: "Professional",
-      issuer: "Amazon Web Services (AWS)",
-      status: "Verified",
-      issueDate: "15-11-2023",
-      expiryDate: "14-11-2026",
-      refNo: "AWS-CERT-SA-904812",
-      fileType: "PDF",
-      fileSize: "950 KB",
-      icon: "Award",
-      description: "Professional AWS Cloud Architecture Credential",
-      securitySeal: "AWS-BADGE-AUTHENTIC-2026",
-      tags: ["Certification", "Expiring Soon"]
-    },
-    {
-      id: "doc-108",
-      citizenId: "CIV-100001",
-      name: "CII Institutional Membership Token",
-      category: "Organization",
-      issuer: "Confederation of Indian Industry",
-      status: "Verified",
-      issueDate: "01-01-2024",
-      expiryDate: "31-12-2026",
-      refNo: "CII-MEM-2024-9402",
-      fileType: "PDF",
-      fileSize: "980 KB",
-      icon: "Building2",
-      description: "Institutional Professional Network Credential",
-      securitySeal: "CII-ORG-VERIFIED-TOKEN",
-      tags: ["Organization", "Membership"]
+      fileSize: "880 KB",
+      icon: "Compass",
+      description: "Verified Travel Identity Token for Airport / Hotel Check-in.",
+      securitySeal: "CIVIC-TRAVEL-TOKEN-SEAL",
+      tags: ["Travel", "Identity", "Booking", "Demo"],
+      isDemo: true
     },
 
-    // --- CITIZEN 2: CIV-100002 (Ananya Sharma) ---
+    // --- CITIZEN 2: CIV-DEMO-10002 (Priya Sharma) ---
     {
-      id: "doc-201",
-      citizenId: "CIV-100002",
-      name: "National Voter Identity Card (EPIC)",
-      category: "Government",
-      issuer: "Election Commission of India",
+      id: "doc-priya-01",
+      citizenId: "CIV-DEMO-10002",
+      name: "Tokenized Aadhaar Record",
+      category: "Identity",
+      issuer: "UIDAI",
       status: "Verified",
-      issueDate: "14-01-2019",
-      expiryDate: "Permanent",
-      refNo: "EPIC-MH-904812",
+      issueDate: "22-09-2018",
+      expiryDate: "Lifetime",
+      refNo: "DEMO-AADHAAR-10002",
       fileType: "PDF",
-      fileSize: "1.1 MB",
+      fileSize: "1.2 MB",
       icon: "ShieldCheck",
-      description: "168-Chandivali Constituency ECI Verified Elector Credential",
-      securitySeal: "ECI-EPIC-SEAL-VERIFIED",
-      isFavorite: true,
-      tags: ["Identity", "Voter ID"]
+      description: "Tokenized Aadhaar Record for Priya Sharma.",
+      securitySeal: "UIDAI-SYNTHETIC-SEAL-VERIFIED",
+      tags: ["Identity", "Aadhaar", "Demo"],
+      isDemo: true
     },
     {
-      id: "doc-202",
-      citizenId: "CIV-100002",
+      id: "doc-priya-02",
+      citizenId: "CIV-DEMO-10002",
       name: "M.Tech Data Science Degree",
       category: "Education",
-      issuer: "ABC University",
+      issuer: "CivicOne Tech University",
       status: "Verified",
-      issueDate: "12-07-2020",
+      issueDate: "12-07-2026",
       expiryDate: "N/A",
-      refNo: "ABC-MTECH-DS-2020-11",
+      refNo: "DEMO-MTECH-2026-02",
       fileType: "PDF",
       fileSize: "2.9 MB",
       icon: "GraduationCap",
-      description: "Master of Technology in Data Science & Machine Learning",
-      securitySeal: "NAD-ABC-MTECH-VERIFIED",
-      isFavorite: true,
-      tags: ["Education", "Degree"]
-    },
-    {
-      id: "doc-203",
-      citizenId: "CIV-100002",
-      name: "Metropolis Executive Diagnostic Report",
-      category: "Healthcare",
-      issuer: "Metropolis Diagnostics",
-      status: "Verified",
-      issueDate: "10-07-2026",
-      expiryDate: "N/A",
-      refNo: "METRO-LAB-2026-9048",
-      fileType: "PDF",
-      fileSize: "1.4 MB",
-      icon: "HeartPulse",
-      description: "Annual Pathology Health Clearance Report",
-      securitySeal: "LAB-SEAL-ENCRYPTED",
-      isPrivate: true,
-      tags: ["Healthcare", "Private"]
+      description: "Master of Technology Degree in Data Science.",
+      securitySeal: "NAD-TECH-UNIV-VERIFIED",
+      tags: ["Education", "Degree", "Demo"],
+      isDemo: true
     },
 
-    // --- CITIZEN 3: CIV-100003 (Vikramaditya Rao) ---
+    // --- CITIZEN 3: CIV-DEMO-10003 (Rajesh Patel) ---
     {
-      id: "doc-301",
-      citizenId: "CIV-100003",
-      name: "KA RTO Commercial Vehicle Licence",
-      category: "RTO",
-      issuer: "RTO KA-05 Bengaluru South",
+      id: "doc-rajesh-01",
+      citizenId: "CIV-DEMO-10003",
+      name: "Smart Driving Licence",
+      category: "Vehicle/RTO",
+      issuer: "Parivahan Sewa — RTO GJ-01 Ahmedabad",
       status: "Verified",
       issueDate: "10-05-2015",
       expiryDate: "09-05-2035",
-      refNo: "KA05 20150033019",
+      refNo: "DEMO-DL-10003",
       fileType: "PDF",
       fileSize: "1.6 MB",
       icon: "Car",
-      description: "Karnataka State Motor Transport Driver Authorization",
-      securitySeal: "KA-RTO-SEAL-VALID",
-      tags: ["RTO", "Licence"]
-    },
-
-    // --- CITIZEN 4: CIV-100004 (Priya Sundaram) ---
-    {
-      id: "doc-401",
-      citizenId: "CIV-100004",
-      name: "ICICI Bank Loan Clearance Document",
-      category: "Finance",
-      issuer: "ICICI Bank Ltd",
-      status: "Verified",
-      issueDate: "01-02-2026",
-      expiryDate: "N/A",
-      refNo: "XXXX XXXX 9901 (ICICI)",
-      fileType: "PDF",
-      fileSize: "1.9 MB",
-      icon: "Landmark",
-      description: "Home Loan No-Objection & Financial Clearance Certificate",
-      securitySeal: "ICICI-LOAN-SEAL-OK",
-      isPrivate: true,
-      tags: ["Finance", "Loan"]
-    },
-
-    // --- CITIZEN 5: CIV-100005 (Devendra Patel) ---
-    {
-      id: "doc-501",
-      citizenId: "CIV-100005",
-      name: "State Residence & Domicile Certificate",
-      category: "Government",
-      issuer: "Revenue Dept, Govt of Gujarat",
-      status: "Pending Verification",
-      issueDate: "15-06-2026",
-      expiryDate: "N/A",
-      refNo: "GUJ-DOM-2026-7734",
-      fileType: "PDF",
-      fileSize: "1.1 MB",
-      icon: "ShieldCheck",
-      description: "State Resident Domicile Clearance Reference",
-      securitySeal: "GUJ-REV-PENDING-AUDIT",
-      tags: ["Government", "Pending"]
+      description: "Gujarat State Driving Licence Record.",
+      securitySeal: "GJ-RTO-SEAL-VALID",
+      tags: ["Vehicle/RTO", "Licence", "Demo"],
+      isDemo: true
     }
   ],
 
   // 3. PUBLIC VERIFICATION TOKENS
   publicTokens: {
-    "CIV-TOKEN-984210-SECURE-2026": {
-      citizenId: "CIV-100001",
-      citizenName: "Rajesh Kumar",
-      credentialTitle: "CivicOne Gold National Credential",
-      issuer: "CivicOne Identity Authority",
-      status: "VERIFIED",
-      verifiedAt: "2026-08-13T09:30:00Z",
-      trustScore: "98% Cryptographically Authentic",
-      verificationRef: "VER-2026-90481029",
-      tier: "GOLD"
+    "CIV-TOKEN-CIV-DEMO-10001-SECURE-2026": {
+      citizenId: "CIV-DEMO-10001",
+      citizenName: "Authorized viewer only",
+      civicIdStatus: "Verified",
+      identityStatus: "Verified",
+      accountStatus: "Active",
+      issuer: "CivicOne National Identity Authority",
+      verifiedAt: "2026-08-14T09:00:00Z",
+      trustScore: "100% Tokenized Security Verification",
+      verificationRef: "VER-2026-DEMO-10001",
+      tier: "STANDARD",
+      isDemo: true
     },
-    "CIV-TOKEN-100002-SECURE-2026": {
-      citizenId: "CIV-100002",
-      citizenName: "Ananya Sharma",
-      credentialTitle: "CivicOne Gold National Credential",
-      issuer: "CivicOne Identity Authority",
-      status: "VERIFIED",
-      verifiedAt: "2026-08-13T10:15:00Z",
-      trustScore: "96% Cryptographically Authentic",
-      verificationRef: "VER-2026-10294821",
-      tier: "GOLD"
+    "CIV-TOKEN-CIV-DEMO-10002-SECURE-2026": {
+      citizenId: "CIV-DEMO-10002",
+      citizenName: "Authorized viewer only",
+      civicIdStatus: "Verified",
+      identityStatus: "Verified",
+      accountStatus: "Active",
+      issuer: "CivicOne National Identity Authority",
+      verifiedAt: "2026-08-14T09:15:00Z",
+      trustScore: "100% Tokenized Security Verification",
+      verificationRef: "VER-2026-DEMO-10002",
+      tier: "GOLD",
+      isDemo: true
     }
   },
 
-  // 4. AUDIT LOGS
-  auditLogs: [
-    {
-      id: "sec-101",
-      citizenId: "CIV-100001",
-      event: "Pre-Entry OTP Authenticated",
-      device: "Chrome on Windows 11",
-      location: "Mumbai, India",
-      ip: "49.37.142.90",
-      timestamp: "13 Aug 2026, 09:30:15 AM",
-      status: "SUCCESS"
-    },
-    {
-      id: "sec-102",
-      citizenId: "CIV-100001",
-      event: "Smart Driving Licence Verified",
-      device: "Chrome on Windows 11",
-      location: "Mumbai, India",
-      ip: "49.37.142.90",
-      timestamp: "13 Aug 2026, 09:42:00 AM",
-      status: "SUCCESS"
-    }
-  ],
-
-  // 5. NOTIFICATIONS
-  notifications: [
-    {
-      id: "notif-101",
-      citizenId: "CIV-100001",
-      title: "Smart Driving Licence Verified",
-      category: "Documents",
-      message: "Your MH-02 Driving Licence record was successfully authenticated by MoRTH server.",
-      timestamp: "10 minutes ago",
-      read: false,
-      type: "success"
-    },
-    {
-      id: "notif-102",
-      citizenId: "CIV-100001",
-      title: "Document Expiry Reminder",
-      category: "Security",
-      message: "Your driving licence (MH02 20180094821) expires in 792 days on 14-10-2028.",
-      timestamp: "2 hours ago",
-      read: false,
-      type: "warning"
-    }
-  ],
-
-  // 6. ORGANIZATIONS & CONSENT RECORDS
+  // 4. DEMO ORGANIZATIONS WITH SPECIFIC ROLES & RESTRICTED ACCESS SCOPES
   organizations: [
-    { id: "org-1", name: "ABC University", category: "Education", regNo: "EDU-REG-9048", verified: true, contactEmail: "admissions@abc.edu.in" },
-    { id: "org-2", name: "XYZ University", category: "Education", regNo: "EDU-REG-1102", verified: true, contactEmail: "admissions@xyz.edu.in" },
-    { id: "org-3", name: "Apollo Hospitals", category: "Healthcare", regNo: "HEALTH-REG-4401", verified: true, contactEmail: "records@apollo.org" },
-    { id: "org-4", name: "HDFC Bank Ltd", category: "Finance", regNo: "BANK-REG-8820", verified: true, contactEmail: "kyc@hdfcbank.com" },
-    { id: "org-5", name: "Tata Consultancy Services", category: "Employment", regNo: "CORP-REG-9910", verified: true, contactEmail: "onboarding@tcs.com" }
+    {
+      id: "org-college",
+      roleCode: "COLLEGE_ACCESS_ADMIN",
+      name: "CivicOne Demo College",
+      category: "Education",
+      regNo: "EDU-COLLEGE-9048",
+      contactEmail: "admissions@democollege.edu.in",
+      accessLevel: "VIEW ONLY",
+      badgeText: "VIEW ONLY — ACADEMIC CREDENTIALS",
+      allowedCategories: ["Education", "Identity"],
+      disallowedCategories: ["Finance", "Banking", "Loans", "Healthcare", "Vehicle/RTO", "SIM History", "Travel"],
+      allowedDocTypes: ["Student Identity", "Education Certificates", "Marksheets", "Degree/Diploma", "Course Info", "Institution Details", "Transfer Certificate", "Admission Docs"],
+      verified: true
+    },
+    {
+      id: "org-school",
+      roleCode: "SCHOOL_ACCESS_ADMIN",
+      name: "CivicOne Model School",
+      category: "Education",
+      regNo: "EDU-SCHOOL-1102",
+      contactEmail: "principal@modelschool.edu.in",
+      accessLevel: "VIEW ONLY",
+      badgeText: "VIEW ONLY — LIMITED EDUCATION ACCESS",
+      allowedCategories: ["Education", "Identity"],
+      disallowedCategories: ["Finance", "Banking", "Loans", "Vehicle/RTO", "Healthcare", "SIM History", "Travel"],
+      allowedDocTypes: ["Student Identity", "Birth Certificate", "Previous Education Records", "Transfer Certificate", "Admission Info"],
+      verified: true
+    },
+    {
+      id: "org-mobile",
+      roleCode: "MOBILE_SHOP_ACCESS_ADMIN",
+      name: "CivicOne Mobile Store",
+      category: "Telecom / KYC",
+      regNo: "TEL-STORE-4401",
+      contactEmail: "kyc@civicmobilestore.com",
+      accessLevel: "VIEW ONLY — MINIMUM KYC",
+      badgeText: "KYC VERIFIED — MINIMUM DATA SHARED",
+      allowedCategories: ["Identity"],
+      disallowedCategories: ["Vault Browsing", "Education", "Healthcare", "Finance", "Banking", "Loans", "Vehicle/RTO", "SIM History", "Travel"],
+      allowedDocTypes: ["Identity Status", "Name", "Address Verification", "Verification Status"],
+      verified: true,
+      restrictedMode: true
+    },
+    {
+      id: "org-hotel",
+      roleCode: "HOTEL_ACCESS_ADMIN",
+      name: "CivicOne Grand Hotel",
+      category: "Hospitality",
+      regNo: "HOSP-HOTEL-8820",
+      contactEmail: "frontdesk@civicgrandhotel.com",
+      accessLevel: "VIEW ONLY — GUEST VERIFICATION",
+      badgeText: "HOTEL VERIFICATION — LIMITED ACCESS",
+      allowedCategories: ["Identity", "Travel"],
+      disallowedCategories: ["Finance", "Banking", "Loans", "Education", "Vehicle/RTO", "SIM History", "Healthcare", "Full Profile"],
+      allowedDocTypes: ["Guest Name", "Identity Verification Status", "Approved Identity Document", "Booking/Check-in Info"],
+      verified: true
+    },
+    {
+      id: "org-hospital",
+      roleCode: "HEALTHCARE_ACCESS_ADMIN",
+      name: "CivicOne Demo Hospital",
+      category: "Healthcare",
+      regNo: "HLTH-HOSP-9910",
+      contactEmail: "records@civichospital.org",
+      accessLevel: "VIEW ONLY — HEALTHCARE",
+      badgeText: "HEALTHCARE ACCESS — MEDICAL RECORDS ONLY",
+      allowedCategories: ["Healthcare", "Identity"],
+      disallowedCategories: ["Finance", "Banking", "Education", "Vehicle/RTO", "SIM History", "Travel"],
+      allowedDocTypes: ["Patient Identity", "ABHA Health Account", "Medical Diagnostic Summary"],
+      verified: true
+    },
+    {
+      id: "org-rto",
+      roleCode: "RTO_ACCESS_ADMIN",
+      name: "CivicOne RTO Office",
+      category: "Transport",
+      regNo: "RTO-AP-16-OFFICE",
+      contactEmail: "rto.ap16@civicone.gov.in",
+      accessLevel: "VIEW ONLY — RTO",
+      badgeText: "RTO VERIFICATION — TRANSPORT & DRIVING RECORDS",
+      allowedCategories: ["Vehicle/RTO", "Identity"],
+      disallowedCategories: ["Finance", "Banking", "Education", "Healthcare", "SIM History", "Travel"],
+      allowedDocTypes: ["Driving Licence", "Vehicle Registration", "Insurance", "Pollution Certificate"],
+      verified: true
+    }
   ],
 
+  // 5. CONSENT RECORDS & ACCESS PERMISSIONS
   consentRecords: [
     {
-      id: "share-9041",
-      citizenId: "CIV-100001",
-      citizenCivicId: "CIV-100001",
-      docId: "doc-105",
-      docName: "B.Tech Computer Science Degree",
-      orgId: "org-1",
-      orgName: "ABC University",
-      purpose: "M.Tech Admission Verification",
-      accessType: "View + Verify",
-      createdAt: "13 Aug 2026, 09:35 AM",
-      expiryDate: "20 Aug 2026",
+      id: "share-demo-101",
+      citizenId: "cit-demo-10001",
+      citizenCivicId: "CIV-DEMO-10001",
+      docId: "doc-aarav-08",
+      docName: "B.Tech Computer Science Course Admission Record",
+      orgId: "org-college",
+      orgName: "CivicOne Demo College",
+      roleCode: "COLLEGE_ACCESS_ADMIN",
+      purpose: "B.Tech Admission Verification",
+      accessType: "View Only (Academic)",
+      createdAt: "14 Aug 2026, 08:30 AM",
+      expiryDate: "21 Aug 2026",
       status: "ACTIVE",
-      watermarkText: "CONFIDENTIAL — AUTHORIZED FOR ABC UNIVERSITY — M.TECH ADMISSION — 13 AUG 2026"
+      watermarkText: "CONFIDENTIAL — AUTHORIZED FOR CIVICONE DEMO COLLEGE — ADMISSION VERIFICATION — 14 AUG 2026",
+      isDemo: true
+    },
+    {
+      id: "share-demo-102",
+      citizenId: "cit-demo-10001",
+      citizenCivicId: "CIV-DEMO-10001",
+      docId: "doc-aarav-01",
+      docName: "Tokenized Aadhaar Record (KYC Only)",
+      orgId: "org-mobile",
+      orgName: "CivicOne Mobile Store",
+      roleCode: "MOBILE_SHOP_ACCESS_ADMIN",
+      purpose: "SIM Activation KYC Verification",
+      accessType: "Minimum KYC View Only",
+      createdAt: "14 Aug 2026, 09:10 AM",
+      expiryDate: "15 Aug 2026",
+      status: "ACTIVE",
+      watermarkText: "CONFIDENTIAL — MINIMUM KYC SHARED FOR CIVICONE MOBILE STORE — 14 AUG 2026",
+      isDemo: true
     }
   ],
 
-  goldPassRequests: [
+  shareRequests: [
     {
-      id: "gpr-demo-01",
-      citizenId: "CIV-100001",
-      citizenName: "Rajesh Kumar",
-      appliedAt: "2026-08-13T10:00:00Z",
+      id: "req-demo-201",
+      orgId: "org-hotel",
+      orgName: "CivicOne Grand Hotel",
+      roleCode: "HOTEL_ACCESS_ADMIN",
+      citizenCivicId: "CIV-DEMO-10001",
+      docId: "doc-aarav-04",
+      docName: "Indian Passport",
+      purpose: "Hotel Guest Registration & Check-in",
+      accessType: "Limited Hotel View",
+      requestedExpiry: "3 Days",
+      requestedAt: "14 Aug 2026, 09:30 AM",
       status: "PENDING",
-      plan: "Annual Pass (₹499)",
-      paymentRef: "TXN-984210-DEMO",
-      notes: "Pending Admin Verification"
+      isDemo: true
     }
   ],
 
-  // 6. LOGS & NOTIFICATIONS ALIASES
-  securityLogs: [
+  // 6. PRIVACY ACCESS AUDIT LOGS
+  auditLogs: [
     {
-      id: "sec-101",
-      citizenId: "CIV-100001",
-      event: "Pre-Entry OTP Authenticated",
-      device: "Chrome Web Client (Windows)",
-      location: "Mumbai, India",
+      id: "sec-demo-01",
+      citizenId: "CIV-DEMO-10001",
+      event: "CivicOne Demo Session Initialized for Aarav Kumar",
+      device: "Web Browser",
+      location: "Vijayawada, India",
       ip: "49.37.142.90",
-      timestamp: "13 Aug 2026, 09:30 AM",
+      timestamp: "14 Aug 2026, 08:00 AM",
       status: "SUCCESS"
     },
     {
-      id: "sec-102",
-      citizenId: "CIV-100001",
-      event: "Smart Driving Licence Verified",
-      device: "Chrome Web Client (Windows)",
-      location: "Mumbai, India",
+      id: "sec-demo-02",
+      citizenId: "CIV-DEMO-10001",
+      event: "Academic Access Granted to CivicOne Demo College",
+      device: "Citizen Consent Engine",
+      location: "Vijayawada, India",
       ip: "49.37.142.90",
-      timestamp: "13 Aug 2026, 09:42 AM",
+      timestamp: "14 Aug 2026, 08:30 AM",
       status: "SUCCESS"
     }
   ],
 
-  // 7. SERVICES & WORKFLOWS
-  services: [
-    { id: "srv-01", title: "Aadhaar Identity Linkage", category: "Government", provider: "UIDAI", fee: "Free", timeframe: "Instant", requiredDocs: ["doc-101"] },
-    { id: "srv-02", title: "Driving Licence Renewal", category: "RTO", provider: "Parivahan Sewa (MoRTH)", fee: "₹200", timeframe: "1-2 Days", requiredDocs: ["doc-103"] },
-    { id: "srv-03", title: "PAN Card Instant Link", category: "Finance", provider: "Income Tax Department", fee: "Free", timeframe: "Instant", requiredDocs: ["doc-102"] },
-    { id: "srv-04", title: "ABHA Health Account Sync", category: "Healthcare", provider: "National Health Authority", fee: "Free", timeframe: "Instant", requiredDocs: ["doc-106"] },
-    { id: "srv-05", title: "Voter ID E-EPIC Download", category: "Government", provider: "Election Commission of India", fee: "Free", timeframe: "Instant", requiredDocs: ["doc-104"] }
-  ],
-
-  categoryServices: {
-    government: {
-      category: "Government & Identity",
-      provider: "UIDAI, ITD, MEA & Election Commission",
-      lastSynced: "Today, 10:42 AM",
-      records: [
-        { id: "rec-gov-01", name: "Aadhaar Identity Reference", issuer: "UIDAI", maskedId: "XXXX XXXX 8942", status: "Verified" },
-        { id: "rec-gov-02", name: "Permanent Account Number (PAN)", issuer: "Income Tax Dept", maskedId: "ABCDE1234F", status: "Verified" },
-        { id: "rec-gov-03", name: "Digital Voter ID Card (EPIC)", issuer: "Election Commission of India", maskedId: "MH/07/008/421899", status: "Verified" }
-      ]
-    },
-    healthcare: {
-      category: "Healthcare & Medical",
-      provider: "National Health Authority (NHA)",
-      lastSynced: "Today, 09:15 AM",
-      records: [
-        { id: "rec-hlth-01", name: "ABHA Health Account Number", issuer: "National Health Authority", maskedId: "23-4521-8761-0043", status: "Verified" }
-      ]
-    },
-    rto: {
-      category: "RTO & Vehicles",
-      provider: "Ministry of Road Transport and Highways",
-      lastSynced: "Today, 11:30 AM",
-      vehicles: [
-        { regNo: "MH02CA0094321", model: "Maruti Swift Dzire (White)", rto: "MH02 - Mumbai West", status: "Active", validUntil: "10-03-2026" }
-      ],
-      records: [
-        { id: "rec-rto-01", name: "Smart Driving Licence", issuer: "Parivahan Sewa (MoRTH)", maskedId: "MH02 20180094821", status: "Verified" }
-      ]
-    },
-    finance: {
-      category: "Banking & Finance",
-      provider: "Income Tax Department & Reserve Bank Gateway",
-      lastSynced: "Yesterday, 04:20 PM",
-      records: [
-        { id: "rec-fin-01", name: "Form 16 TDS Statement", issuer: "Income Tax Dept", maskedId: "FY-2023-24", status: "Verified" }
-      ]
-    },
-    education: {
-      category: "Education & Academic",
-      provider: "National Academic Depository (NAD)",
-      lastSynced: "10 Aug 2026",
-      qualificationTimeline: [
-        { year: "2001", level: "10th SSC Board", board: "Maharashtra State Board (85.6%)" },
-        { year: "2003", level: "12th HSC Board", board: "Maharashtra State Board (Science)" },
-        { year: "2007", level: "B.Tech Computer Science", board: "University of Mumbai" }
-      ],
-      records: [
-        { id: "rec-edu-01", name: "B.Tech Degree Certificate", issuer: "University of Mumbai", maskedId: "MU-ENG-2007-984210", status: "Verified" }
-      ]
-    }
-  },
-
-  serviceActivities: [
+  // 7. NOTIFICATIONS
+  notifications: [
     {
-      id: "act-101",
-      serviceTitle: "Driving Licence Renewal",
-      provider: "Parivahan Sewa (MoRTH)",
-      status: "Submitted / In Progress",
-      appliedAt: "12 Aug 2026",
-      referenceNo: "RTO-REF-984210",
-      notes: "Application submitted securely using verified CivicOne vault document."
+      id: "notif-demo-01",
+      citizenId: "CIV-DEMO-10001",
+      title: "New Access Request: CivicOne Grand Hotel",
+      category: "Consent",
+      message: "CivicOne Grand Hotel requested limited guest verification access to your Passport for Hotel Check-in.",
+      timestamp: "15 minutes ago",
+      read: false,
+      type: "info"
+    },
+    {
+      id: "notif-demo-02",
+      citizenId: "CIV-DEMO-10001",
+      title: "Academic Access Granted",
+      category: "Consent",
+      message: "CivicOne Demo College was granted View Only access to your Course Admission Record.",
+      timestamp: "1 hour ago",
+      read: true,
+      type: "success"
     }
   ],
 
+  // 8. TOURISM DESTINATIONS DATASET (CIVICONE WORLD)
+  destinations: [
+    {
+      id: "dest-dubai",
+      title: "Dubai, United Arab Emirates",
+      country: "United Arab Emirates",
+      city: "Dubai",
+      category: "Luxury / Architecture",
+      rating: 4.9,
+      image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=800",
+      shortDescription: "Ultra-modern metropolis famous for Burj Khalifa, desert safaris, luxury shopping, and world-class attractions.",
+      bestTimeToVisit: "November to March",
+      estimatedBudget: "₹75,000 – ₹1,500,000 per person",
+      popularAttractions: ["Burj Khalifa", "Dubai Mall & Fountain", "Palm Jumeirah", "Desert Safari", "Museum of the Future"],
+      localTransport: "Dubai Metro, Tram, RTA Cabs, Careem, Water Taxis",
+      safetyInfo: "Ranked among the safest global destinations. Clean, strictly monitored, 24/7 tourist police helpline.",
+      nearbyHotels: ["Burj Al Arab Jumeirah", "Atlantis The Palm", "Rove Downtown"],
+      nearbyRestaurants: ["Zuma Dubai", "Pierchic", "Al Fanar Seafood"],
+      travelOptions: {
+        flights: "Direct 3.5 hr flights from Mumbai, Delhi, Bengaluru, Hyderabad, Chennai",
+        buses: "Inter-emirate RTA bus routes from Abu Dhabi and Sharjah",
+        cabs: "RTA Taxi app, Uber, Careem available 24/7"
+      }
+    },
+    {
+      id: "dest-paris",
+      title: "Paris, France",
+      country: "France",
+      city: "Paris",
+      category: "Historical / Cultural",
+      rating: 4.8,
+      image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=800",
+      shortDescription: "The City of Light, renowned for art museums, iconic Eiffel Tower, fine dining, and rich European heritage.",
+      bestTimeToVisit: "April to May & September to October",
+      estimatedBudget: "₹1,20,000 – ₹2,50,000 per person",
+      popularAttractions: ["Eiffel Tower", "Louvre Museum", "Notre-Dame Cathedral", "Arc de Triomphe", "Seine River Cruise"],
+      localTransport: "RATP Metro, RER Suburban Rail, Velib City Bikes, Buses",
+      safetyInfo: "Generally safe. Watch for pickpockets at major tourist hubs like Eiffel Tower and Louvre.",
+      nearbyHotels: ["Le Bristol Paris", "Hotel Plaza Athenee", "CitizenM Paris Gare de Lyon"],
+      nearbyRestaurants: ["Le Jules Verne", "Bistrot Paul Bert", "L'As du Fallafel"],
+      travelOptions: {
+        flights: "Direct 8-9 hr flights from Delhi & Mumbai (Air India, Air France)",
+        trains: "Eurostar connected to London, Brussels, and Amsterdam",
+        cabs: "G7 Taxi app and Uber Paris"
+      }
+    },
+    {
+      id: "dest-tokyo",
+      title: "Tokyo, Japan",
+      country: "Japan",
+      city: "Tokyo",
+      category: "Modern / Cultural",
+      rating: 4.9,
+      image: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&q=80&w=800",
+      shortDescription: "Hyper-futuristic capital blending ancient temples, neon-lit skyscrapers, culinary excellence, and bullet trains.",
+      bestTimeToVisit: "March to May (Cherry Blossom) & October to November",
+      estimatedBudget: "₹1,10,000 – ₹2,20,000 per person",
+      popularAttractions: ["Shinjuku Crossing", "Senso-ji Temple", "Tokyo Tower", "TeamLab Planets", "Mount Fuji Day Trip"],
+      localTransport: "JR Yamanote Line, Tokyo Metro, Suica IC Card, Shinkansen Bullet Train",
+      safetyInfo: "Extremely safe with near-zero crime rates. High civic discipline and medical standards.",
+      nearbyHotels: ["Park Hyatt Tokyo", "Aman Tokyo", "Hotel Gracery Shinjuku"],
+      nearbyRestaurants: ["Sukiyabashi Jiro", "Ichiran Ramen Shinjuku", "Gyukatsu Motomura"],
+      travelOptions: {
+        flights: "Direct 7.5 hr flights from Delhi & Bengaluru (ANA, Japan Airlines)",
+        trains: "Shinkansen High Speed Bullet Train network to Kyoto and Osaka",
+        cabs: "JapanTaxi App and Uber Tokyo"
+      }
+    },
+    {
+      id: "dest-goa",
+      title: "Goa, India",
+      country: "India",
+      city: "Goa",
+      category: "Beaches / Budget",
+      rating: 4.7,
+      image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&q=80&w=800",
+      shortDescription: "India's beach paradise known for golden coastlines, Portuguese heritage, seafood delis, and vibrant nightlife.",
+      bestTimeToVisit: "November to February",
+      estimatedBudget: "₹15,000 – ₹50,000 per person",
+      popularAttractions: ["Baga Beach", "Aguada Fort", "Basilica of Bom Jesus", "Dudhsagar Waterfalls", "Panjim Latin Quarter"],
+      localTransport: "Self-drive bikes, rental cars, Goa Miles cabs, local buses",
+      safetyInfo: "Safe coastal state. Lifeguards stationed on all major public beaches.",
+      nearbyHotels: ["Taj Exotica Resort", "W Goa Anjuna", "Hard Rock Hotel Goa"],
+      nearbyRestaurants: ["Brittos Baga", "Fisherman's Wharf", "Mum's Kitchen Panaji"],
+      travelOptions: {
+        flights: "Direct flights to Dabolim (GOI) and Mopa (GOX) from all major Indian cities",
+        trains: "Konkan Railway trains to Madgaon (MAO) and Thivim (THVM)",
+        buses: "Overnight sleeper buses from Mumbai, Pune, Bengaluru, Hyderabad"
+      }
+    }
+  ],
+
+  // 9. TRAVEL PROVIDER ADAPTERS & INTEGRATION STATE
+  travelProviders: [
+    { id: "prov-air", name: "CivicOne Flight Engine (IndiGo, Air India, Emirates)", category: "Flights", status: "ADAPTER_READY", connected: false },
+    { id: "prov-bus", name: "CivicOne Bus Gateway (RedBus, KSRTC, APSRTC)", category: "Buses", status: "ADAPTER_READY", connected: false },
+    { id: "prov-rail", name: "IRCTC Rail Link", category: "Railway", status: "ADAPTER_READY", connected: false },
+    { id: "prov-cab", name: "CivicOne Cabs (Uber, Ola, Rapido)", category: "Cabs", status: "ADAPTER_READY", connected: false },
+    { id: "prov-bike", name: "CivicOne Rentals (Bounce, Royal Brothers)", category: "Bike Rental", status: "ADAPTER_READY", connected: false }
+  ],
+
+  // 10. RECENT OFFICIAL GOVERNMENT UPDATES
   govtUpdates: [
     {
-      id: "gov-001",
-      title: "DigiLocker Integration with CivicOne — Official Notice",
-      department: "Ministry of Electronics & IT (MeitY)",
-      source: "Ministry of Electronics & IT (MeitY)",
-      category: "Technology",
-      content: "Citizens can now link DigiLocker credentials to their CivicOne Vault for unified digital identity access across government portals.",
-      summary: "Citizens can link DigiLocker credentials to their CivicOne Vault.",
+      id: "gov-up-001",
+      title: "UIDAI Mandates Tokenized Aadhaar References for Identity Verification",
+      department: "Ministry of Electronics & IT (MeitY) / UIDAI",
+      source: "Official UIDAI Press Release",
+      category: "Identity",
+      content: "UIDAI has reiterated that service providers must use tokenized Aadhaar references rather than storing 12-digit physical Aadhaar numbers, safeguarding citizen privacy across digital platforms.",
+      summary: "Tokenized Aadhaar references mandated for identity privacy.",
       publishedAt: "2026-08-12T09:00:00Z",
       date: "12 Aug 2026",
       unread: true,
-      priority: "High"
+      priority: "High",
+      isOfficial: true
     },
     {
-      id: "gov-002",
-      title: "Vehicle RC Renewal via Parivahan Online Service",
-      department: "Parivahan Sewa — MoRTH",
-      source: "Parivahan Sewa — MoRTH",
+      id: "gov-up-002",
+      title: "Parivahan Portal Launches Unified Digital Driving Licence Verification",
+      department: "Ministry of Road Transport and Highways (MoRTH)",
+      source: "MoRTH E-Governance Desk",
       category: "RTO",
-      content: "Online renewal of vehicle registration certificates is now fully active through the Parivahan portal.",
-      summary: "Online renewal of vehicle RCs active via Parivahan portal.",
+      content: "MoRTH announces full API integration for smart driving licence verification, allowing citizens to share authenticated transport credentials securely without paper copies.",
+      summary: "Unified digital DL verification activated on Parivahan portal.",
       publishedAt: "2026-08-11T11:30:00Z",
       date: "11 Aug 2026",
       unread: true,
-      priority: "Medium"
+      priority: "Medium",
+      isOfficial: true
+    },
+    {
+      id: "gov-up-003",
+      title: "National Health Authority Expands Universal ABHA Digital Health Network",
+      department: "National Health Authority (NHA)",
+      source: "Ayushman Bharat Digital Mission",
+      category: "Healthcare",
+      content: "NHA reports over 60 crore citizens linked to ABHA accounts, enabling paperless digital lab reports and hospital registration across verified healthcare facilities.",
+      summary: "ABHA Health Account network expanded nationwide.",
+      publishedAt: "2026-08-10T08:00:00Z",
+      date: "10 Aug 2026",
+      unread: false,
+      priority: "Medium",
+      isOfficial: true
     }
   ],
 
   dailyNews: [
     {
-      id: "news-001",
-      title: "India Advances National Digital ID Framework",
-      headline: "India Advances National Digital ID Framework",
+      id: "news-up-001",
+      title: "India Advances Unified Citizen Services Platform Framework",
+      headline: "India Advances Unified Citizen Services Platform Framework",
       source: "CivicOne News Network",
       category: "Technology",
-      snippet: "India continues to strengthen its digital identity ecosystem with unified verified credential portals.",
-      summary: "India continues to strengthen its digital identity ecosystem.",
+      snippet: "India's digital identity landscape achieves new milestones with unified privacy-first consent frameworks and least-privilege organization access.",
+      summary: "India advances unified citizen service framework with consent-driven security.",
       publishedAt: "2026-08-13T07:30:00Z",
       date: "13 Aug 2026",
       readingTime: "3 min"
     }
   ],
 
-  supportTickets: [],
-
-  voterRecord: {
-    name: "Rajesh Kumar",
-    epicNo: "MH/07/008/421899",
-    constituency: "Bandra West (Assembly Constituency 165)",
-    state: "Maharashtra",
-    pollingStation: "St. Stanislaus High School, Room 4",
-    status: "Active Voter Record",
-    verifiedAt: "2026-01-15",
-    qrToken: "VOTER-TOKEN-984210-SECURE"
-  },
-
-  shareRequests: [],
+  goldPassRequests: [
+    {
+      id: "gpr-demo-10001",
+      citizenId: "CIV-DEMO-10001",
+      citizenName: "Aarav Kumar",
+      appliedAt: "2026-08-14T08:00:00Z",
+      status: "PENDING",
+      plan: "Annual Gold Pass (₹499)",
+      paymentRef: "TXN-900001-DEMO",
+      notes: "Awaiting Webhook / Admin Entitlement Verification"
+    }
+  ],
 
   adminStats: {
     totalCitizens: "14,892,104",
@@ -667,7 +1031,7 @@ export const db = {
     { id: "iss-03", name: "National Health Authority", department: "Healthcare", officer: "Dr. A. K. Verma", status: "VERIFIED", issuedDocs: "9,210" }
   ],
 
-  // Getters for single citizen/card access
+  // Getters for active citizen and card
   get citizen() {
     return this.citizens.find(c => c.citizenId === this.activeCitizenId) || this.citizens[0];
   },
@@ -682,58 +1046,10 @@ export const db = {
       status: "Verified Identity",
       issueDate: "15 Jan 2024",
       expiryDate: "14 Jan 2034",
-      securityChipId: `CHIP-${c.citizenId}`,
+      securityChipId: c.goldPassStatus === 'active' ? `GOLD-CHIP-${c.citizenId}` : `CHIP-${c.citizenId}`,
       verificationToken: `CIV-TOKEN-${c.citizenId}-SECURE-2026`,
       qrSignature: "SHA256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       verificationUrl: `http://localhost:3001/verify?token=CIV-TOKEN-${c.citizenId}-SECURE-2026`
     };
   }
 };
-
-// HELPER DATA SERVICE METRIC GETTERS
-export function getActiveCitizen() {
-  return db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
-}
-
-export function setActiveCitizen(citizenId) {
-  const citizen = db.citizens.find(c => c.citizenId === citizenId);
-  if (citizen) {
-    db.activeCitizenId = citizen.citizenId;
-    return citizen;
-  }
-  return getActiveCitizen();
-}
-
-export function getCitizenDocuments(citizenId = db.activeCitizenId) {
-  return db.documents.filter(d => d.citizenId === citizenId);
-}
-
-export function getCitizenNotifications(citizenId = db.activeCitizenId) {
-  return db.notifications.filter(n => n.citizenId === citizenId);
-}
-
-export function getCitizenAuditLogs(citizenId = db.activeCitizenId) {
-  return db.auditLogs.filter(a => a.citizenId === citizenId);
-}
-
-export function verifyDocument(docId) {
-  const doc = db.documents.find(d => d.id === docId);
-  if (doc) {
-    doc.status = "Verified";
-    doc.verifiedAt = new Date().toISOString();
-    
-    // Append entry to audit logs
-    db.auditLogs.unshift({
-      id: `sec-${Date.now()}`,
-      citizenId: doc.citizenId,
-      event: `${doc.name} Credential Verified`,
-      device: "Chrome / CivicOne Platform",
-      location: "Verified Issuer API",
-      ip: "127.0.0.1",
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: "SUCCESS"
-    });
-    return doc;
-  }
-  return null;
-}

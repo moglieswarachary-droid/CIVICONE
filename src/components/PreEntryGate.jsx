@@ -6,7 +6,7 @@ import { ShieldCheck, Lock, Smartphone, ArrowRight, RefreshCw, CheckCircle2, Ale
 export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
   // Steps: 'MOBILE' -> 'OTP' -> 'IDENTITY_CONSENT' -> 'IDENTITY_OTP' -> 'DEVICE_VERIFY'
   const [step, setStep] = useState('MOBILE');
-  const [citizenName, setCitizenName] = useState('Rajesh Kumar');
+  const [citizenName, setCitizenName] = useState('Aarav Kumar');
   const [phone, setPhone] = useState('9876543210');
   const [otp, setOtp] = useState(['1', '2', '3', '4', '5', '6']);
   const [identityOtp, setIdentityOtp] = useState(['1', '2', '3', '4', '5', '6']);
@@ -177,11 +177,12 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
       setDeviceVerifying(true);
       setTimeout(() => {
         onAuthenticated({
-          name: "Rajesh Kumar",
-          civicId: "CIV-984210",
+          name: citizenName || "Aarav Kumar",
+          civicId: "CIV-DEMO-10001",
           phone: `+91 ${phone}`,
-          maskedAadhaar: "XXXX XXXX 8942",
-          identityStatus: "VERIFIED"
+          maskedAadhaar: "XXXX XXXX 1001",
+          identityStatus: "VERIFIED",
+          demoLabel: "DEMO DATA — NOT A REAL CITIZEN"
         });
       }, 2200);
     }

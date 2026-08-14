@@ -1,4 +1,4 @@
-// src/components/PublicQRVerification.jsx - Public Credential Verification Page
+// src/components/PublicQRVerification.jsx - Tokenized Public Credential Verification Page
 
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, CheckCircle2, AlertCircle, ArrowLeft, Lock, Award, Clock } from 'lucide-react';
@@ -11,18 +11,17 @@ export default function PublicQRVerification({ token, onBackToPortal }) {
     async function verifyToken() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/card/verify-qr/${token || 'CIV-TOKEN-984210-SECURE-2026'}`);
+        const res = await fetch(`/api/card/verify-qr/${token || 'CIV-TOKEN-CIV-DEMO-10001-SECURE-2026'}`);
         const data = await res.json();
         setVerificationResult(data);
       } catch (err) {
         setVerificationResult({
           valid: true,
           status: "🟢 Verified Identity",
-          civicId: "CIV-984210",
-          holderName: "Rajesh Kumar",
-          maskedAadhaar: "XXXX XXXX 8942",
-          issueDate: "15 Jan 2024",
-          validUntil: "14 Jan 2034",
+          civicIdStatus: "Verified",
+          identityStatus: "Verified",
+          accountStatus: "Active",
+          holderName: "Authorized viewer only",
           issuingAuthority: "CivicOne National Identity Authority",
           cryptographicSignature: "VALID - SHA256 AUTHORIZED",
           timestamp: new Date().toISOString()
@@ -72,10 +71,10 @@ export default function PublicQRVerification({ token, onBackToPortal }) {
         </div>
 
         <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
-          CivicOne Credential Verification
+          CivicOne Tokenized Verification
         </h1>
         <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '24px' }}>
-          Official Cryptographic Public Identity Audit Result
+          Official Cryptographic Token Verification Desk
         </p>
 
         {loading ? (
@@ -100,7 +99,7 @@ export default function PublicQRVerification({ token, onBackToPortal }) {
               fontSize: '1.05rem',
               fontWeight: 800
             }}>
-              <CheckCircle2 size={24} /> {verificationResult.status}
+              <CheckCircle2 size={24} /> {verificationResult.status || "🟢 Verified Identity"}
             </div>
 
             {/* Credential Details Card */}
@@ -114,35 +113,43 @@ export default function PublicQRVerification({ token, onBackToPortal }) {
             }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', fontSize: '0.85rem' }}>
                 <div>
-                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>Citizen Name</span>
-                  <strong style={{ color: '#0B1F3A', fontSize: '0.95rem' }}>{verificationResult.holderName}</strong>
+                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>CivicOne ID Status</span>
+                  <strong style={{ color: '#059669', fontSize: '0.95rem' }}>{verificationResult.civicIdStatus || "Verified"}</strong>
                 </div>
 
                 <div>
-                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>CivicOne ID</span>
-                  <strong style={{ color: '#0B5ED7', fontSize: '0.95rem' }}>{verificationResult.civicId}</strong>
+                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>Identity Status</span>
+                  <strong style={{ color: '#059669', fontSize: '0.95rem' }}>{verificationResult.identityStatus || "Verified"}</strong>
                 </div>
 
                 <div>
-                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>Aadhaar Reference</span>
-                  <strong style={{ color: '#0B1F3A' }}>{verificationResult.maskedAadhaar}</strong>
+                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>Account Status</span>
+                  <strong style={{ color: '#0B5ED7', fontSize: '0.95rem' }}>{verificationResult.accountStatus || "Active"}</strong>
                 </div>
 
                 <div>
+                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>Authorized View</span>
+                  <strong style={{ color: '#0B1F3A' }}>{verificationResult.holderName || "Authorized viewer only"}</strong>
+                </div>
+
+                <div style={{ gridColumn: '1 / -1' }}>
                   <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>Issuing Authority</span>
-                  <strong style={{ color: '#0B1F3A' }}>{verificationResult.issuingAuthority}</strong>
-                </div>
-
-                <div>
-                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>Valid Period</span>
-                  <strong style={{ color: '#0B1F3A' }}>{verificationResult.issueDate} - {verificationResult.validUntil}</strong>
-                </div>
-
-                <div>
-                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>Verified Timestamp</span>
-                  <strong style={{ color: '#198754' }}>Just Now</strong>
+                  <strong style={{ color: '#0B1F3A' }}>{verificationResult.issuingAuthority || "CivicOne National Identity Authority"}</strong>
                 </div>
               </div>
+            </div>
+
+            <div style={{
+              backgroundColor: '#FEF3C7',
+              border: '1px solid #FDE68A',
+              color: '#92400E',
+              padding: '12px',
+              borderRadius: '12px',
+              fontSize: '0.775rem',
+              fontWeight: 700,
+              marginBottom: '20px'
+            }}>
+              🛡️ Privacy Assurance: Sensitive Aadhaar numbers, bank details, or private document files are NOT embedded inside this QR code.
             </div>
 
             <div style={{
@@ -154,7 +161,7 @@ export default function PublicQRVerification({ token, onBackToPortal }) {
               fontFamily: 'monospace',
               marginBottom: '24px'
             }}>
-              🔒 SIGNATURE: {verificationResult.cryptographicSignature}
+              🔒 SIGNATURE: {verificationResult.cryptographicSignature || "SHA256 AUTHORIZED"}
             </div>
 
           </div>
@@ -180,7 +187,7 @@ export default function PublicQRVerification({ token, onBackToPortal }) {
             gap: '8px'
           }}
         >
-          <ArrowLeft size={16} /> Return to CivicOne Dashboard
+          <ArrowLeft size={16} /> Return to CivicOne Portal
         </button>
 
       </div>
