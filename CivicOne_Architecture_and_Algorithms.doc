@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>CivicOne Architecture & Algorithms Specification</title>
+<style>
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #1E293B;
+    line-height: 1.6;
+    margin: 0;
+    padding: 24px;
+    background-color: #FFFFFF;
+  }
+  h1 {
+    color: #0B5ED7;
+    border-bottom: 2px solid #0B5ED7;
+    padding-bottom: 8px;
+    font-size: 26px;
+    margin-top: 24px;
+  }
+  h2 {
+    color: #0B1F3A;
+    border-bottom: 1px solid #E2E8F0;
+    padding-bottom: 6px;
+    font-size: 20px;
+    margin-top: 20px;
+  }
+  h3 {
+    color: #1E293B;
+    font-size: 16px;
+    margin-top: 16px;
+  }
+  p, li {
+    font-size: 14px;
+    color: #334155;
+  }
+  code {
+    background-color: #F1F5F9;
+    color: #0F172A;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 13px;
+  }
+  pre {
+    background-color: #0F172A;
+    color: #F8FAFC;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  th, td {
+    border: 1px solid #CBD5E1;
+    padding: 10px 12px;
+    text-align: left;
+  }
+  th {
+    background-color: #0B5ED7;
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+  tr:nth-child(even) {
+    background-color: #F8FAFC;
+  }
+  blockquote {
+    border-left: 4px solid #0B5ED7;
+    margin: 16px 0;
+    padding: 8px 16px;
+    background-color: #EFF6FF;
+    color: #1E40AF;
+  }
+</style>
+</head>
+<body>
+<h1>CivicOne System Architecture & Algorithms Specification</h1>
+<p>This document provides a comprehensive technical breakdown of the <strong>CivicOne Digital Identity & Citizen Portal System</strong>. It covers the overall system architecture, data flow, security model, and detailed step-by-step algorithms for every login gateway and web page/view within the application.</p>
+<hr>
+<h2>1. System Architecture Overview</h<h2>
+<p>CivicOne is built as a full-stack, decoupled Web application featuring a modern React SPA frontend and a RESTful Express.js backend.</p>
+<pre><code class="language-mermaid">
+graph TD
+    Client["React 18 SPA (Vite Client - Port 3000)"]
+    API["Express.js REST API (Node Server - Port 3001)"]
+    DB[("Mock Database Store (mockDb.js)")]
+    
+    Client --&gt;|HTTP / JSON REST API| API
+    API --&gt;|CRUD &amp; Audit Logging| DB
+</code></pre>
+<h3>Key Architectural Layers</h3>
+<li><strong>Frontend Layer (<code>src/</code>)</strong>:</li>
+<p>   - <strong>Framework</strong>: React 18 with Vite bundling.</p>
+<p>   - <strong>Styling</strong>: Vanilla CSS visual design system featuring Glassmorphism, CSS Variables (<code>data-theme</code>), and responsive flex/grid layouts.</p>
+<p>   - <strong>Iconography</strong>: Lucide React.</p>
+<p>   - <strong>Routing Strategy</strong>: Single Page Application (SPA) view-state routing managed via <code>src/App.jsx</code> with hash and pathname synchronization (<code>#org</code>, <code>#authority</code>, <code>#admin</code>, <code>/verify?token=...</code>). Includes keyboard shortcuts (e.g., <code>Ctrl + Shift + A</code> for Super Admin access).</p>
+<li><strong>Backend API Layer (<code>server/index.js</code>)</strong>:</li>
+<p>   - <strong>Runtime</strong>: Node.js v20+ with ES Modules (<code>type: "module"</code>).</p>
+<p>   - <strong>Framework</strong>: Express.js with CORS enabled for cross-origin requests.</p>
+<p>   - <strong>Endpoints</strong>:</p>
+<p>     - <code>/api/auth/*</code>: OTP generation, OTP verification, Aadhaar tokenized identity verification, Government Officer authentication, and Super Admin master login.</p>
+<p>     - <code>/api/card/*</code>: Dynamic citizen card retrieval, tier upgrades, dynamic QR token verification, and credential sharing.</p>
+<p>     - <code>/api/vault/*</code>: Vault document search, multi-category filtering, OCR auto-extraction upload, and cryptographic verification.</p>
+<p>     - <code>/api/services/*</code>: Departmental integration endpoints, entitlement sync, and MFA/consent management.</p>
+<p>     - <code>/api/admin/*</code>: System health metrics, administrative verification of Gold Pass applications, audit logs, and fraud detection.</p>
+<p>     - <code>/api/payment/*</code>: Payment gateway order creation and server-to-server webhook verification.</p>
+<li><strong>Data & Security Layer (<code>server/mockDb.js</code> & <code>src/data/mockData.js</code>)</strong>:</li>
+<p>   - <strong>State</strong>: Centralized in-memory database store supporting multi-tenant demo citizen profiles, identity records, vault documents, notifications, and security audit logs.</p>
+<p>   - <strong>Security Features</strong>: Tokenized identity verification, masked Aadhaar numbers (<code>XXXX XXXX 8942</code>), biometric consent validation, and SHA-256 cryptographic QR code signatures.</p>
+<hr>
+<h2>2. Authentication & Login Algorithms</h<h2>
+<p>CivicOne provides 3 distinct login gateways plus 1 interactive demo session switcher algorithm.</p>
+<hr>
+<h3>2.1 Citizen Login Algorithm (`PreEntryGate.jsx`)</h3>
+<p>The Citizen Login uses a 5-stage zero-trust authentication flow:</p>
+<pre><code class="language-mermaid">
+sequenceDiagram
+    autonumber
+    actor Citizen
+    participant Gate as PreEntryGate
+    participant Server as Express Server
+    participant DB as Mock DB
+
+    Citizen-&gt;&gt;Gate: 1. Enter 10-Digit Mobile Number
+    Gate-&gt;&gt;Server: POST /api/auth/send-otp { phone }
+    Server--&gt;&gt;Gate: 200 OK { success: true, demoOtp: "123456" }
+    Gate--&gt;&gt;Citizen: Render OTP Verification Step (60s Timer)
+
+    Citizen-&gt;&gt;Gate: 2. Input 6-Digit Mobile OTP ("123456")
+    Gate-&gt;&gt;Server: POST /api/auth/verify-otp { phone, otp }
+    Server--&gt;&gt;Gate: 200 OK { sessionToken, requireIdentityVerification: true }
+    Gate--&gt;&gt;Citizen: Render Aadhaar Identity Consent Screen
+
+    Citizen-&gt;&gt;Gate: 3. Grant Explicit Aadhaar Consent &amp; Submit
+    Gate--&gt;&gt;Citizen: Render Aadhaar Identity OTP Screen
+
+    Citizen-&gt;&gt;Gate: 4. Input 6-Digit Aadhaar OTP ("123456")
+    Gate-&gt;&gt;Server: POST /api/auth/identity-verify { consent: true, aadhaarOtp }
+    Server-&gt;&gt;DB: Record Security Audit Log &amp; Return Verified Profile
+    Server--&gt;&gt;Gate: 200 OK { citizen, identityStatus: "VERIFIED" }
+
+    Gate-&gt;&gt;Gate: 5. Execute 2.2s Device Security &amp; Biometric Scan Animation
+    Gate-&gt;&gt;Citizen: Transition to CitizenDashboard View
+</code></pre>
+<h4>Step-by-Step Algorithm:</h4>
+<li><strong>Input Mobile Number</strong>:</li>
+<p>   - Validate that input contains exactly 10 numeric digits.</p>
+<p>   - Dispatch <code>POST /api/auth/send-otp</code> with formatted phone number (<code>+91 XXXXXXXXXX</code>).</p>
+<p>   - Initialize 60-second resend countdown timer and transition step to <code>OTP</code>.</p>
+<li><strong>Verify Mobile OTP</strong>:</li>
+<p>   - Validate that 6 auto-advancing digit fields are completed.</p>
+<p>   - Dispatch <code>POST /api/auth/verify-otp</code>.</p>
+<p>   - On success, set <code>sessionToken</code> and transition step to <code>IDENTITY_CONSENT</code>.</p>
+<li><strong>Identity Consent & Aadhaar Authorization</strong>:</li>
+<p>   - Require explicit checkbox selection for UIDAI tokenized verification.</p>
+<p>   - On confirmation, transition step to <code>IDENTITY_OTP</code>.</p>
+<li><strong>Submit Identity OTP</strong>:</li>
+<p>   - Collect 6-digit Aadhaar authorization OTP.</p>
+<p>   - Dispatch <code>POST /api/auth/identity-verify</code>.</p>
+<p>   - Backend appends a security audit entry to <code>db.securityLogs</code> and returns verified citizen details.</p>
+<li><strong>Device Security Verification</strong>:</li>
+<p>   - Transition to <code>DEVICE_VERIFY</code> state.</p>
+<p>   - Display a 2.2-second pulse animation performing device hash integrity, location check, and cryptographic handshake.</p>
+<p>   - Invoke <code>onAuthenticated(citizenData)</code> to load the <code>CitizenDashboard</code>.</p>
+<hr>
+<h3>2.2 Government Officer Login Algorithm (`AuthorityGate.jsx`)</h3>
+<p>The Officer Gate provides department-level authentication for government issuers:</p>
+<h4>Step-by-Step Algorithm:</h4>
+<li><strong>Input Credentials</strong>:</li>
+<p>   - Capture official email address (e.g., <code>officer.sharma@parivahan.gov.in</code>).</p>
+<p>   - Select issuing department from dropdown (e.g., *Parivahan Sewa*, *NHA*, *ITD*, *MEA*, *NAD*, *State Land Records*).</p>
+<p>   - Optional: Enter Badge ID and Officer Passcode (<code>govt123</code>).</p>
+<li><strong>Submission & Verification</strong>:</li>
+<p>   - Dispatch <code>POST /api/auth/authority-login</code> with credentials.</p>
+<p>   - Backend verifies email domain and passcode.</p>
+<p>   - Generates an official session token (<code>GOVT-AUTH-<timestamp>-SECURE</code>) with <code>LEVEL-3 VERIFIED</code> clearance.</p>
+<p>   - Appends login record to government security audit log.</p>
+<li><strong>Portal Entry</strong>:</li>
+<p>   - Invoke <code>onAuthenticated(officerData)</code> and transition application view to <code>AuthorityPortal</code>.</p>
+<hr>
+<h3>2.3 Super Admin Login Algorithm (`AdminGate.jsx`)</h3>
+<p>The Super Admin Gate controls system-wide governance:</p>
+<h4>Step-by-Step Algorithm:</h4>
+<li><strong>Shortcut / Route Trigger</strong>:</li>
+<p>   - Accessed via <code>#admin</code>, <code>/owner-admin</code>, or global keyboard shortcut (<code>Ctrl + Shift + A</code>).</p>
+<li><strong>Credential Capture</strong>:</li>
+<p>   - Capture Master Admin Username (e.g., <code>superadmin@civicone.gov.in</code>), Root Passkey (<code>superadmin123</code>), and Hardware Key Token (<code>MASTER-HW-KEY-9048</code>).</p>
+<li><strong>Root Authentication</strong>:</li>
+<p>   - Dispatch <code>POST /api/auth/admin-login</code>.</p>
+<p>   - Backend verifies master clearance and assigns <code>MASTER ROOT CLEARANCE</code>.</p>
+<p>   - Logs event into central security logs.</p>
+<li><strong>Portal Entry</strong>:</li>
+<p>   - Invoke <code>onAuthenticated(adminData)</code> and transition application view to <code>AdminPortal</code>.</p>
+<hr>
+<h3>2.4 Interactive Demo Account Switcher Algorithm (`CitizenDashboard.jsx`)</h3>
+<p>CivicOne allows instant switching between demo citizen accounts without logging out:</p>
+<h4>Step-by-Step Algorithm:</h4>
+<li>User selects a demo citizen from the header dropdown (e.g., *Rajesh Kumar*, *Priya Sharma*, *Amit Patel*).</li>
+<li>Client sends <code>POST /api/citizen/switch-demo</code> with target <code>citizenId</code>.</li>
+<li>Backend updates <code>db.activeCitizenId</code> and fetches the new citizen's profile, virtual card data, and vault documents.</li>
+<li>Appends a new audit log: <code>"Switched Demo Session to [Name]"</code>.</li>
+<li>Frontend updates local states (<code>currentCitizen</code>, <code>cardData</code>, <code>documents</code>) reactively.</li>
+<hr>
+<h2>3. Web Page & View Algorithms</h<h2>
+<p>Below are the algorithms for all 10 core views and components in CivicOne.</p>
+<hr>
+<h3>3.1 Landing Page (`LandingPage.jsx`)</h3>
+<li><strong>Purpose</strong>: Public portal homepage highlighting CivicOne features, trust metrics, department integrations, and entrance portals.</li>
+<li><strong>Algorithm</strong>:</li>
+<p>  1. On render, display Hero Section with live counter stats (100M+ Citizens, 45+ Depts, 99.9% Uptime).</p>
+<p>  2. Provide interactive portal selection cards:</p>
+<p>     - <strong>Citizen Portal</strong>: Triggers <code>onAccessCivicOne()</code> -> Sets view to <code>gate</code>.</p>
+<p>     - <strong>Government Officer Portal</strong>: Triggers <code>onOpenAuthorityPortal()</code> -> Sets view to <code>authority-gate</code>.</p>
+<p>     - <strong>Super Admin Portal</strong>: Triggers <code>onOpenOwnerAdmin()</code> -> Sets view to <code>admin-gate</code>.</p>
+<p>  3. Render feature showcase grids (Dynamic QR, Cryptographic Vault, Instant Verification).</p>
+<hr>
+<h3>3.2 Citizen Dashboard (`CitizenDashboard.jsx`)</h3>
+<li><strong>Purpose</strong>: Main authenticated hub for citizens with tab navigation, quick stats, notification drawer, and interactive account switcher.</li>
+<li><strong>Algorithm</strong>:</li>
+<p>  1. <strong>Initialization (<code>useEffect</code>)</strong>:</p>
+<p>     - Execute <code>Promise.all()</code> fetching <code>/api/card/me</code>, <code>/api/vault/documents</code>, <code>/api/notifications</code>, <code>/api/updates/govt</code>, <code>/api/updates/news</code>, and <code>/api/citizens/demo</code>.</p>
+<p>     - Populate React state hooks with returned data or fallback seed data.</p>
+<p>  2. <strong>Tab Routing</strong>:</p>
+<p>     - Handle active tab state (<code>home</code>, <code>card</code>, <code>vault</code>, <code>services</code>, <code>gold-pass</code>, <code>activity</code>, <code>govt-updates</code>, <code>news</code>, <code>security</code>, <code>help</code>, <code>profile</code>).</p>
+<p>     - Render header with search bar, notification drawer toggle, theme switcher, and demo citizen selector.</p>
+<p>  3. <strong>Global Search</strong>:</p>
+<p>     - Filter documents, services, and news against query string in real-time.</p>
+<hr>
+<h3>3.3 Virtual Civic Card & Gold Pass Upgrade (`VirtualCard.jsx` & `GoldPassPaymentModal.jsx`)</h3>
+<li><strong>Purpose</strong>: Displays the citizen's dynamic digital identity card, dynamic QR verification code, and Gold Pass payment workflow.</li>
+<li><strong>Algorithm</strong>:</li>
+<p>  1. <strong>Render Card</strong>:</p>
+<p>     - Display holder photo, masked Aadhaar, Civic ID, security chip ID, and tier badge (*Verified Citizen* vs. *👑 Premium Gold Citizen*).</p>
+<p>  2. <strong>Dynamic QR Code Generation</strong>:</p>
+<p>     - Generate SHA-256 verification signature and verification URL (<code>http://localhost:3001/verify?token=...</code>).</p>
+<p>     - Clicking "Verify QR" navigates to the public verification view.</p>
+<p>  3. <strong>Gold Pass Upgrade & Webhook Payment Algorithm</strong>:</p>
+<p>     <code></code>`mermaid</p>
+<p>     graph TD</p>
+<p>         A[Click Upgrade to Gold Pass] --> B[Open GoldPassPaymentModal]</p>
+<p>         B --> C[Select Plan: ₹499/yr & Payment Method: UPI/Card]</p>
+<p>         C --> D[POST /api/payment/create-order]</p>
+<p>         D --> E[Simulate Payment Gateway Confirmation]</p>
+<p>         E --> F[POST /api/payment/webhook]</p>
+<p>         F --> G[Server Grants Gold Entitlement & Adds Audit Log]</p>
+<p>         G --> H[Update Card Tier to GOLD reactively]</p>
+<p>     <code></code>`</p>
+<hr>
+<h3>3.4 My Civic Vault (`CivicVault.jsx`)</h3>
+<li><strong>Purpose</strong>: Cryptographic document storage, filtering, upload, and instant verification against issuing authorities.</li>
+<li><strong>Algorithm</strong>:</li>
+<p>  1. <strong>Filtering & Search</strong>:</p>
+<p>     - Send query params <code>category</code>, <code>status</code>, <code>search</code>, <code>sort</code>, and <code>favoritesOnly</code> to <code>GET /api/vault/documents</code>.</p>
+<p>     - Render document cards with verification seals, issue dates, and ref numbers.</p>
+<p>  2. <strong>Document Upload & Auto-Extraction</strong>:</p>
+<p>     - Form collects Name, Category, Issuer, Ref No, and Privacy Toggle.</p>
+<p>     - On submission, send <code>POST /api/vault/upload</code>.</p>
+<p>     - Server generates security seal (<code>CIVIC-SEAL-VERIFIED-<timestamp></code>) and appends document to vault.</p>
+<p>  3. <strong>Instant Credential Verification</strong>:</p>
+<p>     - User clicks "Verify Credential".</p>
+<p>     - Send <code>POST /api/vault/verify-doc/:id</code>.</p>
+<p>     - Server checks credential status against simulated issuer API, updates status to <code>Verified</code>, and returns verification confirmation.</p>
+<hr>
+<h3>3.5 Department Services & Schemes (`ServicesSection.jsx`)</h3>
+<li><strong>Purpose</strong>: Portal for accessing integrated government departments (Parivahan, NHA, Income Tax, Passport, Digilocker, Land Records).</li>
+<li><strong>Algorithm</strong>:</li>
+<p>  1. Display department service cards categorized by ministry.</p>
+<p>  2. <strong>Department Sync</strong>:</p>
+<p>     - User clicks "Sync Services".</p>
+<p>     - Send <code>POST /api/services/category/:catKey/sync</code>.</p>
+<p>     - Server updates <code>lastSynced</code> timestamp and returns synced document count.</p>
+<p>  3. <strong>Consent & MFA Management</strong>:</p>
+<p>     - User toggles consent for automated data sharing between departments.</p>
+<p>     - Send <code>POST /api/services/category/:catKey/consent</code>.</p>
+<hr>
+<h3>3.6 Public Dynamic QR Verification (`PublicQRVerification.jsx`)</h3>
+<li><strong>Purpose</strong>: Public verification endpoint accessible by scanning a citizen's dynamic QR code or navigating to <code>/verify?token=...</code>.</li>
+<li><strong>Algorithm</strong>:</li>
+<p>  1. Extract <code>token</code> parameter from URL search params.</p>
+<p>  2. Send <code>GET /api/card/verify-qr/:token</code>.</p>
+<p>  3. <strong>Verification Logic</strong>:</p>
+<p>     - If token starts with <code>CIV-TOKEN-</code> or matches active card, server returns status <code>🟢 Verified Identity</code>, citizen name, masked Aadhaar, and SHA-256 cryptographic signature.</p>
+<p>     - Otherwise, server returns status <code>🔴 Invalid / Expired Credential</code>.</p>
+<p>  4. Render official verification badge and timestamped verification report.</p>
+<hr>
+<h3>3.7 Organization Verification Portal (`OrganizationPortal.jsx`)</h3>
+<li><strong>Purpose</strong>: Enterprise interface for employers, banks, and institutions to verify citizen credentials with explicit consent.</li>
+<li><strong>Algorithm</strong>:</li>
+<p>  1. Organization inputs Request Token or Scanned Dynamic QR Code.</p>
+<p>  2. Send verification request to server.</p>
+<p>  3. Server validates authorization consent and returns cryptographic verification badge with validity window.</p>
+<hr>
+<h3>3.8 Government Officer Portal (`AuthorityPortal.jsx`)</h3>
+<li><strong>Purpose</strong>: Official verification and document issuance workspace for government department officers.</li>
+<li><strong>Algorithm</strong>:</li>
+<p>  1. Render officer header with department badge (<code>LEVEL-3 VERIFIED</code>).</p>
+<p>  2. <strong>Search Citizen Identity</strong>:</p>
+<p>     - Enter Civic ID or Aadhaar number to look up citizen records.</p>
+<p>  3. <strong>Issue New Official Credential</strong>:</p>
+<p>     - Form collects Citizen ID, Document Type, and Expiry Date.</p>
+<p>     - Submitting issues document directly into citizen's vault with official government seal.</p>
+<hr>
+<h3>3.9 National Super Admin Control Center (`AdminPortal.jsx`)</h3>
+<li><strong>Purpose</strong>: Master control dashboard for system administrators.</li>
+<li><strong>Algorithm</strong>:</li>
+<p>  1. <strong>System Health Metrics</strong>: Display real-time CPU/Memory usage, active sessions, API response times, and error rates.</p>
+<p>  2. <strong>Pending Gold Pass Approvals</strong>:</p>
+<p>     - Fetch list via <code>GET /api/admin/goldpass/requests</code>.</p>
+<p>     - Admin can approve, reject, or revoke Gold Pass applications via <code>POST /api/admin/goldpass/verify</code>.</p>
+<p>  3. <strong>Security Audit Logs</strong>:</p>
+<p>     - Stream live system audit logs from <code>db.securityLogs</code> tracking logins, uploads, verifications, and payment webhooks.</p>
+<hr>
+<h3>3.10 Supporting Views (`VoterIdVault.jsx`, `SecurityCentre.jsx`, `ProfileSettings.jsx`, `HelpCentre.jsx`)</h3>
+<li><strong>Voter ID Vault</strong>: Manages election identity, polling station locator, and digital voter slip download.</li>
+<li><strong>Security Centre</strong>: Shows security score (e.g. 98/100), connected devices, active sessions, and 2FA settings.</li>
+<li><strong>Profile Settings</strong>: Enables updating citizen contact details, emergency contacts, and notification preferences.</li>
+<li><strong>Help Centre & AI Assistant (<code>AiAgentFloating.jsx</code>)</strong>: Provides FAQ search and an interactive AI chatbot assisting citizens with portal navigation.</li>
+<hr>
+<h2>4. Summary Table of Login Routes & Gateways</h<h2>
+<table><thead><tr><th>Portal / Gateway</th><th>Access Route</th><th>Authentication Required</th><th>Verification Mechanism</th></tr></thead><tbody>
+<tr><td>**Citizen Pre-Entry Gate**</td><td>Main Button / `/gate`</td><td>Mobile OTP + Aadhaar OTP</td><td>2-Factor OTP + Tokenized UIDAI</td></tr>
+<tr><td>**Government Officer Gate**</td><td>`#authority` / `/authority`</td><td>Dept Email + Officer Passcode</td><td>Level-3 Officer Clearance (`govt123`)</td></tr>
+<tr><td>**Super Admin Gate**</td><td>`#admin` / `Ctrl+Shift+A`</td><td>Master Username + Passkey + Hardware Token</td><td>Master Root Clearance (`superadmin123`)</td></tr>
+<tr><td>**Public QR Verification**</td><td>`/verify?token=...`</td><td>None (Public Endpoint)</td><td>SHA-256 Dynamic QR Token Verification</td></tr>
+</tbody></table>
+</body>
+</html>

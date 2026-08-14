@@ -414,17 +414,37 @@ app.get('/api/vault/summary', (req, res) => {
   });
 });
 
-// GET Vault Documents with Filters, Search, Category
+// GET Vault Documents with Filters, Search, Category, and Type
 app.get('/api/vault/documents', (req, res) => {
-  const { category, search, status, sort } = req.query;
+  const { category, type, search, status, sort } = req.query;
   const activeCitizenId = db.activeCitizenId;
   let docs = db.documents.filter(d => d.citizenId === activeCitizenId);
 
-  if (category && category !== "All") {
-    docs = docs.filter(d => d.category.toLowerCase() === category.toLowerCase() || (category === 'Vehicle/RTO' && d.category === 'RTO'));
+  const normCat = (c) => {
+    const s = (c || '').toLowerCase();
+    if (s.includes('gov') || s.includes('identity')) return 'government';
+    if (s.includes('rto') || s.includes('vehicle')) return 'rto';
+    if (s.includes('edu') || s.includes('academic')) return 'academic';
+    return s;
+  };
+
+  const normType = (t) => {
+    const s = (t || '').toLowerCase();
+    if (s.includes('cert')) return 'certificate';
+    return 'document';
+  };
+
+  if (category && category.toLowerCase() !== "all") {
+    const targetCat = normCat(category);
+    docs = docs.filter(d => normCat(d.category) === targetCat);
   }
 
-  if (status && status !== "All") {
+  if (type && type.toLowerCase() !== "all" && type.toLowerCase() !== "all types") {
+    const targetType = normType(type);
+    docs = docs.filter(d => normType(d.type || 'document') === targetType);
+  }
+
+  if (status && status.toLowerCase() !== "all") {
     docs = docs.filter(d => d.status.toLowerCase() === status.toLowerCase());
   }
 
@@ -433,15 +453,27 @@ app.get('/api/vault/documents', (req, res) => {
     docs = docs.filter(d =>
       d.name.toLowerCase().includes(q) ||
       d.issuer.toLowerCase().includes(q) ||
-      d.category.toLowerCase().includes(q) ||
+      normCat(d.category).includes(q) ||
+      normType(d.type || 'document').includes(q) ||
       (d.refNo && d.refNo.toLowerCase().includes(q))
     );
   }
+
+  const getCategoryRank = (cat) => {
+    const c = normCat(cat);
+    if (c === 'academic') return 1;
+    if (c === 'government') return 2;
+    if (c === 'rto') return 3;
+    return 99;
+  };
 
   if (sort === "Name") {
     docs.sort((a, b) => a.name.localeCompare(b.name));
   } else if (sort === "Status") {
     docs.sort((a, b) => a.status.localeCompare(b.status));
+  } else {
+    // Default sorting: Academic -> Government Authorized -> RTO -> Rest
+    docs.sort((a, b) => getCategoryRank(a.category) - getCategoryRank(b.category));
   }
 
   return res.json({
@@ -452,31 +484,50 @@ app.get('/api/vault/documents', (req, res) => {
 
 // Upload New Document
 app.post('/api/vault/upload', (req, res) => {
-  const { name, category, issuer, refNo, description, isPrivate } = req.body;
+  const { name, category, type, issuer, refNo, issueDate, expiryDate, description, isPrivate, institution, course, degree, semester } = req.body;
   const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
 
   if (!name || !category || !issuer) {
     return res.status(400).json({ error: "Please provide document name, category, and issuing authority." });
   }
 
+  const normCat = (c) => {
+    const s = (c || '').toLowerCase();
+    if (s.includes('gov') || s.includes('identity')) return 'government';
+    if (s.includes('rto') || s.includes('vehicle')) return 'rto';
+    if (s.includes('edu') || s.includes('academic')) return 'academic';
+    return s;
+  };
+
+  const normType = (t) => {
+    const s = (t || '').toLowerCase();
+    if (s.includes('cert')) return 'certificate';
+    return 'document';
+  };
+
   const newDoc = {
     id: `doc-${Date.now()}`,
     citizenId: citizen.citizenId,
     name,
-    category: category || "Identity",
+    category: normCat(category),
+    type: normType(type),
     issuer,
-    status: "Verified",
-    issueDate: new Date().toLocaleDateString('en-GB'),
-    expiryDate: "N/A",
-    refNo: refNo || `DEMO-REF-${Math.floor(100000 + Math.random() * 900000)}`,
-    fileType: "PDF",
-    fileSize: "1.4 MB",
-    icon: "FileCheck",
-    description: description || "User uploaded document stored securely in Civic Vault.",
-    securitySeal: `CIVIC-SEAL-VERIFIED-${Date.now()}`,
+    refNo: refNo || `REF-${Math.floor(100000 + Math.random() * 900000)}`,
+    status: 'Verified',
+    issueDate: issueDate || new Date().toLocaleDateString('en-GB'),
+    expiryDate: expiryDate || 'N/A',
+    lastVerified: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    fileType: 'PDF',
+    fileSize: '1.2 MB',
+    icon: normType(type) === 'certificate' ? 'Award' : 'FileText',
+    description: description || 'User uploaded authenticated credential record.',
     isPrivate: Boolean(isPrivate),
-    tags: [category, "User Uploaded", "Demo"],
-    isDemo: true
+    institution,
+    course,
+    degree,
+    semester,
+    tags: [normCat(category), normType(type), 'User Uploaded'],
+    isDemo: false
   };
 
   db.documents.unshift(newDoc);
