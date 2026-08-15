@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import DocumentViewerModal from './DocumentViewerModal.jsx';
 import { orgService } from '../services/api.js';
-import { INDIA_STATES_AND_UTS, ORGANIZATION_TYPES } from '../data/mockData.js';
+import { INDIA_STATES_AND_UTS, PRIVATE_ORG_TYPES } from '../data/mockData.js';
 
 export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
   const [organizations, setOrganizations] = useState([]);

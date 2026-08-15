@@ -42,16 +42,26 @@ export const INDIA_STATES_AND_UTS = [
   "Puducherry"
 ];
 
-export const ORGANIZATION_TYPES = [
+export const PRIVATE_ORG_TYPES = [
   {
-    id: "police",
-    name: "Police Departments",
-    roleCode: "POLICE_ADMIN",
-    description: "Police verification, FIR case reference check and authorized identity verification.",
-    icon: "ShieldAlert",
-    color: "#DC2626",
-    allowed: ["Identity Verification", "Verified Documents", "FIR Case Reference", "Audit Logs"],
-    disallowed: ["Full Unrestricted Vault Browsing"]
+    id: "bank",
+    name: "Banks & Financial Institutions",
+    roleCode: "BANKING_ACCESS_ADMIN",
+    description: "KYC verification for account opening and loan processing.",
+    icon: "Landmark",
+    color: "#0284C7",
+    allowed: ["Identity Verification", "KYC Details", "Address Verification", "PAN Document"],
+    disallowed: ["Healthcare", "Education", "Vehicle", "SIM History", "Travel"]
+  },
+  {
+    id: "insurance",
+    name: "Insurance Companies",
+    roleCode: "INSURANCE_ACCESS_ADMIN",
+    description: "Verification for policy issuance and claim processing.",
+    icon: "ShieldCheck",
+    color: "#0D9488",
+    allowed: ["Identity Verification", "Healthcare Summary", "Vehicle Insurance Status"],
+    disallowed: ["Education", "Banking", "SIM History", "Travel"]
   },
   {
     id: "college",
@@ -102,26 +112,6 @@ export const ORGANIZATION_TYPES = [
     color: "#7C3AED",
     allowed: ["Identity: VERIFIED", "Address: VERIFIED", "KYC: VERIFIED", "Transaction: AUTHORIZED"],
     disallowed: ["Full Vault Browsing", "Education", "Healthcare", "Banking", "Vehicle", "Travel"]
-  },
-  {
-    id: "government",
-    name: "Government Departments",
-    roleCode: "GOVERNMENT_ADMIN",
-    description: "Service-specific citizen verification.",
-    icon: "Landmark",
-    color: "#073B8C",
-    allowed: ["Service-Specific Identity Verification Only"],
-    disallowed: ["Automatic Exposure of Education/Healthcare/Banking/Travel"]
-  },
-  {
-    id: "rto",
-    name: "RTO & Transport Authorities",
-    roleCode: "RTO_ACCESS_ADMIN",
-    description: "Driving licence and vehicle verification.",
-    icon: "Car",
-    color: "#EA580C",
-    allowed: ["Driving Licence", "Vehicle Registration (RC)", "Insurance", "Pollution Certificate"],
-    disallowed: ["Education", "Healthcare", "Bank", "Loan", "SIM", "Travel"]
   },
   {
     id: "healthcare",

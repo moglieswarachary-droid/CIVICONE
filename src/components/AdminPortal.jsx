@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Crown, ShieldCheck, Users, Landmark, AlertTriangle, Lock, Unlock, Activity, RefreshCw, LogOut, CheckCircle2, Search, Sliders, Database, Key, Building2, Eye, ShieldAlert, FileText } from 'lucide-react';
-import { DEMO_GOVERNMENT_OFFICERS, DEMO_GLOBAL_ACCESS_LOGS, ROLE_PERMISSION_MATRIX, ORGANIZATION_TYPES } from '../data/mockData.js';
+import { DEMO_GOVERNMENT_OFFICERS, DEMO_GLOBAL_ACCESS_LOGS, ROLE_PERMISSION_MATRIX, PRIVATE_ORG_TYPES, GOVERNMENT_DEPARTMENTS } from '../data/mockData.js';
 
 export default function AdminPortal({ admin, onReturnHome }) {
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'organizations' | 'officers' | 'global_access' | 'citizens' | 'matrix' | 'security'
@@ -219,7 +219,7 @@ export default function AdminPortal({ admin, onReturnHome }) {
                 </tr>
               </thead>
               <tbody>
-                {ORGANIZATION_TYPES.map(org => (
+                {[...PRIVATE_ORG_TYPES, ...GOVERNMENT_DEPARTMENTS].map(org => (
                   <tr key={org.id} style={{ borderBottom: '1px solid #334155' }}>
                     <td style={{ padding: '14px 12px', fontWeight: 800, color: '#FFFFFF' }}>CivicOne Demo {org.name}</td>
                     <td style={{ padding: '14px 12px', color: org.color, fontWeight: 700 }}>{org.name}</td>

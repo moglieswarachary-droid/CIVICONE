@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage.jsx';
 import PreEntryGate from './components/PreEntryGate.jsx';
 import CitizenDashboard from './components/CitizenDashboard.jsx';
+import OrganizationGate from './components/OrganizationGate.jsx';
 import OrganizationPortal from './components/OrganizationPortal.jsx';
 import AuthorityGate from './components/AuthorityGate.jsx';
 import AuthorityPortal from './components/AuthorityPortal.jsx';
@@ -13,7 +14,7 @@ import AdminPortal from './components/AdminPortal.jsx';
 import PublicQRVerification from './components/PublicQRVerification.jsx';
 
 export default function App() {
-  // Views: 'landing' | 'gate' | 'citizen' | 'organization' | 'authority-gate' | 'authority' | 'police' | 'admin-gate' | 'admin' | 'verify'
+  // Views: 'landing' | 'gate' | 'citizen' | 'organization-gate' | 'organization' | 'authority-gate' | 'authority' | 'police' | 'admin-gate' | 'admin' | 'verify'
   const [currentView, setCurrentView] = useState('landing');
   const [authenticatedCitizen, setAuthenticatedCitizen] = useState(null);
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState(null);
@@ -126,6 +127,14 @@ export default function App() {
         />
       );
 
+    case 'organization-gate':
+      return (
+        <OrganizationGate
+          onAuthenticated={handleOpenOrgPortal}
+          onGoBackToLanding={() => setCurrentView('landing')}
+        />
+      );
+
     case 'organization':
       return (
         <OrganizationPortal
@@ -206,7 +215,7 @@ export default function App() {
           onAccessCivicOne={() => setCurrentView('gate')}
           onOpenAuthorityPortal={() => setCurrentView('authority-gate')}
           onOpenOwnerAdmin={() => setCurrentView('admin-gate')}
-          onOpenOrgPortal={handleOpenOrgPortal}
+          onOpenOrganizationGate={() => setCurrentView('organization-gate')}
         />
       );
   }
