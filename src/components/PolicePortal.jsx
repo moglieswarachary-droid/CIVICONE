@@ -5,7 +5,7 @@ import {
   ShieldAlert, Search, FileCheck, CheckCircle2, AlertCircle, Clock, FileText,
   UserCheck, ArrowLeft, Building2, Lock, History, FileSearch, ShieldCheck, Filter
 } from 'lucide-react';
-import { INDIA_STATES_AND_UTS } from '../data/mockData.js';
+import { INDIA_STATES_AND_UTS, DEMO_POLICE_FIRS } from '../data/mockData.js';
 
 export default function PolicePortal({ officer, initialState, onReturnHome }) {
   const [selectedState, setSelectedState] = useState(
@@ -17,7 +17,7 @@ export default function PolicePortal({ officer, initialState, onReturnHome }) {
   const [accessDuration, setAccessDuration] = useState('24 hours');
   const [verifying, setVerifying] = useState(false);
   const [verificationData, setVerificationData] = useState(null);
-  const [activeTab, setActiveTab] = useState('verify'); // 'verify' | 'audit' | 'requests'
+  const [activeTab, setActiveTab] = useState('fir'); // 'fir' | 'verify' | 'audit'
 
   const allPoliceOrgs = [
     'Demo Police Organization (All States)',
@@ -171,9 +171,9 @@ export default function PolicePortal({ officer, initialState, onReturnHome }) {
         {/* TAB BAR */}
         <div style={{ display: 'flex', gap: '10px', borderBottom: '2px solid #3A506B', marginBottom: '24px', paddingBottom: '10px' }}>
           {[
-            { id: 'verify', label: '🔍 Purpose-Based Citizen Verification' },
-            { id: 'audit', label: '📜 Police Audit Trail Logs' },
-            { id: 'requests', label: '📋 Pending Verification Requests' }
+            { id: 'fir', label: '📋 Active FIR Registry' },
+            { id: 'verify', label: '🔍 Citizen Verification' },
+            { id: 'audit', label: '📜 Police Audit Trail' }
           ].map(t => (
             <button
               key={t.id}
@@ -193,6 +193,63 @@ export default function PolicePortal({ officer, initialState, onReturnHome }) {
             </button>
           ))}
         </div>
+
+        {/* TAB 0: FIR REGISTRY */}
+        {activeTab === 'fir' && (
+          <div style={{ backgroundColor: '#1C2541', borderRadius: '20px', border: '1px solid #3A506B', padding: '28px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '4px' }}>Active FIR Registry</h3>
+                <div style={{ fontSize: '0.8rem', color: '#94A3B8' }}>{selectedState} — {DEMO_POLICE_FIRS.length} active cases</div>
+              </div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <span style={{ backgroundColor: 'rgba(220,38,38,0.2)', color: '#FF6B6B', padding: '6px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem' }}>
+                  {DEMO_POLICE_FIRS.filter(f => f.status.includes('Pending')).length} Pending
+                </span>
+                <span style={{ backgroundColor: 'rgba(74,222,128,0.15)', color: '#4ADE80', padding: '6px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem' }}>
+                  {DEMO_POLICE_FIRS.filter(f => f.status === 'Resolved').length} Resolved
+                </span>
+              </div>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #3A506B', textAlign: 'left' }}>
+                    <th style={{ padding: '12px', fontWeight: 800, color: '#6FFFE9', whiteSpace: 'nowrap' }}>FIR ID</th>
+                    <th style={{ padding: '12px', fontWeight: 800, color: '#94A3B8' }}>Date</th>
+                    <th style={{ padding: '12px', fontWeight: 800, color: '#94A3B8' }}>Subject</th>
+                    <th style={{ padding: '12px', fontWeight: 800, color: '#94A3B8' }}>Location</th>
+                    <th style={{ padding: '12px', fontWeight: 800, color: '#94A3B8' }}>Complainant</th>
+                    <th style={{ padding: '12px', fontWeight: 800, color: '#94A3B8' }}>Status</th>
+                    <th style={{ padding: '12px', fontWeight: 800, color: '#94A3B8' }}>Assigned Officer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {DEMO_POLICE_FIRS.map((fir, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #1E2D45', transition: 'background 0.2s' }}>
+                      <td style={{ padding: '14px 12px', fontFamily: 'monospace', color: '#FEF08A', fontWeight: 700, whiteSpace: 'nowrap' }}>{fir.id}</td>
+                      <td style={{ padding: '14px 12px', color: '#94A3B8', whiteSpace: 'nowrap' }}>{fir.date}</td>
+                      <td style={{ padding: '14px 12px', color: '#FFFFFF', fontWeight: 700 }}>{fir.subject}</td>
+                      <td style={{ padding: '14px 12px', color: '#94A3B8' }}>{fir.location}</td>
+                      <td style={{ padding: '14px 12px', color: '#6FFFE9', fontFamily: 'monospace', fontSize: '0.8rem' }}>{fir.complainantId}</td>
+                      <td style={{ padding: '14px 12px' }}>
+                        <span style={{
+                          backgroundColor: fir.status.includes('Pending') ? 'rgba(239,68,68,0.2)' : 'rgba(74,222,128,0.15)',
+                          color: fir.status.includes('Pending') ? '#F87171' : '#4ADE80',
+                          padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800, whiteSpace: 'nowrap'
+                        }}>
+                          {fir.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '14px 12px', color: '#60A5FA', whiteSpace: 'nowrap' }}>{fir.assignedOfficer}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* TAB 1: PURPOSE-BASED CITIZEN VERIFICATION */}
         {activeTab === 'verify' && (

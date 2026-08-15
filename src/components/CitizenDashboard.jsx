@@ -15,7 +15,6 @@ import SecurityCentre from './SecurityCentre.jsx';
 import HelpCentre from './HelpCentre.jsx';
 import ProfileSettings from './ProfileSettings.jsx';
 import AiAgentFloating from './AiAgentFloating.jsx';
-import GoldPassPaymentModal from './GoldPassPaymentModal.jsx';
 import PrivacyCenter from './PrivacyCenter.jsx';
 import TourismGuide from './TourismGuide.jsx';
 import TravelBookingHub from './TravelBookingHub.jsx';
@@ -25,10 +24,9 @@ import {
 } from '../data/mockData.js';
 
 export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification }) {
-  // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'gold-pass' | 'activity' | 'privacy' | 'notifications' | 'tourism' | 'travel' | 'govt-updates' | 'news' | 'security' | 'help' | 'ai' | 'profile'
+  // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'activity' | 'privacy' | 'notifications' | 'tourism' | 'travel' | 'govt-updates' | 'news' | 'security' | 'help' | 'ai' | 'profile'
   const [activeTab, setActiveTab] = useState('home');
   const [theme, setTheme] = useState('light');
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [documents, setDocuments] = useState(DEMO_DOCUMENTS);
@@ -119,8 +117,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         { id: 'home', label: 'Home', icon: LayoutDashboard },
         { id: 'card', label: 'My Civic Card', icon: Ticket },
         { id: 'vault', label: 'My Vault', icon: FolderClosed },
-        { id: 'services', label: 'Services', icon: Grid },
-        { id: 'gold-pass', label: 'Gold Pass', icon: Crown }
+        { id: 'services', label: 'Services', icon: Grid }
       ]
     },
     {
@@ -163,25 +160,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
   const unreadNotifCount = notifications.filter(n => !n.read).length;
 
-  const [goldPassStatus, setGoldPassStatus] = useState(currentCitizen?.goldPassStatus || cardData?.goldPassStatus || 'standard');
-
-  useEffect(() => {
-    async function checkGoldPass() {
-      try {
-        const res = await fetch('/api/goldpass/status');
-        const data = await res.json();
-        if (data.goldPassStatus) {
-          setGoldPassStatus(data.goldPassStatus);
-        }
-      } catch (err) {
-        console.log("Using default entitlement status");
-      }
-    }
-    checkGoldPass();
-  }, [currentCitizen]);
-
-  const isGoldTier = goldPassStatus === 'active';
-
   const handleSelectTab = (tabId) => {
     setActiveTab(tabId);
     setMobileMoreDrawerOpen(false);
@@ -216,21 +194,21 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 width: '36px',
                 height: '36px',
                 borderRadius: '10px',
-                background: isGoldTier ? 'linear-gradient(135deg, #EAB308 0%, #CA8A04 100%)' : '#0B5ED7',
+                background: '#0B5ED7',
                 color: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: isGoldTier ? '0 4px 14px rgba(202, 138, 4, 0.4)' : '0 4px 12px rgba(11, 94, 215, 0.3)'
+                boxShadow: '0 4px 12px rgba(11, 94, 215, 0.3)'
               }}>
-                {isGoldTier ? <Crown size={20} /> : <ShieldCheck size={20} />}
+                <ShieldCheck size={20} />
               </div>
               <div>
                 <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>
                   CivicOne
                 </span>
-                <span style={{ display: 'block', fontSize: '0.6rem', fontWeight: 800, color: isGoldTier ? '#CA8A04' : '#0B5ED7', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '-4px' }}>
-                  {isGoldTier ? "👑 Gold Pass Active" : "Citizen Portal"}
+                <span style={{ display: 'block', fontSize: '0.6rem', fontWeight: 800, color: '#0B5ED7', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '-4px' }}>
+                  Citizen Portal
                 </span>
               </div>
             </div>
@@ -254,7 +232,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
             >
               {demoCitizens.map(c => (
                 <option key={c.citizenId} value={c.citizenId}>
-                  {c.fullName} ({c.citizenId}) {c.tier === 'GOLD' ? '👑' : ''}
+                  {c.fullName} ({c.citizenId})
                 </option>
               ))}
             </select>
@@ -405,7 +383,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                             key={item.id}
                             onClick={() => handleSelectTab(item.id)}
                             style={{
-                              backgroundColor: isSelected ? (isGoldTier ? '#CA8A04' : '#0B5ED7') : 'transparent',
+                              backgroundColor: isSelected ? '#0B5ED7' : 'transparent',
                               color: isSelected ? '#FFFFFF' : 'var(--text-muted)',
                               padding: '10px 14px',
                               borderRadius: '10px',
@@ -467,58 +445,39 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
               {/* Requirement 16: Top Greeting Section */}
               <div style={{
-                background: isGoldTier
-                  ? 'linear-gradient(135deg, #1C190D 0%, #3B2E09 60%, #856414 100%)'
-                  : 'var(--bg-card)',
+                background: 'var(--bg-card)',
                 borderRadius: '20px',
                 padding: '24px',
-                border: isGoldTier ? '1.5px solid #FACC15' : '1px solid var(--border-light)',
-                boxShadow: isGoldTier ? '0 10px 30px rgba(202, 138, 4, 0.25)' : 'var(--shadow-sm)',
+                border: '1px solid var(--border-light)',
+                boxShadow: 'var(--shadow-sm)',
                 marginBottom: '20px',
                 display: 'flex',
-                justify: 'space-between',
+                justifyContent: 'space-between',
                 alignItems: 'center',
                 flexWrap: 'wrap',
                 gap: '16px',
-                color: isGoldTier ? '#FFFFFF' : 'var(--text-main)'
+                color: 'var(--text-main)'
               }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    {isGoldTier && <Crown size={22} style={{ color: '#FDE047' }} />}
-                    <h1 style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: isGoldTier ? '#FEF08A' : 'var(--text-main)' }}>
+                    <h1 style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '-0.02em', color: 'var(--text-main)' }}>
                       Welcome back, {currentCitizen.fullName}
                     </h1>
                   </div>
-                  <p style={{ fontSize: '0.85rem', color: isGoldTier ? 'rgba(255,255,255,0.9)' : 'var(--text-light)', marginTop: '2px' }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-light)', marginTop: '2px' }}>
                     CivicOne ID: <strong>{currentCitizen.citizenId}</strong> | Aadhaar Ref: <strong>{currentCitizen.maskedAadhaar}</strong>
                   </p>
                   <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
-                    <span style={{ backgroundColor: isGoldTier ? '#CA8A04' : '#D1E7DD', color: isGoldTier ? '#FFFFFF' : '#0F5132', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ backgroundColor: '#D1E7DD', color: '#0F5132', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                       <CheckCircle2 size={12} /> Identity: Verified
                     </span>
                     <span style={{ backgroundColor: '#DBEAFE', color: '#1E40AF', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                       <Shield size={12} /> Security: Protected
                     </span>
-                    <span style={{ backgroundColor: isGoldTier ? '#FEF3C7' : '#F1F5F9', color: isGoldTier ? '#92400E' : '#475569', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800 }}>
-                      Status: {isGoldTier ? "GOLD PASS ACTIVE 👑" : "STANDARD"}
+                    <span style={{ backgroundColor: '#F1F5F9', color: '#475569', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800 }}>
+                      Status: ACTIVE CITIZEN
                     </span>
                   </div>
-                </div>
-
-                <div>
-                  {!isGoldTier ? (
-                    <button
-                      onClick={() => handleSelectTab('gold-pass')}
-                      style={{ backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 20px', borderRadius: '14px', fontWeight: 900, fontSize: '0.875rem', boxShadow: '0 4px 14px rgba(202, 138, 4, 0.4)', border: 'none', cursor: 'pointer' }}
-                    >
-                      👑 Upgrade to Gold Pass
-                    </button>
-                  ) : (
-                    <div style={{ textAlign: 'right', fontSize: '0.8rem', color: '#FDE047', fontWeight: 700 }}>
-                      <div>Activated: 14 Aug 2026</div>
-                      <div>Valid: 14 Aug 2027</div>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -635,9 +594,9 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 </div>
 
                 <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-light)' }}>
-                  <span style={{ fontSize: '0.725rem', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase' }}>Gold Pass Status</span>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: isGoldTier ? '#CA8A04' : '#64748B', marginTop: '4px' }}>
-                    {isGoldTier ? "Active 👑" : "Not Active"}
+                  <span style={{ fontSize: '0.725rem', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase' }}>Account Status</span>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#059669', marginTop: '4px' }}>
+                    Active
                   </div>
                 </div>
               </div>
@@ -697,46 +656,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
             <ServicesSection />
           )}
 
-          {/* TAB 8: GOLD PASS ENTITLEMENT */}
-          {activeTab === 'gold-pass' && (
-            <div style={{ maxWidth: '900px', margin: '0 auto', paddingTop: '12px' }}>
-              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#FEF3C7', color: '#92400E', padding: '6px 16px', borderRadius: '20px', fontWeight: 800, fontSize: '0.85rem', marginBottom: '12px' }}>
-                  <Crown size={18} style={{ color: '#D97706' }} /> CivicOne Gold Pass Entitlement
-                </div>
-                <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)' }}>
-                  Unlock Premium Identity Credentials
-                </h1>
-              </div>
 
-              <div style={{
-                backgroundColor: goldPassStatus === 'active' ? '#FEF3C7' : 'var(--bg-card)',
-                borderRadius: '20px', padding: '24px', border: goldPassStatus === 'active' ? '2px solid #FACC15' : '1px solid var(--border-light)',
-                marginBottom: '24px', boxShadow: 'var(--shadow-md)'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-                  <div>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-light)', textTransform: 'uppercase' }}>
-                      Account Status:
-                    </div>
-                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: goldPassStatus === 'active' ? '#856414' : 'var(--text-main)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {goldPassStatus === 'active' && <Crown size={24} style={{ color: '#CA8A04' }} />}
-                      {goldPassStatus === 'active' ? "GOLD PASS ACTIVE 👑" : "STANDARD ACCOUNT"}
-                    </div>
-                  </div>
-
-                  {goldPassStatus !== 'active' && (
-                    <button
-                      onClick={() => setShowPaymentModal(true)}
-                      style={{ backgroundColor: '#CA8A04', color: '#FFFFFF', padding: '12px 24px', borderRadius: '14px', fontWeight: 900, fontSize: '0.95rem', border: 'none', cursor: 'pointer' }}
-                    >
-                      Get Gold Pass (₹499/yr)
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* TAB: GOVT UPDATES & DAILY NEWS */}
           {(activeTab === 'govt-updates' || activeTab === 'news') && (
@@ -774,7 +694,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         </button>
 
         <button className={`mobile-bottom-nav-item ${activeTab === 'card' ? 'active' : ''}`} onClick={() => handleSelectTab('card')}>
-          <Ticket size={20} style={{ color: isGoldTier ? '#CA8A04' : '#0B5ED7' }} />
+          <Ticket size={20} style={{ color: '#0B5ED7' }} />
           <span>Card</span>
         </button>
 
@@ -808,7 +728,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {[
-                  { id: 'gold-pass', label: 'Gold Pass', icon: Crown },
+
                   { id: 'activity', label: 'My Activity', icon: Activity },
                   { id: 'privacy', label: 'Access & Consent', icon: Lock },
                   { id: 'tourism', label: 'CivicOne World', icon: Compass },
@@ -852,16 +772,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         </div>
       )}
 
-      {/* GOLD PASS PAYMENT MODAL */}
-      {showPaymentModal && (
-        <GoldPassPaymentModal
-          onClose={() => setShowPaymentModal(false)}
-          onSuccess={() => {
-            setGoldPassStatus('active');
-            setShowPaymentModal(false);
-          }}
-        />
-      )}
+
 
       <AiAgentFloating />
 

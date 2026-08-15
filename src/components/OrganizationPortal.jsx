@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import DocumentViewerModal from './DocumentViewerModal.jsx';
 import { orgService } from '../services/api.js';
-import { INDIA_STATES_AND_UTS, PRIVATE_ORG_TYPES } from '../data/mockData.js';
+import { INDIA_STATES_AND_UTS, PRIVATE_ORG_TYPES, DEMO_HOTEL_GUESTS } from '../data/mockData.js';
 
 export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
   const [organizations, setOrganizations] = useState([]);
@@ -24,7 +24,7 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
 
   const [requests, setRequests] = useState([]);
   const [consents, setConsents] = useState([]);
-  const [activeTab, setActiveTab] = useState('locker'); // 'locker' | 'request' | 'history'
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'locker' | 'request' | 'history'
   
   // Request Form State
   const [citizenCivicId, setCitizenCivicId] = useState('CIV-DEMO-10001');
@@ -279,6 +279,7 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
         {/* TAB BAR */}
         <div style={{ display: 'flex', gap: '10px', borderBottom: '2px solid #E2E8F0', marginBottom: '24px', paddingBottom: '10px' }}>
           {[
+            { id: 'dashboard', label: '📊 Dashboard', count: selectedOrg.category === 'hotel' || selectedOrg.category === 'Hotel & Hospitality' ? DEMO_HOTEL_GUESTS.length : 0 },
             { id: 'locker', label: '📂 Authorized Credentials Locker', count: authorizedConsents.length },
             { id: 'request', label: '➕ Request Document Access', count: 0 },
             { id: 'history', label: '📜 Verification History Logs', count: requests.length }
@@ -302,6 +303,62 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
             </button>
           ))}
         </div>
+
+        {/* TAB 0: DASHBOARD */}
+        {activeTab === 'dashboard' && (
+          <div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '16px' }}>
+              {selectedOrg.name} Dashboard
+            </h3>
+            {selectedOrg.category === 'hotel' || selectedOrg.category === 'Hotel & Hospitality' ? (
+              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '24px' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '16px' }}>Current Checked-in Guests</h4>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '2px solid #E2E8F0', textAlign: 'left' }}>
+                        <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Guest Name</th>
+                        <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Civic ID</th>
+                        <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Room No</th>
+                        <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Check-In</th>
+                        <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Status</th>
+                        <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Verification</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {DEMO_HOTEL_GUESTS.map((guest, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                          <td style={{ padding: '12px', fontWeight: 700, color: '#0B1F3A' }}>{guest.name}</td>
+                          <td style={{ padding: '12px', fontFamily: 'monospace', color: '#0B5ED7' }}>{guest.citizenId}</td>
+                          <td style={{ padding: '12px' }}>{guest.roomNo}</td>
+                          <td style={{ padding: '12px', color: '#64748B' }}>{guest.checkIn}</td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{ backgroundColor: '#ECFDF5', color: '#047857', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 }}>
+                              {guest.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{ 
+                              backgroundColor: guest.verificationStatus.includes('Pending') ? '#FEF9C3' : '#E0F2FE', 
+                              color: guest.verificationStatus.includes('Pending') ? '#854D0E' : '#0369A1', 
+                              padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700 
+                            }}>
+                              {guest.verificationStatus}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '40px', textAlign: 'center', color: '#64748B' }}>
+                Dashboard data not available for this organization type. Please use the Authorized Credentials Locker.
+              </div>
+            )}
+          </div>
+        )}
 
         {/* TAB 1: AUTHORIZED CREDENTIALS LOCKER */}
         {activeTab === 'locker' && (

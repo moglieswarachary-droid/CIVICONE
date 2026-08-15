@@ -5,10 +5,10 @@ import {
   Landmark, ShieldCheck, Building2, Eye, CheckCircle2, ArrowLeft, RefreshCw,
   AlertTriangle, Lock, Users, FileText, Search, ShieldAlert, Award, Clock, MapPin
 } from 'lucide-react';
-import { GOVERNMENT_OFFICER_LEVELS } from '../data/mockData.js';
+import { GOVERNMENT_OFFICER_LEVELS, DEMO_POLICE_FIRS } from '../data/mockData.js';
 
 export default function AuthorityPortal({ officer, onReturnHome }) {
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'organizations' | 'requests' | 'issue' | 'audit'
+  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'overview' | 'organizations' | 'requests' | 'issue' | 'audit'
   const [officerData, setOfficerData] = useState(officer || {
     officerId: 'GOVT-OFFICER-8942',
     name: 'Officer K. Sharma',
@@ -156,7 +156,8 @@ export default function AuthorityPortal({ officer, onReturnHome }) {
         {/* TAB BAR */}
         <div style={{ display: 'flex', gap: '10px', borderBottom: '2px solid #1E3A8A', marginBottom: '24px', paddingBottom: '10px' }}>
           {[
-            { id: 'overview', label: '📊 Supervision Overview' },
+            { id: 'dashboard', label: '📊 Department Dashboard' },
+            { id: 'overview', label: '📈 Supervision Overview' },
             { id: 'organizations', label: '🏢 Organization Supervision' },
             { id: 'requests', label: '📋 Access Requests & Purpose Review' },
             { id: 'issue', label: '📜 Issue Official Digital Credential' }
@@ -179,6 +180,58 @@ export default function AuthorityPortal({ officer, onReturnHome }) {
             </button>
           ))}
         </div>
+
+        {/* TAB 0: DASHBOARD */}
+        {activeTab === 'dashboard' && (
+          <div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px' }}>
+              {officerData.department} Dashboard
+            </h3>
+            {officerData.department === 'Police' ? (
+              <div style={{ backgroundColor: '#162C4D', borderRadius: '20px', padding: '24px', border: '1px solid #1E3A8A' }}>
+                <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#60A5FA', marginBottom: '16px' }}>Active FIR Registry</h4>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid #1E3A8A', color: '#94A3B8', textAlign: 'left' }}>
+                        <th style={{ padding: '12px', fontWeight: 800 }}>FIR ID</th>
+                        <th style={{ padding: '12px', fontWeight: 800 }}>Date</th>
+                        <th style={{ padding: '12px', fontWeight: 800 }}>Subject</th>
+                        <th style={{ padding: '12px', fontWeight: 800 }}>Location</th>
+                        <th style={{ padding: '12px', fontWeight: 800 }}>Status</th>
+                        <th style={{ padding: '12px', fontWeight: 800 }}>Officer</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {DEMO_POLICE_FIRS.map((fir, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid #1E3A8A' }}>
+                          <td style={{ padding: '12px', fontFamily: 'monospace', color: '#FEF08A', fontWeight: 700 }}>{fir.id}</td>
+                          <td style={{ padding: '12px', color: '#94A3B8' }}>{fir.date}</td>
+                          <td style={{ padding: '12px', color: '#FFFFFF', fontWeight: 700 }}>{fir.subject}</td>
+                          <td style={{ padding: '12px', color: '#94A3B8' }}>{fir.location}</td>
+                          <td style={{ padding: '12px' }}>
+                            <span style={{ 
+                              backgroundColor: fir.status.includes('Pending') ? '#78350F' : '#064E3B', 
+                              color: fir.status.includes('Pending') ? '#FEF08A' : '#34D399', 
+                              padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 800 
+                            }}>
+                              {fir.status}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px', color: '#60A5FA' }}>{fir.assignedOfficer}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div style={{ backgroundColor: '#162C4D', borderRadius: '20px', padding: '40px', border: '1px solid #1E3A8A', textAlign: 'center', color: '#94A3B8' }}>
+                Dashboard data not available for this department type. Please select another tab.
+              </div>
+            )}
+          </div>
+        )}
 
         {/* TAB 1: OVERVIEW METRICS (Requirement 9) */}
         {activeTab === 'overview' && (

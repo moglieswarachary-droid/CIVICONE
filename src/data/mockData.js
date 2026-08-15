@@ -780,3 +780,68 @@ export const ROLE_PERMISSION_MATRIX = [
   { role: "Level 5 CivicOne Super Admin", citizenData: "Platform Authorized Audit", orgMgmt: "All Organizations", officerMgmt: "All Officers", platformMgmt: "Full Control" }
 ];
 
+export const DEMO_HOTEL_GUESTS = [
+  {
+    id: "GUEST-001",
+    name: "Ravi Kumar",
+    citizenId: "CIV-DEMO-10001",
+    checkIn: "2026-08-10 14:00",
+    checkOut: "2026-08-15 11:00",
+    status: "Checked In",
+    verificationStatus: "Verified via CivicOne",
+    roomNo: "204"
+  },
+  {
+    id: "GUEST-002",
+    name: "Priya Sharma",
+    citizenId: "CIV-DEMO-10002",
+    checkIn: "2026-08-12 15:30",
+    checkOut: "2026-08-16 11:00",
+    status: "Checked In",
+    verificationStatus: "Verified via CivicOne",
+    roomNo: "310"
+  },
+  {
+    id: "GUEST-003",
+    name: "Amit Patel",
+    citizenId: "CIV-DEMO-10003",
+    checkIn: "2026-08-14 12:15",
+    checkOut: "2026-08-18 11:00",
+    status: "Checked In",
+    verificationStatus: "Pending Verification",
+    roomNo: "105"
+  }
+];
+
+export const DEMO_POLICE_FIRS = [
+  {
+    id: "FIR-2026-904812",
+    date: "2026-08-10",
+    subject: "Vehicle Theft",
+    location: "Andheri West, Mumbai",
+    complainantName: "Sanjay Gupta",
+    complainantId: "CIV-DEMO-10005",
+    status: "Pending Investigation",
+    assignedOfficer: "Inspector V. Deshmukh"
+  },
+  {
+    id: "FIR-2026-904813",
+    date: "2026-08-12",
+    subject: "Cyber Fraud",
+    location: "Online",
+    complainantName: "Meera Reddy",
+    complainantId: "CIV-DEMO-10006",
+    status: "Resolved",
+    assignedOfficer: "Sub-Inspector A. Khan"
+  },
+  {
+    id: "FIR-2026-904814",
+    date: "2026-08-14",
+    subject: "Property Dispute",
+    location: "Koramangala, Bengaluru",
+    complainantName: "Vikram Singh",
+    complainantId: "CIV-DEMO-10007",
+    status: "Pending Investigation",
+    assignedOfficer: "Inspector K. Patil"
+  }
+];
