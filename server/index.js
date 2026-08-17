@@ -6,6 +6,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { db } from './mockDb.js';
 import { dbService } from './db.js';
+import { generateToken } from './auth.js';
+import { authenticateToken, requireRole } from './middleware/authMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -59,7 +61,7 @@ app.post('/api/auth/verify-otp', (req, res) => {
 });
 
 // Aadhaar Tokenized Identity Verification
-app.post('/api/auth/identity-verify', (req, res) => {
+app.post('/api/auth/identity-verify', async (req, res) => {
   const { consent, aadhaarOtp, name, phone } = req.body;
 
   if (!consent) {
@@ -70,20 +72,23 @@ app.post('/api/auth/identity-verify', (req, res) => {
     return res.status(400).json({ error: "Invalid identity verification OTP. Use 123456 for demo." });
   }
 
-  const activeCitizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
+  const activeCitizen = await dbService.getCitizenById(db.activeCitizenId);
   if (name && name.trim()) {
     activeCitizen.fullName = name.trim();
   }
 
-  db.auditLogs.unshift({
-    id: `sec-${Date.now()}`,
+  await dbService.addAuditLog({
     citizenId: activeCitizen.citizenId,
     event: `Tokenized Identity Verification Completed for ${activeCitizen.fullName}`,
     device: "Web Client",
     location: "Vijayawada, AP",
-    ip: "49.37.142.90",
-    timestamp: new Date().toLocaleString(),
-    status: "SUCCESS"
+    ip: "49.37.142.90"
+  });
+
+  const token = generateToken({
+    citizenId: activeCitizen.citizenId,
+    role: 'CITIZEN',
+    name: activeCitizen.fullName
   });
 
   return res.json({
@@ -91,12 +96,13 @@ app.post('/api/auth/identity-verify', (req, res) => {
     message: "Identity verified securely via UIDAI Authorized Token service.",
     citizen: activeCitizen,
     maskedAadhaar: activeCitizen.maskedAadhaar,
-    identityStatus: "VERIFIED"
+    identityStatus: "VERIFIED",
+    token
   });
 });
 
 // Government Officer Login API
-app.post('/api/auth/authority-login', (req, res) => {
+app.post('/api/auth/authority-login', async (req, res) => {
   const { email, department, badgeId, passcode } = req.body;
 
   if (!email || !department) {
@@ -116,26 +122,31 @@ app.post('/api/auth/authority-login', (req, res) => {
     sessionToken: `GOVT-AUTH-${Date.now()}-SECURE`
   };
 
-  db.auditLogs.unshift({
-    id: `sec-${Date.now()}`,
+  await dbService.addAuditLog({
     citizenId: "GOVT-DESK",
     event: `Government Officer Login: ${email} (${department})`,
     device: "Web Client",
     location: "New Delhi, India",
-    ip: "164.100.42.10",
-    timestamp: new Date().toLocaleString(),
-    status: "SUCCESS"
+    ip: "164.100.42.10"
+  });
+
+  const token = generateToken({
+    officerId: officerSession.officerId,
+    email: officerSession.email,
+    department: officerSession.department,
+    role: 'OFFICER'
   });
 
   return res.json({
     success: true,
     message: "Government Officer Authenticated Successfully.",
-    officer: officerSession
+    officer: officerSession,
+    token
   });
 });
 
 // Super Admin Login API (Server-Side Authorized)
-app.post('/api/auth/admin-login', (req, res) => {
+app.post('/api/auth/admin-login', async (req, res) => {
   const { username, passkey } = req.body;
 
   if (!username) {
@@ -154,21 +165,25 @@ app.post('/api/auth/admin-login', (req, res) => {
     sessionToken: `ADMIN-ROOT-${Date.now()}-SECURE`
   };
 
-  db.auditLogs.unshift({
-    id: `sec-${Date.now()}`,
+  await dbService.addAuditLog({
     citizenId: "SUPERADMIN-01",
     event: `Super Admin Master Login: ${username}`,
-    device: "Master Console",
-    location: "NIC Security Hub",
-    ip: "164.100.1.1",
-    timestamp: new Date().toLocaleString(),
-    status: "SUCCESS"
+    device: "Web Client",
+    location: "New Delhi, India",
+    ip: "164.100.42.1"
+  });
+
+  const token = generateToken({
+    adminId: adminSession.adminId,
+    username: adminSession.username,
+    role: 'ADMIN'
   });
 
   return res.json({
     success: true,
-    message: "Super Admin Authenticated with Master Clearance.",
-    admin: adminSession
+    message: "Master Admin Root Authorization Granted.",
+    admin: adminSession,
+    token
   });
 });
 
