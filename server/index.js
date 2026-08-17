@@ -64,15 +64,16 @@ app.post('/api/auth/verify-otp', (req, res) => {
     return res.status(400).json({ error: "Invalid OTP. Please enter 6-digit verification code." });
   }
 
-  if (record && record.otp !== otp && otp !== '123456') {
-    return res.status(400).json({ error: "Incorrect OTP entered. Please check and try again." });
+  // Accept generated OTP or 123456
+  if (otp === '123456' || (record && record.otp === otp) || !record) {
+    return res.json({
+      success: true,
+      message: "Mobile number verified successfully.",
+      sessionToken: `CIV-SESS-${Date.now()}-SECURE`
+    });
   }
 
-  return res.json({
-    success: true,
-    message: "Mobile number verified successfully.",
-    sessionToken: `CIV-SESS-${Date.now()}-SECURE`
-  });
+  return res.status(400).json({ error: "Incorrect OTP entered. Please enter the 6-digit code shown on screen." });
 });
 
 // POST Citizen Registration Endpoint (Unique Civic ID + MPIN Hashing)

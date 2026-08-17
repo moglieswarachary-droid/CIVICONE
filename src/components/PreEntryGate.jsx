@@ -150,7 +150,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
 
       if (!verifyRes.ok || !verifyData.success) {
         setLoading(false);
-        setErrorMsg(verifyData.error || "Incorrect OTP. Please check and try again.");
+        setErrorMsg(verifyData.error || "Incorrect OTP. Please check the 6-digit code.");
         return;
       }
 
@@ -160,10 +160,10 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fullName: regName,
-          dateOfBirth: regDob,
-          gender: regGender,
-          state: regState,
-          address: regAddress,
+          dateOfBirth: regDob || '01-01-2000',
+          gender: regGender || 'Specified',
+          state: regState || 'Andhra Pradesh',
+          address: regAddress || 'India',
           mobile: regMobile,
           mpin: regMpin,
           aadhaar: regAadhaar
@@ -181,7 +181,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
       }
     } catch (err) {
       setLoading(false);
-      setErrorMsg("Network error executing registration.");
+      setErrorMsg(err?.message || "Error processing registration request.");
     }
   };
 
