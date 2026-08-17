@@ -121,3 +121,9 @@ out
 # OS files
 .DS_Store
 Thumbs.db
+
+# Database files
+*.db
+*.db-journal
+prisma/dev.db
+

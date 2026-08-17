@@ -1,0 +1,160 @@
+// prisma/schema.prisma - CivicOne Relational Database Schema
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Citizen {
+  id                  String   @id @default(uuid())
+  citizenId           String   @unique
+  fullName            String
+  displayName         String
+  dateOfBirth         String
+  gender              String
+  profileImage        String?
+  mobile              String
+  mobileMasked        String
+  email               String?
+  emailMasked          String?
+  address             String
+  addressSummary      String
+  state               String
+  trustLevel          String   @default("Verified Citizen")
+  verificationStatus  String   @default("VERIFIED")
+  securityScore       Int      @default(95)
+  virtualCardId       String?
+  virtualCardStatus   String   @default("ACTIVE")
+  tier                String   @default("STANDARD")
+  bloodGroup          String?
+  emergencyContact    String?
+  maskedAadhaar       String
+  isDemo              Boolean  @default(false)
+  demoLabel           String?
+  educationInfoJson   String?  // Stored JSON payload
+  governmentInfoJson  String?  // Stored JSON payload
+  rtoInfoJson         String?  // Stored JSON payload
+  healthcareInfoJson  String?  // Stored JSON payload
+  travelInfoJson      String?  // Stored JSON payload
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  vaultDocuments      VaultDocument[]
+  consentRequests     ConsentRequest[]
+  auditLogs           AuditLog[]
+}
+
+model VirtualCard {
+  id          String   @id @default(uuid())
+  citizenId   String   @unique
+  cardType    String   @default("STANDARD")
+  cardStatus  String   @default("ACTIVE")
+  qrToken     String
+  issuedAt    DateTime @default(now())
+  expiresAt   DateTime?
+}
+
+model VaultDocument {
+  id               String   @id @default(uuid())
+  citizenId        String
+  docType          String
+  name             String
+  docNumber        String
+  issuer           String
+  issueDate        String
+  expiryDate       String
+  isVerified       Boolean  @default(true)
+  fileUrl          String?
+  category         String   @default("Government")
+  createdAt        DateTime @default(now())
+
+  citizen          Citizen  @relation(fields: [citizenId], references: [citizenId], onDelete: Cascade)
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  orgId       String   @unique
+  name        String
+  state       String
+  orgType     String   // hotel, bank, school, hospital
+  roleCode    String
+  accessLevel String   @default("VIEW ONLY")
+  badgeText   String
+  regNo       String
+  status      String   @default("VERIFIED")
+  createdAt   DateTime @default(now())
+}
+
+model GovtOfficer {
+  id              String   @id @default(uuid())
+  officerId       String   @unique
+  name            String
+  email           String
+  department      String   // Police, Transport (RTO), Revenue, etc.
+  state           String
+  office          String
+  roleLevel       Int      @default(1)
+  roleTitle       String
+  clearanceStatus String   @default("LEVEL-3 VERIFIED")
+  securityStatus  String   @default("LOCK-PROTECTED")
+  createdAt       DateTime @default(now())
+}
+
+model ConsentRequest {
+  id              String    @id @default(uuid())
+  citizenId       String
+  requestingOrg   String
+  requestingRole  String
+  purpose         String
+  scope           String
+  status          String    @default("PENDING") // PENDING, GRANTED, REVOKED, EXPIRED
+  requestedAt     DateTime  @default(now())
+  grantedAt       DateTime?
+  expiresAt       DateTime?
+
+  citizen         Citizen   @relation(fields: [citizenId], references: [citizenId], onDelete: Cascade)
+}
+
+model FIRRecord {
+  id              String   @id @default(uuid())
+  firId           String   @unique
+  date            String
+  subject         String
+  location        String
+  complainantId   String
+  status          String   @default("Pending Investigation") // Pending Investigation, Resolved, Under Review
+  assignedOfficer String
+  state           String
+  createdAt       DateTime @default(now())
+}
+
+model HotelGuest {
+  id                 String   @id @default(uuid())
+  guestName          String
+  civicId            String
+  roomNo             String
+  checkInDate        String
+  checkOutDate       String
+  verificationStatus String   @default("VERIFIED")
+  state              String
+  createdAt          DateTime @default(now())
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  logId       String   @unique
+  citizenId   String?
+  event       String
+  device      String   @default("Web Client")
+  location    String   @default("Vijayawada, AP")
+  ip          String   @default("127.0.0.1")
+  timestamp   String
+  status      String   @default("SUCCESS")
+  createdAt   DateTime @default(now())
+
+  citizen     Citizen? @relation(fields: [citizenId], references: [citizenId], onDelete: SetNull)
+}

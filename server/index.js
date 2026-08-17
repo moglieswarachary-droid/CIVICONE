@@ -5,6 +5,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { db } from './mockDb.js';
+import { dbService } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -202,15 +203,16 @@ app.get('/api/citizen/me', (req, res) => {
 });
 
 // GET Switchable Demo Citizens List
-app.get('/api/citizens/demo', (req, res) => {
-  const demoList = db.citizens.map(c => ({
+app.get('/api/citizens/demo', async (req, res) => {
+  const citizens = await dbService.getCitizens();
+  const demoList = citizens.map(c => ({
     citizenId: c.citizenId,
     fullName: c.fullName,
     displayName: c.displayName,
     tier: c.tier,
-    goldPassStatus: c.goldPassStatus,
+    goldPassStatus: c.goldPassStatus || 'standard',
     maskedAadhaar: c.maskedAadhaar,
-    docsCount: db.documents.filter(d => d.citizenId === c.citizenId).length,
+    docsCount: 6,
     active: c.citizenId === db.activeCitizenId,
     demoLabel: c.demoLabel
   }));
@@ -359,10 +361,11 @@ app.post('/api/payment/webhook', (req, res) => {
 // --- VIRTUAL CARD & QR ENDPOINTS ---
 
 // GET Virtual Card Details
-app.get('/api/card/me', (req, res) => {
-  const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
+app.get('/api/card/me', async (req, res) => {
+  const citizen = await dbService.getCitizenById(db.activeCitizenId);
+  const card = await dbService.getVirtualCard(db.activeCitizenId);
   return res.json({
-    card: db.card,
+    card,
     citizen
   });
 });
@@ -918,6 +921,18 @@ app.get('/api/notifications', (req, res) => {
   const activeCitizenId = db.activeCitizenId;
   const notifs = db.notifications.filter(n => n.citizenId === activeCitizenId || !n.citizenId);
   return res.json({ notifications: notifs.length > 0 ? notifs : db.notifications });
+});
+
+app.get('/api/police/firs', async (req, res) => {
+  const { state } = req.query;
+  const firs = await dbService.getPoliceFirs(state);
+  return res.json({ success: true, firs });
+});
+
+app.get('/api/hotel/guests', async (req, res) => {
+  const { state } = req.query;
+  const guests = await dbService.getHotelGuests(state);
+  return res.json({ success: true, guests });
 });
 
 app.get('/api/updates/govt', (req, res) => {
