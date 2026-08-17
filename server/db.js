@@ -91,7 +91,7 @@ export const dbService = {
 
   // Register New Citizen with Unique Civic ID Generation and MPIN Hashing
   async registerCitizen(data) {
-    const { fullName, dateOfBirth, gender, state, address, mobile, mpin, aadhaar } = data;
+    const { fullName, dateOfBirth, gender, state, address, mobile, email, mpin, aadhaar } = data;
     const statePrefix = (state || 'AP').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
     // Generate Unique Civic ID
@@ -119,6 +119,7 @@ export const dbService = {
 
     const hashedMpin = mpin ? await hashPassword(mpin) : null;
     const cleanMobile = (mobile || '').startsWith('+91') ? mobile : `+91-${mobile}`;
+    const userEmail = email || `${uniqueCivicId.toLowerCase()}@civicone.gov.in`;
     const maskedAadhaar = aadhaar ? `XXXX XXXX ${aadhaar.slice(-4)}` : `XXXX XXXX ${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newCitizen = {
@@ -129,8 +130,8 @@ export const dbService = {
       gender: gender || 'Specified',
       mobile: cleanMobile,
       mobileMasked: cleanMobile,
-      email: `${uniqueCivicId.toLowerCase()}@civicone.gov.in`,
-      emailMasked: `${uniqueCivicId.toLowerCase()}@civicone.gov.in`,
+      email: userEmail,
+      emailMasked: userEmail,
       address: address || `${state || 'Andhra Pradesh'}, India`,
       addressSummary: `${state || 'Andhra Pradesh'}, India`,
       state: state || 'Andhra Pradesh',
@@ -399,5 +400,39 @@ export const dbService = {
 
     fallbackDb.auditLogs.unshift(log);
     return log;
+  },
+
+  // Update Citizen Profile Details (Mobile, Email)
+  async updateCitizenProfile(citizenId, updates) {
+    const { mobile, email } = updates;
+    const cleanMobile = mobile ? (mobile.startsWith('+91') ? mobile : `+91-${mobile}`) : undefined;
+
+    try {
+      if (prisma) {
+        const updated = await prisma.citizen.update({
+          where: { citizenId },
+          data: {
+            ...(cleanMobile && { mobile: cleanMobile, mobileMasked: cleanMobile }),
+            ...(email && { email, emailMasked: email })
+          }
+        });
+        return updated;
+      }
+    } catch (err) {
+      console.warn("Prisma update profile fallback:", err.message);
+    }
+
+    const found = fallbackDb.citizens.find(c => c.citizenId === citizenId);
+    if (found) {
+      if (cleanMobile) {
+        found.mobile = cleanMobile;
+        found.mobileMasked = cleanMobile;
+      }
+      if (email) {
+        found.email = email;
+        found.emailMasked = email;
+      }
+    }
+    return found;
   }
 };

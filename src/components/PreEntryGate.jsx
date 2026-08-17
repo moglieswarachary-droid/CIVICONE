@@ -21,6 +21,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
 
   // Form Fields for Registration
   const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
   const [regDob, setRegDob] = useState('');
   const [regGender, setRegGender] = useState('Male');
   const [regState, setRegState] = useState('Andhra Pradesh');
@@ -161,6 +162,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         fullName: regName,
+        email: regEmail,
         dateOfBirth: regDob || '01-01-2000',
         gender: regGender || 'Specified',
         state: regState || 'Andhra Pradesh',
@@ -381,6 +383,27 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
                     placeholder="e.g. Ramesh Varma"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#0F172A',
+                      border: '1px solid #334155',
+                      color: '#FFFFFF',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '14px' }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#94A3B8', marginBottom: '4px' }}>
+                    EMAIL ADDRESS (FOR OFFICIAL NOTIFICATIONS & DISPATCHES)
+                  </label>
+                  <input
+                    type="email"
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
+                    placeholder="e.g. ramesh.varma@example.com"
                     style={{
                       width: '100%',
                       padding: '10px 12px',

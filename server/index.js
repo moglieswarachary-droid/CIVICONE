@@ -79,7 +79,7 @@ app.post('/api/auth/verify-otp', (req, res) => {
 // POST Citizen Registration Endpoint (Unique Civic ID + MPIN Hashing)
 app.post('/api/auth/citizen-register', async (req, res) => {
   try {
-    const { fullName, dateOfBirth, gender, state, address, mobile, mpin, aadhaar } = req.body;
+    const { fullName, dateOfBirth, gender, state, address, mobile, email, mpin, aadhaar } = req.body;
 
     if (!fullName || !mobile || !mpin) {
       return res.status(400).json({ error: "Please fill in all required registration fields including 4-digit MPIN." });
@@ -102,6 +102,7 @@ app.post('/api/auth/citizen-register', async (req, res) => {
       state,
       address,
       mobile,
+      email,
       mpin,
       aadhaar
     });
@@ -183,6 +184,32 @@ app.post('/api/auth/citizen-login', async (req, res) => {
   } catch (err) {
     console.error("Error in /api/auth/citizen-login:", err);
     return res.status(500).json({ error: err.message || "Login processing error." });
+  }
+});
+
+// PUT Update Citizen Profile Endpoint (Email & Mobile with Audit Logging)
+app.put('/api/citizen/profile', async (req, res) => {
+  try {
+    const { citizenId, mobile, email } = req.body;
+    const targetId = citizenId || db.activeCitizenId;
+
+    const updated = await dbService.updateCitizenProfile(targetId, { mobile, email });
+
+    await dbService.addAuditLog({
+      citizenId: targetId,
+      event: `Profile Credentials Updated (Mobile/Email Modified)`,
+      device: "Web Client",
+      location: "India",
+      ip: "49.37.142.90"
+    });
+
+    return res.json({
+      success: true,
+      message: "Profile updated successfully.",
+      citizen: updated
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message || "Failed to update profile." });
   }
 });
 
@@ -624,6 +651,76 @@ app.get('/api/vault/documents', (req, res) => {
     count: docs.length,
     documents: docs
   });
+});
+
+// GET Category Services Detail Hub
+app.get('/api/services/category/:catKey', (req, res) => {
+  const { catKey } = req.params;
+  const mockCategoryData = {
+    government: {
+      categoryName: "Government & Identity Services",
+      provider: "UIDAI, Income Tax Department, Election Commission of India",
+      records: [
+        { id: "rec-gov-01", name: "Aadhaar e-KYC Verification", docNumber: "XXXX XXXX 8909", issuer: "UIDAI", status: "VERIFIED", issueDate: "2024-01-15", maskedId: "XXXX-8909" },
+        { id: "rec-gov-02", name: "Permanent Account Number (PAN)", docNumber: "ABCDE1234F", issuer: "Income Tax Dept", status: "VERIFIED", issueDate: "2022-06-10", maskedId: "ABCDE****F" },
+        { id: "rec-gov-03", name: "Voter Identity Card (EPIC)", docNumber: "VTR-AP-908123", issuer: "Election Commission", status: "VERIFIED", issueDate: "2023-03-22", maskedId: "VTR-****-123" }
+      ],
+      workflows: [
+        { id: "wf-gov-01", name: "Link Aadhaar with PAN Card", status: "ACTIVE", actionLabel: "Execute Linkage" },
+        { id: "wf-gov-02", name: "Download Signed Voter e-EPIC", status: "READY", actionLabel: "Download e-EPIC" },
+        { id: "wf-gov-03", name: "Re-issue Domicile / Native Certificate", status: "ACTIVE", actionLabel: "Apply Certificate" }
+      ]
+    },
+    rto: {
+      categoryName: "RTO & Vehicle Transport Hub",
+      provider: "Ministry of Road Transport and Highways (MoRTH)",
+      records: [
+        { id: "rec-rto-01", name: "Smart Driving Licence (DL)", docNumber: "DL-37-2024-00912", issuer: "AP Transport Dept", status: "VALID", issueDate: "2024-02-01", expiryDate: "2044-02-01" },
+        { id: "rec-rto-02", name: "Vehicle Registration Certificate (RC)", docNumber: "AP-39-BX-9081", issuer: "RTO Vijayawada", status: "ACTIVE", issueDate: "2023-11-10" },
+        { id: "rec-rto-03", name: "Pollution Under Control (PUC)", docNumber: "PUC-89102-2026", issuer: "MoRTH Authorized Center", status: "VALID", expiryDate: "2026-11-30" }
+      ],
+      workflows: [
+        { id: "wf-rto-01", name: "Pay Pending e-Challan Fine", status: "NO PENALTIES", actionLabel: "Check e-Challans" },
+        { id: "wf-rto-02", name: "DL Renewal Application", status: "ELIGIBLE", actionLabel: "Renew Driving Licence" },
+        { id: "wf-rto-03", name: "HSRP Fuel Sticker Booking", status: "OPEN", actionLabel: "Book HSRP Slot" }
+      ]
+    },
+    healthcare: {
+      categoryName: "Healthcare & ABHA Digital Network",
+      provider: "National Health Authority (NHA)",
+      records: [
+        { id: "rec-hlth-01", name: "Universal ABHA Digital Health Card", docNumber: "91-8901-2309-12", issuer: "Ayushman Bharat Mission", status: "ACTIVE" },
+        { id: "rec-hlth-02", name: "Covid-19 Vaccination Certificate", docNumber: "VAC-90123-IN", issuer: "CoWIN / Ministry of Health", status: "VERIFIED" }
+      ],
+      workflows: [
+        { id: "wf-hlth-01", name: "Create / Sync ABHA Health Account", status: "SYNCED", actionLabel: "Sync Medical Records" },
+        { id: "wf-hlth-02", name: "Share Health Records with Hospital", status: "READY", actionLabel: "Generate Token" }
+      ]
+    },
+    finance: {
+      categoryName: "Banking & Financial KYC Network",
+      provider: "Reserve Bank of India & Tax Network",
+      records: [
+        { id: "rec-fin-01", name: "Form 16 Tax Deduction Certificate", docNumber: "FY-2025-26", issuer: "Income Tax Dept", status: "VERIFIED" }
+      ],
+      workflows: [
+        { id: "wf-fin-01", name: "Instant One-Click Bank CKYC Share", status: "READY", actionLabel: "Authorize Bank KYC" }
+      ]
+    }
+  };
+
+  const data = mockCategoryData[catKey] || {
+    categoryName: `${catKey.toUpperCase()} Services Hub`,
+    provider: "CivicOne Integrated National Gateway",
+    records: [
+      { id: `rec-${catKey}-01`, name: `${catKey.toUpperCase()} Official Credential`, docNumber: `DOC-${Date.now()}`, issuer: "National Issuing Authority", status: "VERIFIED" }
+    ],
+    workflows: [
+      { id: `wf-${catKey}-01`, name: `Request ${catKey.toUpperCase()} Verification`, status: "ACTIVE", actionLabel: "Launch Workflow" }
+    ]
+  };
+
+  return res.json({ success: true, data });
 });
 
 // Upload New Document

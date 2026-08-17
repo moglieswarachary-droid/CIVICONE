@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import {
   ShieldCheck, QrCode, RotateCw, Share2, Download, History, Lock, CheckCircle2,
-  Copy, X, Sparkles, ShieldAlert, Fingerprint, Crown, Smartphone, Radio, Zap, Award
+  Copy, X, Sparkles, ShieldAlert, Fingerprint, Crown, Smartphone, Radio, Zap, Award, Eye, EyeOff
 } from 'lucide-react';
 
 export default function VirtualCard({ citizen, card, onNavigateToVerification, onCardUpdate }) {
@@ -13,6 +13,7 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showNfcModal, setShowNfcModal] = useState(false);
   const [showTierModal, setShowTierModal] = useState(false);
+  const [showFullAadhaar, setShowFullAadhaar] = useState(false);
   
   // Card Tier State (Defaulting to STANDARD unless Gold Pass is ACTIVE)
   const [currentTier, setCurrentTier] = useState(card?.tier || 'STANDARD');
@@ -303,8 +304,15 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
                     <Copy size={12} />
                   </button>
                 </div>
-                <div style={{ fontSize: '0.725rem', color: isGold ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.75)', marginTop: '2px' }}>
-                  Aadhaar Ref: {citizen.maskedAadhaar}
+                <div style={{ fontSize: '0.725rem', color: isGold ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.75)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>Aadhaar Number: <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{showFullAadhaar ? (citizen.aadhaarNumber || '8121 4981 8909') : (citizen.maskedAadhaar || 'XXXX XXXX 8909')}</span></span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setShowFullAadhaar(!showFullAadhaar); }}
+                    style={{ background: 'none', border: 'none', color: isGold ? '#FDE047' : '#BFDBFE', cursor: 'pointer', padding: 0, opacity: 0.95, display: 'flex', alignItems: 'center' }}
+                    title={showFullAadhaar ? "Hide Aadhaar Number" : "Reveal Aadhaar Number"}
+                  >
+                    {showFullAadhaar ? <EyeOff size={13} /> : <Eye size={13} />}
+                  </button>
                 </div>
               </div>
 

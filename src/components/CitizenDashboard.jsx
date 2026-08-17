@@ -133,8 +133,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       key: 'explore',
       title: 'EXPLORE',
       items: [
-        { id: 'tourism', label: 'CivicOne World', icon: Compass },
-        { id: 'travel', label: 'Travel & Bookings', icon: Plane },
         { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
         { id: 'news', label: 'Daily News', icon: Newspaper }
       ]
@@ -212,30 +210,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 </span>
               </div>
             </div>
-          </div>
-
-          {/* Demo Citizen Profile Switcher */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748B' }}>Active Citizen:</span>
-            <select
-              value={currentCitizen.citizenId}
-              onChange={(e) => handleSwitchDemoAccount(e.target.value)}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '8px',
-                border: '1.5px solid #CBD5E1',
-                fontWeight: 800,
-                fontSize: '0.8rem',
-                color: '#0B1F3A',
-                backgroundColor: '#FFFFFF'
-              }}
-            >
-              {demoCitizens.map(c => (
-                <option key={c.citizenId} value={c.citizenId}>
-                  {c.fullName} ({c.citizenId})
-                </option>
-              ))}
-            </select>
           </div>
 
           {/* Global Search Bar */}
@@ -437,12 +411,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           {activeTab === 'home' && (
             <div>
               
-              {/* Synthetic Data Notice Banner */}
-              <div style={{ backgroundColor: '#FEF3C7', border: '1px solid #FDE68A', padding: '8px 16px', borderRadius: '12px', color: '#92400E', fontSize: '0.8rem', fontWeight: 800, marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>⚠️ {currentCitizen.demoLabel || "DEMO DATA — NOT A REAL CITIZEN"}</span>
-                <span>Profile: <strong>{currentCitizen.fullName} ({currentCitizen.citizenId})</strong></span>
-              </div>
-
               {/* Requirement 16: Top Greeting Section */}
               <div style={{
                 background: 'var(--bg-card)',
@@ -636,19 +604,58 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
             <PrivacyCenter citizen={currentCitizen} />
           )}
 
-          {/* TAB 5: CIVICONE WORLD TOURISM GUIDE */}
-          {activeTab === 'tourism' && (
-            <TourismGuide
-              onSelectTravelBooking={(city) => {
-                setTargetTravelCity(city);
-                setActiveTab('travel');
-              }}
-            />
-          )}
+          {/* TAB: NOTIFICATIONS HUB */}
+          {activeTab === 'notifications' && (
+            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '28px', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Bell size={24} style={{ color: '#0B5ED7' }} /> Citizen Notification &amp; Alert Hub
+                  </h1>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    Real-time official alerts, consent requests, document expiry notifications, and security dispatches.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+                  style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-muted)', border: '1px solid var(--border-light)', padding: '8px 14px', borderRadius: '10px', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+                >
+                  Mark All as Read
+                </button>
+              </div>
 
-          {/* TAB 6: BOOK & TRAVEL GLOBAL HUB */}
-          {activeTab === 'travel' && (
-            <TravelBookingHub citizen={currentCitizen} initialDestination={targetTravelCity} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {notifications && notifications.length > 0 ? (
+                  notifications.map(n => (
+                    <div key={n.id} style={{
+                      backgroundColor: n.read ? 'var(--bg-main)' : 'rgba(11, 94, 215, 0.04)',
+                      border: `1px solid ${n.read ? 'var(--border-light)' : '#BFDBFE'}`,
+                      borderRadius: '14px', padding: '16px', display: 'flex', gap: '14px', alignItems: 'flex-start'
+                    }}>
+                      <div style={{
+                        padding: '10px', borderRadius: '12px',
+                        backgroundColor: n.type === 'CONSENT_REQUEST' ? '#FEF3C7' : n.type === 'SECURITY_ALERT' ? '#FEE2E2' : '#DBEAFE',
+                        color: n.type === 'CONSENT_REQUEST' ? '#D97706' : n.type === 'SECURITY_ALERT' ? '#DC2626' : '#2563EB'
+                      }}>
+                        <Bell size={20} />
+                      </div>
+
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{n.title}</strong>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 600 }}>{n.time || n.date || 'Today'}</span>
+                        </div>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>{n.message || n.summary || n.content}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    No new notifications at this time.
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
           {/* TAB 7: PUBLIC SERVICES */}
