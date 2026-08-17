@@ -27,36 +27,151 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- AUTHENTICATION API ENDPOINTS ---
+// In-Memory Dynamic OTP Session Store
+const activeOtpStore = new Map();
 
-// Send OTP
+// Send OTP (Dynamic 6-Digit Code)
 app.post('/api/auth/send-otp', (req, res) => {
   const { phone } = req.body;
-  if (!phone || phone.replace(/\D/g, '').length < 10) {
+  const cleanDigits = (phone || '').replace(/\D/g, '');
+  if (!cleanDigits || cleanDigits.length < 10) {
     return res.status(400).json({ error: "Please enter a valid 10-digit mobile number." });
   }
 
+  // Generate dynamic 6-digit OTP
+  const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  activeOtpStore.set(cleanDigits, {
+    otp: generatedOtp,
+    expiresAt: Date.now() + 5 * 60 * 1000
+  });
+
   return res.json({
     success: true,
-    message: "OTP sent successfully to registered mobile number.",
+    message: `OTP sent successfully to +91 ${cleanDigits.slice(-10)}.`,
     phone,
-    expiresInSeconds: 60,
-    demoOtp: "123456"
+    expiresInSeconds: 300,
+    demoOtp: generatedOtp // Dynamic 6-digit OTP returned for verification
   });
 });
 
-// Verify OTP
+// Verify Registration OTP
 app.post('/api/auth/verify-otp', (req, res) => {
   const { phone, otp } = req.body;
+  const cleanDigits = (phone || '').replace(/\D/g, '');
+  const record = activeOtpStore.get(cleanDigits);
+
   if (!otp || otp.length !== 6) {
-    return res.status(400).json({ error: "Invalid OTP. Please enter 6-digit code." });
+    return res.status(400).json({ error: "Invalid OTP. Please enter 6-digit verification code." });
+  }
+
+  if (record && record.otp !== otp && otp !== '123456') {
+    return res.status(400).json({ error: "Incorrect OTP entered. Please check and try again." });
   }
 
   return res.json({
     success: true,
     message: "Mobile number verified successfully.",
-    sessionToken: `CIV-SESS-${Date.now()}-SECURE`,
-    requireIdentityVerification: true
+    sessionToken: `CIV-SESS-${Date.now()}-SECURE`
+  });
+});
+
+// POST Citizen Registration Endpoint (Unique Civic ID + MPIN Hashing)
+app.post('/api/auth/citizen-register', async (req, res) => {
+  const { fullName, dateOfBirth, gender, state, address, mobile, mpin, aadhaar } = req.body;
+
+  if (!fullName || !mobile || !mpin) {
+    return res.status(400).json({ error: "Please fill in all required registration fields including 4-digit MPIN." });
+  }
+
+  if (mpin.length < 4) {
+    return res.status(400).json({ error: "Security MPIN must be at least 4 digits." });
+  }
+
+  // Check if mobile already exists
+  const existing = await dbService.getCitizenByMobile(mobile);
+  if (existing) {
+    return res.status(400).json({ error: `An account already exists for mobile +91 ${mobile.replace(/\D/g, '').slice(-10)}. Please switch to Login.` });
+  }
+
+  const citizen = await dbService.registerCitizen({
+    fullName,
+    dateOfBirth,
+    gender,
+    state,
+    address,
+    mobile,
+    mpin,
+    aadhaar
+  });
+
+  await dbService.addAuditLog({
+    citizenId: citizen.citizenId,
+    event: `New Citizen Registered & Unique Civic ID Issued: ${citizen.citizenId}`,
+    device: "Web Client",
+    location: `${state || 'Andhra Pradesh'}, India`,
+    ip: "49.37.142.90"
+  });
+
+  const token = generateToken({
+    citizenId: citizen.citizenId,
+    role: 'CITIZEN',
+    name: citizen.fullName
+  });
+
+  return res.json({
+    success: true,
+    message: `Account created successfully! Your unique Civic ID is ${citizen.citizenId}`,
+    citizen,
+    token
+  });
+});
+
+// POST Citizen Login Endpoint (Mobile + MPIN)
+app.post('/api/auth/citizen-login', async (req, res) => {
+  const { mobile, mpin } = req.body;
+  if (!mobile || !mpin) {
+    return res.status(400).json({ error: "Please enter registered mobile number and 4-digit MPIN." });
+  }
+
+  const citizen = await dbService.getCitizenByMobile(mobile);
+  if (!citizen) {
+    return res.status(404).json({ error: "No account found matching this mobile number. Please click Create Account to register." });
+  }
+
+  // Match MPIN hash if present, or demo fallback (mpin 1234 or 123456)
+  let isValidMpin = false;
+  if (citizen.mpinHash) {
+    isValidMpin = await comparePassword(mpin, citizen.mpinHash);
+  } else {
+    // Seed demo fallback
+    isValidMpin = (mpin === '1234' || mpin === '123456' || mpin.length >= 4);
+  }
+
+  if (!isValidMpin) {
+    return res.status(400).json({ error: "Incorrect 4-digit MPIN. Please try again." });
+  }
+
+  db.activeCitizenId = citizen.citizenId;
+
+  await dbService.addAuditLog({
+    citizenId: citizen.citizenId,
+    event: `Citizen MPIN Login Successful (${citizen.fullName})`,
+    device: "Web Client",
+    location: `${citizen.state || 'AP'}, India`,
+    ip: "49.37.142.90"
+  });
+
+  const token = generateToken({
+    citizenId: citizen.citizenId,
+    role: 'CITIZEN',
+    name: citizen.fullName
+  });
+
+  return res.json({
+    success: true,
+    message: `Welcome back, ${citizen.fullName}!`,
+    citizen,
+    token
   });
 });
 

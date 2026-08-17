@@ -1,40 +1,97 @@
-// src/components/PreEntryGate.jsx - Pre-Entry Security Gateway & Authentication Flow
+// src/components/PreEntryGate.jsx - Citizen Authentication & Unique Civic ID Registration Gateway
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ShieldCheck, Lock, Smartphone, ArrowRight, RefreshCw, CheckCircle2, AlertCircle, Fingerprint, Eye, EyeOff, ShieldAlert } from 'lucide-react';
+import {
+  ShieldCheck, Lock, Smartphone, ArrowRight, RefreshCw, CheckCircle2,
+  AlertCircle, Fingerprint, User, UserPlus, KeyRound, MapPin, Calendar, FileText
+} from 'lucide-react';
+import { INDIA_STATES_AND_UTS } from '../data/mockData.js';
+import { authStorage } from '../services/api.js';
 
 export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
-  // Steps: 'MOBILE' -> 'OTP' -> 'IDENTITY_CONSENT' -> 'IDENTITY_OTP' -> 'DEVICE_VERIFY'
-  const [step, setStep] = useState('MOBILE');
-  const [citizenName, setCitizenName] = useState('Aarav Kumar');
-  const [phone, setPhone] = useState('9876543210');
-  const [otp, setOtp] = useState(['1', '2', '3', '4', '5', '6']);
-  const [identityOtp, setIdentityOtp] = useState(['1', '2', '3', '4', '5', '6']);
-  const [consent, setConsent] = useState(true);
-  const [timer, setTimer] = useState(60);
+  // mode: 'LOGIN' | 'REGISTER'
+  const [authMode, setAuthMode] = useState('LOGIN');
+  
+  // Registration Steps: 'FORM' -> 'OTP_VERIFY' -> 'SUCCESS_ID'
+  const [regStep, setRegStep] = useState('FORM');
+
+  // Form Fields for Login
+  const [loginPhone, setLoginPhone] = useState('9000000001');
+  const [loginMpin, setLoginMpin] = useState('1234');
+
+  // Form Fields for Registration
+  const [regName, setRegName] = useState('');
+  const [regDob, setRegDob] = useState('');
+  const [regGender, setRegGender] = useState('Male');
+  const [regState, setRegState] = useState('Andhra Pradesh');
+  const [regAddress, setRegAddress] = useState('');
+  const [regMobile, setRegMobile] = useState('');
+  const [regAadhaar, setRegAadhaar] = useState('');
+  const [regMpin, setRegMpin] = useState('');
+
+  // OTP Verification State
+  const [generatedDemoOtp, setGeneratedDemoOtp] = useState('');
+  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
+  const [registeredCitizen, setRegisteredCitizen] = useState(null);
+
+  // Status & Error States
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [deviceVerifying, setDeviceVerifying] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const otpRefs = useRef([]);
 
-  const otpInputsRef = useRef([]);
-  const idOtpInputsRef = useRef([]);
-
-  // Countdown timer effect
-  useEffect(() => {
-    let interval = null;
-    if (step === 'OTP' && timer > 0) {
-      interval = setInterval(() => setTimer((t) => t - 1), 1000);
-    }
-    return () => clearInterval(interval);
-  }, [step, timer]);
-
-  // Handle Mobile Number Submission
-  const handleMobileSubmit = async (e) => {
+  // Handle Login with Mobile + MPIN
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    if (!phone || phone.length < 10) {
+    if (!loginPhone || loginPhone.length < 10) {
+      setErrorMsg("Please enter registered 10-digit mobile number.");
+      return;
+    }
+    if (!loginMpin || loginMpin.length < 4) {
+      setErrorMsg("Please enter your 4-digit security MPIN.");
+      return;
+    }
+
+    setErrorMsg('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/citizen-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: loginPhone, mpin: loginMpin })
+      });
+      const data = await res.json();
+      setLoading(false);
+
+      if (res.ok && data.success) {
+        if (data.token) authStorage.setToken(data.token);
+        onAuthenticated(data.citizen);
+      } else {
+        setErrorMsg(data.error || "Login failed. Please check your credentials.");
+      }
+    } catch (err) {
+      setLoading(false);
+      setErrorMsg("Network error connecting to auth server.");
+    }
+  };
+
+  // Handle Registration Step 1: Send Registration OTP
+  const handleRegisterFormSubmit = async (e) => {
+    e.preventDefault();
+    if (!regName.trim()) {
+      setErrorMsg("Please enter your full name as per official records.");
+      return;
+    }
+    if (!regMobile || regMobile.length < 10) {
       setErrorMsg("Please enter a valid 10-digit mobile number.");
       return;
     }
+    if (!regMpin || regMpin.length < 4) {
+      setErrorMsg("Please create a 4-digit security MPIN.");
+      return;
+    }
+
     setErrorMsg('');
     setLoading(true);
 
@@ -42,618 +99,564 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
       const res = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: `+91 ${phone}` })
+        body: JSON.stringify({ phone: regMobile })
       });
       const data = await res.json();
       setLoading(false);
 
       if (res.ok && data.success) {
-        setStep('OTP');
-        setTimer(60);
+        setGeneratedDemoOtp(data.demoOtp || '123456');
+        setRegStep('OTP_VERIFY');
       } else {
-        setErrorMsg(data.error || "Verification unsuccessful. Please check your details and try again.");
+        setErrorMsg(data.error || "Failed to send registration OTP.");
       }
     } catch (err) {
       setLoading(false);
-      // Fallback for seamless frontend demo if backend isn't reached yet
-      setStep('OTP');
-      setTimer(60);
+      setGeneratedDemoOtp('123456');
+      setRegStep('OTP_VERIFY');
     }
   };
 
-  // Handle OTP Digit Input Change
-  const handleOtpChange = (index, value, isIdOtp = false) => {
-    if (!/^\d*$/.test(value)) return;
-
-    const currentOtp = isIdOtp ? [...identityOtp] : [...otp];
-    currentOtp[index] = value.slice(-1);
-
-    if (isIdOtp) {
-      setIdentityOtp(currentOtp);
-      if (value && index < 5) {
-        idOtpInputsRef.current[index + 1]?.focus();
-      }
-    } else {
-      setOtp(currentOtp);
-      if (value && index < 5) {
-        otpInputsRef.current[index + 1]?.focus();
-      }
+  // Handle OTP Digit Input
+  const handleOtpInput = (idx, val) => {
+    if (!/^\d*$/.test(val)) return;
+    const newOtp = [...otpDigits];
+    newOtp[idx] = val.slice(-1);
+    setOtpDigits(newOtp);
+    if (val && idx < 5) {
+      otpRefs.current[idx + 1]?.focus();
     }
   };
 
-  // Handle Keydown Backspace Focus
-  const handleKeyDown = (index, e, isIdOtp = false) => {
-    if (e.key === 'Backspace') {
-      const currentOtp = isIdOtp ? identityOtp : otp;
-      if (!currentOtp[index] && index > 0) {
-        if (isIdOtp) {
-          idOtpInputsRef.current[index - 1]?.focus();
-        } else {
-          otpInputsRef.current[index - 1]?.focus();
-        }
-      }
-    }
-  };
-
-  // Verify Mobile OTP
-  const handleVerifyOtp = async () => {
-    const code = otp.join('');
+  // Submit OTP & Issue Unique Civic ID
+  const handleVerifyRegistrationOtp = async () => {
+    const code = otpDigits.join('');
     if (code.length !== 6) {
-      setErrorMsg("Please enter the 6-digit OTP code.");
+      setErrorMsg("Please enter the 6-digit verification OTP.");
       return;
     }
+
     setErrorMsg('');
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/verify-otp', {
+      // 1. Verify OTP
+      const verifyRes = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: `+91 ${phone}`, otp: code })
+        body: JSON.stringify({ phone: regMobile, otp: code })
       });
-      const data = await res.json();
+      const verifyData = await verifyRes.json();
+
+      if (!verifyRes.ok || !verifyData.success) {
+        setLoading(false);
+        setErrorMsg(verifyData.error || "Incorrect OTP. Please check and try again.");
+        return;
+      }
+
+      // 2. Register Account & Generate Unique Civic ID
+      const regRes = await fetch('/api/auth/citizen-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: regName,
+          dateOfBirth: regDob,
+          gender: regGender,
+          state: regState,
+          address: regAddress,
+          mobile: regMobile,
+          mpin: regMpin,
+          aadhaar: regAadhaar
+        })
+      });
+      const regData = await regRes.json();
       setLoading(false);
 
-      if (res.ok && data.success) {
-        setStep('IDENTITY_CONSENT');
+      if (regRes.ok && regData.success) {
+        if (regData.token) authStorage.setToken(regData.token);
+        setRegisteredCitizen(regData.citizen);
+        setRegStep('SUCCESS_ID');
       } else {
-        setErrorMsg(data.error || "Verification unsuccessful. Please check your details and try again.");
+        setErrorMsg(regData.error || "Registration failed. Please check your details.");
       }
     } catch (err) {
       setLoading(false);
-      setStep('IDENTITY_CONSENT');
-    }
-  };
-
-  // Resend OTP
-  const handleResendOtp = () => {
-    setTimer(60);
-    setErrorMsg('');
-    setOtp(['', '', '', '', '', '']);
-  };
-
-  // Submit Identity Consent & Proceed to Identity OTP
-  const handleConsentProceed = () => {
-    if (!consent) {
-      setErrorMsg("Explicit citizen consent is required to verify identity credentials.");
-      return;
-    }
-    setErrorMsg('');
-    setStep('IDENTITY_OTP');
-  };
-
-  // Submit Identity OTP & Execute Device Security Check
-  const handleIdentityVerify = async () => {
-    const idCode = identityOtp.join('');
-    if (idCode.length !== 6) {
-      setErrorMsg("Please enter the 6-digit identity authorization OTP.");
-      return;
-    }
-    setErrorMsg('');
-    setLoading(true);
-
-    try {
-      const res = await fetch('/api/auth/identity-verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ consent: true, aadhaarOtp: idCode })
-      });
-      const data = await res.json();
-      setLoading(false);
-
-      if (res.ok && data.success) {
-        // Trigger Device Verification Phase
-        setStep('DEVICE_VERIFY');
-        setDeviceVerifying(true);
-        setTimeout(() => {
-          onAuthenticated(data.citizen);
-        }, 2200);
-      } else {
-        setErrorMsg(data.error || "Verification unsuccessful. Please check your details and try again.");
-      }
-    } catch (err) {
-      setLoading(false);
-      setStep('DEVICE_VERIFY');
-      setDeviceVerifying(true);
-      setTimeout(() => {
-        onAuthenticated({
-          name: citizenName || "Aarav Kumar",
-          civicId: "CIV-DEMO-10001",
-          phone: `+91 ${phone}`,
-          maskedAadhaar: "XXXX XXXX 1001",
-          identityStatus: "VERIFIED",
-          demoLabel: "DEMO DATA — NOT A REAL CITIZEN"
-        });
-      }, 2200);
+      setErrorMsg("Network error executing registration.");
     }
   };
 
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#F6F9FC',
+      backgroundColor: '#0F172A',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '24px 16px',
-      position: 'relative'
+      color: '#F8FAFC'
     }}>
-      {/* Background Decorative Gradient Blobs */}
       <div style={{
-        position: 'absolute',
-        top: '-10%',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '600px',
-        height: '600px',
-        background: 'radial-gradient(circle, rgba(11,94,215,0.08) 0%, rgba(246,249,252,0) 70%)',
-        pointerEvents: 'none',
-        zIndex: 0
-      }} />
-
-      <div className="glass-panel" style={{
-        maxWidth: '460px',
         width: '100%',
+        maxWidth: '480px',
+        backgroundColor: '#1E293B',
         borderRadius: '24px',
-        boxShadow: '0 20px 40px -8px rgba(11, 31, 58, 0.12)',
-        padding: '36px 32px',
-        position: 'relative',
-        zIndex: 1,
-        border: '1px solid #E2E8F0'
+        border: '1px solid #334155',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+        padding: '32px 28px'
       }}>
-
-        {/* Top Header Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        {/* Header Branding */}
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '16px',
-            backgroundColor: '#0B5ED7',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
+            width: '56px',
+            height: '56px',
+            borderRadius: '16px',
+            backgroundColor: '#0284C7',
             color: '#FFFFFF',
-            boxShadow: '0 8px 20px rgba(11, 94, 215, 0.3)',
-            marginBottom: '16px'
+            marginBottom: '12px'
           }}>
             <ShieldCheck size={32} />
           </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0B1F3A', letterSpacing: '-0.02em' }}>
-            Welcome to CivicOne
-          </h1>
-          <p style={{ fontSize: '0.9rem', color: '#475569', marginTop: '6px', fontWeight: 500 }}>
-            Your secure digital identity, documents and services — in one place.
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '4px' }}>
+            CivicOne Citizen Portal
+          </h2>
+          <p style={{ fontSize: '0.875rem', color: '#94A3B8' }}>
+            National Sovereign Digital Identity Gateway
           </p>
         </div>
 
-        {/* Error Alert Box */}
-        {errorMsg && (
+        {/* MODE SWITCH TABS */}
+        {regStep !== 'SUCCESS_ID' && (
           <div style={{
-            backgroundColor: '#F8D7DA',
-            border: '1px solid #F5C2C7',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            backgroundColor: '#0F172A',
             borderRadius: '12px',
-            padding: '12px 16px',
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '10px',
-            color: '#842029',
-            fontSize: '0.85rem'
+            padding: '4px',
+            marginBottom: '24px',
+            border: '1px solid #334155'
           }}>
-            <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div>
-              <strong>Verification unsuccessful</strong>
-              <div style={{ marginTop: '2px' }}>{errorMsg}</div>
-            </div>
+            <button
+              onClick={() => { setAuthMode('LOGIN'); setErrorMsg(''); setRegStep('FORM'); }}
+              style={{
+                padding: '10px',
+                borderRadius: '8px',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+                backgroundColor: authMode === 'LOGIN' ? '#0284C7' : 'transparent',
+                color: authMode === 'LOGIN' ? '#FFFFFF' : '#94A3B8',
+                transition: 'all 0.2s'
+              }}
+            >
+              🔑 Login
+            </button>
+            <button
+              onClick={() => { setAuthMode('REGISTER'); setErrorMsg(''); setRegStep('FORM'); }}
+              style={{
+                padding: '10px',
+                borderRadius: '8px',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+                backgroundColor: authMode === 'REGISTER' ? '#0284C7' : 'transparent',
+                color: authMode === 'REGISTER' ? '#FFFFFF' : '#94A3B8',
+                transition: 'all 0.2s'
+              }}
+            >
+              ✨ Create Account
+            </button>
           </div>
         )}
 
-        {/* STEP 1: MOBILE NUMBER & CITIZEN NAME ENTRY */}
-        {step === 'MOBILE' && (
-          <form onSubmit={handleMobileSubmit}>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#0B1F3A', marginBottom: '6px' }}>
-                Full Legal Name
-              </label>
-              <input
-                type="text"
-                value={citizenName}
-                onChange={(e) => setCitizenName(e.target.value)}
-                placeholder="Enter your full name (e.g. Ananya Sharma)"
-                style={{
-                  width: '100%',
-                  padding: '12px 14px',
-                  borderRadius: '12px',
-                  border: '1.5px solid #CBD5E1',
-                  backgroundColor: '#FFFFFF',
-                  fontSize: '0.95rem',
-                  fontWeight: 600,
-                  color: '#0F172A'
-                }}
-                required
-              />
-            </div>
+        {/* ERROR DISPLAY */}
+        {errorMsg && (
+          <div style={{
+            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+            border: '1px solid #EF4444',
+            color: '#FCA5A5',
+            padding: '12px 14px',
+            borderRadius: '12px',
+            fontSize: '0.85rem',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <AlertCircle size={18} />
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#0B1F3A', marginBottom: '8px' }}>
-                Mobile Number Verification
+        {/* ----------------- MODE A: EXISTING LOGIN ----------------- */}
+        {authMode === 'LOGIN' && (
+          <form onSubmit={handleLoginSubmit}>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8', marginBottom: '6px' }}>
+                REGISTERED MOBILE NUMBER
               </label>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                border: '1.5px solid #CBD5E1',
-                borderRadius: '12px',
-                backgroundColor: '#FFFFFF',
-                padding: '0 14px',
-                transition: 'border-color 0.2s',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-              }}>
-                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#073B8C', paddingRight: '10px', borderRight: '1px solid #E2E8F0' }}>
-                  +91
-                </span>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: '14px', top: '12px', color: '#64748B', fontWeight: 700 }}>+91</span>
                 <input
                   type="tel"
                   maxLength={10}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                  placeholder="Enter 10-digit mobile number"
+                  value={loginPhone}
+                  onChange={(e) => setLoginPhone(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Enter 10-digit mobile"
                   style={{
                     width: '100%',
-                    padding: '14px 12px',
-                    border: 'none',
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    color: '#0F172A'
+                    padding: '12px 14px 12px 52px',
+                    borderRadius: '10px',
+                    backgroundColor: '#0F172A',
+                    border: '1px solid #334155',
+                    color: '#FFFFFF',
+                    fontWeight: 700,
+                    outline: 'none'
                   }}
-                  autoFocus
                 />
               </div>
-              <p style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '6px' }}>
-                🔒 An OTP will be sent to this mobile number for authorization.
-              </p>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8', marginBottom: '6px' }}>
+                4-DIGIT SECURITY MPIN
+              </label>
+              <input
+                type="password"
+                maxLength={4}
+                value={loginMpin}
+                onChange={(e) => setLoginMpin(e.target.value.replace(/\D/g, ''))}
+                placeholder="Enter 4-digit MPIN"
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: '10px',
+                  backgroundColor: '#0F172A',
+                  border: '1px solid #334155',
+                  color: '#FFFFFF',
+                  fontWeight: 700,
+                  fontSize: '1.1rem',
+                  letterSpacing: '4px',
+                  outline: 'none'
+                }}
+              />
             </div>
 
             <button
               type="submit"
-              disabled={loading || phone.length < 10}
+              disabled={loading}
               style={{
                 width: '100%',
                 padding: '14px',
                 borderRadius: '12px',
-                backgroundColor: phone.length < 10 ? '#94A3B8' : '#0B5ED7',
+                backgroundColor: '#0284C7',
                 color: '#FFFFFF',
-                fontSize: '0.95rem',
-                fontWeight: 700,
+                fontWeight: 800,
+                border: 'none',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: phone.length < 10 ? 'none' : '0 4px 14px rgba(11, 94, 215, 0.35)',
-                cursor: phone.length < 10 ? 'not-allowed' : 'pointer'
+                fontSize: '1rem'
               }}
             >
-              {loading ? (
-                <>
-                  <RefreshCw size={18} className="animate-spin" /> Sending OTP...
-                </>
-              ) : (
-                <>
-                  Continue Securely <ArrowRight size={18} />
-                </>
-              )}
+              {loading ? <RefreshCw className="animate-spin" size={20} /> : <>Login to Citizen Vault <ArrowRight size={18} /></>}
             </button>
-
-            <div style={{ marginTop: '24px', textAlign: 'center' }}>
-              <button
-                type="button"
-                onClick={onGoBackToLanding}
-                style={{ background: 'none', color: '#475569', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'underline' }}
-              >
-                Return to CivicOne Home
-              </button>
-            </div>
           </form>
         )}
 
-        {/* STEP 2: MOBILE OTP VERIFICATION */}
-        {step === 'OTP' && (
+        {/* ----------------- MODE B: CREATE NEW ACCOUNT ----------------- */}
+        {authMode === 'REGISTER' && (
           <div>
-            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0B1F3A' }}>
-                Verify your mobile number
-              </div>
-              <p style={{ fontSize: '0.85rem', color: '#475569', marginTop: '4px' }}>
-                Enter the 6-digit OTP sent to <strong>+91 {phone}</strong>
-              </p>
-            </div>
+            {/* REGISTRATION STEP 1: FILL FORM */}
+            {regStep === 'FORM' && (
+              <form onSubmit={handleRegisterFormSubmit}>
+                <div style={{ marginBottom: '14px' }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#94A3B8', marginBottom: '4px' }}>
+                    FULL NAME (AS PER AADHAAR / OFFICIAL RECORDS)
+                  </label>
+                  <input
+                    type="text"
+                    value={regName}
+                    onChange={(e) => setRegName(e.target.value)}
+                    placeholder="e.g. Ramesh Varma"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#0F172A',
+                      border: '1px solid #334155',
+                      color: '#FFFFFF',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
 
-            {/* OTP Input Boxes */}
-            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginBottom: '24px', flexWrap: 'nowrap' }}>
-              {otp.map((digit, idx) => (
-                <input
-                  key={idx}
-                  ref={(el) => (otpInputsRef.current[idx] = el)}
-                  type="text"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(idx, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(idx, e)}
-                  style={{
-                    width: '100%',
-                    maxWidth: '44px',
-                    height: '48px',
-                    borderRadius: '10px',
-                    border: digit ? '2px solid #0B5ED7' : '1.5px solid #CBD5E1',
-                    backgroundColor: digit ? '#EAF3FF' : '#FFFFFF',
-                    textAlign: 'center',
-                    fontSize: '1.15rem',
-                    fontWeight: 700,
-                    color: '#0B1F3A'
-                  }}
-                  autoFocus={idx === 0}
-                />
-              ))}
-            </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#94A3B8', marginBottom: '4px' }}>
+                      DATE OF BIRTH
+                    </label>
+                    <input
+                      type="date"
+                      value={regDob}
+                      onChange={(e) => setRegDob(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        backgroundColor: '#0F172A',
+                        border: '1px solid #334155',
+                        color: '#FFFFFF',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#94A3B8', marginBottom: '4px' }}>
+                      STATE OF RESIDENCE
+                    </label>
+                    <select
+                      value={regState}
+                      onChange={(e) => setRegState(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        backgroundColor: '#0F172A',
+                        border: '1px solid #334155',
+                        color: '#FFFFFF',
+                        outline: 'none'
+                      }}
+                    >
+                      {INDIA_STATES_AND_UTS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                </div>
 
-            <button
-              onClick={handleVerifyOtp}
-              disabled={loading || otp.join('').length < 6}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: '12px',
-                backgroundColor: otp.join('').length < 6 ? '#94A3B8' : '#0B5ED7',
-                color: '#FFFFFF',
-                fontSize: '0.95rem',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                marginBottom: '16px'
-              }}
-            >
-              {loading ? <RefreshCw size={18} className="animate-spin" /> : <Lock size={18} />} Verify OTP
-            </button>
+                <div style={{ marginBottom: '14px' }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#94A3B8', marginBottom: '4px' }}>
+                    10-DIGIT MOBILE NUMBER (FOR REGISTRATION OTP)
+                  </label>
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    value={regMobile}
+                    onChange={(e) => setRegMobile(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Enter mobile number"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#0F172A',
+                      border: '1px solid #334155',
+                      color: '#FFFFFF',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
 
-            {/* Resend & Change Phone Actions */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: '#475569' }}>
-              <button
-                type="button"
-                onClick={() => setStep('MOBILE')}
-                style={{ background: 'none', color: '#0B5ED7', fontWeight: 600 }}
-              >
-                Change mobile number
-              </button>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#94A3B8', marginBottom: '4px' }}>
+                      AADHAAR REF (12 DIGITS)
+                    </label>
+                    <input
+                      type="password"
+                      maxLength={12}
+                      value={regAadhaar}
+                      onChange={(e) => setRegAadhaar(e.target.value.replace(/\D/g, ''))}
+                      placeholder="XXXX XXXX 1234"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        backgroundColor: '#0F172A',
+                        border: '1px solid #334155',
+                        color: '#FFFFFF',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#94A3B8', marginBottom: '4px' }}>
+                      CREATE 4-DIGIT MPIN
+                    </label>
+                    <input
+                      type="password"
+                      maxLength={4}
+                      value={regMpin}
+                      onChange={(e) => setRegMpin(e.target.value.replace(/\D/g, ''))}
+                      placeholder="e.g. 1234"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        backgroundColor: '#0F172A',
+                        border: '1px solid #334155',
+                        color: '#FFFFFF',
+                        fontWeight: 800,
+                        letterSpacing: '2px',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                </div>
 
-              {timer > 0 ? (
-                <span>Resend OTP in <strong>{timer}s</strong></span>
-              ) : (
                 <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  style={{ background: 'none', color: '#0B5ED7', fontWeight: 700 }}
-                >
-                  Resend OTP
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* STEP 3: IDENTITY VERIFICATION CONSENT (AADHAAR COMPATIBLE) */}
-        {step === 'IDENTITY_CONSENT' && (
-          <div>
-            <div style={{
-              backgroundColor: '#EAF3FF',
-              borderRadius: '16px',
-              padding: '16px',
-              marginBottom: '20px',
-              border: '1px solid #BFDBFE'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#073B8C', fontWeight: 700, fontSize: '0.95rem' }}>
-                <ShieldCheck size={22} /> Official Identity Verification
-              </div>
-              <p style={{ fontSize: '0.825rem', color: '#1E3A8A', marginTop: '6px', lineHeight: 1.5 }}>
-                Your identity information is securely protected using authorized, tokenized identity verification protocols.
-              </p>
-            </div>
-
-            <div style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: '12px',
-              padding: '14px',
-              border: '1px solid #E2E8F0',
-              marginBottom: '20px'
-            }}>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={consent}
-                  onChange={(e) => setConsent(e.target.checked)}
-                  style={{ marginTop: '3px', width: '18px', height: '18px', accentColor: '#0B5ED7' }}
-                />
-                <span style={{ fontSize: '0.825rem', color: '#334155', lineHeight: 1.4 }}>
-                  I give explicit consent to CivicOne to verify my authorized digital identity reference and create a encrypted citizen session. <strong>No full Aadhaar number is displayed or stored.</strong>
-                </span>
-              </label>
-            </div>
-
-            <button
-              onClick={handleConsentProceed}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: '12px',
-                backgroundColor: '#0B5ED7',
-                color: '#FFFFFF',
-                fontSize: '0.95rem',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-            >
-              Proceed to Identity Authorization <ArrowRight size={18} />
-            </button>
-          </div>
-        )}
-
-        {/* STEP 4: IDENTITY VERIFICATION OTP */}
-        {step === 'IDENTITY_OTP' && (
-          <div>
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0B1F3A' }}>
-                Identity Authorization Code
-              </div>
-              <p style={{ fontSize: '0.825rem', color: '#475569', marginTop: '4px' }}>
-                Enter the 6-digit identity validation OTP sent to your Aadhaar-linked mobile. (Demo OTP: <strong>123456</strong>)
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginBottom: '20px', flexWrap: 'nowrap' }}>
-              {identityOtp.map((digit, idx) => (
-                <input
-                  key={idx}
-                  ref={(el) => (idOtpInputsRef.current[idx] = el)}
-                  type="text"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(idx, e.target.value, true)}
-                  onKeyDown={(e) => handleKeyDown(idx, e, true)}
+                  type="submit"
+                  disabled={loading}
                   style={{
                     width: '100%',
-                    maxWidth: '44px',
-                    height: '48px',
+                    padding: '12px',
                     borderRadius: '10px',
-                    border: digit ? '2px solid #0B5ED7' : '1.5px solid #CBD5E1',
-                    backgroundColor: digit ? '#EAF3FF' : '#FFFFFF',
-                    textAlign: 'center',
-                    fontSize: '1.15rem',
-                    fontWeight: 700,
-                    color: '#0B1F3A'
+                    backgroundColor: '#0284C7',
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    border: 'none',
+                    cursor: 'pointer'
                   }}
-                  autoFocus={idx === 0}
-                />
-              ))}
-            </div>
+                >
+                  {loading ? 'Sending Verification OTP...' : 'Send Registration OTP'}
+                </button>
+              </form>
+            )}
 
-            <div style={{
-              backgroundColor: '#F8FAFC',
-              borderRadius: '10px',
-              padding: '10px 14px',
-              fontSize: '0.75rem',
+            {/* REGISTRATION STEP 2: OTP VERIFICATION */}
+            {regStep === 'OTP_VERIFY' && (
+              <div>
+                <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                  <p style={{ fontSize: '0.85rem', color: '#94A3B8', marginBottom: '8px' }}>
+                    Enter 6-digit OTP sent to <strong>+91 {regMobile}</strong>
+                  </p>
+                  <div style={{
+                    backgroundColor: 'rgba(2, 132, 199, 0.15)',
+                    color: '#38BDF8',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    display: 'inline-block'
+                  }}>
+                    🔑 SMS Gateway Code: <strong>{generatedDemoOtp}</strong>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '20px' }}>
+                  {otpDigits.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      ref={el => otpRefs.current[idx] = el}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOtpInput(idx, e.target.value)}
+                      style={{
+                        width: '44px',
+                        height: '48px',
+                        textAlign: 'center',
+                        fontSize: '1.2rem',
+                        fontWeight: 800,
+                        borderRadius: '8px',
+                        backgroundColor: '#0F172A',
+                        border: '1px solid #334155',
+                        color: '#FFFFFF',
+                        outline: 'none'
+                      }}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleVerifyRegistrationOtp}
+                  disabled={loading}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    backgroundColor: '#10B981',
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {loading ? 'Issuing Unique Civic ID...' : 'Verify OTP & Issue Civic ID'}
+                </button>
+              </div>
+            )}
+
+            {/* REGISTRATION STEP 3: ISSUED UNIQUE CIVIC ID */}
+            {regStep === 'SUCCESS_ID' && registeredCitizen && (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                  border: '1px solid #10B981',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  marginBottom: '20px'
+                }}>
+                  <CheckCircle2 size={40} color="#10B981" style={{ margin: '0 auto 8px auto' }} />
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '4px' }}>
+                    Account & Sovereign Identity Created!
+                  </h4>
+                  <p style={{ fontSize: '0.8rem', color: '#94A3B8', marginBottom: '12px' }}>
+                    Your unique Civic ID has been registered in the Sovereign Database.
+                  </p>
+                  <div style={{
+                    backgroundColor: '#0F172A',
+                    padding: '10px',
+                    borderRadius: '10px',
+                    fontFamily: 'monospace',
+                    fontSize: '1.2rem',
+                    fontWeight: 900,
+                    color: '#38BDF8',
+                    letterSpacing: '1px'
+                  }}>
+                    {registeredCitizen.citizenId}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => onAuthenticated(registeredCitizen)}
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    borderRadius: '12px',
+                    backgroundColor: '#0284C7',
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Enter My Civic Dashboard →
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{ marginTop: '24px', textAlign: 'center' }}>
+          <button
+            onClick={onGoBackToLanding}
+            style={{
+              background: 'none',
+              border: 'none',
               color: '#64748B',
-              textAlign: 'center',
-              marginBottom: '20px'
-            }}>
-              🔒 Tokenized Aadhaar Reference: <strong>XXXX XXXX 8942</strong>
-            </div>
-
-            <button
-              onClick={handleIdentityVerify}
-              disabled={loading || identityOtp.join('').length < 6}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: '12px',
-                backgroundColor: identityOtp.join('').length < 6 ? '#94A3B8' : '#0B5ED7',
-                color: '#FFFFFF',
-                fontSize: '0.95rem',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-            >
-              {loading ? <RefreshCw size={18} className="animate-spin" /> : <Fingerprint size={18} />} Authenticate & Enter Portal
-            </button>
-          </div>
-        )}
-
-        {/* STEP 5: DEVICE SECURITY CHECK ANIMATION */}
-        {step === 'DEVICE_VERIFY' && (
-          <div style={{ textAlign: 'center', padding: '24px 0' }}>
-            <div style={{
-              width: '72px',
-              height: '72px',
-              borderRadius: '50%',
-              backgroundColor: '#EAF3FF',
-              color: '#0B5ED7',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '20px',
-              boxShadow: '0 0 0 12px rgba(11, 94, 215, 0.1)',
-              animation: 'pulseGlow 2s infinite ease-in-out'
-            }}>
-              <CheckCircle2 size={40} />
-            </div>
-
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '8px' }}>
-              Device & Session Verification
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: '#475569', maxWidth: '320px', margin: '0 auto' }}>
-              Establishing encrypted TLS session and loading citizen digital vault credentials...
-            </p>
-
-            <div style={{
-              width: '100%',
-              height: '6px',
-              backgroundColor: '#E2E8F0',
-              borderRadius: '3px',
-              marginTop: '24px',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                width: '100%',
-                height: '100%',
-                backgroundColor: '#0B5ED7',
-                borderRadius: '3px',
-                animation: 'shimmer 1.5s infinite linear'
-              }} />
-            </div>
-          </div>
-        )}
-
-        {/* Security Footer Note */}
-        <div style={{
-          marginTop: '28px',
-          paddingTop: '20px',
-          borderTop: '1px solid #E2E8F0',
-          textAlign: 'center',
-          fontSize: '0.75rem',
-          color: '#64748B',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6px'
-        }}>
-          <Lock size={14} style={{ color: '#0B5ED7' }} /> Protected by 256-Bit Cryptographic Security & National Digital Identity Framework
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            ← Back to CivicOne Home
+          </button>
         </div>
-
       </div>
     </div>
   );

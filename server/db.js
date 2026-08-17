@@ -3,6 +3,7 @@
 import { PrismaClient } from '@prisma/client';
 import { db as fallbackDb } from './mockDb.js';
 import { generateSHA256, encryptData } from './crypto.js';
+import { hashPassword, comparePassword } from './auth.js';
 
 let prisma;
 try {
@@ -53,7 +54,116 @@ export const dbService = {
     } catch (err) {
       console.warn("DB Query fallback to in-memory citizen search");
     }
-    return fallbackDb.citizens.find(c => c.citizenId === citizenId) || fallbackDb.citizens[0];
+  // Get Citizen By Mobile Number
+  async getCitizenByMobile(rawMobile) {
+    const cleanDigits = (rawMobile || '').replace(/\D/g, '');
+    try {
+      if (prisma) {
+        const citizens = await prisma.citizen.findMany();
+        const found = citizens.find(c => (c.mobile || '').replace(/\D/g, '').includes(cleanDigits));
+        if (found) {
+          return {
+            ...found,
+            educationInfo: JSON.parse(found.educationInfoJson || '{}'),
+            governmentInfo: JSON.parse(found.governmentInfoJson || '{}'),
+            rtoInfo: JSON.parse(found.rtoInfoJson || '{}'),
+            healthcareInfo: JSON.parse(found.healthcareInfoJson || '{}'),
+            travelInfo: JSON.parse(found.travelInfoJson || '{}')
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("DB Query fallback for mobile search");
+    }
+    return fallbackDb.citizens.find(c => (c.mobile || '').replace(/\D/g, '').includes(cleanDigits));
+  },
+
+  // Register New Citizen with Unique Civic ID Generation and MPIN Hashing
+  async registerCitizen(data) {
+    const { fullName, dateOfBirth, gender, state, address, mobile, mpin, aadhaar } = data;
+    const statePrefix = (state || 'AP').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+    // Generate Unique Civic ID
+    let uniqueCivicId = '';
+    let exists = true;
+    let attempts = 0;
+
+    while (exists && attempts < 10) {
+      attempts++;
+      const timeStampCode = Date.now().toString().slice(-6);
+      const randomPart = Math.floor(100 + Math.random() * 900);
+      uniqueCivicId = `CIV-${statePrefix}-${timeStampCode}-${randomPart}`;
+      
+      try {
+        if (prisma) {
+          const check = await prisma.citizen.findUnique({ where: { citizenId: uniqueCivicId } });
+          if (!check) exists = false;
+        } else {
+          exists = fallbackDb.citizens.some(c => c.citizenId === uniqueCivicId);
+        }
+      } catch (e) {
+        exists = false;
+      }
+    }
+
+    const hashedMpin = mpin ? await hashPassword(mpin) : null;
+    const cleanMobile = (mobile || '').startsWith('+91') ? mobile : `+91-${mobile}`;
+    const maskedAadhaar = aadhaar ? `XXXX XXXX ${aadhaar.slice(-4)}` : `XXXX XXXX ${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const newCitizen = {
+      citizenId: uniqueCivicId,
+      fullName: fullName || 'Citizen User',
+      displayName: (fullName || 'Citizen').split(' ')[0],
+      dateOfBirth: dateOfBirth || '01-01-2000',
+      gender: gender || 'Specified',
+      mobile: cleanMobile,
+      mobileMasked: cleanMobile,
+      email: `${uniqueCivicId.toLowerCase()}@civicone.gov.in`,
+      emailMasked: `${uniqueCivicId.toLowerCase()}@civicone.gov.in`,
+      address: address || `${state || 'Andhra Pradesh'}, India`,
+      addressSummary: `${state || 'Andhra Pradesh'}, India`,
+      state: state || 'Andhra Pradesh',
+      trustLevel: 'Verified Citizen',
+      verificationStatus: 'VERIFIED',
+      securityScore: 98,
+      virtualCardId: `VCD-STD-${Math.floor(10000 + Math.random() * 90000)}`,
+      virtualCardStatus: 'ACTIVE',
+      tier: 'STANDARD',
+      maskedAadhaar,
+      mpinHash: hashedMpin,
+      isDemo: false
+    };
+
+    try {
+      if (prisma) {
+        await prisma.citizen.create({
+          data: {
+            ...newCitizen,
+            educationInfoJson: '{}',
+            governmentInfoJson: JSON.stringify({ drivingLicence: `DL-${statePrefix}-2026-9048` }),
+            rtoInfoJson: '{}',
+            healthcareInfoJson: '{}',
+            travelInfoJson: '{}'
+          }
+        });
+
+        await prisma.virtualCard.create({
+          data: {
+            citizenId: uniqueCivicId,
+            cardType: 'STANDARD',
+            cardStatus: 'ACTIVE',
+            qrToken: `CIV-TOKEN-${uniqueCivicId}-SECURE-2026`
+          }
+        });
+      }
+    } catch (err) {
+      console.warn("DB Register fallback to in-memory store");
+    }
+
+    fallbackDb.citizens.unshift(newCitizen);
+    fallbackDb.activeCitizenId = uniqueCivicId;
+
+    return newCitizen;
   },
 
   // Get Documents for Citizen

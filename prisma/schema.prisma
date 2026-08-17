@@ -33,6 +33,7 @@ model Citizen {
   bloodGroup          String?
   emergencyContact    String?
   maskedAadhaar       String
+  mpinHash            String?
   isDemo              Boolean  @default(false)
   demoLabel           String?
   educationInfoJson   String?  // Stored JSON payload
