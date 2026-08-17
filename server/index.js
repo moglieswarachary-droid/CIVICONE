@@ -702,25 +702,6 @@ app.post('/api/police/fir/create', async (req, res) => {
     fir
   });
 });
-  doc.securitySeal = `VERIFIED-ISSUER-SEAL-${Date.now()}`;
-
-  db.auditLogs.unshift({
-    id: `sec-${Date.now()}`,
-    citizenId: doc.citizenId,
-    event: `Credential Verified: ${doc.name}`,
-    device: "Web Client",
-    location: "Vijayawada, AP",
-    ip: "49.37.142.90",
-    timestamp: new Date().toLocaleString(),
-    status: "SUCCESS"
-  });
-
-  return res.json({
-    success: true,
-    message: `${doc.name} verified successfully against ${doc.issuer}.`,
-    document: doc
-  });
-});
 
 // --- ORGANIZATIONS & CONSENT ENGINE API (BACKEND-ENFORCED RBAC) ---
 

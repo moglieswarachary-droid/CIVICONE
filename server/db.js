@@ -54,6 +54,9 @@ export const dbService = {
     } catch (err) {
       console.warn("DB Query fallback to in-memory citizen search");
     }
+    return fallbackDb.citizens.find(c => c.citizenId === citizenId) || fallbackDb.citizens[0];
+  },
+
   // Get Citizen By Mobile Number
   async getCitizenByMobile(rawMobile) {
     const cleanDigits = (rawMobile || '').replace(/\D/g, '');
