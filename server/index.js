@@ -6,7 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { db } from './mockDb.js';
 import { dbService } from './db.js';
-import { generateToken } from './auth.js';
+import { generateToken, verifyToken, hashPassword, comparePassword } from './auth.js';
 import { authenticateToken, requireRole } from './middleware/authMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
