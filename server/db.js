@@ -138,7 +138,27 @@ export const dbService = {
       if (prisma) {
         await prisma.citizen.create({
           data: {
-            ...newCitizen,
+            citizenId: newCitizen.citizenId,
+            fullName: newCitizen.fullName,
+            displayName: newCitizen.displayName,
+            dateOfBirth: newCitizen.dateOfBirth,
+            gender: newCitizen.gender,
+            mobile: newCitizen.mobile,
+            mobileMasked: newCitizen.mobileMasked,
+            email: newCitizen.email,
+            emailMasked: newCitizen.emailMasked,
+            address: newCitizen.address,
+            addressSummary: newCitizen.addressSummary,
+            state: newCitizen.state,
+            trustLevel: newCitizen.trustLevel,
+            verificationStatus: newCitizen.verificationStatus,
+            securityScore: newCitizen.securityScore,
+            virtualCardId: newCitizen.virtualCardId,
+            virtualCardStatus: newCitizen.virtualCardStatus,
+            tier: newCitizen.tier,
+            maskedAadhaar: newCitizen.maskedAadhaar,
+            mpinHash: newCitizen.mpinHash,
+            isDemo: false,
             educationInfoJson: '{}',
             governmentInfoJson: JSON.stringify({ drivingLicence: `DL-${statePrefix}-2026-9048` }),
             rtoInfoJson: '{}',
@@ -157,7 +177,7 @@ export const dbService = {
         });
       }
     } catch (err) {
-      console.warn("DB Register fallback to in-memory store");
+      console.warn("DB Register fallback to in-memory store:", err.message);
     }
 
     fallbackDb.citizens.unshift(newCitizen);
@@ -338,10 +358,11 @@ export const dbService = {
   // Add Security Audit Log
   async addAuditLog(logData) {
     const logId = `sec-${Date.now()}`;
+    const targetCitizenId = logData.citizenId || 'CIV-DEMO-10001';
     const log = {
       id: logId,
       logId,
-      citizenId: logData.citizenId || 'CIV-DEMO-10001',
+      citizenId: targetCitizenId,
       event: logData.event,
       device: logData.device || 'Web Client',
       location: logData.location || 'Vijayawada, AP',
@@ -352,10 +373,17 @@ export const dbService = {
 
     try {
       if (prisma) {
-        await prisma.auditLog.create({ data: log });
+        // Check if citizen exists to avoid foreign key failure
+        const citizenCheck = await prisma.citizen.findUnique({ where: { citizenId: targetCitizenId } });
+        await prisma.auditLog.create({
+          data: {
+            ...log,
+            citizenId: citizenCheck ? targetCitizenId : null
+          }
+        });
       }
     } catch (err) {
-      console.warn("DB Log save fallback to in-memory audit log");
+      console.warn("DB Log save fallback to in-memory audit log:", err.message);
     }
 
     fallbackDb.auditLogs.unshift(log);

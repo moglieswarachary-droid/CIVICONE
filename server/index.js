@@ -78,102 +78,112 @@ app.post('/api/auth/verify-otp', (req, res) => {
 
 // POST Citizen Registration Endpoint (Unique Civic ID + MPIN Hashing)
 app.post('/api/auth/citizen-register', async (req, res) => {
-  const { fullName, dateOfBirth, gender, state, address, mobile, mpin, aadhaar } = req.body;
+  try {
+    const { fullName, dateOfBirth, gender, state, address, mobile, mpin, aadhaar } = req.body;
 
-  if (!fullName || !mobile || !mpin) {
-    return res.status(400).json({ error: "Please fill in all required registration fields including 4-digit MPIN." });
+    if (!fullName || !mobile || !mpin) {
+      return res.status(400).json({ error: "Please fill in all required registration fields including 4-digit MPIN." });
+    }
+
+    if (mpin.length < 4) {
+      return res.status(400).json({ error: "Security MPIN must be at least 4 digits." });
+    }
+
+    // Check if mobile already exists
+    const existing = await dbService.getCitizenByMobile(mobile);
+    if (existing) {
+      return res.status(400).json({ error: `An account already exists for mobile +91 ${mobile.replace(/\D/g, '').slice(-10)}. Please switch to Login.` });
+    }
+
+    const citizen = await dbService.registerCitizen({
+      fullName,
+      dateOfBirth,
+      gender,
+      state,
+      address,
+      mobile,
+      mpin,
+      aadhaar
+    });
+
+    await dbService.addAuditLog({
+      citizenId: citizen.citizenId,
+      event: `New Citizen Registered & Unique Civic ID Issued: ${citizen.citizenId}`,
+      device: "Web Client",
+      location: `${state || 'Andhra Pradesh'}, India`,
+      ip: "49.37.142.90"
+    });
+
+    const token = generateToken({
+      citizenId: citizen.citizenId,
+      role: 'CITIZEN',
+      name: citizen.fullName
+    });
+
+    return res.json({
+      success: true,
+      message: `Account created successfully! Your unique Civic ID is ${citizen.citizenId}`,
+      citizen,
+      token
+    });
+  } catch (err) {
+    console.error("Error in /api/auth/citizen-register:", err);
+    return res.status(500).json({ error: err.message || "Registration processing error." });
   }
-
-  if (mpin.length < 4) {
-    return res.status(400).json({ error: "Security MPIN must be at least 4 digits." });
-  }
-
-  // Check if mobile already exists
-  const existing = await dbService.getCitizenByMobile(mobile);
-  if (existing) {
-    return res.status(400).json({ error: `An account already exists for mobile +91 ${mobile.replace(/\D/g, '').slice(-10)}. Please switch to Login.` });
-  }
-
-  const citizen = await dbService.registerCitizen({
-    fullName,
-    dateOfBirth,
-    gender,
-    state,
-    address,
-    mobile,
-    mpin,
-    aadhaar
-  });
-
-  await dbService.addAuditLog({
-    citizenId: citizen.citizenId,
-    event: `New Citizen Registered & Unique Civic ID Issued: ${citizen.citizenId}`,
-    device: "Web Client",
-    location: `${state || 'Andhra Pradesh'}, India`,
-    ip: "49.37.142.90"
-  });
-
-  const token = generateToken({
-    citizenId: citizen.citizenId,
-    role: 'CITIZEN',
-    name: citizen.fullName
-  });
-
-  return res.json({
-    success: true,
-    message: `Account created successfully! Your unique Civic ID is ${citizen.citizenId}`,
-    citizen,
-    token
-  });
 });
 
 // POST Citizen Login Endpoint (Mobile + MPIN)
 app.post('/api/auth/citizen-login', async (req, res) => {
-  const { mobile, mpin } = req.body;
-  if (!mobile || !mpin) {
-    return res.status(400).json({ error: "Please enter registered mobile number and 4-digit MPIN." });
+  try {
+    const { mobile, mpin } = req.body;
+    if (!mobile || !mpin) {
+      return res.status(400).json({ error: "Please enter registered mobile number and 4-digit MPIN." });
+    }
+
+    const citizen = await dbService.getCitizenByMobile(mobile);
+    if (!citizen) {
+      return res.status(404).json({ error: "No account found matching this mobile number. Please click Create Account to register." });
+    }
+
+    // Match MPIN hash if present, or demo fallback (mpin 1234 or 123456)
+    let isValidMpin = false;
+    if (citizen.mpinHash) {
+      isValidMpin = await comparePassword(mpin, citizen.mpinHash);
+    } else {
+      // Seed demo fallback
+      isValidMpin = (mpin === '1234' || mpin === '123456' || mpin.length >= 4);
+    }
+
+    if (!isValidMpin) {
+      return res.status(400).json({ error: "Incorrect 4-digit MPIN. Please try again." });
+    }
+
+    db.activeCitizenId = citizen.citizenId;
+
+    await dbService.addAuditLog({
+      citizenId: citizen.citizenId,
+      event: `Citizen MPIN Login Successful (${citizen.fullName})`,
+      device: "Web Client",
+      location: `${citizen.state || 'AP'}, India`,
+      ip: "49.37.142.90"
+    });
+
+    const token = generateToken({
+      citizenId: citizen.citizenId,
+      role: 'CITIZEN',
+      name: citizen.fullName
+    });
+
+    return res.json({
+      success: true,
+      message: `Welcome back, ${citizen.fullName}!`,
+      citizen,
+      token
+    });
+  } catch (err) {
+    console.error("Error in /api/auth/citizen-login:", err);
+    return res.status(500).json({ error: err.message || "Login processing error." });
   }
-
-  const citizen = await dbService.getCitizenByMobile(mobile);
-  if (!citizen) {
-    return res.status(404).json({ error: "No account found matching this mobile number. Please click Create Account to register." });
-  }
-
-  // Match MPIN hash if present, or demo fallback (mpin 1234 or 123456)
-  let isValidMpin = false;
-  if (citizen.mpinHash) {
-    isValidMpin = await comparePassword(mpin, citizen.mpinHash);
-  } else {
-    // Seed demo fallback
-    isValidMpin = (mpin === '1234' || mpin === '123456' || mpin.length >= 4);
-  }
-
-  if (!isValidMpin) {
-    return res.status(400).json({ error: "Incorrect 4-digit MPIN. Please try again." });
-  }
-
-  db.activeCitizenId = citizen.citizenId;
-
-  await dbService.addAuditLog({
-    citizenId: citizen.citizenId,
-    event: `Citizen MPIN Login Successful (${citizen.fullName})`,
-    device: "Web Client",
-    location: `${citizen.state || 'AP'}, India`,
-    ip: "49.37.142.90"
-  });
-
-  const token = generateToken({
-    citizenId: citizen.citizenId,
-    role: 'CITIZEN',
-    name: citizen.fullName
-  });
-
-  return res.json({
-    success: true,
-    message: `Welcome back, ${citizen.fullName}!`,
-    citizen,
-    token
-  });
 });
 
 // Aadhaar Tokenized Identity Verification
@@ -1066,6 +1076,17 @@ app.get('/api/hotel/guests', async (req, res) => {
 
 app.get('/api/updates/govt', (req, res) => {
   return res.json({ updates: db.govtUpdates });
+});
+
+// Catch-all API 404 Handler (Guarantees JSON response, never HTML)
+app.all('/api/*', (req, res) => {
+  return res.status(404).json({ error: `API endpoint '${req.originalUrl}' not found.` });
+});
+
+// Global Express Error Middleware
+app.use((err, req, res, next) => {
+  console.error("Global Server Error:", err);
+  return res.status(500).json({ error: err.message || "Internal server error." });
 });
 
 // SPA Fallback Route
