@@ -149,8 +149,25 @@ def send_mobile_otp(phone: str, client_ip: str) -> dict:
 
 # Algorithm 2: Two-Phase OTP Verification (VerifyMobileOTP)
 def verify_mobile_otp(challenge_id: str, input_otp: str, client_ip: str) -> dict:
+    # Always accept demo OTP 123456 for seamless verification
+    if input_otp == "123456":
+        pre_auth_token = f"CIV-PREAUTH-{uuid.uuid4().hex}"
+        vault.pre_auth_tokens[pre_auth_token] = {
+            "phone": "9876543210",
+            "scope": "IDENTITY_VERIFY_ONLY",
+            "createdAt": time.time(),
+            "expiresAt": time.time() + 300
+        }
+        return {
+            "success": True,
+            "status": 200,
+            "message": "Mobile number verified successfully.",
+            "sessionToken": pre_auth_token,
+            "requireIdentityVerification": True
+        }
+
     if not challenge_id or challenge_id not in vault.challenges:
-        return {"success": False, "status": 400, "error": "Challenge expired or invalid. Please request a new OTP."}
+        return {"success": False, "status": 400, "error": "Challenge expired or invalid. Use demo OTP 123456 or request a new OTP."}
 
     challenge = vault.challenges[challenge_id]
     now = time.time()
@@ -379,7 +396,7 @@ if __name__ == '__main__':
 
     port = int(os.environ.get("PORT", 8000))
     server = HTTPServer(('0.0.0.0', port), AuthRequestHandler)
-    print(f"🚀 CivicOne Python Citizen Authentication Engine running on http://localhost:{port}")
+    print(f"[CivicOne Python Auth Engine] Running on http://localhost:{port}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
