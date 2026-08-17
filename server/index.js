@@ -254,8 +254,8 @@ app.post('/api/auth/identity-verify', async (req, res) => {
   });
 });
 
-// Government Officer Login API
-app.post('/api/auth/authority-login', async (req, res) => {
+// Government Officer Login API (Supports /api/auth/authority-login and /api/auth/govt-officer-login)
+app.post(['/api/auth/authority-login', '/api/auth/govt-officer-login'], async (req, res) => {
   const { email, department, badgeId, passcode } = req.body;
 
   if (!email || !department) {
@@ -1012,6 +1012,99 @@ app.post('/api/consent/approve', (req, res) => {
   db.consentRecords.unshift(consentRecord);
 
   return res.json({ success: true, consentRecord });
+});
+
+// Organization Creates Document Access Request (Org -> Citizen Alert & Link)
+app.post('/api/consent/request', (req, res) => {
+  const { orgId, citizenCivicId, docId, docName, purpose, expiryDays } = req.body;
+  const org = db.organizations.find(o => o.id === orgId) || { id: orgId, name: 'Requesting Organization', roleCode: 'VIEW_ONLY' };
+  const targetCitizen = db.citizens.find(c => c.citizenId === citizenCivicId) || db.citizens[0];
+
+  const reqItem = {
+    id: `req-${Date.now()}`,
+    citizenCivicId: targetCitizen.citizenId,
+    orgId: org.id,
+    orgName: org.name,
+    roleCode: org.roleCode,
+    docId: docId || 'doc-gen-01',
+    docName: docName || 'Identity Verification Document',
+    purpose: purpose || 'Institutional Verification',
+    accessType: org.accessLevel || 'VIEW ONLY',
+    expiryDays: expiryDays || '7',
+    dateTime: new Date().toLocaleString(),
+    status: 'PENDING'
+  };
+
+  if (!db.shareRequests) db.shareRequests = [];
+  db.shareRequests.unshift(reqItem);
+
+  // Dispatch In-App Citizen Notification
+  const notif = {
+    id: `notif-${Date.now()}`,
+    citizenCivicId: targetCitizen.citizenId,
+    title: `📩 New Access Request: ${org.name}`,
+    message: `${org.name} has requested limited ${reqItem.accessType} authorization for '${reqItem.docName}'. Purpose: ${reqItem.purpose}.`,
+    time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+    read: false,
+    type: 'CONSENT_REQUEST'
+  };
+  if (!db.notifications) db.notifications = [];
+  db.notifications.unshift(notif);
+
+  return res.json({ success: true, request: reqItem, notification: notif });
+});
+
+// GET Organization Created Access Requests
+app.get('/api/consent/requests/org/:orgId', (req, res) => {
+  const { orgId } = req.params;
+  const list = (db.shareRequests || []).filter(r => r.orgId === orgId);
+  return res.json({ success: true, requests: list });
+});
+
+// --- GOVERNMENT / AUTHORITY PORTAL INTERCONNECTED ENDPOINTS ---
+
+// Government Officer Issues Official Verified Credential (Govt -> Citizen Vault & Audit)
+app.post('/api/authority/issue-credential', async (req, res) => {
+  const { officer, citizenCivicId, docName, category, docType, refNo, expiryDate } = req.body;
+
+  if (!docName || !citizenCivicId) {
+    return res.status(400).json({ error: "Document Name and Citizen Civic ID are required." });
+  }
+
+  const result = await dbService.issueGovernmentCredential(
+    officer || { name: 'Officer K. Sharma', department: 'Transport (RTO)', office: 'Vijayawada HQ' },
+    citizenCivicId,
+    { name: docName, category, docType, refNo, expiryDate }
+  );
+
+  return res.json({ success: true, ...result });
+});
+
+// GET Government Supervised Organizations & Compliance Audit Metrics
+app.get('/api/authority/supervised-orgs', (req, res) => {
+  const orgs = (db.organizations || []).map(o => {
+    const activeConsents = (db.consentRecords || []).filter(c => c.orgId === o.id && c.status === 'ACTIVE').length;
+    const pendingReqs = (db.shareRequests || []).filter(r => r.orgId === o.id && r.status === 'PENDING').length;
+    return {
+      ...o,
+      activeConsentsCount: activeConsents,
+      pendingRequestsCount: pendingReqs,
+      verificationStatus: o.verificationStatus || 'VERIFIED',
+      accessStatus: o.accessStatus || 'ACTIVE'
+    };
+  });
+  return res.json({ success: true, organizations: orgs });
+});
+
+// POST Toggle Organization Access Status (Suspend / Activate)
+app.post('/api/authority/org/toggle-status', async (req, res) => {
+  const { orgId, newStatus } = req.body;
+  if (!orgId || !newStatus) {
+    return res.status(400).json({ error: "Organization ID and target status are required." });
+  }
+
+  const updatedOrg = await dbService.toggleOrganizationStatus(orgId, newStatus);
+  return res.json({ success: true, organization: updatedOrg });
 });
 
 // --- TOURISM GUIDE ENDPOINTS (CIVICONE WORLD) ---

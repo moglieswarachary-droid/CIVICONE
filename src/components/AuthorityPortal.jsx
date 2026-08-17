@@ -22,41 +22,94 @@ export default function AuthorityPortal({ officer, onReturnHome }) {
     securityStatus: 'LOCK-PROTECTED LEVEL-3'
   });
 
-  const [supervisedOrgs, setSupervisedOrgs] = useState([
-    { id: 'org-pol-ap', name: 'CivicOne Demo Police (AP)', type: 'Police', state: 'Andhra Pradesh', jurisdiction: 'Vijayawada Urban', verificationStatus: 'VERIFIED', accessStatus: 'ACTIVE', lastActivity: '10:15 AM Today' },
-    { id: 'org-col-ap', name: 'CivicOne Demo College (AP)', type: 'College', state: 'Andhra Pradesh', jurisdiction: 'Krishna District', verificationStatus: 'VERIFIED', accessStatus: 'ACTIVE', lastActivity: '08:30 AM Today' },
-    { id: 'org-sch-ap', name: 'CivicOne Model School (AP)', type: 'School', state: 'Andhra Pradesh', jurisdiction: 'Vijayawada Rural', verificationStatus: 'VERIFIED', accessStatus: 'ACTIVE', lastActivity: 'Yesterday' },
-    { id: 'org-hot-ap', name: 'CivicOne Grand Hotel (AP)', type: 'Hotel', state: 'Andhra Pradesh', jurisdiction: 'MG Road Sector', verificationStatus: 'VERIFIED', accessStatus: 'ACTIVE', lastActivity: '09:30 AM Today' },
-    { id: 'org-elec-ap', name: 'CivicOne Gadget Store (AP)', type: 'Electronics', state: 'Andhra Pradesh', jurisdiction: 'Eluru Road', verificationStatus: 'VERIFIED', accessStatus: 'ACTIVE', lastActivity: '09:55 AM Today' },
-    { id: 'org-mob-ap', name: 'CivicOne Mobile Store (AP)', type: 'Mobile Shop', state: 'Andhra Pradesh', jurisdiction: 'Bunder Road', verificationStatus: 'VERIFIED', accessStatus: 'ACTIVE', lastActivity: '09:10 AM Today' }
-  ]);
-
-  const [accessRequests, setAccessRequests] = useState([
-    { id: 'REQ-GOVT-101', orgName: 'CivicOne Demo College', orgType: 'College', dataRequested: 'Student Identity + Education Certificate', purpose: 'Admission verification', authorization: 'CITIZEN CONSENT APPROVED', dateTime: '14 Aug 2026, 08:30 AM', status: 'Approved', accessLevel: 'VIEW ONLY' },
-    { id: 'REQ-GOVT-102', orgName: 'CivicOne Mobile Store', orgType: 'Mobile Shop', dataRequested: 'Minimum Identity & Address Verification', purpose: 'SIM activation KYC', authorization: 'CITIZEN CONSENT APPROVED', dateTime: '14 Aug 2026, 09:10 AM', status: 'Approved', accessLevel: 'MINIMUM KYC VIEW ONLY' },
-    { id: 'REQ-GOVT-103', orgName: 'CivicOne Grand Hotel', orgType: 'Hotel', dataRequested: 'Guest Name & ID Verification Badge', purpose: 'Guest check-in', authorization: 'PENDING CITIZEN CONSENT', dateTime: '14 Aug 2026, 09:30 AM', status: 'Pending', accessLevel: 'LIMITED HOTEL VIEW' }
-  ]);
+  const [supervisedOrgs, setSupervisedOrgs] = useState([]);
+  const [accessRequests, setAccessRequests] = useState([]);
+  const [loadingOrgs, setLoadingOrgs] = useState(false);
 
   const [issueForm, setIssueForm] = useState({
-    citizenCivicId: 'CIV-DEMO-10001',
-    docName: '',
-    category: officerData.department || 'Transport (RTO)',
-    refNo: ''
+    citizenCivicId: 'CIV-AP-710646-823',
+    docName: 'Smart Driving Licence (DL)',
+    category: 'Transport (RTO)',
+    docType: 'Official Driving Licence',
+    refNo: 'DL-37-2026-90812',
+    expiryDate: '2046-08-17'
   });
   const [issueSuccess, setIssueSuccess] = useState(null);
+  const [issuing, setIssuing] = useState(false);
+
+  const fetchAuthorityData = async () => {
+    setLoadingOrgs(true);
+    try {
+      const [resOrgs, resReqs] = await Promise.all([
+        fetch('/api/authority/supervised-orgs').then(r => r.json()),
+        fetch('/api/consent/citizen-requests').then(r => r.json())
+      ]);
+      setLoadingOrgs(false);
+      if (resOrgs.organizations) setSupervisedOrgs(resOrgs.organizations);
+      if (resReqs.requests) setAccessRequests(resReqs.requests);
+    } catch (err) {
+      setLoadingOrgs(false);
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAuthorityData();
+  }, []);
 
   const handleIssueCredential = async (e) => {
     e.preventDefault();
     if (!issueForm.docName || !issueForm.citizenCivicId) return;
+    setIssuing(true);
+    setIssueSuccess(null);
 
-    setIssueSuccess({
-      name: issueForm.docName,
-      category: issueForm.category,
-      refNo: issueForm.refNo || `GOVT-AUTH-${Math.floor(10000 + Math.random() * 90000)}`,
-      status: "Verified",
-      issuedAt: new Date().toLocaleTimeString()
-    });
-    setIssueForm({ citizenCivicId: 'CIV-DEMO-10001', docName: '', category: officerData.department, refNo: '' });
+    try {
+      const res = await fetch('/api/authority/issue-credential', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          officer: officerData,
+          citizenCivicId: issueForm.citizenCivicId,
+          docName: issueForm.docName,
+          category: issueForm.category,
+          docType: issueForm.docType,
+          refNo: issueForm.refNo,
+          expiryDate: issueForm.expiryDate
+        })
+      });
+      const data = await res.json();
+      setIssuing(false);
+
+      if (data.success) {
+        setIssueSuccess({
+          name: data.document.name,
+          category: data.document.category,
+          refNo: data.document.docNumber,
+          citizenId: data.document.citizenId,
+          status: "🟢 ISSUED & ADDED TO CITIZEN VAULT",
+          issuedAt: new Date().toLocaleTimeString()
+        });
+      }
+    } catch (err) {
+      setIssuing(false);
+    }
+  };
+
+  const handleToggleOrgStatus = async (orgId, currentStatus) => {
+    const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+    try {
+      const res = await fetch('/api/authority/org/toggle-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orgId, newStatus })
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchAuthorityData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -302,26 +355,44 @@ export default function AuthorityPortal({ officer, onReturnHome }) {
               <thead>
                 <tr style={{ borderBottom: '1px solid #1E3A8A', color: '#94A3B8' }}>
                   <th style={{ padding: '12px' }}>Organization Name</th>
-                  <th style={{ padding: '12px' }}>Type</th>
+                  <th style={{ padding: '12px' }}>Category</th>
                   <th style={{ padding: '12px' }}>State / Jurisdiction</th>
                   <th style={{ padding: '12px' }}>Verification Status</th>
-                  <th style={{ padding: '12px' }}>Access Status</th>
-                  <th style={{ padding: '12px' }}>Last Activity</th>
+                  <th style={{ padding: '12px' }}>Access Clearance</th>
+                  <th style={{ padding: '12px' }}>Action Control</th>
                 </tr>
               </thead>
               <tbody>
                 {supervisedOrgs.map(org => (
                   <tr key={org.id} style={{ borderBottom: '1px solid #1E3A8A' }}>
                     <td style={{ padding: '14px 12px', fontWeight: 800, color: '#FFFFFF' }}>{org.name}</td>
-                    <td style={{ padding: '14px 12px', color: '#60A5FA', fontWeight: 700 }}>{org.type}</td>
-                    <td style={{ padding: '14px 12px', color: '#94A3B8' }}>{org.state} ({org.jurisdiction})</td>
+                    <td style={{ padding: '14px 12px', color: '#60A5FA', fontWeight: 700 }}>{org.category || org.type}</td>
+                    <td style={{ padding: '14px 12px', color: '#94A3B8' }}>{org.state || officerData.state} ({org.jurisdiction || 'Regional'})</td>
                     <td style={{ padding: '14px 12px' }}>
-                      <span style={{ backgroundColor: '#064E3B', color: '#34D399', padding: '2px 8px', borderRadius: '6px', fontWeight: 800, fontSize: '0.75rem' }}>
-                        {org.verificationStatus}
+                      <span style={{
+                        backgroundColor: org.verificationStatus === 'SUSPENDED' ? '#7F1D1D' : '#064E3B',
+                        color: org.verificationStatus === 'SUSPENDED' ? '#FCA5A5' : '#34D399',
+                        padding: '3px 10px', borderRadius: '6px', fontWeight: 800, fontSize: '0.75rem'
+                      }}>
+                        {org.verificationStatus || 'VERIFIED'}
                       </span>
                     </td>
-                    <td style={{ padding: '14px 12px', color: '#4ADE80', fontWeight: 800 }}>● {org.accessStatus}</td>
-                    <td style={{ padding: '14px 12px', color: '#94A3B8' }}>{org.lastActivity}</td>
+                    <td style={{ padding: '14px 12px', color: org.accessStatus === 'SUSPENDED' ? '#EF4444' : '#4ADE80', fontWeight: 800 }}>
+                      ● {org.accessStatus || 'ACTIVE'}
+                    </td>
+                    <td style={{ padding: '14px 12px' }}>
+                      <button
+                        onClick={() => handleToggleOrgStatus(org.id, org.accessStatus || 'ACTIVE')}
+                        style={{
+                          backgroundColor: org.accessStatus === 'SUSPENDED' ? '#064E3B' : '#7F1D1D',
+                          color: org.accessStatus === 'SUSPENDED' ? '#A7F3D0' : '#FECACA',
+                          border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 800,
+                          fontSize: '0.75rem', cursor: 'pointer'
+                        }}
+                      >
+                        {org.accessStatus === 'SUSPENDED' ? 'Re-Activate Clearance' : 'Suspend Access'}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

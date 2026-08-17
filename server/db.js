@@ -434,5 +434,61 @@ export const dbService = {
       }
     }
     return found;
+  },
+
+  // Issue Verified Government Credential directly into Citizen Vault
+  async issueGovernmentCredential(officer, citizenCivicId, docData) {
+    const targetCitizen = fallbackDb.citizens.find(c => c.citizenId === citizenCivicId) || fallbackDb.citizens[0];
+    
+    const newDoc = {
+      id: `doc-govt-${Date.now()}`,
+      citizenId: targetCitizen.citizenId,
+      name: docData.name,
+      category: docData.category || 'Government',
+      docType: docData.docType || 'Official Credential',
+      issuer: docData.issuer || officer.department || 'Government Authority',
+      docNumber: docData.refNo || `GOVT-AUTH-${Math.floor(100000 + Math.random() * 900000)}`,
+      issueDate: new Date().toISOString().split('T')[0],
+      expiryDate: docData.expiryDate || '2045-12-31',
+      status: 'VERIFIED',
+      verificationBadge: '🟢 GOVERNMENT ISSUED & DIGITALLY SIGNED',
+      digitalSignature: `SIG-GOVT-AUTH-${Math.random().toString(36).substring(2, 10).toUpperCase()}`
+    };
+
+    fallbackDb.documents.unshift(newDoc);
+
+    // Create In-App Citizen Notification
+    const notif = {
+      id: `notif-${Date.now()}`,
+      citizenCivicId: targetCitizen.citizenId,
+      title: `🏛️ New Official Credential Issued: ${newDoc.name}`,
+      message: `Issued by ${newDoc.issuer} (${officer.name || 'Government Officer'}). Document Ref: ${newDoc.docNumber}. Added directly to your CivicVault.`,
+      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      read: false,
+      type: 'GOVT_ISSUANCE'
+    };
+    if (!fallbackDb.notifications) fallbackDb.notifications = [];
+    fallbackDb.notifications.unshift(notif);
+
+    // Add Audit Log
+    this.addAuditLog({
+      citizenId: targetCitizen.citizenId,
+      event: `Government Officer (${officer.name}) Issued Credential: ${newDoc.name} (${newDoc.docNumber})`,
+      device: 'Government Officer Terminal',
+      location: officer.office || 'Vijayawada HQ',
+      status: 'SUCCESS'
+    });
+
+    return { success: true, document: newDoc, notification: notif };
+  },
+
+  // Toggle Organization Verification & Access Status
+  async toggleOrganizationStatus(orgId, newStatus) {
+    const org = fallbackDb.organizations.find(o => o.id === orgId);
+    if (org) {
+      org.accessStatus = newStatus;
+      org.verificationStatus = newStatus === 'SUSPENDED' ? 'SUSPENDED' : 'VERIFIED';
+    }
+    return org;
   }
 };

@@ -27,11 +27,16 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'locker' | 'request' | 'history'
   
   // Request Form State
-  const [citizenCivicId, setCitizenCivicId] = useState('CIV-DEMO-10001');
+  const [citizenCivicId, setCitizenCivicId] = useState('CIV-AP-710646-823');
   const [docId, setDocId] = useState('doc-aarav-08');
-  const [purpose, setPurpose] = useState('Academic Enrollment Verification');
+  const [docName, setDocName] = useState('B.Tech Degree Certificate (Academic)');
+  const [purpose, setPurpose] = useState('Institutional Enrollment Verification');
   const [expiryDays, setExpiryDays] = useState('7');
   const [requestMsg, setRequestMsg] = useState('');
+
+  // Industry Workflow Demo States
+  const [hotelScanGuest, setHotelScanGuest] = useState({ civicId: 'CIV-AP-710646-823', name: 'Raghavendra', checkInTime: 'Today 02:30 PM', roomNo: 'Suite 402', status: 'VERIFIED' });
+  const [collegeVerifyStudent, setCollegeVerifyStudent] = useState({ civicId: 'CIV-AP-710646-823', studentName: 'Raghavendra', course: 'B.Tech CS', year: '2026', nadStatus: 'VERIFIED ON NAD' });
 
   // Document Viewer Modal State
   const [viewingDoc, setViewingDoc] = useState(null);
@@ -43,7 +48,7 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
     try {
       const [resOrgs, resReqs, resCons] = await Promise.all([
         fetch('/api/organizations').then(r => r.json()),
-        fetch('/api/consent/citizen-requests').then(r => r.json()),
+        fetch(`/api/consent/requests/org/${selectedOrg.id}`).then(r => r.json()),
         fetch('/api/consent/active').then(r => r.json())
       ]);
 
@@ -57,7 +62,7 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
 
   useEffect(() => {
     fetchOrgData();
-  }, []);
+  }, [selectedOrg.id]);
 
   const handleCreateRequest = async (e) => {
     e.preventDefault();
@@ -71,13 +76,14 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
           orgId: selectedOrg.id,
           citizenCivicId,
           docId,
+          docName,
           purpose,
           expiryDays
         })
       });
       const data = await res.json();
       if (data.success) {
-        setRequestMsg(`Document access request sent to citizen ${citizenCivicId} for ${purpose}.`);
+        setRequestMsg(`✅ Access request sent to citizen (${citizenCivicId})! Notification dispatched to citizen app.`);
         fetchOrgData();
       } else {
         setRequestMsg(data.error || 'Failed to send request.');

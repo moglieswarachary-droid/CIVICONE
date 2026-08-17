@@ -77,6 +77,8 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       }
     }
     loadDashboardData();
+    const interval = setInterval(loadDashboardData, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   // Switch Demo Citizen Account Handler
@@ -308,7 +310,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       {/* MAIN CONTENT AREA WITH COLLAPSIBLE SIDEBAR */}
       <div style={{ flex: 1, display: 'flex', maxWidth: '1400px', width: '100%', margin: '0 auto', paddingBottom: '70px' }}>
         
-        {/* DESKTOP SIDEBAR WITH COLLAPSIBLE GROUPS */}
+        {/* DESKTOP SIDEBAR WITH COLLAPSIBLE GROUPS (Sticky & Synced Layout) */}
         <aside style={{
           width: '260px',
           borderRight: '1px solid var(--border-light)',
@@ -316,11 +318,16 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           padding: '20px 14px',
           display: 'flex',
           flexDirection: 'column',
-          justify: 'space-between',
-          flexShrink: 0
+          justifyContent: 'space-between',
+          flexShrink: 0,
+          position: 'sticky',
+          top: '80px',
+          alignSelf: 'flex-start',
+          maxHeight: 'calc(100vh - 100px)',
+          overflowY: 'auto'
         }} className="hidden-mobile">
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', maxHeight: 'calc(100vh - 120px)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {navigationGroups.map(group => {
               const isOpen = openGroups[group.key];
               return (
@@ -330,9 +337,9 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     style={{
                       width: '100%',
                       display: 'flex',
-                      justify: 'space-between',
                       alignItems: 'center',
-                      padding: '4px 10px',
+                      justifyContent: 'space-between',
+                      padding: '6px 10px',
                       background: 'none',
                       border: 'none',
                       fontSize: '0.7rem',
@@ -404,8 +411,8 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
         </aside>
 
-        {/* MAIN DISPLAY PANEL */}
-        <main style={{ flex: 1, padding: '20px 14px', overflowY: 'auto', width: '100%' }}>
+        {/* MAIN DISPLAY PANEL (Synced Window Scroll) */}
+        <main style={{ flex: 1, padding: '20px 24px', minWidth: 0 }}>
           
           {/* TAB 1: CITIZEN HOME DASHBOARD (Requirement 16 & 22) */}
           {activeTab === 'home' && (
