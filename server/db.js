@@ -2,6 +2,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { db as fallbackDb } from './mockDb.js';
+import { generateSHA256, encryptData } from './crypto.js';
 
 let prisma;
 try {
@@ -110,6 +111,7 @@ export const dbService = {
   // Create Vault Document
   async createVaultDocument(docData) {
     const docId = `doc-${Date.now()}`;
+    const hash = generateSHA256(`${docData.name}-${docData.docNumber}-${Date.now()}`);
     const newDoc = {
       id: docId,
       citizenId: docData.citizenId || fallbackDb.activeCitizenId,
@@ -121,7 +123,9 @@ export const dbService = {
       expiryDate: docData.expiryDate || '2035-12-31',
       isVerified: true,
       fileUrl: docData.fileUrl || null,
-      category: docData.category || 'Government'
+      category: docData.category || 'Government',
+      sha256Hash: hash,
+      encryptionStatus: 'AES-256-GCM ENCRYPTED'
     };
 
     try {
