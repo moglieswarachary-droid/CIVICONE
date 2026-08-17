@@ -55,24 +55,18 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
     setErrorMsg('');
     setLoading(true);
 
-    try {
-      const res = await fetch('/api/auth/citizen-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile: loginPhone, mpin: loginMpin })
-      });
-      const data = await res.json();
-      setLoading(false);
+    const res = await safeFetchJson('/api/auth/citizen-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: loginPhone, mpin: loginMpin })
+    });
+    setLoading(false);
 
-      if (res.ok && data.success) {
-        if (data.token) authStorage.setToken(data.token);
-        onAuthenticated(data.citizen);
-      } else {
-        setErrorMsg(data.error || "Login failed. Please check your credentials.");
-      }
-    } catch (err) {
-      setLoading(false);
-      setErrorMsg("Network error connecting to auth server.");
+    if (res.ok && res.data.success) {
+      if (res.data.token) authStorage.setToken(res.data.token);
+      onAuthenticated(res.data.citizen);
+    } else {
+      setErrorMsg(res.data.error || "Login failed. Please check your credentials.");
     }
   };
 
@@ -95,25 +89,18 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
     setErrorMsg('');
     setLoading(true);
 
-    try {
-      const res = await fetch('/api/auth/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: regMobile })
-      });
-      const data = await res.json();
-      setLoading(false);
+    const res = await safeFetchJson('/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: regMobile })
+    });
+    setLoading(false);
 
-      if (res.ok && data.success) {
-        setGeneratedDemoOtp(data.demoOtp || '123456');
-        setRegStep('OTP_VERIFY');
-      } else {
-        setErrorMsg(data.error || "Failed to send registration OTP.");
-      }
-    } catch (err) {
-      setLoading(false);
-      setGeneratedDemoOtp('123456');
+    if (res.ok && res.data.success) {
+      setGeneratedDemoOtp(res.data.demoOtp || '123456');
       setRegStep('OTP_VERIFY');
+    } else {
+      setErrorMsg(res.data.error || "Failed to send registration OTP.");
     }
   };
 
@@ -128,6 +115,22 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
     }
   };
 
+  // Helper for safe JSON response parsing without HTML syntax crashes
+  const safeFetchJson = async (url, options) => {
+    try {
+      const res = await fetch(url, options);
+      const text = await res.text();
+      try {
+        const data = JSON.parse(text);
+        return { ok: res.ok, status: res.status, data };
+      } catch (e) {
+        return { ok: false, status: res.status, data: { error: `Server returned non-JSON response (${res.status}).` } };
+      }
+    } catch (networkErr) {
+      return { ok: false, status: 0, data: { error: "Network error connecting to API server." } };
+    }
+  };
+
   // Submit OTP & Issue Unique Civic ID
   const handleVerifyRegistrationOtp = async () => {
     const code = otpDigits.join('');
@@ -139,49 +142,42 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
     setErrorMsg('');
     setLoading(true);
 
-    try {
-      // 1. Verify OTP
-      const verifyRes = await fetch('/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: regMobile, otp: code })
-      });
-      const verifyData = await verifyRes.json();
+    // 1. Verify OTP
+    const verifyRes = await safeFetchJson('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: regMobile, otp: code })
+    });
 
-      if (!verifyRes.ok || !verifyData.success) {
-        setLoading(false);
-        setErrorMsg(verifyData.error || "Incorrect OTP. Please check the 6-digit code.");
-        return;
-      }
-
-      // 2. Register Account & Generate Unique Civic ID
-      const regRes = await fetch('/api/auth/citizen-register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: regName,
-          dateOfBirth: regDob || '01-01-2000',
-          gender: regGender || 'Specified',
-          state: regState || 'Andhra Pradesh',
-          address: regAddress || 'India',
-          mobile: regMobile,
-          mpin: regMpin,
-          aadhaar: regAadhaar
-        })
-      });
-      const regData = await regRes.json();
+    if (!verifyRes.ok || !verifyRes.data.success) {
       setLoading(false);
+      setErrorMsg(verifyRes.data.error || "Incorrect OTP. Please check the 6-digit code.");
+      return;
+    }
 
-      if (regRes.ok && regData.success) {
-        if (regData.token) authStorage.setToken(regData.token);
-        setRegisteredCitizen(regData.citizen);
-        setRegStep('SUCCESS_ID');
-      } else {
-        setErrorMsg(regData.error || "Registration failed. Please check your details.");
-      }
-    } catch (err) {
-      setLoading(false);
-      setErrorMsg(err?.message || "Error processing registration request.");
+    // 2. Register Account & Generate Unique Civic ID
+    const regRes = await safeFetchJson('/api/auth/citizen-register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fullName: regName,
+        dateOfBirth: regDob || '01-01-2000',
+        gender: regGender || 'Specified',
+        state: regState || 'Andhra Pradesh',
+        address: regAddress || 'India',
+        mobile: regMobile,
+        mpin: regMpin,
+        aadhaar: regAadhaar
+      })
+    });
+    setLoading(false);
+
+    if (regRes.ok && regRes.data.success) {
+      if (regRes.data.token) authStorage.setToken(regRes.data.token);
+      setRegisteredCitizen(regRes.data.citizen);
+      setRegStep('SUCCESS_ID');
+    } else {
+      setErrorMsg(regRes.data.error || "Registration failed. Please check your details.");
     }
   };
 
