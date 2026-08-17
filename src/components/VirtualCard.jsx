@@ -291,13 +291,13 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
 
               <div style={{ flex: 1 }}>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.01em', textShadow: isGold ? '0 2px 4px rgba(0,0,0,0.6)' : 'none' }}>
-                  {citizen.name}
+                  {citizen.fullName || citizen.name || citizen.displayName || 'Citizen'}
                 </h2>
                 <div style={{ fontSize: '0.85rem', fontWeight: 800, color: isGold ? '#FEF08A' : '#BFDBFE', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  Civic ID: {card?.civicId || citizen.civicId}
+                  Civic ID: <span style={{ fontFamily: 'monospace', fontWeight: 900, letterSpacing: '0.5px' }}>{citizen.citizenId || card?.civicId || citizen.civicId}</span>
                   <button
-                    onClick={(e) => { e.stopPropagation(); copyToClipboard(card?.civicId || citizen.civicId); }}
-                    style={{ background: 'none', color: isGold ? '#FDE047' : '#BFDBFE', opacity: 0.8 }}
+                    onClick={(e) => { e.stopPropagation(); copyToClipboard(citizen.citizenId || card?.civicId || citizen.civicId); }}
+                    style={{ background: 'none', color: isGold ? '#FDE047' : '#BFDBFE', opacity: 0.8, cursor: 'pointer', border: 'none', padding: 0 }}
                     title="Copy Civic ID"
                   >
                     <Copy size={12} />

@@ -59,11 +59,16 @@ export const dbService = {
 
   // Get Citizen By Mobile Number
   async getCitizenByMobile(rawMobile) {
-    const cleanDigits = (rawMobile || '').replace(/\D/g, '');
+    const targetDigits = (rawMobile || '').replace(/\D/g, '').slice(-10);
+    if (!targetDigits || targetDigits.length < 10) return null;
+
     try {
       if (prisma) {
         const citizens = await prisma.citizen.findMany();
-        const found = citizens.find(c => (c.mobile || '').replace(/\D/g, '').includes(cleanDigits));
+        const found = citizens.find(c => {
+          const mDigits = (c.mobile || '').replace(/\D/g, '').slice(-10);
+          return mDigits === targetDigits;
+        });
         if (found) {
           return {
             ...found,
@@ -76,9 +81,12 @@ export const dbService = {
         }
       }
     } catch (err) {
-      console.warn("DB Query fallback for mobile search");
+      console.warn("DB Query fallback for mobile search:", err.message);
     }
-    return fallbackDb.citizens.find(c => (c.mobile || '').replace(/\D/g, '').includes(cleanDigits));
+    return fallbackDb.citizens.find(c => {
+      const mDigits = (c.mobile || '').replace(/\D/g, '').slice(-10);
+      return mDigits === targetDigits;
+    });
   },
 
   // Register New Citizen with Unique Civic ID Generation and MPIN Hashing
