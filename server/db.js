@@ -107,6 +107,120 @@ export const dbService = {
     return fallbackDb.hotelGuests;
   },
 
+  // Create Vault Document
+  async createVaultDocument(docData) {
+    const docId = `doc-${Date.now()}`;
+    const newDoc = {
+      id: docId,
+      citizenId: docData.citizenId || fallbackDb.activeCitizenId,
+      docType: docData.docType || docData.name,
+      name: docData.name,
+      docNumber: docData.docNumber || `DOC-${Math.floor(1000 + Math.random() * 9000)}`,
+      issuer: docData.issuer || 'Govt Authority',
+      issueDate: docData.issueDate || new Date().toISOString().split('T')[0],
+      expiryDate: docData.expiryDate || '2035-12-31',
+      isVerified: true,
+      fileUrl: docData.fileUrl || null,
+      category: docData.category || 'Government'
+    };
+
+    try {
+      if (prisma) {
+        await prisma.vaultDocument.create({ data: newDoc });
+      }
+    } catch (err) {
+      console.warn("DB Vault document save fallback to memory");
+    }
+
+    fallbackDb.documents.unshift(newDoc);
+    return newDoc;
+  },
+
+  // Verify Vault Document
+  async verifyVaultDocument(docId) {
+    try {
+      if (prisma) {
+        await prisma.vaultDocument.update({
+          where: { id: docId },
+          data: { isVerified: true }
+        });
+      }
+    } catch (err) {
+      console.warn("DB Vault doc verify fallback to memory");
+    }
+    const d = fallbackDb.documents.find(doc => doc.id === docId);
+    if (d) d.isVerified = true;
+    return d || { id: docId, isVerified: true };
+  },
+
+  // Create Consent Access Request
+  async createConsentRequest(reqData) {
+    const reqId = `req-${Date.now()}`;
+    const newReq = {
+      id: reqId,
+      citizenId: reqData.citizenId || 'CIV-DEMO-10001',
+      requestingOrg: reqData.requestingOrg || 'CivicOne Partner Org',
+      requestingRole: reqData.requestingRole || 'VERIFICATION_ADMIN',
+      purpose: reqData.purpose || 'Credential Verification',
+      scope: reqData.scope || 'Identity Status & Vault Credentials',
+      status: 'PENDING',
+      requestedAt: new Date()
+    };
+
+    try {
+      if (prisma) {
+        await prisma.consentRequest.create({ data: newReq });
+      }
+    } catch (err) {
+      console.warn("DB Consent request fallback to memory");
+    }
+
+    if (!fallbackDb.consentRequests) fallbackDb.consentRequests = [];
+    fallbackDb.consentRequests.unshift(newReq);
+    return newReq;
+  },
+
+  // Create FIR Record
+  async createFIRRecord(firData) {
+    const firId = `FIR-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+    const newFir = {
+      id: firId,
+      firId,
+      date: new Date().toISOString().split('T')[0],
+      subject: firData.subject || 'Incident Report',
+      location: firData.location || 'Local Station Jurisdiction',
+      complainantId: firData.complainantId || 'CIV-DEMO-10001',
+      status: 'Pending Investigation',
+      assignedOfficer: firData.assignedOfficer || 'Inspector On Duty',
+      state: firData.state || 'Maharashtra'
+    };
+
+    try {
+      if (prisma) {
+        await prisma.fIRRecord.create({ data: newFir });
+      }
+    } catch (err) {
+      console.warn("DB FIR creation fallback to memory");
+    }
+
+    if (!fallbackDb.policeFirs) fallbackDb.policeFirs = [];
+    fallbackDb.policeFirs.unshift(newFir);
+    return newFir;
+  },
+
+  // Get Organizations
+  async getOrganizations() {
+    try {
+      if (prisma) {
+        const orgs = await prisma.organization.findMany();
+        if (orgs && orgs.length > 0) return orgs;
+      }
+    } catch (err) {
+      console.warn("DB Query fallback to memory for Organizations");
+    }
+    return fallbackDb.organizations;
+  },
+
   // Add Security Audit Log
   async addAuditLog(logData) {
     const logId = `sec-${Date.now()}`;

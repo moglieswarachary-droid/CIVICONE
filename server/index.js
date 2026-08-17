@@ -501,64 +501,31 @@ app.get('/api/vault/documents', (req, res) => {
 });
 
 // Upload New Document
-app.post('/api/vault/upload', (req, res) => {
-  const { name, category, type, issuer, refNo, issueDate, expiryDate, description, isPrivate, institution, course, degree, semester } = req.body;
-  const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
+app.post('/api/vault/upload', async (req, res) => {
+  const { name, category, type, issuer, refNo, issueDate, expiryDate, description, isPrivate } = req.body;
+  const citizen = await dbService.getCitizenById(db.activeCitizenId);
 
   if (!name || !category || !issuer) {
     return res.status(400).json({ error: "Please provide document name, category, and issuing authority." });
   }
 
-  const normCat = (c) => {
-    const s = (c || '').toLowerCase();
-    if (s.includes('gov') || s.includes('identity')) return 'government';
-    if (s.includes('rto') || s.includes('vehicle')) return 'rto';
-    if (s.includes('edu') || s.includes('academic')) return 'academic';
-    return s;
-  };
-
-  const normType = (t) => {
-    const s = (t || '').toLowerCase();
-    if (s.includes('cert')) return 'certificate';
-    return 'document';
-  };
-
-  const newDoc = {
-    id: `doc-${Date.now()}`,
+  const newDoc = await dbService.createVaultDocument({
     citizenId: citizen.citizenId,
     name,
-    category: normCat(category),
-    type: normType(type),
+    category: category || 'Government',
+    docType: type || 'Document',
     issuer,
-    refNo: refNo || `REF-${Math.floor(100000 + Math.random() * 900000)}`,
-    status: 'Verified',
-    issueDate: issueDate || new Date().toLocaleDateString('en-GB'),
-    expiryDate: expiryDate || 'N/A',
-    lastVerified: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-    fileType: 'PDF',
-    fileSize: '1.2 MB',
-    icon: normType(type) === 'certificate' ? 'Award' : 'FileText',
-    description: description || 'User uploaded authenticated credential record.',
-    isPrivate: Boolean(isPrivate),
-    institution,
-    course,
-    degree,
-    semester,
-    tags: [normCat(category), normType(type), 'User Uploaded'],
-    isDemo: false
-  };
+    docNumber: refNo || `REF-${Math.floor(100000 + Math.random() * 900000)}`,
+    issueDate: issueDate || new Date().toISOString().split('T')[0],
+    expiryDate: expiryDate || '2035-12-31'
+  });
 
-  db.documents.unshift(newDoc);
-
-  db.auditLogs.unshift({
-    id: `sec-${Date.now()}`,
+  await dbService.addAuditLog({
     citizenId: citizen.citizenId,
     event: `Document Uploaded & Verified: ${name}`,
     device: "Web Client",
     location: "Vijayawada, AP",
-    ip: "49.37.142.90",
-    timestamp: new Date().toLocaleString(),
-    status: "SUCCESS"
+    ip: "49.37.142.90"
   });
 
   return res.json({
@@ -569,15 +536,46 @@ app.post('/api/vault/upload', (req, res) => {
 });
 
 // Trigger Document Credential Verification
-app.post('/api/vault/verify-doc/:id', (req, res) => {
+app.post('/api/vault/verify-doc/:id', async (req, res) => {
   const { id } = req.params;
-  const doc = db.documents.find(d => d.id === id);
+  const doc = await dbService.verifyVaultDocument(id);
 
-  if (!doc) {
-    return res.status(404).json({ error: "Document not found." });
+  return res.json({
+    success: true,
+    message: "Document identity hash verified against issuing authority database.",
+    document: doc
+  });
+});
+
+// Create Police FIR Record
+app.post('/api/police/fir/create', async (req, res) => {
+  const { subject, location, complainantId, assignedOfficer, state } = req.body;
+  if (!subject || !location) {
+    return res.status(400).json({ error: "Please provide FIR subject and incident location." });
   }
 
-  doc.status = "Verified";
+  const fir = await dbService.createFIRRecord({
+    subject,
+    location,
+    complainantId: complainantId || 'CIV-DEMO-10001',
+    assignedOfficer: assignedOfficer || 'Inspector On Duty',
+    state: state || 'Maharashtra'
+  });
+
+  await dbService.addAuditLog({
+    citizenId: fir.complainantId,
+    event: `New FIR Filed: ${fir.firId} (${subject})`,
+    device: "Police Console",
+    location,
+    ip: "164.100.1.1"
+  });
+
+  return res.json({
+    success: true,
+    message: "FIR filed and registered successfully in Police National Database.",
+    fir
+  });
+});
   doc.securitySeal = `VERIFIED-ISSUER-SEAL-${Date.now()}`;
 
   db.auditLogs.unshift({
