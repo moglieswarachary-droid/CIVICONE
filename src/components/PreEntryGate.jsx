@@ -28,6 +28,8 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
     return () => clearInterval(interval);
   }, [step, timer]);
 
+  const [challengeId, setChallengeId] = useState('');
+
   // Handle Mobile Number Submission
   const handleMobileSubmit = async (e) => {
     e.preventDefault();
@@ -48,6 +50,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
       setLoading(false);
 
       if (res.ok && data.success) {
+        if (data.challengeId) setChallengeId(data.challengeId);
         setStep('OTP');
         setTimer(60);
       } else {
@@ -55,7 +58,6 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
       }
     } catch (err) {
       setLoading(false);
-      // Fallback for seamless frontend demo if backend isn't reached yet
       setStep('OTP');
       setTimer(60);
     }
@@ -109,7 +111,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
       const res = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: `+91 ${phone}`, otp: code })
+        body: JSON.stringify({ phone: `+91 ${phone}`, otp: code, challengeId })
       });
       const data = await res.json();
       setLoading(false);
