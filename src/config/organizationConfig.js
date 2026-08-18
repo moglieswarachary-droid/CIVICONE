@@ -72,17 +72,27 @@ export const ORGANIZATION_CONFIGS = {
     logoEmoji: '👮‍♂️',
     categoryName: 'Law Enforcement',
     integrationStatus: 'Prototype / Simulated',
-    description: 'Authorized law enforcement identity verification, FIR management, and criminal history checks.',
-    roles: ['Police Admin', 'Police Officer', 'Police Verifier', 'Police Auditor'],
+    description: 'Authorized law enforcement identity verification, FIR management, criminal checks, and high-rank judicial warrant audits.',
+    roles: [
+      'Police Admin',
+      'Senior Police Commissioner / SP (Level 3 High-Rank Access)',
+      'Economic Offences Wing / Cyber Crime (EOW Financial Investigations)',
+      'Medico-Legal Special Investigator (Forensic & Health Records)',
+      'Police Inspector (Standard Enforcement)',
+      'Police Verifier',
+      'Police Auditor'
+    ],
     capabilities: [
       'Identity Verification',
       'Credential Verification',
       'Authorized Citizen Access',
       'Verification Requests',
-      'Verification History'
+      'Verification History',
+      'High-Rank Financial Warrant Access',
+      'Medico-Legal Health Audit'
     ],
-    allowedCategories: ['Identity', 'Vehicle/RTO', 'Legal/Police'],
-    allowedDocTypes: ['Aadhaar Identity', 'Driving Licence', 'FIR Records', 'Police Verification']
+    allowedCategories: ['Identity', 'Vehicle/RTO', 'Legal/Police', 'Finance', 'Healthcare'],
+    allowedDocTypes: ['Aadhaar Identity', 'Driving Licence', 'FIR Records', 'Police Verification', 'Bank Account Verification', 'PAN Status', 'ABHA Health Card', 'Medical Casualty Report']
   },
   'rto': {
     id: 'rto',
