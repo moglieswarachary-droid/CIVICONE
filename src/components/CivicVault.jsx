@@ -21,6 +21,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
 
   // Modals State
   const [selectedDoc, setSelectedDoc] = useState(null);
+  const [showCategoryModal, setShowCategoryModal] = useState(null); // 'government' | 'rto' | 'academic' | null
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(null);
   const [showVerifyModal, setShowVerifyModal] = useState(null);
@@ -475,7 +476,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
             </div>
           </div>
           <button
-            onClick={() => { setActiveCategory('government'); setActiveType('all'); }}
+            onClick={() => setShowCategoryModal('government')}
             style={{
               marginTop: '16px',
               backgroundColor: '#1D4ED8',
@@ -527,7 +528,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
             </div>
           </div>
           <button
-            onClick={() => { setActiveCategory('rto'); setActiveType('all'); }}
+            onClick={() => setShowCategoryModal('rto')}
             style={{
               marginTop: '16px',
               backgroundColor: '#D97706',
@@ -579,7 +580,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
             </div>
           </div>
           <button
-            onClick={() => { setActiveCategory('academic'); setActiveType('all'); }}
+            onClick={() => setShowCategoryModal('academic')}
             style={{
               marginTop: '16px',
               backgroundColor: '#7C3AED',
@@ -602,8 +603,8 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
 
       </div>
 
-      {/* REQUIREMENT 10: ENHANCED MULTI-FIELD SEARCH BAR */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', marginBottom: '20px' }}>
+      {/* REQUIREMENT 10: SEARCH BAR */}
+      <div style={{ marginBottom: '20px' }}>
         <div style={{ position: 'relative' }}>
           <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#64748B' }} />
           <input
@@ -615,22 +616,6 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
           />
           {searchQuery && (
             <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', color: '#64748B', border: 'none', cursor: 'pointer' }}>
-              <X size={16} />
-            </button>
-          )}
-        </div>
-
-        <div style={{ position: 'relative' }}>
-          <Sparkles size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#7C3AED' }} />
-          <input
-            type="text"
-            value={aiQuery}
-            onChange={(e) => setAiQuery(e.target.value)}
-            placeholder="Ask CivicOne AI (e.g. 'Show degree certificates', 'expiring documents')..."
-            style={{ width: '100%', padding: '12px 16px 12px 46px', borderRadius: '16px', border: '1.5px solid #DDD6FE', backgroundColor: '#F5F3FF', fontSize: '0.875rem', fontWeight: 600, color: '#5B21B6' }}
-          />
-          {aiQuery && (
-            <button onClick={() => setAiQuery('')} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', color: '#7C3AED', border: 'none', cursor: 'pointer' }}>
               <X size={16} />
             </button>
           )}
@@ -982,6 +967,97 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
                 {uploading ? 'Saving Document...' : 'Save Document to Vault 🚀'}
               </button>
             </form>
+      {/* CATEGORY OVERLAY DIALOG MODAL */}
+      {showCategoryModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(11, 31, 58, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 200,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '24px',
+            maxWidth: '850px',
+            width: '100%',
+            maxHeight: '88vh',
+            overflowY: 'auto',
+            padding: '32px',
+            position: 'relative',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.35)'
+          }}>
+            <button
+              onClick={() => setShowCategoryModal(null)}
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#64748B', cursor: 'pointer' }}
+            >
+              <X size={24} />
+            </button>
+
+            {/* Modal Category Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '8px' }}>
+              <div style={{
+                width: '48px', height: '48px', borderRadius: '16px',
+                backgroundColor: showCategoryModal === 'government' ? '#DBEAFE' : showCategoryModal === 'rto' ? '#FEF3C7' : '#EDE9FE',
+                color: showCategoryModal === 'government' ? '#1D4ED8' : showCategoryModal === 'rto' ? '#D97706' : '#7C3AED',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                {showCategoryModal === 'government' ? <ShieldCheck size={28} /> : showCategoryModal === 'rto' ? <Car size={28} /> : <GraduationCap size={28} />}
+              </div>
+              <div>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0B1F3A' }}>
+                  {showCategoryModal === 'government' ? '🏛️ Government Authorized Vault' : showCategoryModal === 'rto' ? '🚗 RTO & Vehicle Credentials' : '🎓 Academic Degrees & Marksheets'}
+                </h2>
+                <p style={{ fontSize: '0.85rem', color: '#64748B', marginTop: '2px' }}>
+                  Exclusive category vault view for your verified {showCategoryModal} records.
+                </p>
+              </div>
+            </div>
+
+            {/* Document Cards in this Category */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '16px', marginTop: '24px' }}>
+              {documents.filter(d => getNormCat(d.category) === showCategoryModal).map(doc => (
+                <div key={doc.id} style={{
+                  backgroundColor: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '16px',
+                  padding: '18px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justify: 'space-between'
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                      {getDocIcon(doc)}
+                      {getStatusBadge(doc)}
+                    </div>
+                    <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '4px' }}>{doc.name}</h4>
+                    <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>Issuer: {doc.issuer}</div>
+                    {doc.refNo && <div style={{ fontSize: '0.75rem', color: '#0B5ED7', fontFamily: 'monospace', fontWeight: 700, marginTop: '2px' }}>Ref: {doc.refNo}</div>}
+                  </div>
+
+                  <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
+                    <button
+                      onClick={() => { setShowCategoryModal(null); setSelectedDoc(doc); }}
+                      style={{ flex: 1, backgroundColor: '#0B5ED7', color: '#FFFFFF', padding: '8px', borderRadius: '10px', fontWeight: 700, fontSize: '0.775rem', border: 'none', cursor: 'pointer' }}
+                    >
+                      View Details
+                    </button>
+                    <button
+                      onClick={() => { setShowCategoryModal(null); handleRunVerification(doc); }}
+                      style={{ backgroundColor: '#EAF3FF', color: '#0B5ED7', padding: '8px', borderRadius: '10px', fontWeight: 700, fontSize: '0.775rem', border: 'none', cursor: 'pointer' }}
+                    >
+                      Verify
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
           </div>
         </div>
       )}

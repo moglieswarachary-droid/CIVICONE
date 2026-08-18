@@ -33,62 +33,24 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
     }, 2000);
   };
 
-  // SVG QR Code generator bound to Civic ID
+  // Real Scannable QR Code generator bound to Civic ID
   const renderQrSvg = (size = 140, idValue = civicId) => {
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(idValue)}&color=0B1F3A&bgcolor=FFFFFF`;
     return (
-      <svg width={size} height={size} viewBox="0 0 100 100" style={{ display: 'block', margin: '0 auto', background: '#FFFFFF', padding: '6px', borderRadius: '8px' }}>
-        <rect width="100" height="100" fill="#FFFFFF" />
-        {/* Corner Position Detection Squares */}
-        <rect x="6" y="6" width="24" height="24" fill="#0B1F3A" />
-        <rect x="10" y="10" width="16" height="16" fill="#FFFFFF" />
-        <rect x="14" y="14" width="8" height="8" fill="#0B5ED7" />
-
-        <rect x="70" y="6" width="24" height="24" fill="#0B1F3A" />
-        <rect x="74" y="10" width="16" height="16" fill="#FFFFFF" />
-        <rect x="78" y="14" width="8" height="8" fill="#0B5ED7" />
-
-        <rect x="6" y="70" width="24" height="24" fill="#0B1F3A" />
-        <rect x="10" y="74" width="16" height="16" fill="#FFFFFF" />
-        <rect x="14" y="78" width="8" height="8" fill="#0B5ED7" />
-
-        {/* Dynamic Data Modules derived from civicId */}
-        <rect x="36" y="8" width="6" height="6" fill="#0B5ED7" />
-        <rect x="46" y="8" width="6" height="6" fill="#0B1F3A" />
-        <rect x="56" y="8" width="6" height="6" fill="#0B5ED7" />
-
-        <rect x="36" y="18" width="6" height="6" fill="#0B1F3A" />
-        <rect x="46" y="18" width="12" height="6" fill="#0B5ED7" />
-
-        <rect x="8" y="36" width="6" height="6" fill="#0B1F3A" />
-        <rect x="18" y="36" width="6" height="6" fill="#0B5ED7" />
-        <rect x="28" y="36" width="12" height="6" fill="#0B1F3A" />
-        <rect x="46" y="36" width="6" height="6" fill="#0B5ED7" />
-        <rect x="56" y="36" width="12" height="6" fill="#0B1F3A" />
-        <rect x="74" y="36" width="6" height="6" fill="#0B5ED7" />
-        <rect x="84" y="36" width="8" height="6" fill="#0B1F3A" />
-
-        <rect x="36" y="46" width="12" height="6" fill="#0B5ED7" />
-        <rect x="54" y="46" width="6" height="6" fill="#0B1F3A" />
-        <rect x="66" y="46" width="12" height="6" fill="#0B5ED7" />
-
-        <rect x="8" y="56" width="6" height="6" fill="#0B5ED7" />
-        <rect x="20" y="56" width="12" height="6" fill="#0B1F3A" />
-        <rect x="38" y="56" width="6" height="6" fill="#0B5ED7" />
-        <rect x="48" y="56" width="12" height="6" fill="#0B1F3A" />
-
-        <rect x="36" y="66" width="8" height="6" fill="#0B1F3A" />
-        <rect x="48" y="66" width="6" height="6" fill="#0B5ED7" />
-        <rect x="60" y="66" width="14" height="6" fill="#0B1F3A" />
-
-        <rect x="36" y="78" width="6" height="6" fill="#0B5ED7" />
-        <rect x="48" y="78" width="12" height="6" fill="#0B1F3A" />
-        <rect x="66" y="78" width="6" height="6" fill="#0B5ED7" />
-        <rect x="78" y="78" width="14" height="6" fill="#0B1F3A" />
-
-        {/* Center Logo */}
-        <circle cx="50" cy="50" r="8" fill="#FFFFFF" />
-        <circle cx="50" cy="50" r="6" fill="#0B5ED7" />
-      </svg>
+      <img
+        src={qrUrl}
+        alt={`QR Code for ${idValue}`}
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          display: 'block',
+          margin: '0 auto',
+          backgroundColor: '#FFFFFF',
+          padding: '6px',
+          borderRadius: '10px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+        }}
+      />
     );
   };
 
