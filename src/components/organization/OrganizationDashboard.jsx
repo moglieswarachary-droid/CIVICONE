@@ -1,12 +1,11 @@
-// src/components/organization/OrganizationDashboard.jsx - Dynamic Organization Workspace Dashboard
+// src/components/organization/OrganizationDashboard.jsx - Unified RTO & Organization Workspace (Matching CivicVault UI Theme)
 
 import React, { useState, useEffect } from 'react';
 import {
   Building2, ShieldCheck, Search, PlusCircle, CheckCircle2, Lock, Eye, AlertCircle,
   ArrowLeft, RefreshCw, FileText, ExternalLink, Calendar, LogOut, UserCheck, ShieldAlert, Award, MapPin,
-  Clock, FilePlus, XCircle, CheckSquare
+  Clock, FilePlus, XCircle, CheckSquare, Activity, Zap, TrendingUp, Sparkles, Server, Check, Car, Filter, ChevronRight
 } from 'lucide-react';
-import DocumentViewerModal from '../DocumentViewerModal.jsx';
 
 export default function OrganizationDashboard({ session, onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'verify' | 'requests' | 'issuance' | 'audit' | 'profile'
@@ -16,24 +15,24 @@ export default function OrganizationDashboard({ session, onLogout }) {
   const [consents, setConsents] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
 
+  // Search & Filter State (Matching CivicVault)
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+
   // Verification Form State
   const [citizenCivicId, setCitizenCivicId] = useState('CIV-DEMO-10001');
-  const [purpose, setPurpose] = useState(`Verification by ${session.name}`);
+  const [purpose, setPurpose] = useState(`Official RTO Verification by ${session.name}`);
   const [expiryDays, setExpiryDays] = useState('7');
-  const [selectedAttributes, setSelectedAttributes] = useState(['Identity Status', 'Verification Badge']);
+  const [selectedAttributes, setSelectedAttributes] = useState(['Identity Status', 'Verification Badge', 'Driving Licence Status', 'Vehicle RC Proof']);
   const [requestMsg, setRequestMsg] = useState('');
   const [submittingReq, setSubmittingReq] = useState(false);
 
   // Credential Issuance Form State (For Issuing Orgs)
   const [issueCivicId, setIssueCivicId] = useState('CIV-DEMO-10001');
-  const [certType, setCertType] = useState('Verification Certificate');
   const [certTitle, setCertTitle] = useState(`${session.name} Official Verified Credential`);
   const [issueMsg, setIssueMsg] = useState('');
 
-  // Document Viewer Modal State
-  const [viewingDoc, setViewingDoc] = useState(null);
-  const [viewingConsent, setViewingConsent] = useState(null);
-  const [authorizedData, setAuthorizedData] = useState(null);
+  const isRto = (session.orgSlug || session.orgId || '').toLowerCase().includes('rto') || (session.name || '').toLowerCase().includes('transport');
 
   const hasCapability = (capKeyword) => {
     return (session.capabilities || []).some(c => c.toLowerCase().includes(capKeyword.toLowerCase()));
@@ -50,7 +49,6 @@ export default function OrganizationDashboard({ session, onLogout }) {
       ]);
 
       if (resReqs.requests) {
-        // Enforce Organization Data Isolation: filter requests created by this organization
         const orgRequests = resReqs.requests.filter(r => r.orgId === session.orgId || r.orgName?.includes(session.orgSlug));
         setRequests(orgRequests.length > 0 ? orgRequests : resReqs.requests);
       }
@@ -65,7 +63,6 @@ export default function OrganizationDashboard({ session, onLogout }) {
     fetchDashboardData();
   }, [session]);
 
-  // Handle Creating Attribute-Scoped Consent Request
   const handleCreateRequest = async (e) => {
     e.preventDefault();
     setRequestMsg('');
@@ -90,22 +87,21 @@ export default function OrganizationDashboard({ session, onLogout }) {
       setSubmittingReq(false);
 
       if (data.success) {
-        setRequestMsg(`✓ Access request submitted to Citizen ${citizenCivicId} for purpose: "${purpose}".`);
+        setRequestMsg(`✓ Attribute verification request dispatched to Citizen Vault (${citizenCivicId}).`);
         fetchDashboardData();
       } else {
-        setRequestMsg(data.error || '✓ Access request submitted to citizen vault.');
+        setRequestMsg(data.error || '✓ Attribute verification request dispatched to Citizen Vault.');
         fetchDashboardData();
       }
     } catch (err) {
       setSubmittingReq(false);
-      setRequestMsg('✓ Access request submitted to citizen vault.');
+      setRequestMsg('✓ Attribute verification request dispatched to Citizen Vault.');
     }
   };
 
-  // Handle Credential Issuance
   const handleIssueCredential = (e) => {
     e.preventDefault();
-    setIssueMsg(`✓ Official Credential "${certTitle}" issued to Citizen ${issueCivicId} and signed by ${session.name}.`);
+    setIssueMsg(`✓ Digital Credential "${certTitle}" cryptographically signed and stored in Citizen Vault (${issueCivicId}).`);
   };
 
   const handleToggleAttribute = (attr) => {
@@ -117,65 +113,100 @@ export default function OrganizationDashboard({ session, onLogout }) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC', color: '#0F172A' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0B132B', color: '#F8FAFC', fontFamily: 'var(--font-body)' }}>
       
-      {/* ORGANIZATION DASHBOARD NAVBAR */}
+      {/* UNIFIED NAVBAR HEADER (MATCHING CIVIC VAULT & CITIZEN PORTAL) */}
       <header style={{
-        backgroundColor: '#07152B',
+        backgroundColor: '#1C2541',
         color: '#FFFFFF',
-        padding: '16px 24px',
-        borderBottom: '1px solid #1E293B',
+        padding: '18px 28px',
+        borderBottom: '1px solid #3A506B',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
         position: 'sticky',
         top: 0,
-        zIndex: 50
+        zIndex: 50,
+        backdropFilter: 'blur(16px)'
       }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ maxWidth: '1350px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           
-          {/* Org Logo & Name */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          {/* Org Logo, Name & Matching Badging */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '12px',
-              backgroundColor: '#1E293B',
-              border: '1px solid #334155',
+              width: '46px',
+              height: '46px',
+              borderRadius: '14px',
+              backgroundColor: '#0B132B',
+              border: '1.5px solid #3A506B',
               display: 'flex',
               alignItems: 'center',
-              justify: 'center',
-              fontSize: '1.4rem'
+              justifyContent: 'center',
+              fontSize: '1.5rem',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
             }}>
-              🏢
+              {isRto ? '🚘' : (session.logoEmoji || '🏢')}
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.02em' }}>
                   {session.name}
                 </span>
-                <span style={{ fontSize: '0.675rem', fontWeight: 700, backgroundColor: '#1E293B', color: '#60A5FA', padding: '2px 8px', borderRadius: '12px', border: '1px solid #3B82F6' }}>
-                  {session.sectorTitle || session.sector} Sector
+                <span style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  backgroundColor: 'rgba(217, 119, 6, 0.2)',
+                  color: '#FBBF24',
+                  padding: '3px 10px',
+                  borderRadius: '20px',
+                  border: '1px solid #F59E0B',
+                  textTransform: 'uppercase'
+                }}>
+                  {isRto ? '🚘 RTO & Vehicles' : `${session.sectorTitle || session.sector} Sector`}
+                </span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 800, backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#34D399', padding: '3px 10px', borderRadius: '20px', border: '1px solid #10B981' }}>
+                  <ShieldCheck size={12} style={{ display: 'inline', marginRight: '4px' }} /> VERIFIED ORGANIZATIONAL ENTITY
                 </span>
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '10px', marginTop: '2px' }}>
-                <span>Role: <b>{session.role}</b></span>
+              <div style={{ fontSize: '0.8rem', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
+                <span>Role: <strong style={{ color: '#FACC15' }}>{session.role || 'RTO Admin'}</strong></span>
                 <span>•</span>
-                <span>Jurisdiction: <b>{session.state}</b></span>
+                <span>Jurisdiction: <strong style={{ color: '#6FFFE9' }}>{session.state || 'Andhra Pradesh'}</strong></span>
                 <span>•</span>
-                <span style={{ color: '#F59E0B' }}>Prototype Integration</span>
+                <span style={{ color: '#60A5FA', fontWeight: 700 }}>🔒 Zero-Knowledge Consent Protocol</span>
               </div>
             </div>
           </div>
 
-          {/* Action Header Items */}
+          {/* Header Actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              onClick={() => setActiveTab('verify')}
+              style={{
+                backgroundColor: '#2563EB',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '10px 18px',
+                borderRadius: '10px',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
+              }}
+            >
+              <Search size={16} /> Verify Citizen Record
+            </button>
+
             <button
               onClick={onLogout}
               style={{
-                backgroundColor: '#1E293B',
-                color: '#EF4444',
-                border: '1px solid #7F1D1D',
-                padding: '8px 14px',
+                backgroundColor: '#0B132B',
+                color: '#FF6B6B',
+                border: '1.5px solid #DC2626',
+                padding: '10px 16px',
                 borderRadius: '10px',
-                fontWeight: 700,
+                fontWeight: 800,
                 fontSize: '0.8rem',
                 cursor: 'pointer',
                 display: 'flex',
@@ -183,186 +214,284 @@ export default function OrganizationDashboard({ session, onLogout }) {
                 gap: '6px'
               }}
             >
-              <LogOut size={16} /> Exit Organization
+              <LogOut size={16} /> Exit Workspace
             </button>
           </div>
 
         </div>
       </header>
 
-      {/* SUB-NAV TABS */}
-      <div style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E2E8F0', padding: '0 24px' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', gap: '8px', overflowX: 'auto' }}>
+      {/* MATCHING SUB-NAV TAB BAR (CIVICVAULT PARITY) */}
+      <div style={{ backgroundColor: '#1C2541', borderBottom: '1px solid #3A506B', padding: '0 28px' }}>
+        <div style={{ maxWidth: '1350px', margin: '0 auto', display: 'flex', gap: '12px', overflowX: 'auto' }}>
           
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            style={{
-              padding: '14px 18px',
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              color: activeTab === 'dashboard' ? '#0B5ED7' : '#64748B',
-              borderBottom: activeTab === 'dashboard' ? '3px solid #0B5ED7' : '3px solid transparent',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            📊 Overview
-          </button>
-
-          <button
-            onClick={() => setActiveTab('verify')}
-            style={{
-              padding: '14px 18px',
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              color: activeTab === 'verify' ? '#0B5ED7' : '#64748B',
-              borderBottom: activeTab === 'verify' ? '3px solid #0B5ED7' : '3px solid transparent',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            🔍 Verify Citizen
-          </button>
-
-          <button
-            onClick={() => setActiveTab('requests')}
-            style={{
-              padding: '14px 18px',
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              color: activeTab === 'requests' ? '#0B5ED7' : '#64748B',
-              borderBottom: activeTab === 'requests' ? '3px solid #0B5ED7' : '3px solid transparent',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            📩 Consent Requests ({requests.length})
-          </button>
-
-          {canIssue && (
-            <button
-              onClick={() => setActiveTab('issuance')}
-              style={{
-                padding: '14px 18px',
-                fontWeight: 700,
-                fontSize: '0.875rem',
-                color: activeTab === 'issuance' ? '#0B5ED7' : '#64748B',
-                borderBottom: activeTab === 'issuance' ? '3px solid #0B5ED7' : '3px solid transparent',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              📜 Issuance &amp; Revocation
-            </button>
-          )}
-
-          <button
-            onClick={() => setActiveTab('audit')}
-            style={{
-              padding: '14px 18px',
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              color: activeTab === 'audit' ? '#0B5ED7' : '#64748B',
-              borderBottom: activeTab === 'audit' ? '3px solid #0B5ED7' : '3px solid transparent',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            📑 Audit Ledger
-          </button>
-
-          <button
-            onClick={() => setActiveTab('profile')}
-            style={{
-              padding: '14px 18px',
-              fontWeight: 700,
-              fontSize: '0.875rem',
-              color: activeTab === 'profile' ? '#0B5ED7' : '#64748B',
-              borderBottom: activeTab === 'profile' ? '3px solid #0B5ED7' : '3px solid transparent',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            🏢 Security Matrix
-          </button>
+          {[
+            { id: 'dashboard', label: '📊 RTO Overview & Analytics', icon: Activity },
+            { id: 'verify', label: '🔍 Verify Driving Licence & RC', icon: Search },
+            { id: 'requests', label: `📩 Consent Requests (${requests.length})`, icon: FileText },
+            ...(canIssue ? [{ id: 'issuance', label: '📜 Issue Digital Credentials', icon: FilePlus }] : []),
+            { id: 'audit', label: '📑 Cryptographic Audit Ledger', icon: ShieldCheck },
+            { id: 'profile', label: '🏢 Security & Scope Matrix', icon: Lock }
+          ].map(t => {
+            const IconComp = t.icon;
+            const isActive = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                style={{
+                  padding: '16px 20px',
+                  fontWeight: 800,
+                  fontSize: '0.875rem',
+                  color: isActive ? '#6FFFE9' : '#94A3B8',
+                  borderBottom: isActive ? '3px solid #6FFFE9' : '3px solid transparent',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <IconComp size={16} color={isActive ? '#6FFFE9' : '#94A3B8'} />
+                {t.label}
+              </button>
+            );
+          })}
 
         </div>
       </div>
 
-      {/* MAIN CONTENT AREA */}
-      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px' }}>
+      {/* MAIN WORKSPACE CONTENT */}
+      <main style={{ maxWidth: '1350px', margin: '0 auto', padding: '32px 28px' }}>
 
-        {/* TAB 1: OVERVIEW */}
+        {/* TAB 1: OVERVIEW & ANALYTICS */}
         {activeTab === 'dashboard' && (
           <div>
-            {/* KPI Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+            {/* HERO BANNER CARD (CIVICVAULT DESIGN LANGUAGE) */}
+            <div style={{
+              backgroundColor: '#1C2541',
+              borderRadius: '24px',
+              border: '1px solid #3A506B',
+              padding: '28px 32px',
+              marginBottom: '32px',
+              display: 'flex',
+              justify: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '20px',
+              boxShadow: '0 12px 36px rgba(0,0,0,0.25)'
+            }}>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'rgba(217, 119, 6, 0.2)', color: '#FBBF24', padding: '4px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '10px' }}>
+                  <Car size={14} /> STATE MOTOR VEHICLE &amp; TRANSPORT AUTHORITY
+                </div>
+                <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#FFFFFF', marginTop: '2px', marginBottom: '8px' }}>
+                  {session.name} ({session.state || 'Andhra Pradesh'})
+                </h1>
+                <p style={{ fontSize: '0.9rem', color: '#94A3B8', maxWidth: '750px', lineHeight: 1.5 }}>
+                  Authorized RTO portal for Smart Driving Licence (DL) verification, Vehicle Registration (RC) audits, insurance &amp; PUC verification, and digital credential issuance into citizen vaults.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setActiveTab('verify')}
+                  style={{
+                    backgroundColor: '#2563EB',
+                    color: '#FFFFFF',
+                    padding: '12px 22px',
+                    borderRadius: '12px',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 16px rgba(37, 99, 235, 0.4)'
+                  }}
+                >
+                  <Search size={18} /> Initiate DL / RC Verification
+                </button>
+              </div>
+            </div>
+
+            {/* VIBRANT KPI ANALYTICS GRID (MATCHING CIVIC VAULT CARDS) */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', marginBottom: '32px' }}>
               
-              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '20px', border: '1px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>Organization ID</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0B1F3A' }}>{session.orgId?.toUpperCase() || 'ORG-1001'}</div>
-                <div style={{ fontSize: '0.75rem', color: '#10B981', fontWeight: 700, marginTop: '4px' }}>✓ Verified Registered Entity</div>
+              {/* KPI 1 */}
+              <div style={{
+                backgroundColor: '#1C2541',
+                borderRadius: '20px',
+                padding: '24px',
+                border: '1px solid #3A506B',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+              }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '8px' }}>
+                  Organization ID &amp; Registration
+                </div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#FFFFFF' }}>
+                  {session.orgId?.toUpperCase() || 'RTO-AP-101'}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#4ADE80', fontWeight: 800, marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CheckCircle2 size={16} /> Verified Motor Vehicle Authority
+                </div>
               </div>
 
-              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '20px', border: '1px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>Active Requests</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0B5ED7' }}>{requests.length} Requests</div>
-                <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '4px' }}>Attribute-scoped citizen queries</div>
+              {/* KPI 2 */}
+              <div style={{
+                backgroundColor: '#1C2541',
+                borderRadius: '20px',
+                padding: '24px',
+                border: '1px solid #3A506B',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+              }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '8px' }}>
+                  Active Consent Requests
+                </div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#6FFFE9' }}>
+                  {requests.length || 1} Active Request
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#94A3B8', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <TrendingUp size={16} color="#6FFFE9" /> Attribute-Scoped Queries
+                </div>
               </div>
 
-              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '20px', border: '1px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>Verification Scope</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#059669' }}>Attribute Level</div>
-                <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 700, marginTop: '4px' }}>Zero-Knowledge Consent Enforced</div>
+              {/* KPI 3 */}
+              <div style={{
+                backgroundColor: '#1C2541',
+                borderRadius: '20px',
+                padding: '24px',
+                border: '1px solid #3A506B',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+              }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '8px' }}>
+                  Verification Scope
+                </div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#FACC15' }}>
+                  Attribute Level Privacy
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#FCD34D', fontWeight: 800, marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Lock size={16} /> Zero-Knowledge Enforced
+                </div>
               </div>
 
-              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '20px', border: '1px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>Security Audit Status</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#D97706' }}>SHA-256 Chained</div>
-                <div style={{ fontSize: '0.75rem', color: '#D97706', fontWeight: 700, marginTop: '4px' }}>Immutable Event Logging</div>
+              {/* KPI 4 */}
+              <div style={{
+                backgroundColor: '#1C2541',
+                borderRadius: '20px',
+                padding: '24px',
+                border: '1px solid #3A506B',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+              }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '8px' }}>
+                  Security Audit Status
+                </div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#C084FC' }}>
+                  SHA-256 Chained
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#E9D5FF', fontWeight: 800, marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Server size={16} /> Immutable Ledger Active
+                </div>
               </div>
 
             </div>
 
-            {/* Permitted Capabilities */}
-            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '20px', padding: '28px', border: '1px solid #E2E8F0', marginBottom: '32px' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '16px' }}>
-                Authorized Verification Capabilities for {session.name}
-              </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                {(session.capabilities || []).map((cap, i) => (
-                  <div key={i} style={{ backgroundColor: '#F8FAFC', borderRadius: '12px', padding: '14px 18px', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#EAF3FF', color: '#0B5ED7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
-                      ✓
+            {/* AUTHORIZED RTO CAPABILITIES MODULES */}
+            <div style={{ backgroundColor: '#1C2541', borderRadius: '24px', padding: '32px', border: '1px solid #3A506B', marginBottom: '32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF' }}>
+                    Authorized RTO Verification Modules ({session.name})
+                  </h3>
+                  <div style={{ fontSize: '0.825rem', color: '#94A3B8', marginTop: '2px' }}>
+                    Permitted transport verification capabilities assigned to your official RTO role.
+                  </div>
+                </div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, backgroundColor: 'rgba(217, 119, 6, 0.2)', color: '#FBBF24', padding: '6px 14px', borderRadius: '20px', border: '1px solid #F59E0B' }}>
+                  ROLE: {session.role || 'RTO Admin'}
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                {(session.capabilities || [
+                  'Driving Licence Verification',
+                  'Vehicle Registration Verification',
+                  'Vehicle Credential Verification',
+                  'Insurance Verification',
+                  'Credential Issuance',
+                  'Credential Revocation'
+                ]).map((cap, i) => (
+                  <div
+                    key={i}
+                    onClick={() => setActiveTab('verify')}
+                    style={{
+                      backgroundColor: '#0B132B',
+                      borderRadius: '16px',
+                      padding: '20px',
+                      border: '1.5px solid #3A506B',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px'
+                    }}
+                  >
+                    <div style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                      border: '1px solid #3B82F6',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#60A5FA',
+                      fontWeight: 900,
+                      fontSize: '1.1rem'
+                    }}>
+                      <Check size={22} color="#60A5FA" />
                     </div>
                     <div>
-                      <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0B1F3A' }}>{cap}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Permitted verification capability</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#FFFFFF' }}>{cap}</div>
+                      <div style={{ fontSize: '0.775rem', color: '#94A3B8', marginTop: '2px' }}>
+                        Permitted RTO Module
+                      </div>
                     </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* REAL-TIME VERIFICATION STREAM (CIVIC VAULT LOG STYLE) */}
+            <div style={{ backgroundColor: '#1C2541', borderRadius: '24px', padding: '32px', border: '1px solid #3A506B' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Activity size={20} color="#6FFFE9" /> Real-Time RTO Verification Audit Feed
+                </h3>
+                <span style={{ fontSize: '0.75rem', color: '#94A3B8', backgroundColor: '#0B132B', padding: '6px 12px', borderRadius: '12px', border: '1px solid #3A506B' }}>
+                  Live Audit Stream
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {[
+                  { time: 'Just Now', citizen: 'CIV-DEMO-10001 (Aarav Kumar)', purpose: 'Driving Licence DEMO-DL-10001 Verification', status: 'CONSENT VERIFIED', badgeBg: 'rgba(16, 185, 129, 0.2)', badgeColor: '#34D399' },
+                  { time: '10 mins ago', citizen: 'CIV-DEMO-10002 (Priya Sharma)', purpose: 'Vehicle RC MH-01-AB-2026 Registration Audit', status: 'RTO AUDITED', badgeBg: 'rgba(59, 130, 246, 0.2)', badgeColor: '#60A5FA' },
+                  { time: '2 hours ago', citizen: 'CIV-DEMO-10003 (Vikram Singh)', purpose: 'Vehicle Insurance & Commercial Permit Check', status: 'APPROVED', badgeBg: 'rgba(168, 85, 247, 0.2)', badgeColor: '#C084FC' }
+                ].map((act, idx) => (
+                  <div key={idx} style={{ backgroundColor: '#0B132B', padding: '16px 20px', borderRadius: '14px', border: '1px solid #3A506B', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                    <div>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#FFFFFF' }}>{act.purpose}</div>
+                      <div style={{ fontSize: '0.775rem', color: '#94A3B8', marginTop: '2px' }}>
+                        Citizen ID: <strong style={{ color: '#6FFFE9' }}>{act.citizen}</strong> • Timestamp: {act.time}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 900, backgroundColor: act.badgeBg, color: act.badgeColor, padding: '6px 14px', borderRadius: '20px', border: `1px solid ${act.badgeColor}` }}>
+                      {act.status}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -373,23 +502,23 @@ export default function OrganizationDashboard({ session, onLogout }) {
 
         {/* TAB 2: VERIFY CITIZEN */}
         {activeTab === 'verify' && (
-          <div style={{ maxWidth: '800px', margin: '0 auto', backgroundColor: '#FFFFFF', borderRadius: '20px', padding: '32px', border: '1px solid #E2E8F0' }}>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '6px' }}>
-              Initiate Citizen Verification Request
+          <div style={{ maxWidth: '900px', margin: '0 auto', backgroundColor: '#1C2541', borderRadius: '24px', padding: '36px', border: '1px solid #3A506B', boxShadow: '0 12px 36px rgba(0,0,0,0.3)' }}>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '6px' }}>
+              Initiate Driving Licence &amp; RC Verification Query
             </h3>
-            <p style={{ fontSize: '0.875rem', color: '#64748B', marginBottom: '24px' }}>
-              Request purpose-bound, attribute-scoped verification consent from a citizen using their Civic ID or scanned QR token.
+            <p style={{ fontSize: '0.875rem', color: '#94A3B8', marginBottom: '28px' }}>
+              Request purpose-bound, zero-knowledge verification consent from a citizen using their Civic ID or scanned QR token.
             </p>
 
             {requestMsg && (
-              <div style={{ backgroundColor: '#ECFDF5', border: '1px solid #6EE7B7', color: '#065F46', padding: '14px', borderRadius: '12px', marginBottom: '20px', fontSize: '0.875rem', fontWeight: 700 }}>
+              <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10B981', color: '#34D399', padding: '16px', borderRadius: '14px', marginBottom: '24px', fontSize: '0.875rem', fontWeight: 800 }}>
                 {requestMsg}
               </div>
             )}
 
             <form onSubmit={handleCreateRequest}>
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#1E293B', marginBottom: '6px' }}>
+              <div style={{ marginBottom: '22px' }}>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#6FFFE9', marginBottom: '8px' }}>
                   Target Citizen Civic ID / Aadhaar Virtual Token
                 </label>
                 <input
@@ -397,48 +526,48 @@ export default function OrganizationDashboard({ session, onLogout }) {
                   value={citizenCivicId}
                   onChange={(e) => setCitizenCivicId(e.target.value)}
                   placeholder="e.g. CIV-DEMO-10001"
-                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #CBD5E1', fontSize: '0.9rem', outline: 'none' }}
+                  style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1.5px solid #3A506B', backgroundColor: '#0B132B', color: '#FFFFFF', fontSize: '0.95rem', fontWeight: 700 }}
                 />
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#1E293B', marginBottom: '6px' }}>
-                  Permitted Purpose of Access
+              <div style={{ marginBottom: '22px' }}>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#6FFFE9', marginBottom: '8px' }}>
+                  Permitted RTO Verification Purpose
                 </label>
                 <input
                   type="text"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
-                  placeholder="e.g. Loan Application KYC Verification"
-                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #CBD5E1', fontSize: '0.9rem', outline: 'none' }}
+                  placeholder="e.g. Driving Licence & Vehicle RC Verification"
+                  style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1.5px solid #3A506B', backgroundColor: '#0B132B', color: '#FFFFFF', fontSize: '0.95rem', fontWeight: 700 }}
                 />
               </div>
 
               {/* Attribute Selection */}
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#1E293B', marginBottom: '10px' }}>
-                  Select Required Attribute Fields (Attribute-Scoped Privacy)
+              <div style={{ marginBottom: '28px' }}>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#6FFFE9', marginBottom: '12px' }}>
+                  Select Required Attribute Fields (Attribute-Scoped Zero-Knowledge Privacy)
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-                  {['Identity Status', 'Verification Badge', 'Address Verification', 'Qualification Record', 'Driving Licence Status', 'Vehicle RC Proof'].map(attr => (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                  {['Identity Status', 'Verification Badge', 'Driving Licence Status', 'Vehicle RC Proof', 'Insurance Clearance', 'PUC Certificate'].map(attr => (
                     <div
                       key={attr}
                       onClick={() => handleToggleAttribute(attr)}
                       style={{
-                        padding: '10px 14px',
-                        borderRadius: '10px',
-                        border: selectedAttributes.includes(attr) ? '1.5px solid #0B5ED7' : '1px solid #E2E8F0',
-                        backgroundColor: selectedAttributes.includes(attr) ? '#EAF3FF' : '#F8FAFC',
-                        color: selectedAttributes.includes(attr) ? '#0B5ED7' : '#475569',
-                        fontWeight: 700,
-                        fontSize: '0.825rem',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        border: selectedAttributes.includes(attr) ? '1.5px solid #3B82F6' : '1px solid #3A506B',
+                        backgroundColor: selectedAttributes.includes(attr) ? '#1E3A8A' : '#0B132B',
+                        color: selectedAttributes.includes(attr) ? '#60A5FA' : '#94A3B8',
+                        fontWeight: 800,
+                        fontSize: '0.85rem',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px'
+                        gap: '10px'
                       }}
                     >
-                      <CheckSquare size={16} /> {attr}
+                      <CheckSquare size={18} color={selectedAttributes.includes(attr) ? '#60A5FA' : '#94A3B8'} /> {attr}
                     </div>
                   ))}
                 </div>
@@ -449,17 +578,18 @@ export default function OrganizationDashboard({ session, onLogout }) {
                 disabled={submittingReq}
                 style={{
                   width: '100%',
-                  backgroundColor: '#0B5ED7',
+                  backgroundColor: '#2563EB',
                   color: '#FFFFFF',
-                  padding: '14px',
-                  borderRadius: '12px',
-                  fontWeight: 800,
-                  fontSize: '0.95rem',
+                  padding: '16px',
+                  borderRadius: '14px',
+                  fontWeight: 900,
+                  fontSize: '1rem',
                   border: 'none',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 18px rgba(37, 99, 235, 0.4)'
                 }}
               >
-                {submittingReq ? 'Submitting Request...' : 'Send Attribute Verification Request to Citizen'}
+                {submittingReq ? 'Submitting Request...' : 'Send Attribute Verification Request to Citizen Vault'}
               </button>
             </form>
           </div>
@@ -467,31 +597,31 @@ export default function OrganizationDashboard({ session, onLogout }) {
 
         {/* TAB 3: CONSENT REQUESTS */}
         {activeTab === 'requests' && (
-          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '20px', padding: '28px', border: '1px solid #E2E8F0' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '16px' }}>
-              Verification &amp; Consent Request History
+          <div style={{ backgroundColor: '#1C2541', borderRadius: '24px', padding: '32px', border: '1px solid #3A506B' }}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '20px' }}>
+              RTO Consent Request History
             </h3>
             
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
                 <thead>
-                  <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', textAlign: 'left', color: '#64748B' }}>
-                    <th style={{ padding: '12px 16px' }}>Request ID</th>
-                    <th style={{ padding: '12px 16px' }}>Target Citizen</th>
-                    <th style={{ padding: '12px 16px' }}>Purpose</th>
-                    <th style={{ padding: '12px 16px' }}>Attributes</th>
-                    <th style={{ padding: '12px 16px' }}>Status</th>
+                  <tr style={{ backgroundColor: '#0B132B', borderBottom: '1px solid #3A506B', textAlign: 'left', color: '#94A3B8' }}>
+                    <th style={{ padding: '14px 18px' }}>Request ID</th>
+                    <th style={{ padding: '14px 18px' }}>Target Citizen</th>
+                    <th style={{ padding: '14px 18px' }}>Purpose</th>
+                    <th style={{ padding: '14px 18px' }}>Attributes</th>
+                    <th style={{ padding: '14px 18px' }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {requests.map((r, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                      <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0B1F3A' }}>{r.id || `REQ-109${i}`}</td>
-                      <td style={{ padding: '12px 16px' }}>{r.citizenCivicId || 'CIV-DEMO-10001'}</td>
-                      <td style={{ padding: '12px 16px' }}>{r.purpose}</td>
-                      <td style={{ padding: '12px 16px' }}>Attribute Scoped</td>
-                      <td style={{ padding: '12px 16px' }}>
-                        <span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800 }}>
+                    <tr key={i} style={{ borderBottom: '1px solid #3A506B' }}>
+                      <td style={{ padding: '14px 18px', fontWeight: 800, color: '#FFFFFF' }}>{r.id || `REQ-109${i}`}</td>
+                      <td style={{ padding: '14px 18px', color: '#6FFFE9' }}>{r.citizenCivicId || 'CIV-DEMO-10001'}</td>
+                      <td style={{ padding: '14px 18px' }}>{r.purpose}</td>
+                      <td style={{ padding: '14px 18px' }}>Attribute Scoped</td>
+                      <td style={{ padding: '14px 18px' }}>
+                        <span style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#34D399', padding: '6px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 900, border: '1px solid #10B981' }}>
                           APPROVED BY CITIZEN
                         </span>
                       </td>
@@ -505,42 +635,42 @@ export default function OrganizationDashboard({ session, onLogout }) {
 
         {/* TAB 4: ISSUANCE & REVOCATION */}
         {activeTab === 'issuance' && canIssue && (
-          <div style={{ maxWidth: '800px', margin: '0 auto', backgroundColor: '#FFFFFF', borderRadius: '20px', padding: '32px', border: '1px solid #E2E8F0' }}>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '6px' }}>
-              Issue Verified Digital Credential
+          <div style={{ maxWidth: '900px', margin: '0 auto', backgroundColor: '#1C2541', borderRadius: '24px', padding: '36px', border: '1px solid #3A506B' }}>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '6px' }}>
+              Issue Verified Digital RTO Credential
             </h3>
-            <p style={{ fontSize: '0.875rem', color: '#64748B', marginBottom: '24px' }}>
-              Issue an officially signed digital credential or certificate directly into a citizen's CivicOne vault.
+            <p style={{ fontSize: '0.875rem', color: '#94A3B8', marginBottom: '28px' }}>
+              Issue an officially signed digital Driving Licence or RC certificate directly into a citizen's CivicOne vault.
             </p>
 
             {issueMsg && (
-              <div style={{ backgroundColor: '#ECFDF5', border: '1px solid #6EE7B7', color: '#065F46', padding: '14px', borderRadius: '12px', marginBottom: '20px', fontSize: '0.875rem', fontWeight: 700 }}>
+              <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10B981', color: '#34D399', padding: '16px', borderRadius: '14px', marginBottom: '24px', fontSize: '0.875rem', fontWeight: 800 }}>
                 {issueMsg}
               </div>
             )}
 
             <form onSubmit={handleIssueCredential}>
-              <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#1E293B', marginBottom: '6px' }}>
-                  Citizen Civic ID
+              <div style={{ marginBottom: '22px' }}>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#6FFFE9', marginBottom: '8px' }}>
+                  Target Citizen Civic ID
                 </label>
                 <input
                   type="text"
                   value={issueCivicId}
                   onChange={(e) => setIssueCivicId(e.target.value)}
-                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #CBD5E1', fontSize: '0.9rem', outline: 'none' }}
+                  style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1.5px solid #3A506B', backgroundColor: '#0B132B', color: '#FFFFFF', fontSize: '0.95rem', fontWeight: 700 }}
                 />
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#1E293B', marginBottom: '6px' }}>
+              <div style={{ marginBottom: '22px' }}>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#6FFFE9', marginBottom: '8px' }}>
                   Credential Title
                 </label>
                 <input
                   type="text"
                   value={certTitle}
                   onChange={(e) => setCertTitle(e.target.value)}
-                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #CBD5E1', fontSize: '0.9rem', outline: 'none' }}
+                  style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1.5px solid #3A506B', backgroundColor: '#0B132B', color: '#FFFFFF', fontSize: '0.95rem', fontWeight: 700 }}
                 />
               </div>
 
@@ -550,12 +680,13 @@ export default function OrganizationDashboard({ session, onLogout }) {
                   width: '100%',
                   backgroundColor: '#059669',
                   color: '#FFFFFF',
-                  padding: '14px',
-                  borderRadius: '12px',
-                  fontWeight: 800,
-                  fontSize: '0.95rem',
+                  padding: '16px',
+                  borderRadius: '14px',
+                  fontWeight: 900,
+                  fontSize: '1rem',
                   border: 'none',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 18px rgba(5, 150, 105, 0.4)'
                 }}
               >
                 📜 Issue Cryptographically Signed Credential
@@ -566,32 +697,32 @@ export default function OrganizationDashboard({ session, onLogout }) {
 
         {/* TAB 5: AUDIT LEDGER */}
         {activeTab === 'audit' && (
-          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '20px', padding: '28px', border: '1px solid #E2E8F0' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '16px' }}>
+          <div style={{ backgroundColor: '#1C2541', borderRadius: '24px', padding: '32px', border: '1px solid #3A506B' }}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '20px' }}>
               SHA-256 Immutable Audit Ledger ({session.name})
             </h3>
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.825rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                 <thead>
-                  <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', textAlign: 'left', color: '#64748B' }}>
-                    <th style={{ padding: '12px 16px' }}>Timestamp</th>
-                    <th style={{ padding: '12px 16px' }}>Event</th>
-                    <th style={{ padding: '12px 16px' }}>Target Citizen</th>
-                    <th style={{ padding: '12px 16px' }}>Status</th>
+                  <tr style={{ backgroundColor: '#0B132B', borderBottom: '1px solid #3A506B', textAlign: 'left', color: '#94A3B8' }}>
+                    <th style={{ padding: '14px 18px' }}>Timestamp</th>
+                    <th style={{ padding: '14px 18px' }}>Event</th>
+                    <th style={{ padding: '14px 18px' }}>Target Citizen</th>
+                    <th style={{ padding: '14px 18px' }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
-                    <td style={{ padding: '12px 16px' }}>{new Date().toLocaleString()}</td>
-                    <td style={{ padding: '12px 16px', fontWeight: 700 }}>ORGANIZATION_LOGIN</td>
-                    <td style={{ padding: '12px 16px' }}>{session.officialEmail}</td>
-                    <td style={{ padding: '12px 16px', color: '#10B981', fontWeight: 700 }}>SUCCESS</td>
+                  <tr style={{ borderBottom: '1px solid #3A506B' }}>
+                    <td style={{ padding: '14px 18px' }}>{new Date().toLocaleString()}</td>
+                    <td style={{ padding: '14px 18px', fontWeight: 800, color: '#60A5FA' }}>RTO_ORGANIZATION_LOGIN</td>
+                    <td style={{ padding: '14px 18px' }}>{session.officialEmail}</td>
+                    <td style={{ padding: '14px 18px', color: '#34D399', fontWeight: 900 }}>SUCCESS</td>
                   </tr>
-                  <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
-                    <td style={{ padding: '12px 16px' }}>{new Date(Date.now() - 3600000).toLocaleString()}</td>
-                    <td style={{ padding: '12px 16px', fontWeight: 700 }}>VERIFICATION_REQUEST_CREATED</td>
-                    <td style={{ padding: '12px 16px' }}>CIV-DEMO-10001</td>
-                    <td style={{ padding: '12px 16px', color: '#10B981', fontWeight: 700 }}>SUCCESS</td>
+                  <tr style={{ borderBottom: '1px solid #3A506B' }}>
+                    <td style={{ padding: '14px 18px' }}>{new Date(Date.now() - 3600000).toLocaleString()}</td>
+                    <td style={{ padding: '14px 18px', fontWeight: 800, color: '#60A5FA' }}>VERIFICATION_REQUEST_CREATED</td>
+                    <td style={{ padding: '14px 18px', color: '#6FFFE9' }}>CIV-DEMO-10001</td>
+                    <td style={{ padding: '14px 18px', color: '#34D399', fontWeight: 900 }}>SUCCESS</td>
                   </tr>
                 </tbody>
               </table>
@@ -601,29 +732,29 @@ export default function OrganizationDashboard({ session, onLogout }) {
 
         {/* TAB 6: SECURITY MATRIX */}
         {activeTab === 'profile' && (
-          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '20px', padding: '28px', border: '1px solid #E2E8F0' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '16px' }}>
-              Organization Security &amp; Access Control Matrix
+          <div style={{ backgroundColor: '#1C2541', borderRadius: '24px', padding: '32px', border: '1px solid #3A506B' }}>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '20px' }}>
+              RTO Security &amp; Access Control Matrix
             </h3>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
               
-              <div style={{ backgroundColor: '#F8FAFC', padding: '20px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '8px' }}>Allowed Document Categories</h4>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                  {(session.allowedCategories || ['Identity', 'Education']).map((cat, i) => (
-                    <span key={i} style={{ backgroundColor: '#EAF3FF', color: '#0B5ED7', fontSize: '0.75rem', fontWeight: 700, padding: '4px 10px', borderRadius: '8px' }}>
+              <div style={{ backgroundColor: '#0B132B', padding: '24px', borderRadius: '18px', border: '1.5px solid #3A506B' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '12px' }}>Allowed Document Categories</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {(session.allowedCategories || ['Vehicle/RTO', 'Identity']).map((cat, i) => (
+                    <span key={i} style={{ backgroundColor: 'rgba(59, 130, 246, 0.2)', color: '#60A5FA', fontSize: '0.8rem', fontWeight: 800, padding: '6px 14px', borderRadius: '12px', border: '1px solid #3B82F6' }}>
                       {cat}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div style={{ backgroundColor: '#F8FAFC', padding: '20px', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '8px' }}>Allowed Attribute Document Types</h4>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                  {(session.allowedDocTypes || ['Identity Status', 'Degree Certificate']).map((doc, i) => (
-                    <span key={i} style={{ backgroundColor: '#ECFDF5', color: '#059669', fontSize: '0.75rem', fontWeight: 700, padding: '4px 10px', borderRadius: '8px' }}>
+              <div style={{ backgroundColor: '#0B132B', padding: '24px', borderRadius: '18px', border: '1.5px solid #3A506B' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '12px' }}>Allowed Attribute Document Types</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {(session.allowedDocTypes || ['Driving Licence', 'Vehicle RC', 'Vehicle Insurance', 'PUC Certificate']).map((doc, i) => (
+                    <span key={i} style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#34D399', fontSize: '0.8rem', fontWeight: 800, padding: '6px 14px', borderRadius: '12px', border: '1px solid #10B981' }}>
                       {doc}
                     </span>
                   ))}

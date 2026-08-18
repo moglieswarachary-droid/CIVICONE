@@ -194,6 +194,83 @@ app.post('/api/auth/authority-login', async (req, res) => {
   });
 });
 
+// Dedicated Government Officer / Police Login API
+app.post('/api/auth/govt-officer-login', (req, res) => {
+  const { state, department, office, policeStationCode, officerId, password, otp } = req.body;
+  const isPolice = department && department.toLowerCase().includes('police');
+
+  const officerSession = {
+    officerId: officerId || (isPolice ? 'POL-OFFICER-8942' : 'GOVT-OFFICER-8942'),
+    policeOfficerId: isPolice ? (officerId || 'POL-OFFICER-8942') : null,
+    policeStationCode: isPolice ? (policeStationCode || 'PS-AP-101') : null,
+    name: isPolice ? 'Inspector R. Verma' : 'Officer K. Sharma',
+    email: isPolice ? 'inspector.verma@police.gov.in' : 'officer.sharma@parivahan.gov.in',
+    department: department || 'Police Department',
+    state: state || 'Andhra Pradesh',
+    office: office || (isPolice ? 'Demo Police Station — Vijayawada Central' : 'Demo RTO Regional Headquarters — Vijayawada'),
+    roleLevel: isPolice ? 2 : 1,
+    roleTitle: isPolice ? 'LEVEL 2 — DEPARTMENT SUPERVISOR' : 'LEVEL 1 — GOVERNMENT OFFICER',
+    clearanceStatus: 'LEVEL-3 VERIFIED',
+    securityStatus: 'LOCK-PROTECTED LEVEL-3',
+    sessionToken: `GOVT-OFFICER-SESS-${Date.now()}-SECURE`
+  };
+
+  db.auditLogs.unshift({
+    id: `sec-${Date.now()}`,
+    citizenId: officerSession.officerId,
+    event: `Government Officer Session Authenticated: ${officerSession.email} (${department}) [PS Code: ${policeStationCode || 'N/A'}]`,
+    device: "Web Client",
+    location: `${state || 'National'}, India`,
+    ip: "164.100.42.10",
+    timestamp: new Date().toLocaleString(),
+    status: "SUCCESS"
+  });
+
+  return res.json({
+    success: true,
+    message: "Government Officer Session Authenticated.",
+    officer: officerSession
+  });
+});
+
+// Organization Login API
+app.post('/api/organization/login', (req, res) => {
+  const { orgId, orgSlug, orgName, sector, state, role, officialEmail, accessCode, policeStationCode, policeOfficerId } = req.body;
+  const isPolice = orgId === 'police' || (role && role.toLowerCase().includes('police'));
+
+  const session = {
+    orgId: orgId || 'police',
+    orgSlug: orgSlug || 'police',
+    name: `${orgName || 'Police Department'} (${state || 'Andhra Pradesh'})`,
+    sector: sector || 'government',
+    sectorTitle: 'Government',
+    state: state || 'Andhra Pradesh',
+    role: role || 'POLICE_ADMIN',
+    officialEmail: officialEmail || 'inspector.verma@police.gov.in',
+    policeStationCode: isPolice ? (policeStationCode || 'PS-AP-101') : null,
+    policeOfficerId: isPolice ? (policeOfficerId || 'POL-OFFICER-8942') : null,
+    sessionToken: `ORG-SESS-${Date.now()}-SECURE`
+  };
+
+  db.auditLogs.unshift({
+    id: `sec-${Date.now()}`,
+    citizenId: policeOfficerId || "ORG-ADMIN",
+    event: `Organization Portal Session: ${orgName || 'Police Dept'} (${state}) [PS Code: ${policeStationCode || 'N/A'}]`,
+    device: "Web Client",
+    location: `${state || 'National'}, India`,
+    ip: "164.100.42.15",
+    timestamp: new Date().toLocaleString(),
+    status: "SUCCESS"
+  });
+
+  return res.json({
+    success: true,
+    message: "Organization Session Authenticated.",
+    session
+  });
+});
+
+
 // Super Admin Login API (Server-Side Authorized)
 app.post('/api/auth/admin-login', async (req, res) => {
   const { username, passkey } = req.body;
@@ -235,6 +312,135 @@ app.post('/api/auth/admin-login', async (req, res) => {
     token
   });
 });
+
+// --- SUPER ADMIN TELEMETRY & CROSS-DEPARTMENT PROCESS PIPELINE APIS ---
+
+// GET Live Infrastructure Telemetry & Usage Stats
+app.get('/api/admin/usage-stats', (req, res) => {
+  return res.json({
+    success: true,
+    stats: {
+      totalRequestsToday: "1,482,910",
+      activeUsersNow: "28,910",
+      averageLatencyMs: "42 ms",
+      requestsPerMinute: "3,420 RPM",
+      uptimePercentage: "99.98%",
+      pythonAuthEngineStatus: "ONLINE (Port 8000)",
+      expressGatewayStatus: "ONLINE (Port 3001)",
+      uidaiTokenizerStatus: "ONLINE (Token Encryption Active)",
+      vaultStorageUsage: "4.2 TB / 10.0 TB",
+      sectorTrafficDistribution: [
+        { sector: "Government & RTO", percentage: 34, count: "504,189", color: "#3B82F6" },
+        { sector: "Education & UGC", percentage: 24, count: "355,900", color: "#6366F1" },
+        { sector: "Banking & Finance", percentage: 20, count: "296,582", color: "#0284C7" },
+        { sector: "Police & Law Enforcement", percentage: 12, count: "177,949", color: "#EF4444" },
+        { sector: "Healthcare & ABHA", percentage: 10, count: "148,290", color: "#10B981" }
+      ],
+      deviceDistribution: [
+        { type: "Mobile Browsers", percentage: 68, color: "#38BDF8" },
+        { type: "Desktop / Workstations", percentage: 26, color: "#818CF8" },
+        { type: "Tablet & Enterprise Desks", percentage: 6, color: "#FACC15" }
+      ],
+      topStatesByUsage: [
+        { state: "Maharashtra", requests: "312,490", activeUsers: "5,820" },
+        { state: "Andhra Pradesh", requests: "248,100", activeUsers: "4,910" },
+        { state: "Karnataka", requests: "210,500", activeUsers: "4,120" },
+        { state: "Delhi NCR", requests: "189,300", activeUsers: "3,890" },
+        { state: "Tamil Nadu", requests: "165,800", activeUsers: "3,400" },
+        { state: "Gujarat", requests: "142,200", activeUsers: "2,840" }
+      ]
+    }
+  });
+});
+
+// GET All Department Processes with Optional Department / Status Filtering
+app.get('/api/admin/department-processes', (req, res) => {
+  const { department, status, sector, search } = req.query;
+  let processes = db.departmentProcesses || [];
+
+  if (department && department.toLowerCase() !== 'all') {
+    processes = processes.filter(p => p.deptCode === department || p.department.toLowerCase().includes(department.toLowerCase()));
+  }
+
+  if (sector && sector.toLowerCase() !== 'all') {
+    processes = processes.filter(p => p.sector.toLowerCase() === sector.toLowerCase());
+  }
+
+  if (status && status.toLowerCase() !== 'all') {
+    processes = processes.filter(p => p.status.toLowerCase() === status.toLowerCase());
+  }
+
+  if (search) {
+    const q = search.toLowerCase();
+    processes = processes.filter(p => 
+      p.id.toLowerCase().includes(q) ||
+      p.title.toLowerCase().includes(q) ||
+      p.citizenName.toLowerCase().includes(q) ||
+      p.civicId.toLowerCase().includes(q) ||
+      p.department.toLowerCase().includes(q)
+    );
+  }
+
+  return res.json({
+    success: true,
+    totalCount: processes.length,
+    processes
+  });
+});
+
+// POST Perform Action on Department Process (Approve, Flag, Override, Resolve)
+app.post('/api/admin/process/action', (req, res) => {
+  const { processId, action, notes } = req.body;
+  const proc = (db.departmentProcesses || []).find(p => p.id === processId);
+
+  if (!proc) {
+    return res.status(404).json({ error: "Process record not found." });
+  }
+
+  if (action === 'APPROVE') {
+    proc.status = 'VERIFIED_SUCCESS';
+    proc.slaDeadline = 'Completed (Super Admin Approved)';
+    proc.verificationTrace.unshift({
+      step: `Super Admin Master Approval (${notes || 'Direct Clearance'})`,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      actor: "National Super Admin"
+    });
+  } else if (action === 'FLAG') {
+    proc.status = 'FLAGGED_REVIEW';
+    proc.slaDeadline = 'Flagged for High-Level Audit';
+    proc.verificationTrace.unshift({
+      step: `Super Admin Flagged for Security Inspection (${notes || 'Security Audit Initiated'})`,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      actor: "National Super Admin"
+    });
+  } else if (action === 'OVERRIDE') {
+    proc.status = 'DOCUMENT_ISSUED';
+    proc.slaDeadline = 'Completed (Admin Override)';
+    proc.verificationTrace.unshift({
+      step: `Super Admin Identity & Document Issuance Override`,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      actor: "National Super Admin"
+    });
+  }
+
+  db.auditLogs.unshift({
+    id: `sec-${Date.now()}`,
+    citizenId: proc.civicId,
+    event: `SUPER_ADMIN_ACTION: ${action} on ${proc.id} (${proc.department})`,
+    device: "Master Supervision Console",
+    location: "NIC Security Hub",
+    ip: "164.100.1.1",
+    timestamp: new Date().toLocaleString(),
+    status: "SUCCESS"
+  });
+
+  return res.json({
+    success: true,
+    message: `Process ${proc.id} updated successfully: ${action}`,
+    process: proc
+  });
+});
+
 
 // GET Current Active Session & Active Citizen
 app.get('/api/auth/session', (req, res) => {

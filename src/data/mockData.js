@@ -845,3 +845,273 @@ export const DEMO_POLICE_FIRS = [
     assignedOfficer: "Inspector K. Patil"
   }
 ];
+
+// --- CROSS-DEPARTMENT PROCESS PIPELINE DATASET ---
+export const DEMO_ALL_DEPARTMENT_PROCESSES = [
+  // 1. RTO / Parivahan Sewa
+  {
+    id: "PROC-RTO-101",
+    title: "Smart Driving Licence Renewal Verification",
+    department: "Parivahan Sewa (MoRTH / RTO)",
+    deptCode: "DEPT-RTO",
+    sector: "Government",
+    state: "Andhra Pradesh",
+    citizenName: "Aarav Kumar",
+    civicId: "CIV-DEMO-10001",
+    status: "PENDING_APPROVAL",
+    priority: "High",
+    timestamp: "14 Aug 2026, 10:45 AM",
+    slaDeadline: "18 Hours Remaining",
+    requestedDoc: "Smart Driving Licence (DEMO-DL-10001)",
+    purpose: "License Expiry Renewal & Medical Fitness Validation",
+    securityToken: "HASH-RTO-994821-AP",
+    verificationTrace: [
+      { step: "Citizen Renewal Request Submitted", time: "14 Aug 09:00 AM", actor: "Citizen (Aarav Kumar)" },
+      { step: "Aadhaar e-KYC Token Validated", time: "14 Aug 09:02 AM", actor: "UIDAI ADV Engine" },
+      { step: "RTO Fitness Clearance Uploaded", time: "14 Aug 10:15 AM", actor: "RTO Medical Board" },
+      { step: "Pending Regional Officer Seal Approval", time: "14 Aug 10:45 AM", actor: "Officer K. Sharma (RTO)" }
+    ]
+  },
+  {
+    id: "PROC-RTO-102",
+    title: "Vehicle Registration RC Transfer",
+    department: "Parivahan Sewa (MoRTH / RTO)",
+    deptCode: "DEPT-RTO",
+    sector: "Government",
+    state: "Maharashtra",
+    citizenName: "Priya Sharma",
+    civicId: "CIV-DEMO-10002",
+    status: "VERIFIED_SUCCESS",
+    priority: "Normal",
+    timestamp: "14 Aug 2026, 09:30 AM",
+    slaDeadline: "Completed (SLA Met)",
+    requestedDoc: "Vehicle RC (MH-DEMO-1002)",
+    purpose: "Inter-State Vehicle Ownership Transfer Verification",
+    securityToken: "HASH-RTO-883104-MH",
+    verificationTrace: [
+      { step: "Ownership Transfer Initiated", time: "13 Aug 03:00 PM", actor: "Priya Sharma" },
+      { step: "NOC Issued by RTO Mumbai", time: "14 Aug 08:30 AM", actor: "RTO Officer" },
+      { step: "Cryptographic Certificate Generated", time: "14 Aug 09:30 AM", actor: "CivicOne Vault Service" }
+    ]
+  },
+
+  // 2. Passport Seva / MEA
+  {
+    id: "PROC-PASSPORT-201",
+    title: "Passport Re-Issuance Address & Identity Verification",
+    department: "Passport Seva (Ministry of External Affairs)",
+    deptCode: "DEPT-PASS",
+    sector: "Government",
+    state: "Delhi",
+    citizenName: "Ananya Verma",
+    civicId: "CIV-DEMO-10004",
+    status: "IN_VERIFICATION",
+    priority: "Urgent",
+    timestamp: "14 Aug 2026, 11:15 AM",
+    slaDeadline: "12 Hours Remaining",
+    requestedDoc: "Indian Passport & Address Proof",
+    purpose: "Tatkaal Passport Re-issuance Verification",
+    securityToken: "HASH-MEA-441092-DL",
+    verificationTrace: [
+      { step: "Tatkaal Application Lodged", time: "14 Aug 08:00 AM", actor: "Ananya Verma" },
+      { step: "DigiLocker Identity Cross-Check", time: "14 Aug 08:05 AM", actor: "Passport API Gateway" },
+      { step: "Police Verification Dispatched to Special Branch", time: "14 Aug 11:15 AM", actor: "MEA System" }
+    ]
+  },
+
+  // 3. Police Department / Law Enforcement
+  {
+    id: "PROC-POLICE-301",
+    title: "Tenant Police Background Verification",
+    department: "Police Department (Home Affairs)",
+    deptCode: "DEPT-POLICE",
+    sector: "Government",
+    state: "Maharashtra",
+    citizenName: "Rajesh Patel",
+    civicId: "CIV-DEMO-10003",
+    status: "PENDING_APPROVAL",
+    priority: "High",
+    timestamp: "14 Aug 2026, 10:20 AM",
+    slaDeadline: "24 Hours Remaining",
+    requestedDoc: "Police Clearance Record & Identity Token",
+    purpose: "Residential Property Lease Verification",
+    securityToken: "HASH-POL-332910-MH",
+    verificationTrace: [
+      { step: "Landlord Verification Request", time: "13 Aug 06:00 PM", actor: "Property Owner" },
+      { step: "Crime Database Automated Search Clean", time: "14 Aug 07:00 AM", actor: "CCTNS Police Engine" },
+      { step: "Awaiting Station House Officer Sign-Off", time: "14 Aug 10:20 AM", actor: "Inspector R. Verma" }
+    ]
+  },
+  {
+    id: "PROC-POLICE-302",
+    title: "Lost Document FIR Digital Authentication",
+    department: "Police Department (Home Affairs)",
+    deptCode: "DEPT-POLICE",
+    sector: "Government",
+    state: "Andhra Pradesh",
+    citizenName: "Aarav Kumar",
+    civicId: "CIV-DEMO-10001",
+    status: "FLAGGED_REVIEW",
+    priority: "Urgent",
+    timestamp: "14 Aug 2026, 08:50 AM",
+    slaDeadline: "Flagged for Inspection",
+    requestedDoc: "Digital FIR Loss Copy",
+    purpose: "Duplicate Marksheet Claim Verification",
+    securityToken: "HASH-POL-990142-AP",
+    verificationTrace: [
+      { step: "E-FIR Filed for Missing Certificate", time: "13 Aug 11:00 PM", actor: "Aarav Kumar" },
+      { step: "Duplicate Timestamp Flag Detected", time: "14 Aug 08:50 AM", actor: "AI Integrity Agent" }
+    ]
+  },
+
+  // 4. Education & Universities
+  {
+    id: "PROC-EDU-401",
+    title: "B.Tech Degree Certificate Digital Authentication",
+    department: "Higher Education & UGC Board",
+    deptCode: "DEPT-HEDU",
+    sector: "Education",
+    state: "Karnataka",
+    citizenName: "Vikram Singh",
+    civicId: "CIV-DEMO-10005",
+    status: "DOCUMENT_ISSUED",
+    priority: "Normal",
+    timestamp: "14 Aug 2026, 09:10 AM",
+    slaDeadline: "Completed",
+    requestedDoc: "M.Tech Mechanical Degree Certificate",
+    purpose: "Overseas University Verification Request",
+    securityToken: "HASH-UGC-774019-KA",
+    verificationTrace: [
+      { step: "University Convocation Record Sync", time: "12 Aug 02:00 PM", actor: "VTU Registrar" },
+      { step: "Digital Signature Stamped with RSA-4096", time: "14 Aug 09:10 AM", actor: "CivicOne Education Gateway" }
+    ]
+  },
+
+  // 5. Health & Ayushman Bharat (MoHFW)
+  {
+    id: "PROC-HLTH-501",
+    title: "ABHA Universal Health ID Link & Medical Pass",
+    department: "Health & Family Welfare (MoHFW)",
+    deptCode: "DEPT-HLTH",
+    sector: "Healthcare",
+    state: "Maharashtra",
+    citizenName: "Priya Sharma",
+    civicId: "CIV-DEMO-10002",
+    status: "VERIFIED_SUCCESS",
+    priority: "Normal",
+    timestamp: "14 Aug 2026, 07:45 AM",
+    slaDeadline: "Completed",
+    requestedDoc: "ABHA Health Card & Diagnostic Summary",
+    purpose: "Ayushman Bharat National Health Ecosystem Consent",
+    securityToken: "HASH-ABHA-204918-MH",
+    verificationTrace: [
+      { step: "ABHA Address Created: priya.sharma@abdm", time: "14 Aug 07:30 AM", actor: "Priya Sharma" },
+      { step: "ABDM Health Information Provider Verified", time: "14 Aug 07:45 AM", actor: "MoHFW Gateway" }
+    ]
+  },
+
+  // 6. Revenue & Income Tax (CBDT)
+  {
+    id: "PROC-REV-601",
+    title: "Income & Asset Certificate Renewal Validation",
+    department: "Revenue & Tax Department",
+    deptCode: "DEPT-REV",
+    sector: "Government",
+    state: "Andhra Pradesh",
+    citizenName: "Aarav Kumar",
+    civicId: "CIV-DEMO-10001",
+    status: "PENDING_APPROVAL",
+    priority: "Normal",
+    timestamp: "14 Aug 2026, 11:30 AM",
+    slaDeadline: "48 Hours Remaining",
+    requestedDoc: "State Income Certificate (DEMO-INC-2025-10001)",
+    purpose: "Academic Scholarship Eligibility Re-verification",
+    securityToken: "HASH-REV-119402-AP",
+    verificationTrace: [
+      { step: "Renewal Application Submitted", time: "14 Aug 11:00 AM", actor: "Aarav Kumar" },
+      { step: "Form-16 IT Return Cross-Checked", time: "14 Aug 11:15 AM", actor: "Income Tax API" },
+      { step: "Awaiting Revenue Inspector Seal", time: "14 Aug 11:30 AM", actor: "Tahsildar Desk" }
+    ]
+  },
+
+  // 7. Banking & Financial Institutions
+  {
+    id: "PROC-BANK-801",
+    title: "High-Assurance e-KYC Verification for Home Loan",
+    department: "Banking & Financial Services (RBI Regulated)",
+    deptCode: "BANK-01",
+    sector: "Banking & Finance",
+    state: "Gujarat",
+    citizenName: "Rajesh Patel",
+    civicId: "CIV-DEMO-10003",
+    status: "VERIFIED_SUCCESS",
+    priority: "Urgent",
+    timestamp: "14 Aug 2026, 10:05 AM",
+    slaDeadline: "Completed",
+    requestedDoc: "Tokenized Aadhaar, PAN & 3-Year ITR Record",
+    purpose: "State Bank Home Loan Facility Verification",
+    securityToken: "HASH-FIN-990412-GJ",
+    verificationTrace: [
+      { step: "Bank KYC Consent Granted by Citizen", time: "14 Aug 09:50 AM", actor: "Rajesh Patel" },
+      { step: "Tokenized Data Streamed via Encrypted Tunnel", time: "14 Aug 10:00 AM", actor: "CivicOne Banking Engine" },
+      { step: "Bank Underwriting Verification Complete", time: "14 Aug 10:05 AM", actor: "SBI Credit Desk" }
+    ]
+  },
+
+  // 8. Telecom & SIM Services (DoT)
+  {
+    id: "PROC-TEL-901",
+    title: "SIM Card Biometric KYC Re-Verification",
+    department: "Telecom & Mobile Retailers (DoT Authorized)",
+    deptCode: "MOBILE-01",
+    sector: "Private Sector",
+    state: "Delhi",
+    citizenName: "Ananya Verma",
+    civicId: "CIV-DEMO-10004",
+    status: "VERIFIED_SUCCESS",
+    priority: "Normal",
+    timestamp: "14 Aug 2026, 08:20 AM",
+    slaDeadline: "Completed",
+    requestedDoc: "Minimum Address & Tokenized KYC",
+    purpose: "New Enterprise 5G SIM Connection KYC",
+    securityToken: "HASH-TEL-441890-DL",
+    verificationTrace: [
+      { step: "Retailer Scanned CivicOne QR", time: "14 Aug 08:15 AM", actor: "Mobile Retail Outlet" },
+      { step: "Zero-Knowledge Consent Verified", time: "14 Aug 08:20 AM", actor: "DoT TAFCOP Engine" }
+    ]
+  }
+];
+
+// --- WEBSITE USAGE & INFRASTRUCTURE TELEMETRY METRICS ---
+export const DEMO_WEBSITE_USAGE_STATS = {
+  totalRequestsToday: "1,482,910",
+  activeUsersNow: "28,910",
+  averageLatencyMs: "42 ms",
+  requestsPerMinute: "3,420 RPM",
+  uptimePercentage: "99.98%",
+  pythonAuthEngineStatus: "ONLINE (Port 8000)",
+  expressGatewayStatus: "ONLINE (Port 3001)",
+  uidaiTokenizerStatus: "ONLINE (Token Encryption Active)",
+  vaultStorageUsage: "4.2 TB / 10.0 TB",
+  sectorTrafficDistribution: [
+    { sector: "Government & RTO", percentage: 34, count: "504,189", color: "#3B82F6" },
+    { sector: "Education & UGC", percentage: 24, count: "355,900", color: "#6366F1" },
+    { sector: "Banking & Finance", percentage: 20, count: "296,582", color: "#0284C7" },
+    { sector: "Police & Law Enforcement", percentage: 12, count: "177,949", color: "#EF4444" },
+    { sector: "Healthcare & ABHA", percentage: 10, count: "148,290", color: "#10B981" }
+  ],
+  deviceDistribution: [
+    { type: "Mobile Browsers", percentage: 68, color: "#38BDF8" },
+    { type: "Desktop / Workstations", percentage: 26, color: "#818CF8" },
+    { type: "Tablet & Enterprise Desks", percentage: 6, color: "#FACC15" }
+  ],
+  topStatesByUsage: [
+    { state: "Maharashtra", requests: "312,490", activeUsers: "5,820" },
+    { state: "Andhra Pradesh", requests: "248,100", activeUsers: "4,910" },
+    { state: "Karnataka", requests: "210,500", activeUsers: "4,120" },
+    { state: "Delhi NCR", requests: "189,300", activeUsers: "3,890" },
+    { state: "Tamil Nadu", requests: "165,800", activeUsers: "3,400" },
+    { state: "Gujarat", requests: "142,200", activeUsers: "2,840" }
+  ]
+};
+

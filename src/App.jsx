@@ -49,7 +49,7 @@ export default function App() {
         setCurrentView('organization');
       } else if (rawHash === 'owner-admin' || rawHash === 'admin' || rawHash === 'admin-gate' || path.startsWith('/owner-admin')) {
         setCurrentView('admin-gate');
-      } else if (rawHash === 'police' || path.startsWith('/police')) {
+      } else if (rawHash === 'police' || rawHash.startsWith('police-') || rawHash === 'passport' || rawHash === 'pcc' || path.startsWith('/police') || path.startsWith('/passport')) {
         setCurrentView('police');
       } else if (rawHash === 'authority-gate' || rawHash === 'authority' || path.startsWith('/authority')) {
         setCurrentView('authority-gate');
@@ -150,6 +150,7 @@ export default function App() {
         <OrganizationGate
           onAuthenticated={handleOpenOrgPortal}
           onGoBackToLanding={() => changeView('landing')}
+          onOpenSuperAdmin={() => changeView('admin-gate')}
         />
       );
 

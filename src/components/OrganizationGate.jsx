@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import OrganizationSectors from './organization/OrganizationSectors.jsx';
 import OrganizationSelector from './organization/OrganizationSelector.jsx';
 import OrganizationLogin from './organization/OrganizationLogin.jsx';
-import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Crown } from 'lucide-react';
 
-export default function OrganizationGate({ onAuthenticated, onGoBackToLanding }) {
+export default function OrganizationGate({ onAuthenticated, onGoBackToLanding, onOpenSuperAdmin }) {
   // Steps: 'sectors' | 'selector' | 'login'
   const [step, setStep] = useState('sectors');
   const [selectedSector, setSelectedSector] = useState(null);
@@ -64,8 +64,31 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
             </div>
           </div>
 
-          {/* Dynamic Step-Aware Back Button */}
+          {/* Dynamic Step-Aware Back Button & Admin Control */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            
+            {onOpenSuperAdmin && (
+              <button
+                onClick={onOpenSuperAdmin}
+                style={{
+                  backgroundColor: '#1E1B4B',
+                  color: '#FEF08A',
+                  border: '1px solid #4F46E5',
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  fontWeight: 800,
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 8px rgba(79, 70, 229, 0.25)'
+                }}
+              >
+                <Crown size={15} color="#FEF08A" /> Super Admin Supervision
+              </button>
+            )}
+
             {step !== 'sectors' && (
               <button
                 onClick={() => {
@@ -112,6 +135,7 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
 
         </div>
       </header>
+
 
       {/* STEP 1: SECTORS SELECTION */}
       {step === 'sectors' && (
