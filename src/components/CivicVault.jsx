@@ -967,6 +967,10 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
                 {uploading ? 'Saving Document...' : 'Save Document to Vault 🚀'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
       {/* CATEGORY OVERLAY DIALOG MODAL */}
       {showCategoryModal && (
         <div style={{
