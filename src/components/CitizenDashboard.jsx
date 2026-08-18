@@ -308,10 +308,8 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           justifyContent: 'space-between',
           flexShrink: 0,
           position: 'sticky',
-          top: '80px',
-          alignSelf: 'flex-start',
-          minHeight: 'calc(100vh - 100px)',
-          overflowY: 'auto'
+          top: '90px',
+          alignSelf: 'flex-start'
         }} className="hidden-mobile">
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>

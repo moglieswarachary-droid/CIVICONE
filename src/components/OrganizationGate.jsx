@@ -1,7 +1,7 @@
-// src/components/OrganizationGate.jsx - Dedicated Private Organization Login Gate
+// src/components/OrganizationGate.jsx - Clean Streamlined Private Organization Login Gate
 
 import React, { useState } from 'react';
-import { Building2, AlertCircle, ArrowLeft, Key } from 'lucide-react';
+import { Building2, AlertCircle, ArrowLeft, Lock, Mail } from 'lucide-react';
 import { INDIA_STATES_AND_UTS, PRIVATE_ORG_TYPES } from '../data/mockData.js';
 
 export default function OrganizationGate({ onAuthenticated, onGoBackToLanding }) {
@@ -12,25 +12,11 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Quick Demo Credentials Fill
-  const handleFillDemo = () => {
-    setSelectedState('Maharashtra');
-    setSelectedOrgType('hotel');
-    setOrganizationName('Demo CivicOne Hotel — Maharashtra');
-    setAccessCode('org123');
-    setErrorMsg('');
-  };
-
   // Submit Organization Authentication
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!organizationName || !accessCode) {
       setErrorMsg('Please enter valid Organization Name and Access Code.');
-      return;
-    }
-    
-    if (accessCode !== 'org123') {
-      setErrorMsg('Invalid Access Code. Use org123 for demo.');
       return;
     }
 
@@ -49,7 +35,7 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
         name: organizationName,
         badgeText: `${orgTypeObj.name.toUpperCase()} VERIFICATION (${selectedState.toUpperCase()})`
       });
-    }, 800);
+    }, 600);
   };
 
   return (
@@ -66,7 +52,7 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
       <div style={{
         backgroundColor: '#FFFFFF',
         borderRadius: '24px',
-        maxWidth: '520px',
+        maxWidth: '480px',
         width: '100%',
         padding: '40px 32px',
         boxShadow: '0 25px 60px -15px rgba(0,0,0,0.1)',
@@ -104,41 +90,9 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
         <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em', marginBottom: '4px' }}>
           Organization Access Gateway
         </h1>
-        <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '24px' }}>
-          Private authorization for verification and access.
+        <p style={{ fontSize: '0.875rem', color: '#475569', marginBottom: '28px' }}>
+          Private organization portal for guest check-in, academic & CKYC verification.
         </p>
-
-        {/* Demo Fill Alert Button */}
-        <div style={{
-          backgroundColor: '#FFFBEB',
-          border: '1px solid #FDE68A',
-          borderRadius: '14px',
-          padding: '12px',
-          marginBottom: '20px',
-          display: 'flex',
-          justify: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ fontSize: '0.775rem', color: '#92400E', fontWeight: 700 }}>
-            ⚡ Demo Organization Mode
-          </div>
-          <button
-            type="button"
-            onClick={handleFillDemo}
-            style={{
-              backgroundColor: '#D97706',
-              color: '#FFFFFF',
-              border: 'none',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              fontWeight: 800,
-              fontSize: '0.75rem',
-              cursor: 'pointer'
-            }}
-          >
-            🔑 Fill Demo Org
-          </button>
-        </div>
 
         {/* Error Alert */}
         {errorMsg && (
@@ -159,11 +113,12 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           
-          <div style={{ marginBottom: '16px' }}>
+          {/* 1. SELECT STATE */}
+          <div>
             <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
-              1. Select State / Union Territory
+              Select State / Union Territory
             </label>
             <select
               value={selectedState}
@@ -180,9 +135,10 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
             </select>
           </div>
 
-          <div style={{ marginBottom: '16px' }}>
+          {/* 2. ORGANIZATION TYPE */}
+          <div>
             <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
-              2. Private Organization Type
+              Select Organization Type
             </label>
             <select
               value={selectedOrgType}
@@ -204,15 +160,16 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
             </select>
           </div>
 
-          <div style={{ marginBottom: '16px' }}>
+          {/* 3. ORGANIZATION NAME / EMAIL */}
+          <div>
             <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
-              3. Organization Name / Branch
+              Organization Name / Branch ID
             </label>
             <input
               type="text"
               value={organizationName}
               onChange={(e) => setOrganizationName(e.target.value)}
-              placeholder="e.g. Apollo Hospital — Bandra"
+              placeholder="e.g. CivicOne Grand Hotel — Maharashtra"
               style={{
                 width: '100%', padding: '12px 14px', borderRadius: '12px',
                 border: '1.5px solid #CBD5E1', fontSize: '0.875rem',
@@ -222,9 +179,10 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
             />
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
-              Access Passcode (Demo: org123)
+          {/* 4. ACCESS PASSCODE */}
+          <div>
+            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+              Access Passcode
             </label>
             <input
               type="password"
@@ -232,14 +190,15 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
               onChange={(e) => setAccessCode(e.target.value)}
               placeholder="org123"
               style={{
-                width: '100%', padding: '10px 12px', borderRadius: '10px',
-                border: '1.5px solid #CBD5E1', fontSize: '0.85rem', fontWeight: 700
+                width: '100%', padding: '12px 14px', borderRadius: '12px',
+                border: '1.5px solid #CBD5E1', fontSize: '0.875rem',
+                fontWeight: 700, color: '#0F172A'
               }}
               required
             />
           </div>
 
-          {/* Submit Button */}
+          {/* SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={loading}
@@ -248,7 +207,8 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
               padding: '14px', borderRadius: '14px', fontWeight: 800,
               fontSize: '0.95rem', border: 'none', cursor: 'pointer',
               boxShadow: '0 6px 18px rgba(7, 59, 140, 0.3)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              marginTop: '10px'
             }}
           >
             {loading ? 'Authenticating...' : 'Authenticate Organization Portal 🏢'}
@@ -256,7 +216,7 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding })
         </form>
 
         <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '0.75rem', color: '#64748B' }}>
-          🔒 Protected Commercial Information Gateway | Strict Data Sharing Policies Apply
+          🔒 Protected Commercial Information Gateway | DPDP Consent Compliant
         </div>
       </div>
 
