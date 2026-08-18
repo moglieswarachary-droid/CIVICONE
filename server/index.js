@@ -256,30 +256,38 @@ app.post('/api/auth/identity-verify', async (req, res) => {
 
 // Government Officer Login API (Supports /api/auth/authority-login and /api/auth/govt-officer-login)
 app.post(['/api/auth/authority-login', '/api/auth/govt-officer-login'], async (req, res) => {
-  const { email, department, badgeId, passcode } = req.body;
+  const { email, officerId, department, badgeId, passcode, password, state, office } = req.body;
 
-  if (!email || !department) {
-    return res.status(400).json({ error: "Please provide official government email and department selection." });
+  const id = email || officerId || badgeId;
+  if (!id || !department) {
+    return res.status(400).json({ error: "Please provide official government officer ID or email and department selection." });
   }
 
-  if (passcode && passcode !== "govt123" && passcode !== "admin123") {
+  const pass = password || passcode;
+  if (pass && pass !== "govt123" && pass !== "admin123") {
     return res.status(400).json({ error: "Invalid officer security passcode. Use 'govt123' for demo." });
   }
 
+  const isPolice = (department || '').includes('Police');
   const officerSession = {
-    officerId: badgeId || `OFFICER-${Math.floor(1000 + Math.random() * 9000)}`,
-    email,
-    department: department || "Parivahan Sewa (MoRTH)",
-    role: "Government Officer / Issuer",
-    clearanceLevel: "LEVEL-3 VERIFIED",
+    officerId: id,
+    name: isPolice ? 'Inspector R. Verma' : 'Officer K. Sharma',
+    email: email || (isPolice ? 'inspector.verma@police.gov.in' : 'officer.sharma@parivahan.gov.in'),
+    department: department || "Transport (RTO)",
+    state: state || "Andhra Pradesh",
+    office: office || "Demo RTO Regional Headquarters — Vijayawada",
+    roleLevel: isPolice ? 2 : 1,
+    roleTitle: isPolice ? 'LEVEL 2 — DEPARTMENT SUPERVISOR' : 'LEVEL 1 — GOVERNMENT OFFICER',
+    clearanceStatus: "LEVEL-3 VERIFIED",
+    securityStatus: "LOCK-PROTECTED LEVEL-3",
     sessionToken: `GOVT-AUTH-${Date.now()}-SECURE`
   };
 
   await dbService.addAuditLog({
     citizenId: "GOVT-DESK",
-    event: `Government Officer Login: ${email} (${department})`,
+    event: `Government Officer Login: ${officerSession.email} (${officerSession.department})`,
     device: "Web Client",
-    location: "New Delhi, India",
+    location: `${officerSession.state}, India`,
     ip: "164.100.42.10"
   });
 

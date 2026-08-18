@@ -239,19 +239,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* Header Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              className="touch-target"
-              style={{
-                backgroundColor: 'var(--bg-main)',
-                border: '1px solid var(--border-light)',
-                borderRadius: '10px',
-                padding: '8px',
-                color: 'var(--text-main)'
-              }}
-            >
-              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-            </button>
 
             {/* Notifications */}
             <div style={{ position: 'relative' }}>
@@ -323,7 +310,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           position: 'sticky',
           top: '80px',
           alignSelf: 'flex-start',
-          maxHeight: 'calc(100vh - 100px)',
+          minHeight: 'calc(100vh - 100px)',
           overflowY: 'auto'
         }} className="hidden-mobile">
           
@@ -668,6 +655,72 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           {/* TAB 7: PUBLIC SERVICES */}
           {activeTab === 'services' && (
             <ServicesSection />
+          )}
+
+          {/* TAB: MY ACTIVITY LOG & AUDIT HISTORY */}
+          {activeTab === 'activity' && (
+            <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '28px', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <h1 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Activity size={24} style={{ color: '#0B5ED7' }} /> My Activity & Audit History
+                  </h1>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                    Comprehensive log of all identity verifications, document accesses, consent authorizations, and login security events.
+                  </p>
+                </div>
+                <div style={{ backgroundColor: '#EAF3FF', color: '#0B5ED7', padding: '6px 14px', borderRadius: '20px', fontSize: '0.775rem', fontWeight: 800 }}>
+                  🔒 Cryptographically Verified Audit Log
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {[
+                  { title: "Tokenized Identity Verification Completed", category: "UIDAI Verification", time: "Today, 10:42 AM", ip: "49.37.142.90", location: "Vijayawada, AP", status: "SUCCESS" },
+                  { title: "Civic Card Aadhaar Unmasked Toggle", category: "Privacy Audit", time: "Today, 10:38 AM", ip: "49.37.142.90", location: "Web App", status: "SUCCESS" },
+                  { title: "Access Request Dispatched by CivicOne Grand Hotel", category: "Consent Request", time: "Today, 08:21 PM", ip: "164.100.42.10", location: "Hotel Check-in Desk", status: "PENDING" },
+                  { title: "Civic ID Session Login Authenticated", category: "Security Auth", time: "18 Aug 2026, 07:15 PM", ip: "49.37.142.90", location: "Chrome / Windows", status: "SUCCESS" },
+                  { title: "Driving Licence (DL-AP-2024-9984) Credential Issued", category: "Government Issuance", time: "15 Aug 2026, 03:20 PM", ip: "164.100.42.10", location: "RTO AP Headquarters", status: "VERIFIED" },
+                  { title: "Consent Token Approved for State Health Registry", category: "Consent Clearance", time: "14 Aug 2026, 11:05 AM", ip: "49.37.142.90", location: "Health Portal", status: "ACTIVE" }
+                ].map((act, i) => (
+                  <div key={i} style={{
+                    backgroundColor: 'var(--bg-main)',
+                    border: '1px solid var(--border-light)',
+                    borderRadius: '14px',
+                    padding: '16px 20px',
+                    display: 'flex',
+                    justify: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '12px'
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#0B5ED7', backgroundColor: '#DBEAFE', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase' }}>
+                          {act.category}
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 600 }}>{act.time}</span>
+                      </div>
+                      <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)', display: 'block' }}>{act.title}</strong>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                        IP Address: <span style={{ fontFamily: 'monospace' }}>{act.ip}</span> | Location: {act.location}
+                      </div>
+                    </div>
+
+                    <span style={{
+                      backgroundColor: act.status === 'PENDING' ? '#FEF3C7' : '#D1E7DD',
+                      color: act.status === 'PENDING' ? '#D97706' : '#0F5132',
+                      padding: '4px 12px',
+                      borderRadius: '12px',
+                      fontSize: '0.75rem',
+                      fontWeight: 800
+                    }}>
+                      ● {act.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
 

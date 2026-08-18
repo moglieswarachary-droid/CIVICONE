@@ -206,11 +206,8 @@ export default function ServicesSection({ services: initialServices }) {
               <ArrowLeft size={18} /> Return to All Services
             </button>
 
-            {/* Connection Status & Refresh Synchronization */}
+            {/* Refresh Synchronization */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ backgroundColor: '#D1E7DD', color: '#0F5132', padding: '6px 14px', borderRadius: '16px', fontSize: '0.775rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <CheckCircle2 size={16} /> ● Connected ({categoryData?.lastSynced || "Today, 10:42 AM"})
-              </span>
 
               <button
                 onClick={handleRefreshCategorySync}
@@ -405,10 +402,6 @@ export default function ServicesSection({ services: initialServices }) {
                       <div style={{ width: '48px', height: '48px', borderRadius: '14px', backgroundColor: `${cat.color}15`, color: cat.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <IconComp size={26} />
                       </div>
-
-                      <span style={{ backgroundColor: '#D1E7DD', color: '#0F5132', padding: '4px 10px', borderRadius: '12px', fontSize: '0.725rem', fontWeight: 800 }}>
-                        ● Connected
-                      </span>
                     </div>
 
                     <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '4px' }}>
