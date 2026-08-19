@@ -19,7 +19,7 @@ import TourismGuide from './TourismGuide.jsx';
 import TravelBookingHub from './TravelBookingHub.jsx';
 import {
   DEMO_CARD, DEMO_DOCUMENTS, DEMO_GOVT_UPDATES, DEMO_NEWS,
-  DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST, DEMO_FAMILY_MEMBERS, calculateDocExpiryStatus
+  DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST, DEMO_FAMILY_MEMBERS, DEMO_CITIZEN, calculateDocExpiryStatus
 } from '../data/mockData.js';
 
 export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification }) {
@@ -35,9 +35,13 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   const [globalSearch, setGlobalSearch] = useState('');
   const [mobileMoreDrawerOpen, setMobileMoreDrawerOpen] = useState(false);
   const [demoCitizens, setDemoCitizens] = useState(DEMO_CITIZENS_LIST);
-  const [currentCitizen, setCurrentCitizen] = useState(citizen);
+  const [currentCitizen, setCurrentCitizen] = useState(citizen || DEMO_CITIZEN);
   const [targetTravelCity, setTargetTravelCity] = useState('');
   const [familyVaultMemberId, setFamilyVaultMemberId] = useState('fam-self');
+
+  useEffect(() => {
+    if (citizen) setCurrentCitizen(citizen);
+  }, [citizen]);
 
   // Collapsible Group States for Desktop Sidebar
   const [openGroups, setOpenGroups] = useState({
