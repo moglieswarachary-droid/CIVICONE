@@ -3,7 +3,7 @@ import {
   ShieldCheck, Search, Bell, User, LayoutDashboard, Ticket, FolderClosed,
   Grid, Landmark, Newspaper, Shield, HelpCircle, LogOut, Sun, Moon, CheckCircle2,
   ChevronRight, ChevronDown, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, Zap, Radio, Share2, FileText,
-  Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw, Milestone
+  Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw, Milestone, Users
 } from 'lucide-react';
 import VirtualCard from './VirtualCard.jsx';
 import CivicVault from './CivicVault.jsx';
@@ -19,7 +19,7 @@ import TourismGuide from './TourismGuide.jsx';
 import TravelBookingHub from './TravelBookingHub.jsx';
 import {
   DEMO_CARD, DEMO_DOCUMENTS, DEMO_GOVT_UPDATES, DEMO_NEWS,
-  DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST, calculateDocExpiryStatus
+  DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST, DEMO_FAMILY_MEMBERS, calculateDocExpiryStatus
 } from '../data/mockData.js';
 
 export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification }) {
@@ -37,6 +37,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   const [demoCitizens, setDemoCitizens] = useState(DEMO_CITIZENS_LIST);
   const [currentCitizen, setCurrentCitizen] = useState(citizen);
   const [targetTravelCity, setTargetTravelCity] = useState('');
+  const [familyVaultMemberId, setFamilyVaultMemberId] = useState('fam-self');
 
   // Collapsible Group States for Desktop Sidebar
   const [openGroups, setOpenGroups] = useState({
@@ -142,6 +143,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       key: 'myCivicOne',
       title: 'MY CIVICONE',
       items: [
+        { id: 'family-vault', label: 'Family Vault', icon: Users },
         { id: 'activity', label: 'My Activity', icon: Activity },
         { id: 'privacy', label: 'My Access & Consent', icon: Lock },
         { id: 'notifications', label: 'Notifications', icon: Bell }
@@ -177,8 +179,16 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
   const unreadNotifCount = notifications.filter(n => !n.read).length;
 
-  const handleSelectTab = (tabId) => {
-    setActiveTab(tabId);
+  const handleSelectTab = (tabId, memberId = 'fam-self') => {
+    if (tabId === 'family-vault') {
+      setFamilyVaultMemberId(memberId === 'fam-self' ? 'fam-child-1' : memberId);
+      setActiveTab('vault');
+    } else {
+      if (tabId === 'vault') {
+        setFamilyVaultMemberId(memberId);
+      }
+      setActiveTab(tabId);
+    }
     setMobileMoreDrawerOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -466,8 +476,9 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
                   {[
                     { label: 'My Journey', icon: Milestone, action: () => handleSelectTab('journey'), color: '#0B5ED7' },
+                    { label: 'Family Vault', icon: Users, action: () => handleSelectTab('family-vault', 'fam-child-1'), color: '#4F46E5' },
                     { label: 'View Civic Card', icon: Ticket, action: () => handleSelectTab('card'), color: '#0284C7' },
-                    { label: 'Open Vault', icon: FolderClosed, action: () => handleSelectTab('vault'), color: '#059669' },
+                    { label: 'Open Vault', icon: FolderClosed, action: () => handleSelectTab('vault', 'fam-self'), color: '#059669' },
                     { label: 'Verify Document', icon: CheckCircle2, action: () => handleSelectTab('vault'), color: '#7C3AED' },
                     { label: 'Share Access', icon: Share2, action: () => handleSelectTab('privacy'), color: '#DC2626' },
                     { label: 'Check Services', icon: Grid, action: () => handleSelectTab('services'), color: '#D97706' },
@@ -496,6 +507,122 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                       <act.icon size={22} style={{ color: act.color }} />
                       <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-main)', textAlign: 'center' }}>{act.label}</span>
                     </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* FAMILY & DEPENDENT DOCUMENTS HUB WIDGET */}
+              <div style={{
+                backgroundColor: 'var(--bg-card)',
+                borderRadius: '20px',
+                border: '1.5px solid var(--border-light)',
+                padding: '22px',
+                marginBottom: '24px',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '12px', backgroundColor: '#EEF2FF', color: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Users size={20} />
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--text-main)' }}>
+                        Family &amp; Dependent Vaults ({DEMO_FAMILY_MEMBERS.filter(m => m.id !== 'fam-self').length})
+                      </h3>
+                      <p style={{ fontSize: '0.775rem', color: 'var(--text-light)', marginTop: '2px' }}>
+                        Manage official credentials for minor children &amp; senior parents under legal sovereign guardianship
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleSelectTab('family-vault', 'fam-child-1')}
+                    style={{
+                      backgroundColor: '#4F46E5',
+                      color: '#FFFFFF',
+                      padding: '8px 14px',
+                      borderRadius: '10px',
+                      fontSize: '0.775rem',
+                      fontWeight: 800,
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    Open Family Vault →
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                  {DEMO_FAMILY_MEMBERS.filter(m => m.id !== 'fam-self').map(member => (
+                    <div
+                      key={member.id}
+                      style={{
+                        backgroundColor: 'var(--bg-main)',
+                        borderRadius: '16px',
+                        border: '1px solid var(--border-light)',
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '12px'
+                      }}
+                      className="hover-card"
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '44px',
+                          height: '44px',
+                          borderRadius: '12px',
+                          backgroundColor: member.themeColor || '#4F46E5',
+                          color: '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 900,
+                          fontSize: '1rem',
+                          boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)',
+                          flexShrink: 0
+                        }}>
+                          {member.initials || (member.name ? member.name.substring(0, 2).toUpperCase() : 'FM')}
+                        </div>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{member.name}</strong>
+                            <span style={{ backgroundColor: '#EEF2FF', color: '#4F46E5', fontSize: '0.675rem', fontWeight: 800, padding: '2px 6px', borderRadius: '6px' }}>
+                              {member.relationship}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginTop: '2px' }}>
+                            Civic ID: <strong>{member.civicId}</strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-light)', paddingTop: '10px' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <CheckCircle2 size={13} /> {member.documents?.length || member.docCount || 0} Verified Documents
+                        </span>
+
+                        <button
+                          onClick={() => handleSelectTab('family-vault', member.id)}
+                          style={{
+                            backgroundColor: '#4F46E5',
+                            color: '#FFFFFF',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            border: 'none',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          View Vault →
+                        </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -610,7 +737,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* TAB 3: DIGITAL VAULT */}
           {activeTab === 'vault' && (
-            <CivicVault documents={documents} />
+            <CivicVault documents={documents} initialMemberId={familyVaultMemberId} />
           )}
 
           {/* TAB: CIVICONE WORLD TOURISM & DESTINATIONS GUIDE */}
