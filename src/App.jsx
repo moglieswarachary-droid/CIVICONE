@@ -22,41 +22,63 @@ export default function App() {
   const [verifyToken, setVerifyToken] = useState('CIV-TOKEN-CIV-DEMO-10001-SECURE-2026');
   const [selectedOrgConfig, setSelectedOrgConfig] = useState(null);
 
+  // Helper to change view and push browser history state
+  const changeView = (newView, customHash = '') => {
+    setCurrentView(newView);
+    const targetHash = customHash || (newView === 'landing' ? '' : `#${newView}`);
+    if (window.location.hash !== targetHash) {
+      try {
+        window.history.pushState({ view: newView }, '', targetHash || window.location.pathname);
+      } catch (e) {
+        window.location.hash = targetHash;
+      }
+    }
+  };
+
   // Handle URL Hash, Path Routing, and Owner Keyboard Shortcut (Ctrl + Shift + A)
   useEffect(() => {
     const handleUrlRoute = () => {
       const path = window.location.pathname;
-      const hash = window.location.hash;
+      const rawHash = window.location.hash.replace('#', '');
       const searchParams = new URLSearchParams(window.location.search);
       const token = searchParams.get('token');
 
-      if (hash === '#org' || path.startsWith('/org')) {
+      if (rawHash === 'organization-gate' || rawHash === 'organization-access') {
+        setCurrentView('organization-gate');
+      } else if (rawHash === 'organization' || rawHash === 'org' || rawHash.startsWith('org-') || path.startsWith('/org')) {
         setCurrentView('organization');
-      } else if (hash === '#owner-admin' || hash === '#admin' || path.startsWith('/owner-admin')) {
+      } else if (rawHash === 'owner-admin' || rawHash === 'admin' || rawHash === 'admin-gate' || path.startsWith('/owner-admin')) {
         setCurrentView('admin-gate');
-      } else if (hash === '#police' || path.startsWith('/police')) {
+      } else if (rawHash === 'police' || rawHash.startsWith('police-') || rawHash === 'passport' || rawHash === 'pcc' || path.startsWith('/police') || path.startsWith('/passport')) {
         setCurrentView('police');
-      } else if (path.startsWith('/authority') || hash === '#authority') {
+      } else if (rawHash === 'authority-gate' || rawHash === 'authority' || path.startsWith('/authority')) {
         setCurrentView('authority-gate');
-      } else if (path.startsWith('/verify') || token) {
+      } else if (rawHash === 'gate' || rawHash === 'citizen-login') {
+        setCurrentView('gate');
+      } else if (rawHash === 'citizen') {
+        setCurrentView('citizen');
+      } else if (path.startsWith('/verify') || rawHash === 'verify' || token) {
         if (token) setVerifyToken(token);
         setCurrentView('verify');
+      } else if (!rawHash) {
+        setCurrentView('landing');
       }
     };
 
     const handleKeyDown = (e) => {
-      // Owner Secret Shortcut: Ctrl + Shift + A launches Super Admin Gate
       if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
-        setCurrentView('admin-gate');
+        changeView('admin-gate');
       }
     };
 
     handleUrlRoute();
     window.addEventListener('popstate', handleUrlRoute);
+    window.addEventListener('hashchange', handleUrlRoute);
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('popstate', handleUrlRoute);
+      window.removeEventListener('hashchange', handleUrlRoute);
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
@@ -64,23 +86,23 @@ export default function App() {
   // Handle Citizen Login Authentication Completion
   const handleAuthSuccess = (citizenData) => {
     setAuthenticatedCitizen(citizenData);
-    setCurrentView('citizen');
+    changeView('citizen');
   };
 
   // Handle Officer Login Authentication Completion
   const handleOfficerAuthSuccess = (officerData) => {
     setAuthenticatedOfficer(officerData);
     if (officerData.role === 'POLICE_ADMIN' || officerData.department?.includes('Police')) {
-      setCurrentView('police');
+      changeView('police');
     } else {
-      setCurrentView('authority');
+      changeView('authority');
     }
   };
 
   // Handle Admin Login Authentication Completion
   const handleAdminAuthSuccess = (adminData) => {
     setAuthenticatedAdmin(adminData);
-    setCurrentView('admin');
+    changeView('admin');
   };
 
   // Handle Logout
@@ -88,16 +110,12 @@ export default function App() {
     setAuthenticatedCitizen(null);
     setAuthenticatedOfficer(null);
     setAuthenticatedAdmin(null);
-    setCurrentView('landing');
+    changeView('landing');
   };
 
   const handleOpenOrgPortal = (config) => {
     setSelectedOrgConfig(config);
-    if (config.orgType === 'police' || config.roleCode === 'POLICE_ADMIN') {
-      setCurrentView('police');
-    } else {
-      setCurrentView('organization');
-    }
+    changeView('organization');
   };
 
   // Render Current Portal Experience
@@ -106,7 +124,7 @@ export default function App() {
       return (
         <PreEntryGate
           onAuthenticated={handleAuthSuccess}
-          onGoBackToLanding={() => setCurrentView('landing')}
+          onGoBackToLanding={() => changeView('landing')}
         />
       );
 
@@ -117,13 +135,13 @@ export default function App() {
           onLogout={handleLogout}
           onNavigateToVerification={(token) => {
             setVerifyToken(token);
-            setCurrentView('verify');
+            changeView('verify');
           }}
         />
       ) : (
         <PreEntryGate
           onAuthenticated={handleAuthSuccess}
-          onGoBackToLanding={() => setCurrentView('landing')}
+          onGoBackToLanding={() => changeView('landing')}
         />
       );
 
@@ -131,7 +149,8 @@ export default function App() {
       return (
         <OrganizationGate
           onAuthenticated={handleOpenOrgPortal}
-          onGoBackToLanding={() => setCurrentView('landing')}
+          onGoBackToLanding={() => changeView('landing')}
+          onOpenSuperAdmin={() => changeView('admin-gate')}
         />
       );
 
@@ -139,7 +158,7 @@ export default function App() {
       return (
         <OrganizationPortal
           initialOrgConfig={selectedOrgConfig}
-          onReturnHome={() => setCurrentView('landing')}
+          onReturnHome={() => changeView('organization-gate')}
         />
       );
 
@@ -147,7 +166,7 @@ export default function App() {
       return (
         <AuthorityGate
           onAuthenticated={handleOfficerAuthSuccess}
-          onGoBackToLanding={() => setCurrentView('landing')}
+          onGoBackToLanding={() => changeView('landing')}
         />
       );
 
@@ -160,7 +179,7 @@ export default function App() {
       ) : (
         <AuthorityGate
           onAuthenticated={handleOfficerAuthSuccess}
-          onGoBackToLanding={() => setCurrentView('landing')}
+          onGoBackToLanding={() => changeView('landing')}
         />
       );
 
@@ -177,7 +196,7 @@ export default function App() {
       return (
         <AdminGate
           onAuthenticated={handleAdminAuthSuccess}
-          onGoBackToLanding={() => setCurrentView('landing')}
+          onGoBackToLanding={() => changeView('landing')}
         />
       );
 
@@ -190,7 +209,7 @@ export default function App() {
       ) : (
         <AdminGate
           onAuthenticated={handleAdminAuthSuccess}
-          onGoBackToLanding={() => setCurrentView('landing')}
+          onGoBackToLanding={() => changeView('landing')}
         />
       );
 
@@ -200,9 +219,9 @@ export default function App() {
           token={verifyToken}
           onBackToPortal={() => {
             if (authenticatedCitizen) {
-              setCurrentView('citizen');
+              changeView('citizen');
             } else {
-              setCurrentView('landing');
+              changeView('landing');
             }
           }}
         />
@@ -212,10 +231,10 @@ export default function App() {
     default:
       return (
         <LandingPage
-          onAccessCivicOne={() => setCurrentView('gate')}
-          onOpenAuthorityPortal={() => setCurrentView('authority-gate')}
-          onOpenOwnerAdmin={() => setCurrentView('admin-gate')}
-          onOpenOrganizationGate={() => setCurrentView('organization-gate')}
+          onAccessCivicOne={() => changeView('gate')}
+          onOpenAuthorityPortal={() => changeView('authority-gate')}
+          onOpenOwnerAdmin={() => changeView('admin-gate')}
+          onOpenOrganizationGate={() => changeView('organization-gate')}
         />
       );
   }
