@@ -1,48 +1,38 @@
-// src/components/DesktopWorkstationGuard.jsx - Senior GovTech Desktop Workstation Security Enforcement Guard
+// src/components/DesktopWorkstationGuard.jsx - High-Security Institutional Clearance Boundary Guard
 
 import React, { useState, useEffect } from 'react';
 import {
-  Monitor, Smartphone, ShieldAlert, Lock, ArrowRight, Home, Copy,
-  Check, AlertTriangle, ShieldCheck, Building2, Landmark, Crown, RefreshCw
+  ShieldAlert, Lock, ArrowRight, Home, AlertTriangle, ShieldCheck,
+  Building2, Landmark, Crown
 } from 'lucide-react';
 
 /**
- * Custom hook to detect if current viewport or device is mobile / non-desktop.
- * Threshold: < 1024px is considered mobile/tablet where dense desktop multi-column governance layouts are not supported.
+ * Device & Viewport boundary detector.
+ * Ensures non-workstation endpoints cannot access restricted institutional consoles.
  */
 export function useDeviceType() {
   const [deviceInfo, setDeviceInfo] = useState(() => {
     if (typeof window === 'undefined') {
-      return { isMobile: false, width: 1440, height: 900, isTouch: false };
+      return { isRestrictedEndpoint: false, width: 1440 };
     }
     const width = window.innerWidth;
-    const height = window.innerHeight;
     const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const isSmallScreen = width < 1024;
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isRestricted = width < 1024 || (isMobileUA && width < 1024);
     return {
-      isMobile: isSmallScreen || (isMobileUA && width < 1024),
-      width,
-      height,
-      isTouch,
-      isMobileUA
+      isRestrictedEndpoint: isRestricted,
+      width
     };
   });
 
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      const height = window.innerHeight;
       const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      const isSmallScreen = width < 1024;
-      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isRestricted = width < 1024 || (isMobileUA && width < 1024);
 
       setDeviceInfo({
-        isMobile: isSmallScreen || (isMobileUA && width < 1024),
-        width,
-        height,
-        isTouch,
-        isMobileUA
+        isRestrictedEndpoint: isRestricted,
+        width
       });
     };
 
@@ -59,59 +49,49 @@ export function useDeviceType() {
 
 /**
  * DesktopWorkstationGuard Component
- * Wraps desktop-only portals (Organization, Gov Officer, Police, Super Admin).
- * When accessed from a mobile phone or screen < 1024px, renders an institutional-grade
- * workstation requirement barrier with clear instructions and 1-click switch to Citizen Mobile Portal.
+ * Secret, high-security barrier that blocks unauthorized handheld/small-screen endpoints
+ * without disclosing technical hardware criteria publicly.
  */
 export default function DesktopWorkstationGuard({
   children,
   portalType = 'organization', // 'organization' | 'authority' | 'police' | 'admin'
-  portalTitle = 'Administrative Portal',
+  portalTitle = 'Restricted Portal',
   onSwitchToCitizen,
   onGoBackToLanding
 }) {
-  const { isMobile, width, height } = useDeviceType();
-  const [copied, setCopied] = useState(false);
+  const { isRestrictedEndpoint } = useDeviceType();
 
   // Portal metadata styling & details
   const getPortalMeta = () => {
     switch (portalType) {
       case 'organization':
         return {
-          badge: '🏢 COMMERCIAL & INSTITUTIONAL GATEWAY',
-          name: 'Organization Verification Portal',
+          badge: '🔒 RESTRICTED INSTITUTIONAL GATEWAY',
+          name: 'Organization Verification Gateway',
           accentColor: '#073B8C',
-          lightBg: '#EAF3FF',
-          icon: Building2,
-          securityLevel: 'CORPORATE CKYC LEVEL 2'
+          icon: Building2
         };
       case 'authority':
         return {
-          badge: '🏛️ STATUTORY GOVERNMENT PORTAL',
+          badge: '🔒 RESTRICTED GOVERNMENT GATEWAY',
           name: 'Government Officer Administration',
           accentColor: '#0B5ED7',
-          lightBg: '#E0F2FE',
-          icon: Landmark,
-          securityLevel: 'STATUTORY OFFICER CLEARANCE'
+          icon: Landmark
         };
       case 'police':
         return {
-          badge: '🚨 LAW ENFORCEMENT & VERIFICATION DESK',
-          name: 'Police & PCC Investigation Portal',
+          badge: '🔒 LAW ENFORCEMENT RESTRICTED GATEWAY',
+          name: 'Police & PCC Investigation Desk',
           accentColor: '#DC2626',
-          lightBg: '#FEF2F2',
-          icon: ShieldAlert,
-          securityLevel: 'LAW ENFORCEMENT RESTRICTED'
+          icon: ShieldAlert
         };
       case 'admin':
       default:
         return {
-          badge: '👑 MASTER ROOT CONTROL TERMINAL',
+          badge: '🔒 RESTRICTED MASTER CONTROL TERMINAL',
           name: 'National Super Admin Control Center',
           accentColor: '#4F46E5',
-          lightBg: '#EEF2FF',
-          icon: Crown,
-          securityLevel: 'MASTER ROOT CLEARANCE'
+          icon: Crown
         };
     }
   };
@@ -119,27 +99,17 @@ export default function DesktopWorkstationGuard({
   const portalMeta = getPortalMeta();
   const IconComponent = portalMeta.icon;
 
-  const handleCopyLink = () => {
-    try {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    } catch (e) {
-      setCopied(true);
-    }
-  };
-
-  // If on desktop / widescreen PC (>= 1024px), render the actual portal directly
-  if (!isMobile) {
+  // If authorized desktop station, render portal
+  if (!isRestrictedEndpoint) {
     return <>{children}</>;
   }
 
-  // If on mobile device / screen < 1024px, render the Workstation Guard
+  // If unauthorized endpoint, render strict security restriction notice
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#0B1528',
-      backgroundImage: 'radial-gradient(circle at 50% 20%, rgba(15, 34, 64, 0.95) 0%, #060D19 100%)',
+      backgroundColor: '#070F1E',
+      backgroundImage: 'radial-gradient(circle at 50% 20%, rgba(15, 30, 60, 0.95) 0%, #040913 100%)',
       color: '#FFFFFF',
       fontFamily: 'var(--font-body)',
       display: 'flex',
@@ -150,14 +120,14 @@ export default function DesktopWorkstationGuard({
     }}>
       {/* Top Bar Header */}
       <div style={{
-        maxWidth: '680px',
+        maxWidth: '640px',
         width: '100%',
         margin: '0 auto',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingBottom: '16px',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
@@ -185,9 +155,9 @@ export default function DesktopWorkstationGuard({
         <button
           onClick={onGoBackToLanding}
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+            backgroundColor: 'rgba(255, 255, 255, 0.06)',
             color: '#CBD5E1',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
             padding: '7px 14px',
             borderRadius: '8px',
             fontSize: '0.775rem',
@@ -202,128 +172,100 @@ export default function DesktopWorkstationGuard({
         </button>
       </div>
 
-      {/* Main Guard Card Content */}
+      {/* Main Security Restriction Card */}
       <div style={{
-        maxWidth: '560px',
+        maxWidth: '520px',
         width: '100%',
         margin: '24px auto',
-        backgroundColor: '#0F1E36',
+        backgroundColor: '#0C182B',
         borderRadius: '24px',
-        border: '1.5px solid rgba(255, 255, 255, 0.12)',
-        padding: '32px 24px',
-        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6)',
+        border: '1.5px solid rgba(255, 255, 255, 0.1)',
+        padding: '36px 24px',
+        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden'
       }}>
-        {/* Glowing Ambient Background */}
+        {/* Subtle Ambient Glow */}
         <div style={{
           position: 'absolute',
-          top: '-60px',
+          top: '-50px',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '240px',
-          height: '240px',
+          width: '220px',
+          height: '220px',
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${portalMeta.accentColor}40 0%, rgba(15, 30, 54, 0) 70%)`,
+          background: 'radial-gradient(circle, rgba(220, 38, 38, 0.25) 0%, rgba(12, 24, 43, 0) 70%)',
           pointerEvents: 'none'
         }} />
 
-        {/* Portal Identifier Tag */}
+        {/* Security Badge */}
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
           gap: '6px',
-          backgroundColor: 'rgba(255, 255, 255, 0.08)',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
+          backgroundColor: 'rgba(220, 38, 38, 0.12)',
+          border: '1px solid rgba(220, 38, 38, 0.3)',
           padding: '5px 14px',
           borderRadius: '20px',
           fontSize: '0.7rem',
           fontWeight: 800,
-          color: '#93C5FD',
+          color: '#FCA5A5',
           letterSpacing: '0.04em',
-          marginBottom: '20px'
+          marginBottom: '22px'
         }}>
-          <IconComponent size={14} />
+          <Lock size={13} />
           {portalMeta.badge}
         </div>
 
-        {/* Visual Workstation Graphic with Restriction Icon */}
+        {/* Lock Graphic */}
         <div style={{
-          position: 'relative',
-          width: '100px',
-          height: '90px',
-          margin: '0 auto 20px auto',
+          width: '74px',
+          height: '74px',
+          borderRadius: '22px',
+          backgroundColor: 'rgba(220, 38, 38, 0.1)',
+          border: '2px solid rgba(220, 38, 38, 0.35)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          margin: '0 auto 20px auto',
+          boxShadow: '0 10px 25px rgba(220, 38, 38, 0.2)'
         }}>
-          <div style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '22px',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            border: '2px solid rgba(147, 197, 253, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)'
-          }}>
-            <Monitor size={42} color="#60A5FA" />
-          </div>
-
-          {/* Overlaid Smartphone with Warning Slash */}
-          <div style={{
-            position: 'absolute',
-            bottom: '-4px',
-            right: '2px',
-            width: '38px',
-            height: '38px',
-            borderRadius: '12px',
-            backgroundColor: '#DC2626',
-            border: '2px solid #0F1E36',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(220, 38, 38, 0.5)'
-          }}>
-            <Smartphone size={20} color="#FFFFFF" />
-          </div>
+          <ShieldAlert size={38} color="#EF4444" />
         </div>
 
         {/* Headline */}
         <h1 style={{
-          fontSize: '1.6rem',
+          fontSize: '1.5rem',
           fontWeight: 900,
           color: '#FFFFFF',
           lineHeight: 1.25,
-          marginBottom: '8px',
+          marginBottom: '10px',
           letterSpacing: '-0.02em'
         }}>
-          Desktop Workstation Required
+          Access Restricted
         </h1>
 
         <p style={{
           fontSize: '0.875rem',
           color: '#94A3B8',
           lineHeight: 1.55,
-          marginBottom: '24px'
+          marginBottom: '26px'
         }}>
-          The <strong style={{ color: '#FFFFFF' }}>{portalTitle || portalMeta.name}</strong> contains high-security institutional controls, multi-pane verification consoles, and encrypted audit pipelines.
-          For security compliance, this portal is <span style={{ color: '#F87171', fontWeight: 700 }}>accessible exclusively via Desktop Computers &amp; PCs</span>.
+          This is a protected operational gateway. Access is strictly limited to authorized personnel with verified institutional credentials.
         </p>
 
-        {/* Security & Display Compliance Reasons */}
+        {/* Security Notices */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
           gap: '10px',
           textAlign: 'left',
-          marginBottom: '26px'
+          marginBottom: '28px'
         }}>
           <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.04)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.07)',
             borderRadius: '12px',
             padding: '12px 14px',
             display: 'flex',
@@ -331,89 +273,65 @@ export default function DesktopWorkstationGuard({
             alignItems: 'flex-start'
           }}>
             <div style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(96, 165, 250, 0.15)',
+              width: '26px',
+              height: '26px',
+              borderRadius: '7px',
+              backgroundColor: 'rgba(239, 68, 68, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              color: '#F87171',
+              marginTop: '1px'
+            }}>
+              <Lock size={14} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#F1F5F9' }}>
+                Authorized Personnel Only
+              </div>
+              <div style={{ fontSize: '0.725rem', color: '#94A3B8', marginTop: '2px' }}>
+                Administrative operations require authenticated institutional terminal clearance.
+              </div>
+            </div>
+          </div>
+
+          <div style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.07)',
+            borderRadius: '12px',
+            padding: '12px 14px',
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'flex-start'
+          }}>
+            <div style={{
+              width: '26px',
+              height: '26px',
+              borderRadius: '7px',
+              backgroundColor: 'rgba(59, 130, 246, 0.15)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
               color: '#60A5FA',
-              marginTop: '2px'
+              marginTop: '1px'
             }}>
-              <Lock size={15} />
+              <ShieldCheck size={14} />
             </div>
             <div>
               <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#F1F5F9' }}>
-                Statutory Security &amp; DPDP Policy
+                End-to-End Cryptographic Audit
               </div>
               <div style={{ fontSize: '0.725rem', color: '#94A3B8', marginTop: '2px' }}>
-                Administrative data lookup and officer approvals mandate secure intranet desktop terminals to prevent unauthorized handheld access.
+                All access requests are securely authenticated and recorded under National Security standards.
               </div>
             </div>
-          </div>
-
-          <div style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.04)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '12px',
-            padding: '12px 14px',
-            display: 'flex',
-            gap: '12px',
-            alignItems: 'flex-start'
-          }}>
-            <div style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(16, 185, 129, 0.15)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              color: '#34D399',
-              marginTop: '2px'
-            }}>
-              <Monitor size={15} />
-            </div>
-            <div>
-              <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#F1F5F9' }}>
-                Multi-Pane Verification Workspace
-              </div>
-              <div style={{ fontSize: '0.725rem', color: '#94A3B8', marginTop: '2px' }}>
-                Document side-by-side auditing, CKYC inspection, and FIR dispatch require a minimum widescreen display resolution of 1024px.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Live Device Diagnostics Pill */}
-        <div style={{
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
-          border: '1px solid rgba(239, 68, 68, 0.25)',
-          borderRadius: '12px',
-          padding: '10px 14px',
-          marginBottom: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '8px',
-          fontSize: '0.725rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FCA5A5' }}>
-            <AlertTriangle size={14} />
-            <span>Detected: <strong>Mobile Viewport ({width} × {height}px)</strong></span>
-          </div>
-          <div style={{ color: '#94A3B8' }}>
-            Required: <strong style={{ color: '#38BDF8' }}>Desktop PC (≥ 1024px)</strong>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {/* Primary Action: Citizen Mobile Portal */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <button
             onClick={onSwitchToCitizen}
             style={{
@@ -431,69 +349,45 @@ export default function DesktopWorkstationGuard({
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              boxShadow: '0 8px 24px rgba(11, 94, 215, 0.4)',
-              transition: 'transform 0.2s ease, boxShadow 0.2s ease'
+              boxShadow: '0 8px 24px rgba(11, 94, 215, 0.4)'
             }}
           >
-            📱 Switch to Citizen Mobile Portal <ArrowRight size={18} />
+            Return to Citizen Portal <ArrowRight size={18} />
           </button>
 
-          {/* Secondary Actions Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <button
-              onClick={handleCopyLink}
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                color: copied ? '#34D399' : '#E2E8F0',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                padding: '11px',
-                borderRadius: '12px',
-                fontWeight: 700,
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px'
-              }}
-            >
-              {copied ? <Check size={15} /> : <Copy size={15} />}
-              {copied ? 'Link Copied!' : 'Copy PC Link'}
-            </button>
-
-            <button
-              onClick={onGoBackToLanding}
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                color: '#E2E8F0',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                padding: '11px',
-                borderRadius: '12px',
-                fontWeight: 700,
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px'
-              }}
-            >
-              <Home size={15} /> CivicOne Home
-            </button>
-          </div>
+          <button
+            onClick={onGoBackToLanding}
+            style={{
+              width: '100%',
+              backgroundColor: 'rgba(255, 255, 255, 0.06)',
+              color: '#CBD5E1',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              padding: '11px',
+              borderRadius: '12px',
+              fontWeight: 700,
+              fontSize: '0.825rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+          >
+            <Home size={15} /> CivicOne Home
+          </button>
         </div>
       </div>
 
       {/* Footer Notice */}
       <div style={{
-        maxWidth: '560px',
+        maxWidth: '520px',
         width: '100%',
         margin: '0 auto',
         textAlign: 'center',
         fontSize: '0.7rem',
         color: '#64748B'
       }}>
-        Digital India National Identity Architecture • DPDP Act 2023 Workstation Policy
+        Digital India Sovereign Architecture • Protected National Infrastructure
       </div>
     </div>
   );

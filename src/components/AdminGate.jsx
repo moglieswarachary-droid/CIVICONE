@@ -118,7 +118,7 @@ export default function AdminGate({ onAuthenticated, onGoBackToLanding }) {
           borderRadius: '20px',
           marginBottom: '12px'
         }}>
-          🖥️ Root Terminal Desktop Station Session Verified
+          🔒 Master System Control
         </div>
 
         <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.02em', marginBottom: '6px' }}>

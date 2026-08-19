@@ -1,10 +1,10 @@
-// src/components/LandingPage.jsx - Premium Public Gateway, Marketing Page, 3-Level Access Hub & State-Wise Organization Access
+// src/components/LandingPage.jsx - Premium Public Gateway & Sovereign Citizen Portal
 
 import React, { useState } from 'react';
 import {
   ShieldCheck, Lock, ArrowRight, Award, FileCheck, Landmark, HeartPulse, Car,
-  GraduationCap, Building2, CheckCircle2, ChevronRight, ShieldAlert, Smartphone,
-  BookOpen, Briefcase, Search, MapPin, UserCheck, AlertTriangle, Key, Monitor, Crown
+  GraduationCap, Building2, CheckCircle2, ChevronRight, ShieldAlert,
+  BookOpen, Briefcase, Search, MapPin, UserCheck, AlertTriangle, Key
 } from 'lucide-react';
 import { INDIA_STATES_AND_UTS } from '../data/mockData.js';
 
@@ -65,19 +65,19 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
               style={{
                 backgroundColor: '#0B5ED7',
                 color: '#FFFFFF',
-                padding: '9px 16px',
+                padding: '9px 18px',
                 borderRadius: '10px',
                 fontWeight: 800,
-                fontSize: '0.825rem',
+                fontSize: '0.85rem',
                 border: 'none',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '8px',
                 boxShadow: '0 4px 12px rgba(11, 94, 215, 0.25)'
               }}
             >
-              <Smartphone size={16} /> Citizen Portal
+              Citizen Portal
             </button>
 
             <button
@@ -86,28 +86,17 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
                 backgroundColor: '#FFFFFF',
                 color: '#073B8C',
                 border: '1.5px solid #BFDBFE',
-                padding: '8px 14px',
+                padding: '8px 16px',
                 borderRadius: '10px',
                 fontWeight: 800,
-                fontSize: '0.825rem',
+                fontSize: '0.85rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '8px'
               }}
             >
-              <Building2 size={16} /> Org Portal
-              <span style={{
-                fontSize: '0.65rem',
-                backgroundColor: '#EFF6FF',
-                color: '#1D4ED8',
-                padding: '2px 6px',
-                borderRadius: '6px',
-                border: '1px solid #BFDBFE',
-                marginLeft: '2px'
-              }}>
-                PC Only
-              </span>
+              <Building2 size={16} /> Organization Portal
             </button>
           </div>
 
@@ -116,39 +105,20 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
 
       {/* HERO SECTION */}
       <section id="home" style={{
-        padding: '40px 20px 50px 20px',
+        padding: '50px 20px 60px 20px',
         position: 'relative',
         overflow: 'hidden',
         background: 'linear-gradient(180deg, #FFFFFF 0%, #F6F9FC 100%)'
       }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
-          
-          {/* Device Compatibility Notice Pill */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            backgroundColor: '#EFF6FF',
-            border: '1px solid #BFDBFE',
-            padding: '6px 16px',
-            borderRadius: '30px',
-            fontSize: '0.775rem',
-            fontWeight: 700,
-            color: '#1D4ED8',
-            marginBottom: '20px'
-          }}>
-            <span>📱 Citizen Portal: Mobile &amp; Desktop</span>
-            <span style={{ color: '#94A3B8' }}>•</span>
-            <span>🖥️ Admin/Org: PC Workstation</span>
-          </div>
 
           <h1 style={{
             fontFamily: 'var(--font-heading)',
-            fontSize: 'clamp(2rem, 5vw, 3rem)',
+            fontSize: 'clamp(2.1rem, 5vw, 3.1rem)',
             fontWeight: 900,
             color: '#0B1F3A',
             lineHeight: 1.15,
-            marginBottom: '28px',
+            marginBottom: '32px',
             letterSpacing: '-0.02em'
           }}>
             Your Digital Identity.<br />
@@ -159,7 +129,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
           <div id="access-gateway" style={{
             backgroundColor: '#FFFFFF',
             borderRadius: '28px',
-            padding: '32px 24px',
+            padding: '36px 28px',
             border: '1.5px solid #E2E8F0',
             boxShadow: '0 20px 50px rgba(11, 94, 215, 0.08)',
             maxWidth: '620px',
@@ -195,7 +165,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
             </div>
 
             <h3 style={{
-              fontSize: '1.45rem',
+              fontSize: '1.5rem',
               fontWeight: 900,
               color: '#0B1F3A',
               marginBottom: '8px',
@@ -205,11 +175,11 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
             </h3>
 
             <p style={{
-              fontSize: '0.9rem',
+              fontSize: '0.925rem',
               color: '#475569',
               lineHeight: 1.6,
               maxWidth: '480px',
-              margin: '0 auto 24px auto'
+              margin: '0 auto 26px auto'
             }}>
               Authenticate securely via registered Mobile / Aadhaar number to access your verified digital identity card, encrypted document vault, and consent control matrix.
             </p>
@@ -238,11 +208,11 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
                 transition: 'transform 0.2s ease, boxShadow 0.2s ease'
               }}
             >
-              📱 Enter Citizen Portal <ArrowRight size={20} />
+              Citizen Login <ArrowRight size={20} />
             </button>
 
-            <div style={{ marginTop: '16px', fontSize: '0.775rem', color: '#64748B' }}>
-              🔒 Compatible with Mobile Phones, Tablets &amp; Desktop Computers.
+            <div style={{ marginTop: '16px', fontSize: '0.775rem', color: '#64748B', fontStyle: 'italic' }}>
+              🔒 Protected by 2-Phase OTP &amp; Aadhaar Cryptographic Vault.
             </div>
           </div>
 
@@ -257,7 +227,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
               <ShieldCheck size={28} style={{ color: '#0B5ED7' }} />
               <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#FFFFFF' }}>CivicOne</span>
             </div>
-            <p style={{ fontSize: '0.85rem', color: '#94A3B8', maxWidth: '300px', lineHeight: 1.5 }}>
+            <p style={{ fontSize: '0.85rem', color: '#94A3B8', maxWidth: '320px', lineHeight: 1.5 }}>
               Official National Digital Identity, Sovereign Personal Vault &amp; Consent Control Architecture.
             </p>
           </div>
@@ -266,54 +236,25 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
             {/* Citizen Access */}
             <div>
               <h4 style={{ fontSize: '0.875rem', color: '#FFFFFF', marginBottom: '12px', fontWeight: 800 }}>
-                Citizen Services (All Devices)
+                Authorized Portals
               </h4>
-              <ul style={{ listStyle: 'none', fontSize: '0.825rem', color: '#94A3B8', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <ul style={{ listStyle: 'none', fontSize: '0.825rem', color: '#94A3B8', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <li>
                   <button
                     onClick={onAccessCivicOne}
-                    style={{ background: 'none', border: 'none', color: '#60A5FA', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'underline', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '5px' }}
+                    style={{ background: 'none', border: 'none', color: '#60A5FA', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
                   >
-                    <Smartphone size={14} /> Citizen Mobile &amp; Web Login
+                    Citizen Login
                   </button>
                 </li>
-              </ul>
-            </div>
-
-            {/* Desktop Workstation Portals */}
-            <div>
-              <h4 style={{ fontSize: '0.875rem', color: '#FFFFFF', marginBottom: '12px', fontWeight: 800 }}>
-                Institutional Portals (Desktop Workstation)
-              </h4>
-              <ul style={{ listStyle: 'none', fontSize: '0.825rem', color: '#94A3B8', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <li>
                   <button
                     onClick={onOpenOrganizationGate}
-                    style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '5px' }}
+                    style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'none', cursor: 'pointer', padding: 0 }}
                     onMouseOver={(e) => e.currentTarget.style.color = '#60A5FA'}
                     onMouseOut={(e) => e.currentTarget.style.color = '#94A3B8'}
                   >
-                    <Building2 size={14} /> Organization Portal (PC Only)
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={onOpenAuthorityPortal}
-                    style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '5px' }}
-                    onMouseOver={(e) => e.currentTarget.style.color = '#60A5FA'}
-                    onMouseOut={(e) => e.currentTarget.style.color = '#94A3B8'}
-                  >
-                    <Landmark size={14} /> Gov Officer Portal (PC Only)
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={onOpenOwnerAdmin}
-                    style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '5px' }}
-                    onMouseOver={(e) => e.currentTarget.style.color = '#60A5FA'}
-                    onMouseOut={(e) => e.currentTarget.style.color = '#94A3B8'}
-                  >
-                    <Crown size={14} /> Super Admin Control (PC Only)
+                    Organization Login
                   </button>
                 </li>
               </ul>
@@ -323,11 +264,12 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
 
         <div style={{ maxWidth: '1200px', margin: '16px auto 0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#64748B', flexWrap: 'wrap', gap: '8px' }}>
           <div>© 2026 CivicOne National Identity Platform. All rights reserved.</div>
-          <div>Strict Security Boundary &amp; DPDP Workstation Compliant</div>
+          <div>End-to-End Cryptographic Security &amp; Authorized Encryption Enabled</div>
         </div>
       </footer>
 
     </div>
   );
 }
+
 

@@ -118,7 +118,7 @@ export default function AuthorityGate({ onAuthenticated, onGoBackToLanding }) {
           borderRadius: '20px',
           marginBottom: '12px'
         }}>
-          🖥️ Authorized Desktop Station Session Verified
+          🔒 Authorized Officer Terminal
         </div>
 
         <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em', marginBottom: '4px' }}>

@@ -77,7 +77,7 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding, o
                   padding: '2px 8px',
                   borderRadius: '12px'
                 }}>
-                  🖥️ Desktop Workstation Session
+                  🔒 Authorized Gateway
                 </span>
               </div>
               <p style={{ fontSize: '0.75rem', color: '#94A3B8', margin: 0 }}>
