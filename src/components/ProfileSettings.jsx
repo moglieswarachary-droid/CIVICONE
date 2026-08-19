@@ -308,12 +308,9 @@ export default function ProfileSettings({ citizen = {}, onLogout, onProfileUpdat
                 <div style={{ fontSize: '0.725rem', color: '#64748B', marginTop: '2px' }}>Purpose: {perm.purpose} • Duration: {perm.duration}</div>
               </div>
 
-              <button
-                onClick={() => alert(`Consent for ${perm.org} has been revoked immediately.`)}
-                style={{ backgroundColor: '#FEE2E2', color: '#DC2626', border: 'none', padding: '8px 14px', borderRadius: '10px', fontWeight: 800, fontSize: '0.775rem', cursor: 'pointer' }}
-              >
-                Revoke Access
-              </button>
+              <div style={{ backgroundColor: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', padding: '6px 12px', borderRadius: '10px', fontWeight: 800, fontSize: '0.775rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Eye size={13} /> View Only
+              </div>
             </div>
           ))}
         </div>

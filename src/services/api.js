@@ -158,8 +158,30 @@ export const privacyService = {
   getActiveConsents: () => safeFetch('/api/consent/active', { headers: authStorage.getHeaders() }, {
     success: true,
     consents: [
-      { id: 'cs-01', orgName: 'State Bank of India', purpose: 'Savings Account KYC', expiresAt: '30 Days', status: 'ACTIVE' },
-      { id: 'cs-02', orgName: 'Apollo Hospitals', purpose: 'ABHA Health Profile Access', expiresAt: '12 Hours', status: 'ACTIVE' }
+      {
+        id: 'cs-01',
+        orgName: 'State Bank of India',
+        docName: 'Aadhaar & PAN Card Credentials',
+        purpose: 'Savings Account KYC & Identity Verification',
+        accessType: 'View Only',
+        createdAt: '14 Aug 2026',
+        expiryDate: '13 Sep 2026 (30 Days)',
+        expiresAt: '30 Days',
+        status: 'ACTIVE',
+        authorizedFields: ['Full Name', 'Date of Birth', 'Masked Aadhaar Number', 'Permanent Address']
+      },
+      {
+        id: 'cs-02',
+        orgName: 'Apollo Hospitals',
+        docName: 'ABHA Health Profile & Vaccination Records',
+        purpose: 'ABHA Health Profile Access & Hospital Admission',
+        accessType: 'View Only',
+        createdAt: '18 Aug 2026',
+        expiryDate: '19 Aug 2026 (12 Hours)',
+        expiresAt: '12 Hours',
+        status: 'ACTIVE',
+        authorizedFields: ['ABHA ID', 'Immunization History', 'Blood Group', 'Emergency Contact']
+      }
     ]
   }),
   getPendingRequests: () => safeFetch('/api/consent/citizen-requests', { headers: authStorage.getHeaders() }, {
