@@ -78,14 +78,15 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
       if (!localCitizen) {
         localCitizen = {
           id: `cit-${cleanPhone}`,
-          citizenId: cleanPhone === '9000000001' ? 'CIV-DEMO-10001' : `CIV-IND-${cleanPhone.slice(-5)}`,
-          fullName: cleanPhone === '9000000001' ? 'Aarav Kumar' : 'Verified Citizen',
-          displayName: cleanPhone === '9000000001' ? 'Aarav' : 'Citizen',
-          name: cleanPhone === '9000000001' ? 'Aarav Kumar' : 'Verified Citizen',
+          citizenId: cleanPhone === '9000000001' ? 'CIV-AP-710646-823' : `CIV-AP-${cleanPhone.slice(-6)}`,
+          civicId: cleanPhone === '9000000001' ? 'CIV-AP-710646-823' : `CIV-AP-${cleanPhone.slice(-6)}`,
+          fullName: cleanPhone === '9000000001' ? 'Raghavendra' : 'Verified Citizen',
+          displayName: cleanPhone === '9000000001' ? 'Raghavendra' : 'Citizen',
+          name: cleanPhone === '9000000001' ? 'Raghavendra' : 'Verified Citizen',
           mobile: `+91 ${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`,
-          email: cleanPhone === '9000000001' ? 'aarav.demo@civicone.example' : `citizen.${cleanPhone.slice(-4)}@civicone.in`,
-          dateOfBirth: '15-07-2004',
-          dob: '15-07-2004',
+          email: cleanPhone === '9000000001' ? 'raghavendra.demo@civicone.gov.in' : `citizen.${cleanPhone.slice(-4)}@civicone.in`,
+          dateOfBirth: '15/08/1995',
+          dob: '15/08/1995',
           gender: 'Male',
           state: 'Andhra Pradesh',
           address: 'Door 4-12, MG Road, Vijayawada, Andhra Pradesh 520002',
@@ -93,9 +94,9 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
           goldPassStatus: 'standard',
           verificationStatus: 'Verified Citizen',
           identityStatus: 'Verified',
-          maskedAadhaar: `XXXX XXXX ${cleanPhone.slice(-4) || '1001'}`,
+          maskedAadhaar: `XXXX XXXX ${cleanPhone.slice(-4) || '8234'}`,
           isDemo: true,
-          demoLabel: 'DEMO DATA — NOT A REAL CITIZEN'
+          demoLabel: 'OFFICIAL CITIZEN PROFILE'
         };
       }
 
