@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { DEMO_DOCUMENTS, DEMO_FAMILY_MEMBERS, calculateDocExpiryStatus } from '../data/mockData.js';
 
-export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
+export default function CivicVault({ documents: initialDocs, onRefreshDocs, initialMemberId = 'fam-self' }) {
   const [documents, setDocuments] = useState(initialDocs && initialDocs.length > 0 ? initialDocs : DEMO_DOCUMENTS);
 
   // Requirement 3 & 4: Category & Type Filters State
@@ -31,7 +31,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
 
   // Family & Dependent Vault State
   const [familyMembers, setFamilyMembers] = useState(DEMO_FAMILY_MEMBERS);
-  const [selectedMemberId, setSelectedMemberId] = useState('fam-self');
+  const [selectedMemberId, setSelectedMemberId] = useState(initialMemberId || 'fam-self');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState({
     name: '',
@@ -40,6 +40,12 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
     gender: 'Male',
     idProof: ''
   });
+
+  useEffect(() => {
+    if (initialMemberId) {
+      setSelectedMemberId(initialMemberId);
+    }
+  }, [initialMemberId]);
 
   const activeMember = familyMembers.find(m => m.id === selectedMemberId) || familyMembers[0];
   const activeDocList = activeMember.id === 'fam-self' ? documents : (activeMember.documents || []);
