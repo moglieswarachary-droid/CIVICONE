@@ -54,15 +54,25 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
   // Fetch initial dashboard data & demo accounts from REST API backend
   useEffect(() => {
+    const fetchJsonSafe = async (url) => {
+      try {
+        const r = await fetch(url);
+        if (!r.ok) return {};
+        return await r.json();
+      } catch (e) {
+        return {};
+      }
+    };
+
     async function loadDashboardData() {
       try {
         const [cardRes, docsRes, notifRes, govtRes, newsRes, demoRes] = await Promise.all([
-          fetch('/api/card/me').then(r => r.json()),
-          fetch('/api/vault/documents').then(r => r.json()),
-          fetch('/api/notifications').then(r => r.json()),
-          fetch('/api/updates/govt').then(r => r.json()),
-          fetch('/api/updates/news').then(r => r.json()),
-          fetch('/api/citizens/demo').then(r => r.json())
+          fetchJsonSafe('/api/card/me'),
+          fetchJsonSafe('/api/vault/documents'),
+          fetchJsonSafe('/api/notifications'),
+          fetchJsonSafe('/api/updates/govt'),
+          fetchJsonSafe('/api/updates/news'),
+          fetchJsonSafe('/api/citizens/demo')
         ]);
 
         if (cardRes.citizen) setCurrentCitizen(cardRes.citizen);
@@ -77,8 +87,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       }
     }
     loadDashboardData();
-    const interval = setInterval(loadDashboardData, 4000);
-    return () => clearInterval(interval);
   }, []);
 
   // Switch Demo Citizen Account Handler
@@ -89,20 +97,28 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ citizenId })
       });
-      const data = await res.json();
-      if (data.success) {
-        setCurrentCitizen(data.citizen);
-        setCardData(data.card);
-        setDocuments(data.documents);
-        const [notifRes, demoRes] = await Promise.all([
-          fetch('/api/notifications').then(r => r.json()),
-          fetch('/api/citizens/demo').then(r => r.json())
-        ]);
-        if (notifRes.notifications) setNotifications(notifRes.notifications);
-        if (demoRes.demoCitizens) setDemoCitizens(demoRes.demoCitizens);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setCurrentCitizen(data.citizen);
+          setCardData(data.card);
+          setDocuments(data.documents);
+          return;
+        }
       }
+      throw new Error("offline");
     } catch (err) {
-      console.log("Demo switch failed");
+      // Local fallback for switching demo citizens on Netlify/offline
+      const target = demoCitizens.find(c => c.citizenId === citizenId) || DEMO_CITIZENS_LIST.find(c => c.citizenId === citizenId);
+      if (target) {
+        setCurrentCitizen(target);
+        setCardData({
+          ...DEMO_CARD,
+          holderName: (target.fullName || target.name || '').toUpperCase(),
+          civicId: target.citizenId,
+          maskedAadhaar: target.maskedAadhaar || 'XXXX XXXX 1001'
+        });
+      }
     }
   };
 

@@ -5,7 +5,14 @@ echo   CivicOne Digital Identity & Premium Gold Citizen Portal
 echo =================================================================
 echo.
 
-SET NODE_EXEC="C:\Users\charv\node-v20.18.0-win-x64\node.exe"
+WHERE node >nul 2>nul
+IF %ERRORLEVEL% EQU 0 (
+  SET NODE_EXEC=node
+) ELSE IF EXIST "C:\Users\charv\node-v20.18.0-win-x64\node.exe" (
+  SET NODE_EXEC="C:\Users\charv\node-v20.18.0-win-x64\node.exe"
+) ELSE (
+  SET NODE_EXEC=node
+)
 
 echo 📦 Building production web bundle (Vite)...
 %NODE_EXEC% "node_modules\vite\bin\vite.js" build
