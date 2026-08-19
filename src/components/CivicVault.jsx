@@ -21,6 +21,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
 
   // Modals State
   const [selectedDoc, setSelectedDoc] = useState(null);
+  const [copyToast, setCopyToast] = useState('');
   const [showCategoryModal, setShowCategoryModal] = useState(null); // 'government' | 'rto' | 'academic' | null
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(null);
@@ -1100,40 +1101,267 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
         </div>
       )}
 
-      {/* MODAL: DOCUMENT DETAIL & VIEWER */}
-      {selectedDoc && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 31, 58, 0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '16px' }}>
-          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '32px', maxWidth: '640px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-            <button onClick={() => setSelectedDoc(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', color: '#64748B', border: 'none', cursor: 'pointer' }}>
-              <X size={22} />
-            </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '14px', backgroundColor: '#EAF3FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {getDocIcon(selectedDoc)}
-              </div>
-              <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0B1F3A' }}>{selectedDoc.name}</h3>
-                <div style={{ fontSize: '0.8rem', color: '#0B5ED7', fontWeight: 700 }}>{selectedDoc.issuer}</div>
-              </div>
-            </div>
+      {/* MODAL: FULL OFFICIAL GRAPHIC DOCUMENT PREVIEW & COPY SUITE */}
+      {selectedDoc && (() => {
+        const docNameLower = (selectedDoc.name || '').toLowerCase();
+        const docRef = selectedDoc.refNo || selectedDoc.docNumber || '8121 4981 8909';
+        const isAadhaar = docNameLower.includes('aadhaar');
+        const isPan = docNameLower.includes('pan');
+        const isDL = docNameLower.includes('driving') || docNameLower.includes('licence') || docNameLower.includes('dl');
+        const isAcademic = docNameLower.includes('b.tech') || docNameLower.includes('degree') || docNameLower.includes('marksheet') || docNameLower.includes('academic');
 
-            <div style={{ backgroundColor: '#1E293B', borderRadius: '16px', padding: '20px', color: '#FFFFFF', marginBottom: '20px' }}>
-              <div style={{ textAlign: 'center', padding: '24px 0' }}>
-                <FileCheck size={54} style={{ color: '#60A5FA', marginBottom: '10px' }} />
-                <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>{selectedDoc.name}</div>
-                <div style={{ fontSize: '0.8rem', color: '#94A3B8', marginTop: '4px' }}>Credential ID: {selectedDoc.refNo}</div>
-                <div style={{ fontSize: '0.8rem', color: '#FEF08A', marginTop: '6px' }}>
-                  Issue Date: <strong>{selectedDoc.issueDate || '15-01-2024'}</strong> | Expiry Date: <strong>{selectedDoc.expiryDate || 'N/A'}</strong>
+        const handleCopyCode = (codeStr, labelText) => {
+          if (navigator.clipboard && codeStr) {
+            navigator.clipboard.writeText(codeStr);
+            setCopyToast(`✅ Copied ${labelText} (${codeStr}) to clipboard!`);
+            setTimeout(() => setCopyToast(''), 3500);
+          }
+        };
+
+        return (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 31, 58, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '16px' }}>
+            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '32px', maxWidth: '680px', width: '100%', maxHeight: '92vh', overflowY: 'auto', position: 'relative', boxShadow: '0 25px 60px rgba(0,0,0,0.35)' }}>
+              
+              {/* Close Button */}
+              <button onClick={() => setSelectedDoc(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: '#F1F5F9', border: 'none', color: '#64748B', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+
+              {/* Modal Header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '16px', backgroundColor: '#EAF3FF', color: '#0B5ED7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {getDocIcon(selectedDoc)}
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0B1F3A' }}>{selectedDoc.name}</h3>
+                  <div style={{ fontSize: '0.825rem', color: '#0B5ED7', fontWeight: 800 }}>Issuing Authority: {selectedDoc.issuer}</div>
                 </div>
               </div>
-            </div>
 
-            <button onClick={() => setSelectedDoc(null)} style={{ width: '100%', backgroundColor: '#0B5ED7', color: '#FFFFFF', padding: '12px', borderRadius: '12px', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
-              Close Viewer
-            </button>
+              {/* COPY FEEDBACK TOAST */}
+              {copyToast && (
+                <div style={{ backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', color: '#065F46', padding: '10px 16px', borderRadius: '12px', fontWeight: 800, fontSize: '0.85rem', marginBottom: '16px', textAlign: 'center' }}>
+                  {copyToast}
+                </div>
+              )}
+
+              {/* 1. VISUAL GRAPHIC DOCUMENT CARD PREVIEW */}
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                  🖼️ Sovereign Digital Document Visual Card Preview:
+                </div>
+
+                {/* AADHAAR CARD VISUAL DESIGN */}
+                {isAadhaar && (
+                  <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '2px solid #E2E8F0', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+                    {/* Tricolor Header Bar */}
+                    <div style={{ height: '6px', background: 'linear-gradient(to right, #FF9933 33%, #FFFFFF 33%, #FFFFFF 66%, #128807 66%)' }} />
+                    <div style={{ backgroundColor: '#F8FAFC', padding: '14px 20px', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ fontSize: '1.4rem' }}>🏛️</div>
+                        <div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 900, color: '#0B1F3A' }}>UNIQUE IDENTIFICATION AUTHORITY OF INDIA</div>
+                          <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#FF9933' }}>GOVERNMENT OF INDIA • Aadhaar - Digital Identity</div>
+                        </div>
+                      </div>
+                      <ShieldCheck size={28} color="#128807" />
+                    </div>
+
+                    <div style={{ padding: '20px', display: 'flex', gap: '20px', alignItems: 'center' }}>
+                      <div style={{ width: '90px', height: '110px', borderRadius: '10px', backgroundColor: '#E2E8F0', border: '2px solid #CBD5E1', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <User size={54} color="#64748B" />
+                        <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#0B5ED7', marginTop: '4px' }}>VERIFIED</span>
+                      </div>
+
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '4px' }}>Raghavendra</div>
+                        <div style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 600 }}>DOB: <strong>15/08/1995</strong> | Gender: <strong>Male</strong></div>
+                        <div style={{ fontSize: '0.775rem', color: '#64748B', marginTop: '4px' }}>Address: Vijayawada, Andhra Pradesh - 520001</div>
+                        
+                        {/* Aadhaar Number Box */}
+                        <div style={{ marginTop: '12px', backgroundColor: '#F1F5F9', border: '1px dashed #0B5ED7', padding: '10px 14px', borderRadius: '10px', display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ fontSize: '1.25rem', fontFamily: 'monospace', fontWeight: 900, color: '#0B1F3A', letterSpacing: '0.15em' }}>
+                            {docRef}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ backgroundColor: '#FF9933', color: '#FFFFFF', padding: '6px 14px', fontSize: '0.7rem', fontWeight: 800, textAlign: 'center' }}>
+                      Aadhaar is proof of identity, not of citizenship • Sovereign Token Verified
+                    </div>
+                  </div>
+                )}
+
+                {/* PAN CARD VISUAL DESIGN */}
+                {isPan && (
+                  <div style={{ backgroundColor: '#1E3A8A', borderRadius: '16px', color: '#FFFFFF', padding: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.15)', position: 'relative' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.2)', pb: '10px', marginBottom: '16px' }}>
+                      <div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 900, color: '#FEF08A' }}>INCOME TAX DEPARTMENT</div>
+                        <div style={{ fontSize: '0.7rem', color: '#93C5FD', fontWeight: 700 }}>GOVT. OF INDIA • Permanent Account Number Card</div>
+                      </div>
+                      <div style={{ fontSize: '1.4rem' }}>🏛️</div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '18px', alignItems: 'center' }}>
+                      <div style={{ width: '80px', height: '95px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <User size={48} color="#93C5FD" />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.75rem', color: '#93C5FD', fontWeight: 700 }}>Name / Name</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#FFFFFF' }}>RAGHAVENDRA</div>
+                        <div style={{ fontSize: '0.75rem', color: '#93C5FD', fontWeight: 700, marginTop: '6px' }}>Father's Name / Father Name</div>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 800, color: '#FEF08A' }}>S. RAGHAVENDRA</div>
+                        <div style={{ fontSize: '0.75rem', color: '#93C5FD', fontWeight: 700, marginTop: '6px' }}>Date of Birth / DOB</div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 800 }}>15/08/1995</div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '16px', backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.25)', padding: '10px 16px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#93C5FD', fontWeight: 800 }}>PAN NUMBER:</span>
+                      <span style={{ fontSize: '1.2rem', fontFamily: 'monospace', fontWeight: 900, color: '#FEF08A', letterSpacing: '0.1em' }}>
+                        {docRef}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* DRIVING LICENCE VISUAL DESIGN */}
+                {isDL && (
+                  <div style={{ backgroundColor: '#0F172A', borderRadius: '16px', color: '#FFFFFF', padding: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', border: '1.5px solid #0B5ED7' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '10px', marginBottom: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Car size={26} color="#60A5FA" />
+                        <div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 900, color: '#60A5FA' }}>TRANSPORT DEPARTMENT — ANDHRA PRADESH</div>
+                          <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>MINISTRY OF ROAD TRANSPORT & HIGHWAYS (MoRTH)</div>
+                        </div>
+                      </div>
+                      <span style={{ backgroundColor: '#059669', color: '#FFFFFF', fontSize: '0.65rem', fontWeight: 900, padding: '3px 8px', borderRadius: '4px' }}>ACTIVE DL</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '16px', alignItems: 'center' }}>
+                      <div style={{ width: '80px', height: '95px', borderRadius: '8px', backgroundColor: '#1E293B', border: '1px solid #334155', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <User size={44} color="#60A5FA" />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.75rem', color: '#94A3B8' }}>Licence Number:</div>
+                        <div style={{ fontSize: '1.15rem', fontFamily: 'monospace', fontWeight: 900, color: '#FEF08A' }}>{docRef}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#E2E8F0', marginTop: '4px' }}>Holder: <strong>Raghavendra</strong></div>
+                        <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginTop: '4px' }}>Authorised Vehicle Class: <strong style={{ color: '#60A5FA' }}>MCWG, LMV</strong></div>
+                        <div style={{ fontSize: '0.75rem', color: '#94A3B8' }}>Valid Expiry Date: <strong style={{ color: '#34D399' }}>{selectedDoc.expiryDate || '14-01-2034'}</strong></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ACADEMIC DEGREE VISUAL DESIGN */}
+                {isAcademic && (
+                  <div style={{ backgroundColor: '#FFFDF5', borderRadius: '16px', border: '2px solid #D97706', padding: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.06)', position: 'relative' }}>
+                    <div style={{ textAlign: 'center', borderBottom: '2px solid #FDE68A', paddingBottom: '14px', marginBottom: '16px' }}>
+                      <GraduationCap size={36} color="#B45309" style={{ margin: '0 auto 6px' }} />
+                      <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#78350F', letterSpacing: '0.02em' }}>STATE TECHNOLOGICAL UNIVERSITY</div>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#D97706', marginTop: '2px' }}>OFFICIAL ACADEMIC CREDENTIAL DEGREE CERTIFICATE</div>
+                    </div>
+
+                    <div style={{ textAlign: 'center', margin: '14px 0' }}>
+                      <div style={{ fontSize: '0.8rem', color: '#92400E' }}>This is to certify that</div>
+                      <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#78350F', margin: '4px 0' }}>Raghavendra</div>
+                      <div style={{ fontSize: '0.85rem', color: '#92400E' }}>has successfully completed the degree of</div>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#B45309', marginTop: '4px' }}>{selectedDoc.name}</div>
+                    </div>
+
+                    <div style={{ backgroundColor: '#FEF3C7', border: '1px dashed #D97706', borderRadius: '10px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#78350F' }}>ROLL / TRANSCRIPT REF:</span>
+                      <span style={{ fontSize: '1.05rem', fontFamily: 'monospace', fontWeight: 900, color: '#78350F' }}>{docRef}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* OTHER / GENERIC DOCUMENT VISUAL DESIGN */}
+                {!isAadhaar && !isPan && !isDL && !isAcademic && (
+                  <div style={{ backgroundColor: '#0B1F3A', borderRadius: '16px', color: '#FFFFFF', padding: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.15)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', borderBottom: '1px solid rgba(255,255,255,0.15)', paddingBottom: '14px', marginBottom: '16px' }}>
+                      <FileCheck size={36} color="#60A5FA" />
+                      <div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 900 }}>{selectedDoc.name}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#94A3B8' }}>Issuing Authority: {selectedDoc.issuer}</div>
+                      </div>
+                    </div>
+
+                    <div style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px 18px', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 700 }}>CREDENTIAL REF CODE:</span>
+                      <span style={{ fontSize: '1.15rem', fontFamily: 'monospace', fontWeight: 900, color: '#FEF08A' }}>{docRef}</span>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+
+              {/* 2. DIRECT ONE-CLICK COPY CODE & METADATA SECTION */}
+              <div style={{ backgroundColor: '#F8FAFC', borderRadius: '16px', border: '1.5px solid #E2E8F0', padding: '20px', marginBottom: '24px' }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  📋 Quick Copy Document Code &amp; Reference:
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <div style={{ flex: 1, backgroundColor: '#FFFFFF', border: '1.5px solid #CBD5E1', padding: '10px 14px', borderRadius: '10px', fontFamily: 'monospace', fontWeight: 900, fontSize: '1.05rem', color: '#0B1F3A', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>{docRef}</span>
+                      <span style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 700, fontFamily: 'sans-serif' }}>Primary Code</span>
+                    </div>
+                    <button
+                      onClick={() => handleCopyCode(docRef, selectedDoc.name)}
+                      style={{ backgroundColor: '#0B5ED7', color: '#FFFFFF', padding: '11px 18px', borderRadius: '10px', fontWeight: 800, fontSize: '0.85rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 12px rgba(11, 94, 215, 0.25)' }}
+                    >
+                      📋 Copy Code
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <div style={{ flex: 1, backgroundColor: '#FFFFFF', border: '1.5px solid #CBD5E1', padding: '10px 14px', borderRadius: '10px', fontSize: '0.8rem', color: '#475569', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {`${selectedDoc.name} | Ref: ${docRef} | Issuer: ${selectedDoc.issuer}`}
+                    </div>
+                    <button
+                      onClick={() => handleCopyCode(`${selectedDoc.name} | Ref: ${docRef} | Issuer: ${selectedDoc.issuer}`, 'Full Credential Details')}
+                      style={{ backgroundColor: '#EAF3FF', color: '#0B5ED7', padding: '11px 14px', borderRadius: '10px', fontWeight: 800, fontSize: '0.8rem', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    >
+                      📋 Copy Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. METADATA SUMMARY TABLE */}
+              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '16px 20px', marginBottom: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '0.825rem' }}>
+                <div>
+                  <span style={{ color: '#64748B', fontWeight: 700, display: 'block' }}>Issue Date</span>
+                  <strong style={{ color: '#0B1F3A' }}>{selectedDoc.issueDate || '15 Jan 2024'}</strong>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B', fontWeight: 700, display: 'block' }}>Expiry Date</span>
+                  <strong style={{ color: '#0B1F3A' }}>{selectedDoc.expiryDate || 'N/A (Lifetime)'}</strong>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B', fontWeight: 700, display: 'block' }}>Verification Status</span>
+                  <span style={{ color: '#059669', fontWeight: 800 }}>🟢 Verified Sovereign Record</span>
+                </div>
+                <div>
+                  <span style={{ color: '#64748B', fontWeight: 700, display: 'block' }}>Sharing Access</span>
+                  <strong style={{ color: '#0B5ED7' }}>Time-Bound Consent Token</strong>
+                </div>
+              </div>
+
+              {/* CLOSE BUTTON */}
+              <button onClick={() => setSelectedDoc(null)} style={{ width: '100%', backgroundColor: '#0B5ED7', color: '#FFFFFF', padding: '14px', borderRadius: '14px', fontWeight: 800, fontSize: '0.925rem', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(11, 94, 215, 0.3)' }}>
+                Done / Close Document Preview
+              </button>
+
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* MODAL: ACCESS HISTORY AUDIT */}
       {showAuditModal && (
