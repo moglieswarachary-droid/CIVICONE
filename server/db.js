@@ -208,7 +208,7 @@ export const dbService = {
     } catch (err) {
       console.warn("DB Query fallback to in-memory vault documents");
     }
-    return fallbackDb.documents.filter(d => d.citizenId === citizenId || !d.citizenId);
+    return fallbackDb.documents.filter(d => d.citizenId === citizenId);
   },
 
   // Get Active Card
