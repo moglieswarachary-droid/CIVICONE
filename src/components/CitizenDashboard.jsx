@@ -864,7 +864,11 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
 
 
-      <AiAgentFloating />
+      <AiAgentFloating
+        citizen={currentCitizen}
+        documents={documents}
+        onNavigateTab={handleSelectTab}
+      />
 
     </div>
   );
