@@ -52,6 +52,45 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
   ]);
   const [viewMaskedAadhaarModal, setViewMaskedAadhaarModal] = useState(null);
 
+  // College / University Admission State & Academic Records Viewer
+  const [collegeAdmissionForm, setCollegeAdmissionForm] = useState({
+    civicId: 'CIV-AP-710646-823',
+    fullName: 'Raghavendra',
+    programLevel: 'Undergraduate (UG / B.Tech)',
+    course: 'B.Tech Computer Science & Engineering',
+    stream: 'Computer Science & Engineering',
+    rollNo: '2026-CSE-091'
+  });
+  const [viewCollegeAcademicDocsModal, setViewCollegeAcademicDocsModal] = useState(null);
+
+  const handleSendCollegeAdmissionOffer = async (e) => {
+    e.preventDefault();
+    setRequestMsg('');
+    try {
+      const res = await fetch('/api/consent/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orgId: selectedOrg.id || 'org-college-01',
+          citizenCivicId: collegeAdmissionForm.civicId,
+          docId: 'doc-academic-suite',
+          docName: 'Aadhaar Card, 10th Marks Card, Inter Marks Card',
+          purpose: `Admission Offer (${collegeAdmissionForm.course}) — Roll No: ${collegeAdmissionForm.rollNo}`,
+          expiryDays: '7'
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRequestMsg(`📩 Admission Offer & Academic Access Request sent to ${collegeAdmissionForm.fullName} (${collegeAdmissionForm.civicId})! Notification sent to student app.`);
+        fetchOrgData();
+      } else {
+        setRequestMsg(data.error || 'Failed to send admission request.');
+      }
+    } catch (err) {
+      setRequestMsg('Network error sending admission request.');
+    }
+  };
+
   const handleHotelLookupCivicId = () => {
     if (!hotelInputId.trim()) return;
     setHotelCitizenBanner({
@@ -512,32 +551,33 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {/* COLLEGE STUDENT ENROLLMENT VERIFICATION MODULE */}
+                {/* COLLEGE STUDENT ADMISSION & ACADEMIC VERIFICATION MODULE */}
                 <div style={{ backgroundColor: '#FFFFFF', borderRadius: '18px', border: '1px solid #E2E8F0', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
                     <div>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0B1F3A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        🎓 Add / Enroll Student by Civic ID
+                      <h4 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0B1F3A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        🎓 Add Admission &amp; Send Acceptance Letter
                       </h4>
                       <p style={{ fontSize: '0.825rem', color: '#64748B', marginTop: '2px' }}>
-                        Enter a student's Civic ID to dispatch a live academic verification &amp; consent request to their mobile app.
+                        Enter student details to dispatch an official Admission Offer and request permitted academic credentials (Aadhaar, 10th Marks, Inter Marks).
                       </p>
                     </div>
                     <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, color: '#1D4ED8' }}>
-                      ⚡ Real-Time Polling Active (4s Sync)
+                      ⚡ Real-Time Polling Active (3s Sync)
                     </div>
                   </div>
 
-                  <form onSubmit={handleCreateRequest} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', backgroundColor: '#F8FAFC', padding: '20px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
+                  <form onSubmit={handleSendCollegeAdmissionOffer} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', backgroundColor: '#F8FAFC', padding: '20px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
+                    
                     <div>
                       <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
-                        Student Civic ID Token
+                        Student Civic ID Token *
                       </label>
                       <input
                         type="text"
-                        value={citizenCivicId}
-                        onChange={(e) => setCitizenCivicId(e.target.value)}
-                        placeholder="CIV-AP-710646-823"
+                        value={collegeAdmissionForm.civicId}
+                        onChange={(e) => setCollegeAdmissionForm({ ...collegeAdmissionForm, civicId: e.target.value })}
+                        placeholder="e.g. CIV-AP-710646-823"
                         style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontFamily: 'monospace', fontWeight: 800, fontSize: '0.875rem' }}
                         required
                       />
@@ -545,56 +585,98 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
 
                     <div>
                       <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
-                        Required Academic Record
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={collegeAdmissionForm.fullName}
+                        onChange={(e) => setCollegeAdmissionForm({ ...collegeAdmissionForm, fullName: e.target.value })}
+                        placeholder="e.g. Raghavendra"
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontWeight: 700, fontSize: '0.85rem' }}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                        Program Level *
                       </label>
                       <select
-                        value={docName}
-                        onChange={(e) => setDocName(e.target.value)}
-                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontWeight: 700, fontSize: '0.85rem' }}
+                        value={collegeAdmissionForm.programLevel}
+                        onChange={(e) => setCollegeAdmissionForm({ ...collegeAdmissionForm, programLevel: e.target.value })}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontWeight: 700, fontSize: '0.85rem', backgroundColor: '#FFFFFF' }}
                       >
-                        <option value="B.Tech Degree Certificate (Academic)">B.Tech Degree Certificate</option>
-                        <option value="Higher Secondary 12th Marksheet (Academic)">12th Marksheet & Transcript</option>
-                        <option value="National Academic Depository (NAD) Verification">NAD Verification Record</option>
+                        <option value="Undergraduate (UG / B.Tech)">Undergraduate (UG / B.Tech)</option>
+                        <option value="Postgraduate (PG / M.Tech)">Postgraduate (PG / M.Tech)</option>
+                        <option value="Diploma / Polytechnic">Diploma / Polytechnic</option>
                       </select>
                     </div>
 
                     <div>
                       <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
-                        Enrollment Purpose
+                        Course *
                       </label>
                       <input
                         type="text"
-                        value={purpose}
-                        onChange={(e) => setPurpose(e.target.value)}
-                        placeholder="Institutional Student Enrollment Verification"
-                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontWeight: 600, fontSize: '0.85rem' }}
+                        value={collegeAdmissionForm.course}
+                        onChange={(e) => setCollegeAdmissionForm({ ...collegeAdmissionForm, course: e.target.value })}
+                        placeholder="e.g. B.Tech Computer Science"
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontWeight: 700, fontSize: '0.85rem' }}
                         required
                       />
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                        Department / Stream
+                      </label>
+                      <input
+                        type="text"
+                        value={collegeAdmissionForm.stream}
+                        onChange={(e) => setCollegeAdmissionForm({ ...collegeAdmissionForm, stream: e.target.value })}
+                        placeholder="e.g. Computer Science &amp; Engineering"
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontWeight: 600, fontSize: '0.85rem' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                        Roll Number / Student ID *
+                      </label>
+                      <input
+                        type="text"
+                        value={collegeAdmissionForm.rollNo}
+                        onChange={(e) => setCollegeAdmissionForm({ ...collegeAdmissionForm, rollNo: e.target.value })}
+                        placeholder="e.g. 2026-CSE-091"
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontWeight: 700, fontSize: '0.85rem' }}
+                        required
+                      />
+                    </div>
+
+                    <div style={{ gridColumn: '1 / -1', marginTop: '6px' }}>
                       <button
                         type="submit"
                         style={{
                           width: '100%',
                           backgroundColor: '#0B5ED7',
                           color: '#FFFFFF',
-                          padding: '12px 16px',
-                          borderRadius: '10px',
+                          padding: '14px',
+                          borderRadius: '12px',
                           fontWeight: 800,
-                          fontSize: '0.85rem',
+                          fontSize: '0.9rem',
                           border: 'none',
                           cursor: 'pointer',
-                          boxShadow: '0 4px 12px rgba(11, 94, 215, 0.25)',
+                          boxShadow: '0 4px 14px rgba(11, 94, 215, 0.3)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          gap: '6px'
+                          gap: '8px'
                         }}
                       >
-                        <PlusCircle size={16} /> Send Student Accept Request 🚀
+                        <PlusCircle size={18} /> Send Admission Offer &amp; Academic Credentials Request 📩
                       </button>
                     </div>
+
                   </form>
 
                   {requestMsg && (
@@ -641,9 +723,9 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
                                 </span>
                               </td>
                               <td style={{ padding: '12px' }}>
-                                {r.status === 'GRANTED' || r.status === 'ACTIVE' ? (
+                                {r.status === 'GRANTED' || r.status === 'APPROVED' || r.status === 'ACTIVE' ? (
                                   <button
-                                    onClick={() => handleViewAuthorizedDoc(r.id)}
+                                    onClick={() => setViewCollegeAcademicDocsModal(r)}
                                     style={{ backgroundColor: '#0B5ED7', color: '#FFFFFF', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.75rem', border: 'none', cursor: 'pointer' }}
                                   >
                                     View Academic Records 🎓
@@ -922,6 +1004,70 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
               style={{ width: '100%', backgroundColor: '#F1F5F9', color: '#334155', padding: '12px', borderRadius: '12px', fontWeight: 800, fontSize: '0.875rem', border: 'none', cursor: 'pointer', marginTop: '20px' }}
             >
               Close Masked Aadhaar View
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* VERIFIED COLLEGE ACADEMIC CREDENTIALS MODAL OVERLAY */}
+      {viewCollegeAcademicDocsModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 31, 58, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '16px' }}>
+          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '32px', maxWidth: '640px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 25px 60px rgba(0,0,0,0.35)' }}>
+            <button onClick={() => setViewCollegeAcademicDocsModal(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: '#F1F5F9', border: 'none', color: '#64748B', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <X size={20} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+              <span style={{ fontSize: '1.6rem' }}>🎓</span>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0B1F3A' }}>
+                  Verified Student Academic Credentials
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: '#64748B' }}>
+                  Shared via student consent for Jawaharlal Nehru Technological University Admission.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
+              
+              {/* 1. MASKED AADHAAR CARD */}
+              <div style={{ backgroundColor: '#F8FAFC', border: '1.5px solid #0B5ED7', borderRadius: '14px', padding: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#0B1F3A' }}>🆔 Aadhaar Identity Card</span>
+                  <span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>VERIFIED UIDAI</span>
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#475569' }}>Name: <strong>Raghavendra</strong> | Civic ID: <strong>{viewCollegeAcademicDocsModal.citizenCivicId}</strong></div>
+                <div style={{ fontSize: '1rem', fontFamily: 'monospace', fontWeight: 900, color: '#0B5ED7', marginTop: '4px', letterSpacing: '0.1em' }}>XXXX XXXX 8909</div>
+              </div>
+
+              {/* 2. 10TH CLASS MARKS CARD */}
+              <div style={{ backgroundColor: '#F8FAFC', border: '1.5px solid #059669', borderRadius: '14px', padding: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#0B1F3A' }}>📜 10th Class (SSC) Board Marks Card</span>
+                  <span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>VERIFIED BOARD</span>
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#475569' }}>Board: <strong>Board of Secondary Education, AP</strong> | Roll No: <strong>SSC-2020-90812</strong></div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#059669', marginTop: '4px' }}>GPA / Result: 10.0 / 10.0 (PASS WITH DISTINCTION)</div>
+              </div>
+
+              {/* 3. INTERMEDIATE (12TH) MARKS CARD */}
+              <div style={{ backgroundColor: '#F8FAFC', border: '1.5px solid #D97706', borderRadius: '14px', padding: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#0B1F3A' }}>🎓 Intermediate (12th Board) Marks Certificate</span>
+                  <span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>VERIFIED BIEAP</span>
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#475569' }}>Board: <strong>Board of Intermediate Education AP (MPC Group)</strong> | Hall Ticket: <strong>INTER-2022-44091</strong></div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#D97706', marginTop: '4px' }}>Total Marks: 982 / 1000 (GRADE A1)</div>
+              </div>
+
+            </div>
+
+            <button
+              onClick={() => setViewCollegeAcademicDocsModal(null)}
+              style={{ width: '100%', backgroundColor: '#F1F5F9', color: '#334155', padding: '12px', borderRadius: '12px', fontWeight: 800, fontSize: '0.875rem', border: 'none', cursor: 'pointer', marginTop: '20px' }}
+            >
+              Close Academic Records View
             </button>
           </div>
         </div>
