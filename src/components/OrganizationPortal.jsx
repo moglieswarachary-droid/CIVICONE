@@ -359,8 +359,154 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
                 </div>
               </div>
             ) : (
-              <div style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '40px', textAlign: 'center', color: '#64748B' }}>
-                Dashboard data not available for this organization type. Please use the Authorized Credentials Locker.
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* COLLEGE STUDENT ENROLLMENT VERIFICATION MODULE */}
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '18px', border: '1px solid #E2E8F0', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+                    <div>
+                      <h4 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0B1F3A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        🎓 Add / Enroll Student by Civic ID
+                      </h4>
+                      <p style={{ fontSize: '0.825rem', color: '#64748B', marginTop: '2px' }}>
+                        Enter a student's Civic ID to dispatch a live academic verification &amp; consent request to their mobile app.
+                      </p>
+                    </div>
+                    <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, color: '#1D4ED8' }}>
+                      ⚡ Real-Time Polling Active (4s Sync)
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleCreateRequest} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', backgroundColor: '#F8FAFC', padding: '20px', borderRadius: '14px', border: '1px solid #E2E8F0' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                        Student Civic ID Token
+                      </label>
+                      <input
+                        type="text"
+                        value={citizenCivicId}
+                        onChange={(e) => setCitizenCivicId(e.target.value)}
+                        placeholder="CIV-AP-710646-823"
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontFamily: 'monospace', fontWeight: 800, fontSize: '0.875rem' }}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                        Required Academic Record
+                      </label>
+                      <select
+                        value={docName}
+                        onChange={(e) => setDocName(e.target.value)}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontWeight: 700, fontSize: '0.85rem' }}
+                      >
+                        <option value="B.Tech Degree Certificate (Academic)">B.Tech Degree Certificate</option>
+                        <option value="Higher Secondary 12th Marksheet (Academic)">12th Marksheet & Transcript</option>
+                        <option value="National Academic Depository (NAD) Verification">NAD Verification Record</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                        Enrollment Purpose
+                      </label>
+                      <input
+                        type="text"
+                        value={purpose}
+                        onChange={(e) => setPurpose(e.target.value)}
+                        placeholder="Institutional Student Enrollment Verification"
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontWeight: 600, fontSize: '0.85rem' }}
+                        required
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                      <button
+                        type="submit"
+                        style={{
+                          width: '100%',
+                          backgroundColor: '#0B5ED7',
+                          color: '#FFFFFF',
+                          padding: '12px 16px',
+                          borderRadius: '10px',
+                          fontWeight: 800,
+                          fontSize: '0.85rem',
+                          border: 'none',
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 12px rgba(11, 94, 215, 0.25)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <PlusCircle size={16} /> Send Student Accept Request 🚀
+                      </button>
+                    </div>
+                  </form>
+
+                  {requestMsg && (
+                    <div style={{ marginTop: '14px', backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', padding: '12px', borderRadius: '10px', color: '#065F46', fontWeight: 800, fontSize: '0.85rem' }}>
+                      {requestMsg}
+                    </div>
+                  )}
+                </div>
+
+                {/* ENROLLED / PENDING STUDENTS TABLE */}
+                <div style={{ backgroundColor: '#FFFFFF', borderRadius: '18px', border: '1px solid #E2E8F0', padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '16px' }}>
+                    Institutional Student Verification Requests &amp; Access Status
+                  </h4>
+                  {requests.length === 0 ? (
+                    <div style={{ padding: '24px', textAlign: 'center', color: '#64748B', fontSize: '0.875rem' }}>
+                      No student requests sent yet. Use the form above to add a student by Civic ID.
+                    </div>
+                  ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                        <thead>
+                          <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '2px solid #E2E8F0', textAlign: 'left' }}>
+                            <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Student Civic ID</th>
+                            <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Requested Document</th>
+                            <th style={{ padding: '12px', fontWeight 800, color: '#475569' }}>Purpose</th>
+                            <th style={{ padding: '12px', fontWeight 800, color: '#475569' }}>Student Accept Status</th>
+                            <th style={{ padding: '12px', fontWeight 800, color: '#475569' }}>College Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {requests.map((r) => (
+                            <tr key={r.id} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                              <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#0B5ED7' }}>{r.citizenCivicId}</td>
+                              <td style={{ padding: '12px', fontWeight: 700, color: '#0B1F3A' }}>{r.docName}</td>
+                              <td style={{ padding: '12px', color: '#475569' }}>{r.purpose}</td>
+                              <td style={{ padding: '12px' }}>
+                                <span style={{
+                                  backgroundColor: r.status === 'GRANTED' || r.status === 'ACTIVE' ? '#ECFDF5' : '#FEF3C7',
+                                  color: r.status === 'GRANTED' || r.status === 'ACTIVE' ? '#047857' : '#D97706',
+                                  padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800
+                                }}>
+                                  {r.status === 'GRANTED' || r.status === 'ACTIVE' ? '🟢 ACCEPTED BY STUDENT' : '🟡 PENDING STUDENT ACCEPTANCE'}
+                                </span>
+                              </td>
+                              <td style={{ padding: '12px' }}>
+                                {r.status === 'GRANTED' || r.status === 'ACTIVE' ? (
+                                  <button
+                                    onClick={() => handleViewAuthorizedDoc(r.id)}
+                                    style={{ backgroundColor: '#0B5ED7', color: '#FFFFFF', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.75rem', border: 'none', cursor: 'pointer' }}
+                                  >
+                                    View Academic Records 🎓
+                                  </button>
+                                ) : (
+                                  <span style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 600 }}>Awaiting Citizen Action</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
