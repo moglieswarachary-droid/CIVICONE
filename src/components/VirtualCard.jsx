@@ -24,7 +24,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
   // Dynamic Citizen Information from authenticated user profile / props
   const civicId = citizen?.citizenId || card?.civicId || citizen?.civicId || 'CIV-AP-710646-823';
   const citizenName = citizen?.fullName || citizen?.name || citizen?.displayName || 'Raghavendra';
-  const citizenInitials = citizenName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'RS';
+  const photoUrl = citizen?.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300";
   const dob = citizen?.dob || citizen?.dateOfBirth || '15/08/1995';
   const gender = citizen?.gender || 'Male';
   const state = citizen?.state || 'Andhra Pradesh';
@@ -323,56 +323,20 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             {/* CARD MAIN PROFILE SECTION (Two-Column Layout) */}
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center', margin: '4px 0' }}>
               
-              {/* Left Column: Official Citizen Sovereign Identity Badge */}
+              {/* Left Column: Citizen Portrait Photograph */}
               <div style={{ position: 'relative', flexShrink: 0 }}>
-                <div
+                <img
+                  src={photoUrl}
+                  alt={citizenName}
                   style={{
                     width: '74px',
                     height: '88px', // 4:5 portrait aspect ratio
                     borderRadius: '11px',
-                    background: 'linear-gradient(145deg, #1E2F6B 0%, #0F172A 100%)',
-                    border: '1.5px solid rgba(217, 222, 232, 0.6)',
-                    boxShadow: '0 4px 14px rgba(16, 27, 61, 0.4)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '4px',
-                    position: 'relative',
-                    overflow: 'hidden'
+                    objectFit: 'cover',
+                    border: '1.5px solid #F8F7F2',
+                    boxShadow: '0 4px 14px rgba(16, 27, 61, 0.4)'
                   }}
-                >
-                  {/* Subtle Guilloche Circle Backdrop */}
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    backgroundImage: 'radial-gradient(circle at center, rgba(56, 189, 248, 0.15) 0%, transparent 70%)',
-                    pointerEvents: 'none'
-                  }} />
-
-                  <User size={30} style={{ color: '#38BDF8', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                  
-                  <div style={{
-                    fontSize: '0.85rem',
-                    fontWeight: 900,
-                    color: '#F8F7F2',
-                    letterSpacing: '0.08em',
-                    lineHeight: 1
-                  }}>
-                    {citizenInitials}
-                  </div>
-
-                  <span style={{
-                    fontSize: '0.55rem',
-                    color: '#93C5FD',
-                    fontWeight: 800,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>
-                    CITIZEN
-                  </span>
-                </div>
-
+                />
                 {/* Official Photo Verification Seal Overlay */}
                 <div style={{
                   position: 'absolute',
