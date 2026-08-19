@@ -403,26 +403,26 @@ export default function MyJourney({ citizen, documents = [] }) {
     {
       step: 15,
       id: 'jour-15',
-      name: 'CivicOne Sovereign Digital Gold Pass',
-      officialTitle: 'CivicOne Sovereign Digital Identity Authority — Verified Citizen Tier',
+      name: 'CivicOne Sovereign Digital Identity Credential',
+      officialTitle: 'CivicOne Sovereign Digital Identity Authority — Verified Citizen Pass',
       category: 'SOVEREIGN',
       categoryLabel: 'Sovereign Milestone',
-      icon: Sparkles,
-      iconColor: '#D97706',
-      iconBg: '#FEF3C7',
+      icon: ShieldCheck,
+      iconColor: '#0B5ED7',
+      iconBg: '#EFF6FF',
       issuer: 'CivicOne National Sovereign Authority',
       issueDate: '15-08-2026',
       year: '2026',
       ageMilestone: 'Age 22 (Present)',
-      refNo: `${citizenId}-GOLD-PASS`,
-      status: 'ACTIVE SOVEREIGN TIER',
+      refNo: `${citizenId}-SOV-ID`,
+      status: 'ACTIVE CITIZEN TIER',
       verificationHash: '0x99f4c1a82d0e76b5193e449a',
-      description: 'Elite sovereign digital identity tier with instant QR KYC verification, priority clearance, and offline cryptography.',
+      description: 'Official sovereign digital identity credential with instant QR verification, digital authentication, and offline cryptography.',
       signatory: 'Chief Technology Officer, CivicOne Sovereign ID',
       keyDetails: {
         'Citizen': citizenName,
         'Civic ID': citizenId,
-        'Identity Tier': 'GOLD PASS / VERIFIED CITIZEN',
+        'Identity Tier': 'NORMAL CITIZEN / VERIFIED',
         'Verification Chain': '15/15 Milestones Cryptographically Linked',
         'Status': 'ACTIVE & PROTECTED'
       }
@@ -436,7 +436,7 @@ export default function MyJourney({ citizen, documents = [] }) {
     { id: 'EDUCATION', label: '🎓 Education & Degree', count: 3 },
     { id: 'TRANSPORT', label: '🚗 Mobility & Vehicles', count: 2 },
     { id: 'HEALTH', label: '🏥 Healthcare & ABHA', count: 2 },
-    { id: 'SOVEREIGN', label: '✨ Sovereign Tier', count: 2 }
+    { id: 'SOVEREIGN', label: '🛡️ Sovereign Credentials', count: 2 }
   ];
 
   const filteredDocs = LIFE_JOURNEY_DOCUMENTS.filter(doc => {

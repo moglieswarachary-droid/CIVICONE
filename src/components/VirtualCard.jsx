@@ -1,31 +1,18 @@
-// src/components/VirtualCard.jsx - Official CivicOne High-Security Digital Identity Card System
-// Supports Two Official Tiers: NORMAL CITIZEN & GOLD TIER PREMIUM
+// src/components/VirtualCard.jsx - Official CivicOne Digital Identity Card (Single Tier: NORMAL CITIZEN)
+// Precision High-Security Digital Credential with Sovereign Navy & Blue Styling
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   ShieldCheck, QrCode, RotateCw, Share2, Download, CheckCircle2,
   Copy, X, Eye, EyeOff, Radio, Mail, MapPin, Calendar, Phone,
-  Crown, Sparkles, Lock, Cpu, Fingerprint, ExternalLink,
-  Check, AlertCircle, Shield, Key
+  Lock, Fingerprint, ExternalLink, Shield, Key, Sparkles, Check
 } from 'lucide-react';
 
 export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerification, onCardUpdate }) {
-  // Determine active tier: defaults to citizen's active gold pass if upgraded, otherwise Normal
-  const isCitizenGold = citizen?.tier === 'GOLD' || citizen?.goldPassStatus === 'active' || card?.tier === 'GOLD';
-  const [selectedTier, setSelectedTier] = useState(isCitizenGold ? 'GOLD' : 'NORMAL');
-  
-  // Sync selectedTier if citizen changes
-  useEffect(() => {
-    if (citizen?.tier === 'GOLD' || citizen?.goldPassStatus === 'active') {
-      setSelectedTier('GOLD');
-    }
-  }, [citizen]);
-
   const [isFlipped, setIsFlipped] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showNfcModal, setShowNfcModal] = useState(false);
-  const [showFullAadhaar, setShowFullAadhaar] = useState(false);
 
   const [nfcScanning, setNfcScanning] = useState(false);
   const [nfcSuccess, setNfcSuccess] = useState(false);
@@ -44,10 +31,6 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
   const jurisdiction = `Republic of India • ${state}`;
   const validFrom = card?.issueDate || '15/01/2024';
   const validUntil = card?.expiryDate || '14/01/2034';
-  const maskedAadhaar = citizen?.maskedAadhaar || 'XXXX XXXX 8909';
-  const fullAadhaar = citizen?.aadhaarNumber || '8121 4981 8909';
-  const mobile = citizen?.mobile || citizen?.phone || '+91 8121280857';
-  const email = citizen?.email || 'raghavendra@civicone.gov.in';
   const ledgerHash = card?.ledgerHash || '0x99a4c82b710e64b8a15c3d2e';
   const verificationRef = `REF-${civicId.replace(/[^A-Z0-9]/g, '')}-SEC`;
   const verificationUrl = `https://verify.civicone.gov.in/card/${encodeURIComponent(civicId)}`;
@@ -84,7 +67,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
       try {
         await navigator.share({
           title: `CivicOne Official Digital Identity - ${citizenName}`,
-          text: `Official CivicOne Verified Identity Card (${selectedTier === 'GOLD' ? 'Gold Tier Premium' : 'Normal Citizen'}) for ${citizenName}. Civic ID: ${civicId}`,
+          text: `Official CivicOne Verified Identity Card for ${citizenName}. Civic ID: ${civicId}`,
           url: verificationUrl
         });
         return;
@@ -100,67 +83,47 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
     setDownloadingImage(true);
     const canvas = document.createElement('canvas');
     canvas.width = 1000;
-    canvas.height = 630; // CR80 ratio 1.586
+    canvas.height = 630; // CR80 standard ID aspect ratio 1.586
     const ctx = canvas.getContext('2d');
 
-    const isGold = selectedTier === 'GOLD';
+    // 1. Background Gradient (Deep Navy to Civic Blue)
+    const grad = ctx.createLinearGradient(0, 0, 1000, 630);
+    grad.addColorStop(0, '#0B1F3A');
+    grad.addColorStop(0.5, '#073B8C');
+    grad.addColorStop(1, '#0B5ED7');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1000, 630);
 
-    // 1. Background
-    if (isGold) {
-      const grad = ctx.createLinearGradient(0, 0, 1000, 630);
-      grad.addColorStop(0, '#090C12');
-      grad.addColorStop(0.5, '#131824');
-      grad.addColorStop(1, '#0B0F17');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 1000, 630);
-
-      // Gold Perimeter Border
-      ctx.strokeStyle = '#D4AF37';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(16, 16, 968, 598);
-
-      ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(24, 24, 952, 582);
-    } else {
-      const grad = ctx.createLinearGradient(0, 0, 1000, 630);
-      grad.addColorStop(0, '#0B1F3A');
-      grad.addColorStop(0.5, '#073B8C');
-      grad.addColorStop(1, '#0B5ED7');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 1000, 630);
-
-      // Silver/Cyan Border
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-      ctx.lineWidth = 3;
-      ctx.strokeRect(16, 16, 968, 598);
-    }
+    // Silver/Cyan Perimeter Border
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(16, 16, 968, 598);
 
     // 2. Header
-    ctx.fillStyle = isGold ? '#F5E7A3' : '#FFFFFF';
+    ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 36px Inter, sans-serif';
     ctx.fillText('CivicOne DIGITAL IDENTITY', 50, 70);
 
-    ctx.fillStyle = isGold ? '#D4AF37' : '#93C5FD';
+    ctx.fillStyle = '#93C5FD';
     ctx.font = 'bold 16px Inter, sans-serif';
-    ctx.fillText(isGold ? 'GOLD TIER ENHANCED SECURITY • SOVEREIGN CREDENTIAL' : 'NATIONAL SOVEREIGN CITIZEN CREDENTIAL', 50, 98);
+    ctx.fillText('NATIONAL SOVEREIGN CITIZEN CREDENTIAL', 50, 98);
 
     // 3. Status Badge
-    ctx.fillStyle = isGold ? '#2D2305' : '#064E3B';
+    ctx.fillStyle = '#064E3B';
     ctx.fillRect(720, 42, 230, 44);
-    ctx.strokeStyle = isGold ? '#FACC15' : '#34D399';
+    ctx.strokeStyle = '#34D399';
     ctx.lineWidth = 2;
     ctx.strokeRect(720, 42, 230, 44);
-    ctx.fillStyle = isGold ? '#FEF08A' : '#A7F3D0';
+    ctx.fillStyle = '#A7F3D0';
     ctx.font = 'bold 16px Inter, sans-serif';
-    ctx.fillText(isGold ? '👑 Level Gold Verified' : '✓ Verified Identity', 740, 70);
+    ctx.fillText('✓ VERIFIED IDENTITY', 740, 70);
 
     // 4. Citizen Info
     ctx.fillStyle = '#FFFFFF';
     ctx.font = 'bold 42px Inter, sans-serif';
     ctx.fillText(citizenName, 220, 220);
 
-    ctx.fillStyle = isGold ? '#FACC15' : '#93C5FD';
+    ctx.fillStyle = '#93C5FD';
     ctx.font = 'bold 24px monospace';
     ctx.fillText(`Civic ID: ${civicId}`, 220, 265);
 
@@ -171,9 +134,9 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
     ctx.fillText(`Validity: ${validFrom} – ${validUntil}`, 220, 390);
 
     // 5. Tier Label Bottom
-    ctx.fillStyle = isGold ? '#D4AF37' : '#60A5FA';
+    ctx.fillStyle = '#60A5FA';
     ctx.font = 'bold 24px Inter, sans-serif';
-    ctx.fillText(isGold ? '★ GOLD TIER PREMIUM' : '● NORMAL CITIZEN', 50, 560);
+    ctx.fillText('● NORMAL CITIZEN', 50, 560);
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.font = '14px monospace';
@@ -181,7 +144,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
 
     setTimeout(() => {
       const link = document.createElement('a');
-      link.download = `CivicOne_${selectedTier}_Card_${civicId}.png`;
+      link.download = `CivicOne_Card_${civicId}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
       setDownloadingImage(false);
@@ -189,10 +152,9 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
   };
 
   // Reusable Scannable Dynamic QR Code
-  const renderQrCode = (size = 110, isGold = false) => {
-    // Construct real scannable verification data payload
-    const qrPayload = `https://verify.civicone.gov.in/verify?id=${encodeURIComponent(civicId)}&tier=${selectedTier}&name=${encodeURIComponent(citizenName)}&v=${encodeURIComponent(ledgerHash.slice(0, 10))}`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrPayload)}&color=0A1128&bgcolor=FFFFFF`;
+  const renderQrCode = (size = 110) => {
+    const qrPayload = `https://verify.civicone.gov.in/verify?id=${encodeURIComponent(civicId)}&tier=NORMAL&name=${encodeURIComponent(citizenName)}&v=${encodeURIComponent(ledgerHash.slice(0, 10))}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrPayload)}&color=0B1F3A&bgcolor=FFFFFF`;
 
     return (
       <div style={{
@@ -200,8 +162,8 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
         backgroundColor: '#FFFFFF',
         padding: '6px',
         borderRadius: '10px',
-        border: isGold ? '2px solid #D4AF37' : '2px solid #93C5FD',
-        boxShadow: isGold ? '0 0 12px rgba(212, 175, 55, 0.35)' : '0 4px 12px rgba(0,0,0,0.12)',
+        border: '2px solid #93C5FD',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
         display: 'inline-block'
       }}>
         <img
@@ -228,81 +190,15 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
     );
   };
 
-  const isGold = selectedTier === 'GOLD';
-
   return (
     <div style={{ maxWidth: '480px', width: '100%', margin: '0 auto' }}>
-      
-      {/* TIER SWITCHER PILL (Allows seamless instant preview & switching of both official tiers) */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: 'var(--bg-card)',
-        padding: '6px',
-        borderRadius: '14px',
-        border: '1px solid var(--border-light)',
-        marginBottom: '14px',
-        boxShadow: 'var(--shadow-sm)'
-      }}>
-        <div style={{ fontSize: '0.725rem', fontWeight: 800, color: 'var(--text-light)', paddingLeft: '8px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          Select Card Tier:
-        </div>
-        <div style={{ display: 'flex', gap: '6px' }}>
-          {/* Normal Citizen Button */}
-          <button
-            type="button"
-            onClick={() => setSelectedTier('NORMAL')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '10px',
-              border: 'none',
-              backgroundColor: !isGold ? '#0B5ED7' : 'transparent',
-              color: !isGold ? '#FFFFFF' : 'var(--text-muted)',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-              boxShadow: !isGold ? '0 2px 8px rgba(11, 94, 215, 0.3)' : 'none',
-              transition: 'all 0.2s'
-            }}
-          >
-            <ShieldCheck size={14} /> Normal Citizen
-          </button>
 
-          {/* Gold Tier Premium Button */}
-          <button
-            type="button"
-            onClick={() => setSelectedTier('GOLD')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '10px',
-              border: isGold ? '1px solid #FACC15' : '1px solid transparent',
-              background: isGold ? 'linear-gradient(135deg, #1C190D 0%, #3B2E09 60%, #0A0D14 100%)' : 'transparent',
-              color: isGold ? '#FEF08A' : 'var(--text-muted)',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-              boxShadow: isGold ? '0 2px 10px rgba(212, 175, 55, 0.35)' : 'none',
-              transition: 'all 0.2s'
-            }}
-          >
-            <Crown size={14} style={{ color: '#FACC15' }} /> Gold Tier Premium
-          </button>
-        </div>
-      </div>
-
-      {/* 3D ROTATABLE DIGITAL IDENTITY CARD */}
+      {/* 3D ROTATABLE DIGITAL IDENTITY CARD (IN-PLACE ROTATION) */}
       <div
         ref={cardRef}
         tabIndex={0}
         role="region"
-        aria-label={`Official CivicOne ${isGold ? 'Gold Tier Premium' : 'Normal Citizen'} Digital Identity Card. Press Enter or Space to flip.`}
+        aria-label="Official CivicOne Normal Citizen Digital Identity Card. Press Enter or Space to flip."
         className={`card-container-3d ${isFlipped ? 'flipped' : ''}`}
         style={{
           width: '100%',
@@ -322,20 +218,16 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
         <div className="card-inner-3d">
 
           {/* =========================================================================
-              FRONT OF DIGITAL IDENTITY CARD
+              FRONT OF DIGITAL IDENTITY CARD (NORMAL CITIZEN)
               ========================================================================= */}
           <div
-            className={`card-front-3d ${isGold ? 'card-gold-bg gold-security-pattern-bg' : 'security-pattern-bg'}`}
+            className="card-front-3d security-pattern-bg"
             style={{
-              background: isGold
-                ? 'linear-gradient(145deg, #090C12 0%, #121622 45%, #181E2E 75%, #0B0E17 100%)'
-                : 'linear-gradient(135deg, #0B1F3A 0%, #073B8C 50%, #0B5ED7 100%)',
+              background: 'linear-gradient(135deg, #0B1F3A 0%, #073B8C 50%, #0B5ED7 100%)',
               padding: '18px 20px',
               color: '#FFFFFF',
-              border: isGold ? '1.5px solid rgba(212, 175, 55, 0.65)' : '1px solid rgba(255, 255, 255, 0.3)',
-              boxShadow: isGold
-                ? '0 20px 45px -10px rgba(0, 0, 0, 0.65), 0 0 25px rgba(212, 175, 55, 0.2)'
-                : '0 20px 45px -10px rgba(11, 31, 58, 0.45), 0 0 15px rgba(11, 94, 215, 0.15)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 20px 45px -10px rgba(11, 31, 58, 0.45), 0 0 15px rgba(11, 94, 215, 0.15)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -343,35 +235,33 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               overflow: 'hidden'
             }}
           >
-            {/* Shimmer Overlays */}
-            <div className={isGold ? 'gold-hologram-shimmer' : 'hologram-shimmer'} />
-            
-            {/* Holographic Security Strip */}
+            {/* Shimmer Overlay */}
+            <div className="hologram-shimmer" />
+
+            {/* Holographic Security Foil Strip (Iridescent Cyan & Silver) */}
             <div
-              className={isGold ? 'gold-security-strip' : 'hologram-security-strip'}
-              style={{ right: '92px' }}
+              className="hologram-security-strip"
+              style={{ right: '88px' }}
             />
 
             {/* Fine Guilloche Micro-Security Pattern Overlay (SVG) */}
             <svg
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: isGold ? 0.15 : 0.08 }}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: 0.08 }}
               xmlns="http://www.w3.org/2000/svg"
             >
               <defs>
-                <pattern id={`guilloche-${isGold ? 'gold' : 'blue'}`} width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M0 20 Q 10 0, 20 20 T 40 20" fill="none" stroke={isGold ? '#D4AF37' : '#93C5FD'} strokeWidth="0.5" />
-                  <path d="M20 0 Q 30 20, 20 40 T 20 0" fill="none" stroke={isGold ? '#D4AF37' : '#93C5FD'} strokeWidth="0.5" />
-                  <circle cx="20" cy="20" r="8" fill="none" stroke={isGold ? '#D4AF37' : '#93C5FD'} strokeWidth="0.4" />
+                <pattern id="guilloche-blue" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M0 20 Q 10 0, 20 20 T 40 20" fill="none" stroke="#93C5FD" strokeWidth="0.5" />
+                  <path d="M20 0 Q 30 20, 20 40 T 20 0" fill="none" stroke="#93C5FD" strokeWidth="0.5" />
+                  <circle cx="20" cy="20" r="8" fill="none" stroke="#93C5FD" strokeWidth="0.4" />
                 </pattern>
               </defs>
-              <rect width="100%" height="100%" fill={`url(#guilloche-${isGold ? 'gold' : 'blue'})`} />
+              <rect width="100%" height="100%" fill="url(#guilloche-blue)" />
             </svg>
 
             {/* Microtext Security Header Line */}
-            <div className="microtext-security" style={{ color: isGold ? '#D4AF37' : '#93C5FD' }}>
-              {isGold
-                ? 'CIVICONE GOLD SOVEREIGN PASS • QUANTUM-RESISTANT PROTOCOL • SECURE SOVEREIGN CREDENTIAL • LEVEL 1 VIP ACCESS •'
-                : 'CIVICONE SECURE IDENTITY VERIFICATION SYSTEM • NATIONAL DIGITAL IDENTITY FRAMEWORK • AUTHENTICATED CREDENTIAL •'}
+            <div className="microtext-security" style={{ color: '#93C5FD' }}>
+              CIVICONE SECURE IDENTITY VERIFICATION SYSTEM • NATIONAL DIGITAL IDENTITY FRAMEWORK • AUTHENTICATED CREDENTIAL •
             </div>
 
             {/* CARD HEADER SECTION */}
@@ -383,18 +273,13 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   width: '32px',
                   height: '32px',
                   borderRadius: '8px',
-                  backgroundColor: isGold ? 'rgba(212, 175, 55, 0.18)' : 'rgba(255, 255, 255, 0.16)',
-                  border: isGold ? '1px solid #D4AF37' : '1px solid rgba(255, 255, 255, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: isGold ? '0 0 10px rgba(212, 175, 55, 0.3)' : 'none'
+                  justifyContent: 'center'
                 }}>
-                  {isGold ? (
-                    <Crown size={18} style={{ color: '#FACC15' }} />
-                  ) : (
-                    <ShieldCheck size={18} style={{ color: '#60A5FA' }} />
-                  )}
+                  <ShieldCheck size={18} style={{ color: '#60A5FA' }} />
                 </div>
                 <div>
                   <div style={{
@@ -402,37 +287,37 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                     fontSize: '0.95rem',
                     letterSpacing: '0.04em',
                     lineHeight: 1.1,
-                    color: isGold ? '#F5E7A3' : '#FFFFFF'
+                    color: '#FFFFFF'
                   }}>
-                    CivicOne <span style={{ fontSize: '0.7rem', fontWeight: 800, color: isGold ? '#D4AF37' : '#93C5FD' }}>DIGITAL IDENTITY</span>
+                    CivicOne <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#93C5FD' }}>DIGITAL IDENTITY</span>
                   </div>
                   <div style={{
                     fontSize: '0.55rem',
-                    color: isGold ? '#C5A059' : '#93C5FD',
+                    color: '#93C5FD',
                     textTransform: 'uppercase',
                     letterSpacing: '0.08em',
                     fontWeight: 700
                   }}>
-                    {isGold ? 'Sovereign Gold Pass Protocol' : 'National Verified Citizen ID'}
+                    National Verified Citizen ID
                   </div>
                 </div>
               </div>
 
               {/* Status Badge */}
               <div style={{
-                backgroundColor: isGold ? 'rgba(212, 175, 55, 0.2)' : 'rgba(16, 185, 129, 0.2)',
-                border: isGold ? '1px solid #FACC15' : '1px solid #34D399',
+                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                border: '1px solid #34D399',
                 padding: '3px 10px',
                 borderRadius: '20px',
                 fontSize: '0.65rem',
                 fontWeight: 800,
-                color: isGold ? '#FEF08A' : '#A7F3D0',
+                color: '#A7F3D0',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                boxShadow: isGold ? '0 0 10px rgba(234, 179, 8, 0.25)' : '0 2px 6px rgba(0,0,0,0.1)'
+                boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
               }}>
-                {isGold ? '👑 Level Gold Verified' : '🟢 Verified Identity'}
+                ✓ VERIFIED IDENTITY
               </div>
             </div>
 
@@ -449,8 +334,8 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                     height: '76px',
                     borderRadius: '10px',
                     objectFit: 'cover',
-                    border: isGold ? '2px solid #D4AF37' : '2px solid rgba(255, 255, 255, 0.9)',
-                    boxShadow: isGold ? '0 4px 14px rgba(212, 175, 55, 0.35)' : '0 4px 12px rgba(0,0,0,0.3)'
+                    border: '2px solid rgba(255, 255, 255, 0.9)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
                   }}
                 />
                 {/* Official Photo Verification Hologram Seal */}
@@ -458,8 +343,8 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   position: 'absolute',
                   bottom: '-3px',
                   right: '-3px',
-                  backgroundColor: isGold ? '#090C12' : '#0B1F3A',
-                  border: isGold ? '1px solid #FACC15' : '1px solid #60A5FA',
+                  backgroundColor: '#0B1F3A',
+                  border: '1px solid #60A5FA',
                   borderRadius: '50%',
                   width: '18px',
                   height: '18px',
@@ -467,7 +352,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <Shield size={11} style={{ color: isGold ? '#FACC15' : '#60A5FA' }} />
+                  <Shield size={11} style={{ color: '#60A5FA' }} />
                 </div>
               </div>
 
@@ -476,7 +361,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 <h2 style={{
                   fontSize: '1.15rem',
                   fontWeight: 900,
-                  color: isGold ? '#FFFFFF' : '#FFFFFF',
+                  color: '#FFFFFF',
                   letterSpacing: '-0.01em',
                   marginBottom: '2px',
                   whiteSpace: 'nowrap',
@@ -489,7 +374,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 <div style={{
                   fontSize: '0.75rem',
                   fontWeight: 800,
-                  color: isGold ? '#FDE047' : '#BFDBFE',
+                  color: '#BFDBFE',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px'
@@ -499,20 +384,20 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); copyToClipboard(civicId); }}
-                    style={{ background: 'none', color: isGold ? '#FDE047' : '#BFDBFE', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
+                    style={{ background: 'none', color: '#BFDBFE', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
                     title="Copy Civic ID"
                   >
                     <Copy size={11} />
                   </button>
                 </div>
 
-                <div style={{ fontSize: '0.675rem', color: isGold ? '#D1D5DB' : 'rgba(255,255,255,0.85)', marginTop: '2px' }}>
+                <div style={{ fontSize: '0.675rem', color: 'rgba(255,255,255,0.85)', marginTop: '2px' }}>
                   DOB: <strong>{dob}</strong> &bull; Gender: <strong>{gender}</strong>
                 </div>
 
                 <div style={{
                   fontSize: '0.625rem',
-                  color: isGold ? '#C5A059' : '#93C5FD',
+                  color: '#93C5FD',
                   marginTop: '2px',
                   display: 'flex',
                   alignItems: 'center',
@@ -523,13 +408,13 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 </div>
               </div>
 
-              {/* Front Scannable QR Code */}
+              {/* Front Scannable QR Code Thumbnail */}
               <div
                 onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
                 style={{ cursor: 'pointer' }}
                 title="Click to expand dynamic scannable QR Code"
               >
-                {renderQrCode(46, isGold)}
+                {renderQrCode(46)}
               </div>
             </div>
 
@@ -538,7 +423,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              borderTop: isGold ? '1px solid rgba(212, 175, 55, 0.35)' : '1px solid rgba(255,255,255,0.2)',
+              borderTop: '1px solid rgba(255,255,255,0.2)',
               paddingTop: '6px',
               fontSize: '0.65rem',
               zIndex: 2
@@ -550,18 +435,18 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   fontWeight: 900,
                   fontSize: '0.7rem',
                   letterSpacing: '0.06em',
-                  color: isGold ? '#FACC15' : '#60A5FA',
+                  color: '#60A5FA',
                   textTransform: 'uppercase',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px'
                 }}>
-                  {isGold ? <Crown size={12} /> : <ShieldCheck size={12} />}
-                  {isGold ? 'GOLD TIER PREMIUM' : 'NORMAL CITIZEN'}
+                  <ShieldCheck size={12} />
+                  NORMAL CITIZEN
                 </div>
                 <div style={{
                   fontSize: '0.55rem',
-                  color: isGold ? 'rgba(212, 175, 55, 0.75)' : 'rgba(255,255,255,0.6)',
+                  color: 'rgba(255,255,255,0.6)',
                   fontFamily: 'monospace'
                 }}>
                   PKI: {verificationRef}
@@ -571,7 +456,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               {/* Flip Hint */}
               <div style={{
                 fontSize: '0.625rem',
-                color: isGold ? '#FEF08A' : '#93C5FD',
+                color: '#93C5FD',
                 fontWeight: 700,
                 display: 'flex',
                 alignItems: 'center',
@@ -585,20 +470,16 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
 
 
           {/* =========================================================================
-              BACK OF DIGITAL IDENTITY CARD
+              BACK OF DIGITAL IDENTITY CARD (NORMAL CITIZEN)
               ========================================================================= */}
           <div
-            className={`card-back-3d ${isGold ? 'card-gold-bg gold-security-pattern-bg' : 'security-pattern-bg'}`}
+            className="card-back-3d security-pattern-bg"
             style={{
-              background: isGold
-                ? 'linear-gradient(145deg, #07090E 0%, #0F131C 50%, #090C12 100%)'
-                : 'linear-gradient(135deg, #08162A 0%, #0B1F3A 60%, #073B8C 100%)',
+              background: 'linear-gradient(135deg, #08162A 0%, #0B1F3A 60%, #073B8C 100%)',
               padding: '16px 18px',
               color: '#FFFFFF',
-              border: isGold ? '1.5px solid rgba(212, 175, 55, 0.65)' : '1px solid rgba(255, 255, 255, 0.25)',
-              boxShadow: isGold
-                ? '0 20px 45px -10px rgba(0, 0, 0, 0.65), 0 0 25px rgba(212, 175, 55, 0.2)'
-                : '0 20px 45px -10px rgba(11, 31, 58, 0.45)',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
+              boxShadow: '0 20px 45px -10px rgba(11, 31, 58, 0.45)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -606,35 +487,35 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               overflow: 'hidden'
             }}
           >
-            {/* Shimmer Overlays */}
-            <div className={isGold ? 'gold-hologram-shimmer' : 'hologram-shimmer'} />
+            {/* Shimmer Overlay */}
+            <div className="hologram-shimmer" />
 
             {/* Back Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 2 }}>
               <div style={{
                 fontSize: '0.725rem',
                 fontWeight: 900,
-                color: isGold ? '#FACC15' : '#93C5FD',
+                color: '#93C5FD',
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px'
               }}>
-                <Lock size={13} style={{ color: isGold ? '#FACC15' : '#60A5FA' }} />
-                {isGold ? 'GOLD TIER ENHANCED SECURITY' : 'BACKSIDE SECURITY FEATURES'}
+                <Lock size={13} style={{ color: '#60A5FA' }} />
+                BACKSIDE SECURITY FEATURES
               </div>
 
               <div style={{
                 fontSize: '0.625rem',
                 fontWeight: 800,
-                color: isGold ? '#FEF08A' : '#4ADE80',
-                backgroundColor: isGold ? 'rgba(212, 175, 55, 0.2)' : 'rgba(74, 222, 128, 0.15)',
+                color: '#4ADE80',
+                backgroundColor: 'rgba(74, 222, 128, 0.15)',
                 padding: '2px 8px',
                 borderRadius: '12px',
-                border: isGold ? '1px solid #D4AF37' : '1px solid #4ADE80'
+                border: '1px solid #4ADE80'
               }}>
-                {isGold ? 'SOVEREIGN TIER-1' : 'AUTHENTICATED'}
+                AUTHENTICATED
               </div>
             </div>
 
@@ -643,55 +524,26 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               
               {/* Left Column: Security Specifications */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '0.675rem' }}>
-                
-                {isGold ? (
-                  <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                      <Cpu size={12} style={{ color: '#FACC15' }} />
-                      <span><strong>Quantum-Resistant Crypto:</strong> PQ-Kyber-1024</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                      <Crown size={12} style={{ color: '#FACC15' }} />
-                      <span><strong>Priority Access:</strong> VIP Fast-Track Clearance</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                      <Fingerprint size={12} style={{ color: '#FACC15' }} />
-                      <span><strong>Multi-Factor Biometrics:</strong> FIDO2 Continuous</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                      <Radio size={12} style={{ color: '#FACC15' }} />
-                      <span><strong>Secure NFC Auth:</strong> Encrypted Type 4</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                      <ShieldCheck size={12} style={{ color: '#FACC15' }} />
-                      <span><strong>Ledger Hash:</strong> <span style={{ fontFamily: 'monospace' }}>{ledgerHash.slice(0, 14)}...</span></span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                      <Fingerprint size={12} style={{ color: '#60A5FA' }} />
-                      <span><strong>Multi-Factor Biometrics:</strong> Grade A+ Verified</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                      <Key size={12} style={{ color: '#60A5FA' }} />
-                      <span><strong>Blockchain Ledger Hash:</strong> <span style={{ fontFamily: 'monospace' }}>{ledgerHash.slice(0, 14)}...</span></span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                      <Phone size={12} style={{ color: '#F87171' }} />
-                      <span><strong>Emergency Contact:</strong> <strong style={{ color: '#FECA57' }}>112</strong> (Helpline)</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                      <Radio size={12} style={{ color: '#60A5FA' }} />
-                      <span><strong>NFC Contactless:</strong> ISO/IEC 14443 Type A</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                      <ShieldCheck size={12} style={{ color: '#60A5FA' }} />
-                      <span><strong>Verification:</strong> Dual-Key PKI Digital Auth</span>
-                    </div>
-                  </>
-                )}
-
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
+                  <Fingerprint size={12} style={{ color: '#60A5FA' }} />
+                  <span><strong>Multi-Factor Identity:</strong> Grade A+ Verified</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
+                  <Key size={12} style={{ color: '#60A5FA' }} />
+                  <span><strong>Secure Digital Auth:</strong> Dual-Key PKI Token</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
+                  <ShieldCheck size={12} style={{ color: '#60A5FA' }} />
+                  <span><strong>Verification Ref:</strong> <span style={{ fontFamily: 'monospace' }}>{verificationRef.slice(0, 16)}</span></span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
+                  <Radio size={12} style={{ color: '#60A5FA' }} />
+                  <span><strong>NFC Authentication:</strong> ISO/IEC 14443 Type A</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
+                  <Phone size={12} style={{ color: '#F87171' }} />
+                  <span><strong>Emergency Contact:</strong> <strong style={{ color: '#67E8F9' }}>112</strong> (Helpline)</span>
+                </div>
               </div>
 
               {/* Right Column: Large Dynamic Scannable QR Code */}
@@ -700,28 +552,28 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 style={{ textAlign: 'center', cursor: 'pointer' }}
                 title="Click to view high-resolution QR modal"
               >
-                {renderQrCode(76, isGold)}
-                <div style={{ fontSize: '0.55rem', color: isGold ? '#D4AF37' : '#93C5FD', fontWeight: 800, marginTop: '2px' }}>
-                  Scan to Verify
+                {renderQrCode(76)}
+                <div style={{ fontSize: '0.55rem', color: '#93C5FD', fontWeight: 800, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  SCAN TO VERIFY
                 </div>
               </div>
             </div>
 
             {/* Back Footer */}
             <div style={{
-              backgroundColor: isGold ? 'rgba(212, 175, 55, 0.08)' : 'rgba(255,255,255,0.06)',
+              backgroundColor: 'rgba(255,255,255,0.06)',
               borderRadius: '8px',
               padding: '6px 10px',
               fontSize: '0.625rem',
-              color: isGold ? '#D4AF37' : '#BFDBFE',
-              border: isGold ? '1px solid rgba(212, 175, 55, 0.2)' : '1px solid rgba(255,255,255,0.1)',
+              color: '#BFDBFE',
+              border: '1px solid rgba(255,255,255,0.1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               zIndex: 2
             }}>
               <span>Verify at: <strong style={{ color: '#FFFFFF' }}>verify.civicone.gov.in</strong></span>
-              <span style={{ fontFamily: 'monospace', color: isGold ? '#FEF08A' : '#FFFFFF' }}>{civicId}</span>
+              <span style={{ fontFamily: 'monospace', color: '#FFFFFF' }}>{civicId}</span>
             </div>
 
           </div>
@@ -763,7 +615,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
           }}
           className="hover-card"
         >
-          <RotateCw size={18} style={{ color: isGold ? '#D4AF37' : '#0B5ED7' }} />
+          <RotateCw size={18} style={{ color: '#0B5ED7' }} />
           <span>Flip Card</span>
         </button>
 
@@ -790,7 +642,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
           }}
           className="hover-card"
         >
-          <QrCode size={18} style={{ color: isGold ? '#D4AF37' : '#0B5ED7' }} />
+          <QrCode size={18} style={{ color: '#0B5ED7' }} />
           <span>View QR</span>
         </button>
 
@@ -817,7 +669,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
           }}
           className="hover-card"
         >
-          <Radio size={18} style={{ color: isGold ? '#D4AF37' : '#0B5ED7' }} />
+          <Radio size={18} style={{ color: '#0B5ED7' }} />
           <span>NFC Tap</span>
         </button>
 
@@ -844,7 +696,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
           }}
           className="hover-card"
         >
-          <Share2 size={18} style={{ color: isGold ? '#D4AF37' : '#0B5ED7' }} />
+          <Share2 size={18} style={{ color: '#0B5ED7' }} />
           <span>Share</span>
         </button>
       </div>
@@ -874,7 +726,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             position: 'relative',
             textAlign: 'center',
             boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
-            border: isGold ? '2px solid #D4AF37' : '2px solid #DBEAFE'
+            border: '2px solid #DBEAFE'
           }}>
             <button
               type="button"
@@ -885,12 +737,12 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               <X size={22} />
             </button>
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: isGold ? '#B45309' : '#0B5ED7', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', backgroundColor: isGold ? '#FEF3C7' : '#EFF6FF', padding: '4px 12px', borderRadius: '12px', marginBottom: '10px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#0B5ED7', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', backgroundColor: '#EFF6FF', padding: '4px 12px', borderRadius: '12px', marginBottom: '10px' }}>
               <ShieldCheck size={14} /> OFFICIAL VERIFICATION QR
             </div>
 
             <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '4px' }}>
-              {isGold ? 'Gold Tier Cryptographic QR' : 'CivicOne Verification QR Code'}
+              CivicOne Verification QR Code
             </h3>
             <p style={{ fontSize: '0.825rem', color: '#64748B', marginBottom: '20px' }}>
               Scan with any authorized reader to instantly verify <strong>{citizenName}</strong>'s credential.
@@ -903,24 +755,24 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               borderRadius: '20px',
               display: 'inline-block',
               marginBottom: '20px',
-              border: isGold ? '2px solid #FDE047' : '2px solid #E2E8F0',
-              boxShadow: isGold ? '0 8px 24px rgba(212, 175, 55, 0.25)' : '0 4px 16px rgba(0,0,0,0.06)'
+              border: '2px solid #E2E8F0',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
             }}>
-              {renderQrCode(200, isGold)}
+              {renderQrCode(200)}
             </div>
 
             {/* Token Info Box */}
             <div style={{
               fontSize: '0.8rem',
-              color: isGold ? '#78350F' : '#073B8C',
-              backgroundColor: isGold ? '#FEF9C3' : '#EAF3FF',
+              color: '#073B8C',
+              backgroundColor: '#EAF3FF',
               padding: '12px 16px',
               borderRadius: '12px',
               marginBottom: '16px',
               fontWeight: 800,
               fontFamily: 'monospace',
               letterSpacing: '0.5px',
-              border: isGold ? '1px solid #FDE047' : '1px solid #BFDBFE'
+              border: '1px solid #BFDBFE'
             }}>
               TOKEN: {civicId}
             </div>
@@ -996,7 +848,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             position: 'relative',
             textAlign: 'center',
             boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
-            border: isGold ? '2px solid #D4AF37' : '2px solid #DBEAFE'
+            border: '2px solid #DBEAFE'
           }}>
             <button
               type="button"
@@ -1007,7 +859,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               <X size={20} />
             </button>
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: isGold ? '#FEF3C7' : '#EFF6FF', color: isGold ? '#B45309' : '#0B5ED7', padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, marginBottom: '12px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#EFF6FF', color: '#0B5ED7', padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, marginBottom: '12px' }}>
               <Radio size={14} /> CONTACTLESS TERMINAL
             </div>
 
@@ -1015,7 +867,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               NFC Contactless Simulation
             </h3>
 
-            {/* Clear Disclaimer as requested */}
+            {/* Clear Disclaimer */}
             <div style={{
               fontSize: '0.725rem',
               color: '#64748B',
@@ -1025,7 +877,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               border: '1px solid #E2E8F0',
               marginBottom: '20px'
             }}>
-              ℹ️ <em>Visual terminal simulation for browsers without direct Web-NFC hardware access.</em>
+              ℹ️ <em>Visual terminal simulation for devices and browsers without direct Web-NFC hardware access.</em>
             </div>
 
             {nfcScanning && (
@@ -1034,17 +886,17 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   width: '88px',
                   height: '88px',
                   borderRadius: '50%',
-                  backgroundColor: isGold ? 'rgba(212, 175, 55, 0.15)' : 'rgba(11, 94, 215, 0.12)',
-                  border: isGold ? '3px solid #D4AF37' : '3px solid #0B5ED7',
+                  backgroundColor: 'rgba(11, 94, 215, 0.12)',
+                  border: '3px solid #0B5ED7',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 16px auto',
                   animation: 'pulseGlow 1.5s infinite ease-in-out'
                 }}>
-                  <Radio size={42} style={{ color: isGold ? '#D4AF37' : '#0B5ED7' }} />
+                  <Radio size={42} style={{ color: '#0B5ED7' }} />
                 </div>
-                <div style={{ fontWeight: 800, color: isGold ? '#B45309' : '#0B5ED7', fontSize: '0.9rem' }}>
+                <div style={{ fontWeight: 800, color: '#0B5ED7', fontSize: '0.9rem' }}>
                   Emitting Contactless Signal...
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '4px' }}>
@@ -1082,14 +934,14 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   marginTop: '10px',
                   marginBottom: '20px'
                 }}>
-                  <strong>Payload:</strong> {selectedTier} Card ({civicId}) validated for contactless transit / venue entry.
+                  <strong>Payload:</strong> Normal Citizen Card ({civicId}) validated for contactless transit / venue entry.
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowNfcModal(false)}
                   style={{
                     width: '100%',
-                    backgroundColor: isGold ? '#B45309' : '#0B5ED7',
+                    backgroundColor: '#0B5ED7',
                     color: '#FFFFFF',
                     padding: '11px',
                     borderRadius: '12px',
@@ -1131,7 +983,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             width: '100%',
             position: 'relative',
             boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
-            border: isGold ? '2px solid #D4AF37' : '2px solid #DBEAFE'
+            border: '2px solid #DBEAFE'
           }}>
             <button
               type="button"
@@ -1142,11 +994,11 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               <X size={22} />
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: isGold ? '#B45309' : '#0B5ED7', fontWeight: 900, fontSize: '1.25rem', marginBottom: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0B5ED7', fontWeight: 900, fontSize: '1.25rem', marginBottom: '6px' }}>
               <Share2 size={22} /> Share & Export Identity Card
             </div>
             <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '20px' }}>
-              Export an official high-resolution image of your <strong>{selectedTier === 'GOLD' ? 'Gold Tier Premium' : 'Normal Citizen'}</strong> card.
+              Export an official high-resolution image of your <strong>Normal Citizen</strong> card.
             </p>
 
             <div style={{ backgroundColor: '#F8FAFC', padding: '14px', borderRadius: '14px', border: '1px solid #E2E8F0', marginBottom: '20px' }}>
@@ -1164,7 +1016,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 disabled={downloadingImage}
                 style={{
                   width: '100%',
-                  backgroundColor: isGold ? '#B45309' : '#0B5ED7',
+                  backgroundColor: '#0B5ED7',
                   color: '#FFFFFF',
                   padding: '13px',
                   borderRadius: '12px',
@@ -1179,7 +1031,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 }}
               >
                 <Download size={18} />
-                {downloadingImage ? 'Generating High-Res PNG...' : `Download ${selectedTier} Card PNG`}
+                {downloadingImage ? 'Generating High-Res PNG...' : 'Download Citizen Card PNG'}
               </button>
 
               {/* Copy URL Button */}

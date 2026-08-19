@@ -334,28 +334,6 @@ input, select, textarea {
   100% { background-position: 0% 0%; }
 }
 
-/* Holographic Security Foil Strip (Gold Card) */
-.gold-security-strip {
-  position: absolute;
-  width: 24px;
-  height: 100%;
-  top: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(254, 240, 138, 0.2) 0%,
-    rgba(217, 119, 6, 0.45) 25%,
-    rgba(253, 224, 71, 0.6) 50%,
-    rgba(180, 83, 9, 0.45) 75%,
-    rgba(254, 240, 138, 0.2) 100%
-  );
-  background-size: 100% 200%;
-  animation: foilShimmer 5s ease infinite;
-  opacity: 0.85;
-  pointer-events: none;
-  border-left: 1px solid rgba(234, 179, 8, 0.4);
-  border-right: 1px solid rgba(234, 179, 8, 0.4);
-}
-
 /* Microtext security class */
 .microtext-security {
   font-family: 'SF Mono', Monaco, 'Courier New', monospace;
@@ -374,78 +352,6 @@ input, select, textarea {
   background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
                     repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0, rgba(255, 255, 255, 0.02) 2px, transparent 0, transparent 8px);
   background-size: 18px 18px, 100% 100%;
-}
-
-.gold-security-pattern-bg {
-  background-image: radial-gradient(rgba(234, 179, 8, 0.12) 1px, transparent 1px),
-                    repeating-linear-gradient(45deg, rgba(234, 179, 8, 0.03) 0, rgba(234, 179, 8, 0.03) 2px, transparent 0, transparent 8px);
-  background-size: 18px 18px, 100% 100%;
-}
-
-/* PREMIUM GOLD CARD STYLES */
-.card-gold-bg {
-  background: linear-gradient(145deg, #0A0D14 0%, #111520 40%, #181E2C 75%, #0E121B 100%) !important;
-  border: 1px solid rgba(212, 175, 55, 0.45) !important;
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.65), 0 0 20px rgba(212, 175, 55, 0.18) !important;
-}
-
-.gold-hologram-shimmer {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 55%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(253, 224, 71, 0.18) 45%,
-    rgba(254, 240, 138, 0.3) 50%,
-    rgba(253, 224, 71, 0.18) 55%,
-    transparent 100%
-  );
-  transform: skewX(-25deg);
-  animation: shimmer 4.5s infinite ease-in-out;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.gold-security-chip {
-  width: 32px;
-  height: 24px;
-  border-radius: 5px;
-  background: linear-gradient(135deg, #FFFBEB 0%, #FDE047 30%, #CA8A04 70%, #78350F 100%);
-  border: 1px solid #FEF08A;
-  box-shadow: 0 0 10px rgba(253, 224, 71, 0.4);
-  position: relative;
-  overflow: hidden;
-}
-
-.gold-security-chip::after {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  border: 0.5px solid rgba(120, 53, 15, 0.6);
-  border-radius: 2px;
-}
-
-.gold-text-gradient {
-  background: linear-gradient(135deg, #FFFDF0 0%, #FDE047 40%, #D4AF37 70%, #CA8A04 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.gold-btn {
-  background: linear-gradient(135deg, #EAB308 0%, #CA8A04 100%);
-  color: #000000;
-  font-weight: 800;
-  border: none;
-  box-shadow: 0 4px 14px rgba(202, 138, 4, 0.4);
-}
-
-.gold-btn:hover {
-  background: linear-gradient(135deg, #FACC15 0%, #EAB308 100%);
-  box-shadow: 0 6px 18px rgba(234, 179, 8, 0.5);
-  transform: translateY(-1px);
 }
 
 /* QUICK ACTION BAR / SHORTCUT DOCK */
