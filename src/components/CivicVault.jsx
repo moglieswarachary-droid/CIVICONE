@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Car, GraduationCap, Award, FileText, Search, Plus, Share2, Eye,
   CheckCircle2, Clock, AlertCircle, X, Lock, Sparkles, ChevronRight, FileCheck,
-  RotateCcw, AlertTriangle, Building2, User
+  RotateCcw, AlertTriangle, Building2, User, Users, Heart, Baby, Check
 } from 'lucide-react';
-import { DEMO_DOCUMENTS, calculateDocExpiryStatus } from '../data/mockData.js';
+import { DEMO_DOCUMENTS, DEMO_FAMILY_MEMBERS, calculateDocExpiryStatus } from '../data/mockData.js';
 
 export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
   const [documents, setDocuments] = useState(initialDocs && initialDocs.length > 0 ? initialDocs : DEMO_DOCUMENTS);
@@ -28,6 +28,21 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
   const [showAuditModal, setShowAuditModal] = useState(null);
   const [shareDuration, setShareDuration] = useState('1 hour');
   const [shareResult, setShareResult] = useState(null);
+
+  // Family & Dependent Vault State
+  const [familyMembers, setFamilyMembers] = useState(DEMO_FAMILY_MEMBERS);
+  const [selectedMemberId, setSelectedMemberId] = useState('fam-self');
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [newMemberForm, setNewMemberForm] = useState({
+    name: '',
+    relationship: 'Son (Minor)',
+    age: '',
+    gender: 'Male',
+    idProof: ''
+  });
+
+  const activeMember = familyMembers.find(m => m.id === selectedMemberId) || familyMembers[0];
+  const activeDocList = activeMember.id === 'fam-self' ? documents : (activeMember.documents || []);
 
   // Requirement 11: Expanded Add Document Form State
   const [uploadForm, setUploadForm] = useState({
@@ -102,7 +117,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
 
   // Requirement 5: Calculate Dynamic Category Summaries
   const getCategoryStats = (catKey) => {
-    const catDocs = documents.filter(d => getNormCat(d.category) === catKey);
+    const catDocs = activeDocList.filter(d => getNormCat(d.category) === catKey);
     const docCount = catDocs.filter(d => getNormType(d) === 'document').length;
     const certCount = catDocs.filter(d => getNormType(d) === 'certificate').length;
     return { total: catDocs.length, docCount, certCount };
@@ -113,7 +128,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
   const academicStats = getCategoryStats('academic');
 
   // Requirement 13: Combined Multi-Level State Filtering
-  const filteredDocs = documents.filter(doc => {
+  const filteredDocs = activeDocList.filter(doc => {
     const cat = getNormCat(doc.category);
     const type = getNormType(doc);
 
@@ -281,6 +296,54 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
         }
       });
     }
+  };
+
+  // Add New Family Dependent
+  const handleAddMemberSubmit = (e) => {
+    e.preventDefault();
+    if (!newMemberForm.name) return;
+
+    const newId = `fam-custom-${Date.now()}`;
+    const newMember = {
+      id: newId,
+      name: newMemberForm.name,
+      role: `${newMemberForm.relationship} (Age ${newMemberForm.age || '10'})`,
+      relationship: newMemberForm.relationship,
+      age: parseInt(newMemberForm.age) || 10,
+      gender: newMemberForm.gender,
+      avatar: newMemberForm.gender === 'Female'
+        ? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300'
+        : 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=300',
+      civicId: `CIV-AP-${Math.floor(100000 + Math.random() * 900000)}-${Math.floor(100 + Math.random() * 900)}`,
+      guardianStatus: 'Legal Sovereign Guardian & Primary Caretaker',
+      docCount: 1,
+      documents: [
+        {
+          id: `fam-doc-${Date.now()}`,
+          name: `${newMemberForm.relationship} Birth / Identity Proof`,
+          category: 'government',
+          type: 'certificate',
+          issuer: 'Civil Registration Authority',
+          refNo: newMemberForm.idProof || `CRA-${Math.floor(100000 + Math.random() * 900000)}`,
+          status: 'Verified',
+          issueDate: new Date().toLocaleDateString('en-GB'),
+          expiryDate: 'Lifetime',
+          description: `Primary family dependent linkage credential for ${newMemberForm.name}.`,
+          isDemo: true
+        }
+      ]
+    };
+
+    setFamilyMembers(prev => [...prev, newMember]);
+    setSelectedMemberId(newId);
+    setShowAddMemberModal(false);
+    setNewMemberForm({
+      name: '',
+      relationship: 'Son (Minor)',
+      age: '',
+      gender: 'Male',
+      idProof: ''
+    });
   };
 
   // Generate Revocable Time-Limited Share Link
@@ -491,6 +554,128 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
           </div>
         </div>
       </div>
+
+      {/* FAMILY & DEPENDENT VAULT SWITCHER BAR */}
+      <div style={{
+        backgroundColor: '#FFFFFF',
+        borderRadius: '20px',
+        border: '1.5px solid #E2E8F0',
+        padding: '16px 20px',
+        marginBottom: '20px',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Users size={18} style={{ color: '#1A4F9C' }} />
+            <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#101B3D', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Family &amp; Dependent Vaults
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowAddMemberModal(true)}
+            style={{
+              backgroundColor: '#EFF6FF',
+              color: '#1A4F9C',
+              border: '1.5px solid #BFDBFE',
+              padding: '6px 12px',
+              borderRadius: '10px',
+              fontSize: '0.775rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Plus size={14} /> Add Dependent
+          </button>
+        </div>
+
+        {/* Family Member Pill Chips */}
+        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+          {familyMembers.map((member) => {
+            const isSelected = member.id === selectedMemberId;
+            const count = member.id === 'fam-self' ? documents.length : (member.documents?.length || member.docCount || 0);
+
+            return (
+              <button
+                key={member.id}
+                type="button"
+                onClick={() => setSelectedMemberId(member.id)}
+                style={{
+                  backgroundColor: isSelected ? '#101B3D' : '#F8FAFC',
+                  color: isSelected ? '#FFFFFF' : '#1E293B',
+                  border: isSelected ? '1.5px solid #101B3D' : '1.5px solid #CBD5E1',
+                  borderRadius: '14px',
+                  padding: '8px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  boxShadow: isSelected ? '0 4px 12px rgba(16, 27, 61, 0.2)' : 'none',
+                  transition: 'all 0.15s'
+                }}
+              >
+                <img
+                  src={member.avatar}
+                  alt={member.name}
+                  style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: isSelected ? '1.5px solid #38BDF8' : '1px solid #CBD5E1' }}
+                />
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontSize: '0.825rem', fontWeight: 800, lineHeight: 1.1 }}>{member.name}</div>
+                  <div style={{ fontSize: '0.675rem', color: isSelected ? '#93C5FD' : '#64748B', fontWeight: 700 }}>
+                    {member.role} &bull; {count} Docs
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* DEPENDENT PROFILE BANNER IF VIEWING A CHILD OR SENIOR PARENT */}
+      {activeMember.id !== 'fam-self' && (
+        <div style={{
+          backgroundColor: '#EFF6FF',
+          borderRadius: '18px',
+          border: '1.5px solid #BFDBFE',
+          padding: '16px 20px',
+          marginBottom: '20px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <img
+              src={activeMember.avatar}
+              alt={activeMember.name}
+              style={{ width: '48px', height: '48px', borderRadius: '12px', objectFit: 'cover', border: '2px solid #1A4F9C' }}
+            />
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#101B3D' }}>{activeMember.name}</h3>
+                <span style={{ backgroundColor: '#1A4F9C', color: '#FFFFFF', padding: '2px 8px', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 800 }}>
+                  {activeMember.relationship}
+                </span>
+              </div>
+              <div style={{ fontSize: '0.775rem', color: '#1E2F6B', marginTop: '2px' }}>
+                Civic ID: <strong>{activeMember.civicId}</strong> &bull; Guardian: <strong>{activeMember.guardianStatus}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <span style={{ backgroundColor: '#ECFDF5', color: '#047857', border: '1px solid #A7F3D0', padding: '6px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <CheckCircle2 size={13} /> Verified Guardian Custody
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* REQUIREMENT 5: THREE CATEGORY OVERVIEW CARDS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px', marginBottom: '24px' }}>
@@ -1112,6 +1297,158 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs }) {
               ))}
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* ADD FAMILY DEPENDENT MODAL */}
+      {showAddMemberModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(11, 31, 58, 0.65)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 1100,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '24px',
+            maxWidth: '520px',
+            width: '100%',
+            padding: '28px',
+            position: 'relative',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.35)',
+            animation: 'modalSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+          }}>
+            <button
+              type="button"
+              onClick={() => setShowAddMemberModal(false)}
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#64748B', cursor: 'pointer' }}
+            >
+              <X size={22} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '14px', backgroundColor: '#EFF6FF', color: '#1A4F9C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Users size={24} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#101B3D' }}>
+                  Enroll Family Dependent
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: '#64748B' }}>
+                  Add a child or senior parent to manage their digital credentials
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleAddMemberSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#101B3D', marginBottom: '6px' }}>
+                  Dependent Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Advait Sharma"
+                  value={newMemberForm.name}
+                  onChange={(e) => setNewMemberForm({ ...newMemberForm, name: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #CBD5E1', fontSize: '0.875rem', fontWeight: 600, boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#101B3D', marginBottom: '6px' }}>
+                    Relationship *
+                  </label>
+                  <select
+                    value={newMemberForm.relationship}
+                    onChange={(e) => setNewMemberForm({ ...newMemberForm, relationship: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #CBD5E1', fontSize: '0.875rem', fontWeight: 600, boxSizing: 'border-box' }}
+                  >
+                    <option value="Son (Minor)">Son (Minor)</option>
+                    <option value="Daughter (Minor)">Daughter (Minor)</option>
+                    <option value="Father (Senior Citizen)">Father (Senior Citizen)</option>
+                    <option value="Mother (Senior Citizen)">Mother (Senior Citizen)</option>
+                    <option value="Spouse">Spouse</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#101B3D', marginBottom: '6px' }}>
+                    Age (Years) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    max="110"
+                    placeholder="e.g. 6"
+                    value={newMemberForm.age}
+                    onChange={(e) => setNewMemberForm({ ...newMemberForm, age: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #CBD5E1', fontSize: '0.875rem', fontWeight: 600, boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#101B3D', marginBottom: '6px' }}>
+                    Gender *
+                  </label>
+                  <select
+                    value={newMemberForm.gender}
+                    onChange={(e) => setNewMemberForm({ ...newMemberForm, gender: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #CBD5E1', fontSize: '0.875rem', fontWeight: 600, boxSizing: 'border-box' }}
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#101B3D', marginBottom: '6px' }}>
+                    Identity Proof / Ref No.
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. B-2022-AP-8841"
+                    value={newMemberForm.idProof}
+                    onChange={(e) => setNewMemberForm({ ...newMemberForm, idProof: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #CBD5E1', fontSize: '0.875rem', fontWeight: 600, boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: '#F8FAFC', padding: '12px 14px', borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '0.75rem', color: '#475569' }}>
+                🛡️ <strong>Guardian Consent:</strong> Adding this dependent links their digital credentials under your primary sovereign guardianship with cryptographic signature.
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAddMemberModal(false)}
+                  style={{ flex: 1, backgroundColor: '#F1F5F9', color: '#475569', padding: '12px', borderRadius: '12px', fontWeight: 800, fontSize: '0.875rem', border: 'none', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{ flex: 2, backgroundColor: '#1A4F9C', color: '#FFFFFF', padding: '12px', borderRadius: '12px', fontWeight: 800, fontSize: '0.875rem', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                >
+                  <Check size={16} /> Enroll &amp; Create Vault
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

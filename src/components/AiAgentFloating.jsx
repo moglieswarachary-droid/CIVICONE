@@ -221,6 +221,12 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
       } else {
         replyText = `Opening your **CivicOne Digital Citizen Card** (${civicId}) with in-place 3D flip and scannable QR verification.`;
       }
+    } else if (lower.includes("family") || lower.includes("child") || lower.includes("dependent") || lower.includes("son") || lower.includes("daughter") || lower.includes("కుటుంబం") || lower.includes("పిల్లల") || lower.includes("తండ్రి") || lower.includes("परिवार") || lower.includes("बच्चे") || lower.includes("माता-पिता")) {
+      targetTab = "vault";
+      targetTabName = "Family & Dependent Vault";
+      replyText = lang === 'te'
+        ? `మీ **కుటుంబ & ఆధారపడిన వారి వాల్ట్** తెరుస్తున్నాను. ఇక్కడ మీ పిల్లలు (ఆరవ్, అనన్య) మరియు వయోవృద్ధ తండ్రి గారి అధికారిక పత్రాలు ఉన్నాయి.`
+        : `Opening your **Family & Dependent Vault**! You can manage verified credentials for your children (Aarav, Ananya) and senior parents with legal guardianship custody.`;
     } else if (lower.includes("vault") || lower.includes("పత్రాలు") || lower.includes("దస్తావేజులు") || lower.includes("दस्तावेज़") || lower.includes("ஆவணங்கள்") || lower.includes("ದಾಖಲೆಗಳು") || lower.includes("documents")) {
       targetTab = "vault";
       targetTabName = "My Vault";

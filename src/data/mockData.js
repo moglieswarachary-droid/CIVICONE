@@ -209,6 +209,206 @@ export function calculateDocExpiryStatus(doc) {
   }
 }
 
+export const DEMO_FAMILY_MEMBERS = [
+  {
+    id: 'fam-self',
+    name: 'Raghavendra (Self)',
+    role: 'Primary Citizen (Self)',
+    relationship: 'Self',
+    age: 29,
+    gender: 'Male',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+    civicId: 'CIV-AP-710646-823',
+    guardianStatus: 'Self Sovereign',
+    docCount: 12
+  },
+  {
+    id: 'fam-child-1',
+    name: 'Aarav Sharma',
+    role: 'Minor Son (Age 8)',
+    relationship: 'Son (Minor)',
+    age: 8,
+    gender: 'Male',
+    avatar: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&q=80&w=300',
+    civicId: 'CIV-AP-990214-411',
+    guardianStatus: 'Father (Primary Legal Guardian)',
+    docCount: 4,
+    documents: [
+      {
+        id: 'fam-doc-01',
+        name: 'Official Birth Certificate (Form 5)',
+        category: 'government',
+        type: 'certificate',
+        issuer: 'Greater Visakhapatnam Municipal Corporation (GVMC)',
+        refNo: 'B-2018-AP-09824',
+        status: 'Verified',
+        issueDate: '12-04-2018',
+        expiryDate: 'Lifetime',
+        description: 'Certified registration of birth under Registration of Births and Deaths Act.',
+        isDemo: true
+      },
+      {
+        id: 'fam-doc-02',
+        name: 'Universal Immunization Programme Card (UIP)',
+        category: 'government',
+        type: 'certificate',
+        issuer: 'Ministry of Health & Family Welfare (MoHFW)',
+        refNo: 'IMM-UIP-2018-842',
+        status: 'Verified',
+        issueDate: '14-04-2018',
+        expiryDate: 'Active (Child Complete)',
+        description: 'National childhood vaccine and immunization record (BCG, OPV, Pentavalent, MMR).',
+        isDemo: true
+      },
+      {
+        id: 'fam-doc-03',
+        name: 'School Admission & Bonafide Certificate',
+        category: 'academic',
+        type: 'certificate',
+        issuer: 'Delhi Public School (CBSE Affiliated)',
+        refNo: 'DPS-ADM-2024-GR3',
+        status: 'Verified',
+        issueDate: '05-06-2024',
+        expiryDate: '31-03-2025',
+        description: 'Current Grade 3 Bonafide student certification and academic identity token.',
+        isDemo: true
+      },
+      {
+        id: 'fam-doc-04',
+        name: 'Aadhaar Minor Identity Enrolment (Baal Aadhaar)',
+        category: 'government',
+        type: 'document',
+        issuer: 'UIDAI — Unique Identification Authority of India',
+        refNo: 'XXXX XXXX 4110 (Blue Aadhaar)',
+        status: 'Verified',
+        issueDate: '20-05-2018',
+        expiryDate: 'Biometric update at Age 15',
+        description: 'Child Aadhaar linked to primary parent biometric and mobile identity.',
+        isDemo: true
+      }
+    ]
+  },
+  {
+    id: 'fam-child-2',
+    name: 'Ananya Sharma',
+    role: 'Minor Daughter (Age 14)',
+    relationship: 'Daughter (Minor)',
+    age: 14,
+    gender: 'Female',
+    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=300',
+    civicId: 'CIV-AP-774102-198',
+    guardianStatus: 'Father (Primary Legal Guardian)',
+    docCount: 3,
+    documents: [
+      {
+        id: 'fam-doc-05',
+        name: 'Official Birth Certificate (Form 5)',
+        category: 'government',
+        type: 'certificate',
+        issuer: 'Municipal Administration Department, AP',
+        refNo: 'B-2012-AP-54129',
+        status: 'Verified',
+        issueDate: '18-09-2012',
+        expiryDate: 'Lifetime',
+        description: 'Municipal registered birth certificate record.',
+        isDemo: true
+      },
+      {
+        id: 'fam-doc-06',
+        name: 'Class IX Secondary School Bonafide & ID',
+        category: 'academic',
+        type: 'document',
+        issuer: 'Kendriya Vidyalaya (CBSE)',
+        refNo: 'KV-2025-IX-089',
+        status: 'Verified',
+        issueDate: '10-06-2025',
+        expiryDate: '31-03-2026',
+        description: 'Secondary school verified enrolment record.',
+        isDemo: true
+      },
+      {
+        id: 'fam-doc-07',
+        name: 'National Junior Athletics Championship Certificate',
+        category: 'academic',
+        type: 'certificate',
+        issuer: 'Sports Authority of India (SAI)',
+        refNo: 'SAI-ATH-2025-GOLD',
+        status: 'Verified',
+        issueDate: '15-02-2025',
+        expiryDate: 'Lifetime',
+        description: 'State Level 100m Sprint Gold Medal verified digital merit credential.',
+        isDemo: true
+      }
+    ]
+  },
+  {
+    id: 'fam-parent-1',
+    name: 'Suryanarayana Sharma',
+    role: 'Senior Citizen Father (Age 72)',
+    relationship: 'Father (Senior Citizen)',
+    age: 72,
+    gender: 'Male',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=300',
+    civicId: 'CIV-AP-102948-002',
+    guardianStatus: 'Adult Caretaker & Nominee',
+    docCount: 4,
+    documents: [
+      {
+        id: 'fam-doc-08',
+        name: 'National Senior Citizen Identity Card',
+        category: 'government',
+        type: 'document',
+        issuer: 'Ministry of Social Justice & Empowerment',
+        refNo: 'SR-AP-2019-7721',
+        status: 'Verified',
+        issueDate: '10-01-2019',
+        expiryDate: 'Lifetime',
+        description: 'Official National Senior Citizen Card for healthcare, rail travel, and utility priority.',
+        isDemo: true
+      },
+      {
+        id: 'fam-doc-09',
+        name: 'Central Pension Payment Order (PPO Passbook)',
+        category: 'government',
+        type: 'document',
+        issuer: 'Central Pension Accounting Office (CPAO)',
+        refNo: 'PPO-CPAO-2018-9941',
+        status: 'Verified',
+        issueDate: '31-05-2018',
+        expiryDate: 'Active',
+        description: 'Superannuation pension disbursement entitlement passbook.',
+        isDemo: true
+      },
+      {
+        id: 'fam-doc-10',
+        name: 'Ayushman Bharat PM-JAY Senior Health Card',
+        category: 'government',
+        type: 'certificate',
+        issuer: 'National Health Authority (NHA)',
+        refNo: 'PMJAY-SR-7104-982',
+        status: 'Verified',
+        issueDate: '15-08-2023',
+        expiryDate: 'Lifetime',
+        description: '₹5 Lakh annual health coverage for senior citizen hospitalization.',
+        isDemo: true
+      },
+      {
+        id: 'fam-doc-11',
+        name: 'Digital Life Certificate (Jeevan Pramaan)',
+        category: 'government',
+        type: 'certificate',
+        issuer: 'Jeevan Pramaan / UIDAI Biometric Auth',
+        refNo: 'JP-2025-NOV-8812',
+        status: 'Verified',
+        issueDate: '10-11-2025',
+        expiryDate: '30-11-2026',
+        description: 'Biometric face-authenticated digital life certificate for pension continuity.',
+        isDemo: true
+      }
+    ]
+  }
+];
+
 export const DEMO_DOCUMENTS = [
   // 1. Academic Documents & Certificates
   {
