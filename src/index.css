@@ -187,19 +187,30 @@ input, select, textarea {
   color: #475569;
 }
 
-/* CivicOne Virtual Card Shimmer & 3D Flip Effect */
+/* CivicOne Digital Identity Card 3D Flip & Security Effects */
 .card-container-3d {
   perspective: 1200px;
   -webkit-perspective: 1200px;
+  outline: none;
+}
+
+.card-container-3d:focus-visible {
+  outline: 2px solid #0B5ED7;
+  outline-offset: 4px;
+  border-radius: 20px;
 }
 
 .card-inner-3d {
   position: relative;
   width: 100%;
   height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0.0, 0.2, 1);
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
-  will-change: transform;
+}
+
+.card-container-3d.flipped .card-inner-3d {
+  transform: rotateY(180deg);
 }
 
 .card-front-3d, .card-back-3d {
@@ -209,14 +220,37 @@ input, select, textarea {
   height: 100%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  border-radius: 22px;
+  border-radius: 18px;
   overflow: hidden;
-  will-change: transform;
+  box-sizing: border-box;
 }
 
 .card-back-3d {
   transform: rotateY(180deg);
-  -webkit-transform: rotateY(180deg);
+}
+
+/* Reduced Motion Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .card-inner-3d {
+    transition: opacity 0.3s ease-in-out !important;
+    transform: none !important;
+  }
+  .card-container-3d.flipped .card-front-3d {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .card-container-3d.flipped .card-back-3d {
+    opacity: 1;
+    transform: none !important;
+  }
+  .card-container-3d:not(.flipped) .card-back-3d {
+    opacity: 0;
+    pointer-events: none;
+    transform: none !important;
+  }
+  .hologram-shimmer, .gold-hologram-shimmer, .hologram-security-strip {
+    animation: none !important;
+  }
 }
 
 /* Holographic Overlays */
@@ -229,90 +263,146 @@ input, select, textarea {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.2) 50%,
     transparent 100%
   );
   transform: skewX(-25deg);
-  animation: shimmer 4s infinite ease-in-out;
+  animation: shimmer 5s infinite ease-in-out;
   pointer-events: none;
+  z-index: 10;
 }
 
 @keyframes shimmer {
   0% { left: -100%; }
-  30% { left: 200%; }
+  35% { left: 200%; }
   100% { left: 200%; }
+}
+
+/* Holographic Security Foil Strip (Normal Blue Card) */
+.hologram-security-strip {
+  position: absolute;
+  width: 24px;
+  height: 100%;
+  top: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(147, 197, 253, 0.35) 20%,
+    rgba(196, 181, 253, 0.45) 40%,
+    rgba(110, 231, 183, 0.35) 60%,
+    rgba(253, 230, 138, 0.4) 80%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  background-size: 100% 200%;
+  animation: foilShimmer 6s ease infinite;
+  opacity: 0.75;
+  pointer-events: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+  border-right: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+@keyframes foilShimmer {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 0% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+/* Holographic Security Foil Strip (Gold Card) */
+.gold-security-strip {
+  position: absolute;
+  width: 24px;
+  height: 100%;
+  top: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(254, 240, 138, 0.2) 0%,
+    rgba(217, 119, 6, 0.45) 25%,
+    rgba(253, 224, 71, 0.6) 50%,
+    rgba(180, 83, 9, 0.45) 75%,
+    rgba(254, 240, 138, 0.2) 100%
+  );
+  background-size: 100% 200%;
+  animation: foilShimmer 5s ease infinite;
+  opacity: 0.85;
+  pointer-events: none;
+  border-left: 1px solid rgba(234, 179, 8, 0.4);
+  border-right: 1px solid rgba(234, 179, 8, 0.4);
+}
+
+/* Microtext security class */
+.microtext-security {
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+  font-size: 5px;
+  letter-spacing: 1.5px;
+  line-height: 1;
+  text-transform: uppercase;
+  user-select: none;
+  opacity: 0.35;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 /* Fine Security Lines Background Pattern */
 .security-pattern-bg {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-                    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0, rgba(255, 255, 255, 0.03) 2px, transparent 0, transparent 8px);
-  background-size: 20px 20px, 100% 100%;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0, rgba(255, 255, 255, 0.02) 2px, transparent 0, transparent 8px);
+  background-size: 18px 18px, 100% 100%;
 }
 
-/* Pulse Glow Animation */
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.03); }
-}
-
-.pulse-glow {
-  animation: pulseGlow 3s infinite ease-in-out;
+.gold-security-pattern-bg {
+  background-image: radial-gradient(rgba(234, 179, 8, 0.12) 1px, transparent 1px),
+                    repeating-linear-gradient(45deg, rgba(234, 179, 8, 0.03) 0, rgba(234, 179, 8, 0.03) 2px, transparent 0, transparent 8px);
+  background-size: 18px 18px, 100% 100%;
 }
 
 /* PREMIUM GOLD CARD STYLES */
 .card-gold-bg {
-  background: linear-gradient(135deg, #1C190D 0%, #3B2E09 30%, #856414 65%, #C5A038 90%, #E6C86E 100%) !important;
-  border: 1px solid rgba(254, 240, 138, 0.45) !important;
-  box-shadow: 0 16px 40px -8px rgba(197, 160, 56, 0.45), 0 0 25px rgba(230, 200, 110, 0.25) !important;
+  background: linear-gradient(145deg, #0A0D14 0%, #111520 40%, #181E2C 75%, #0E121B 100%) !important;
+  border: 1px solid rgba(212, 175, 55, 0.45) !important;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.65), 0 0 20px rgba(212, 175, 55, 0.18) !important;
 }
 
 .gold-hologram-shimmer {
   position: absolute;
   top: 0;
   left: -100%;
-  width: 60%;
+  width: 55%;
   height: 100%;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 235, 150, 0.45) 50%,
+    rgba(253, 224, 71, 0.18) 45%,
+    rgba(254, 240, 138, 0.3) 50%,
+    rgba(253, 224, 71, 0.18) 55%,
     transparent 100%
   );
   transform: skewX(-25deg);
-  animation: shimmer 3.5s infinite ease-in-out;
+  animation: shimmer 4.5s infinite ease-in-out;
   pointer-events: none;
+  z-index: 10;
 }
 
 .gold-security-chip {
-  width: 28px;
-  height: 20px;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #FFF7ED 0%, #FDE047 30%, #CA8A04 70%, #854D0E 100%);
+  width: 32px;
+  height: 24px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #FFFBEB 0%, #FDE047 30%, #CA8A04 70%, #78350F 100%);
   border: 1px solid #FEF08A;
-  box-shadow: 0 0 8px rgba(253, 224, 71, 0.6);
+  box-shadow: 0 0 10px rgba(253, 224, 71, 0.4);
+  position: relative;
+  overflow: hidden;
 }
 
-.gold-vip-badge {
-  background: linear-gradient(135deg, rgba(202, 138, 4, 0.35) 0%, rgba(234, 179, 8, 0.25) 100%);
-  border: 1.5px solid #FACC15;
-  color: #FEF08A;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.725rem;
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  box-shadow: 0 2px 10px rgba(234, 179, 8, 0.3);
-}
-
-.gold-border-glow {
-  box-shadow: 0 0 15px rgba(234, 179, 8, 0.5);
+.gold-security-chip::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 0.5px solid rgba(120, 53, 15, 0.6);
+  border-radius: 2px;
 }
 
 .gold-text-gradient {
-  background: linear-gradient(135deg, #FFF7ED 0%, #FDE047 50%, #EAB308 100%);
+  background: linear-gradient(135deg, #FFFDF0 0%, #FDE047 40%, #D4AF37 70%, #CA8A04 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
