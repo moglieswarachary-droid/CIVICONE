@@ -199,6 +199,35 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
     return expInfo.status === 'EXPIRING SOON' || expInfo.status === 'EXPIRED';
   });
 
+  const handleApproveConsent = async (notifItem) => {
+    try {
+      await fetch('/api/consent/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: notifItem.requestId || 'req-demo-hotel-1' })
+      });
+    } catch (err) {}
+    setNotifications(notifications.map(n => n.id === notifItem.id ? {
+      ...n,
+      title: '🟢 Consent Approved!',
+      message: `${n.message} (Status: ACCEPTED & Masked Aadhaar Shared)`,
+      read: true,
+      status: 'APPROVED'
+    } : n));
+    alert('🟢 Consent Granted! Your Masked Aadhaar Card was shared with the organization for check-in verification.');
+  };
+
+  const handleDeclineConsent = (notifItem) => {
+    setNotifications(notifications.map(n => n.id === notifItem.id ? {
+      ...n,
+      title: '🔴 Consent Declined',
+      message: `${n.message} (Status: DECLINED BY CITIZEN)`,
+      read: true,
+      status: 'DECLINED'
+    } : n));
+    alert('🔴 Consent Declined. Access request was denied.');
+  };
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', display: 'flex', flexDirection: 'column' }}>
       
@@ -296,7 +325,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
               {showNotifPopover && (
                 <div style={{
-                  position: 'absolute', top: '48px', right: 0, width: '300px', maxHeight: '380px',
+                  position: 'absolute', top: '48px', right: 0, width: '320px', maxHeight: '420px',
                   backgroundColor: 'var(--bg-card)', borderRadius: '16px', boxShadow: 'var(--shadow-lg)',
                   border: '1px solid var(--border-light)', padding: '16px', zIndex: 100
                 }}>
@@ -304,11 +333,29 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>Notifications</strong>
                     <button onClick={() => setShowNotifPopover(false)} style={{ background: 'none', color: 'var(--text-light)', border: 'none' }}><X size={16} /></button>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '250px', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
                     {notifications.map(n => (
-                      <div key={n.id} style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', fontSize: '0.8rem' }}>
-                        <strong style={{ color: 'var(--text-main)', display: 'block' }}>{n.title}</strong>
+                      <div key={n.id} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', fontSize: '0.8rem' }}>
+                        <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '2px' }}>{n.title}</strong>
                         <span style={{ color: 'var(--text-muted)' }}>{n.message}</span>
+
+                        {/* ACCEPT / DECLINE BUTTONS FOR CONSENT REQUESTS */}
+                        {(n.type === 'CONSENT_REQUEST' || n.title.includes('Request') || n.title.includes('Access') || n.title.includes('Guest')) && n.status !== 'APPROVED' && n.status !== 'DECLINED' && (
+                          <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                            <button
+                              onClick={() => handleApproveConsent(n)}
+                              style={{ flex: 1, backgroundColor: '#059669', color: '#FFFFFF', padding: '6px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, border: 'none', cursor: 'pointer' }}
+                            >
+                              🟢 ACCEPT
+                            </button>
+                            <button
+                              onClick={() => handleDeclineConsent(n)}
+                              style={{ flex: 1, backgroundColor: '#DC2626', color: '#FFFFFF', padding: '6px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, border: 'none', cursor: 'pointer' }}
+                            >
+                              🔴 DECLINE
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

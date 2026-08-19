@@ -31,8 +31,10 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
   const [shareDuration, setShareDuration] = useState('1 hour');
   const [shareResult, setShareResult] = useState(null);
 
-  // Family & Dependent Vault State
-  const [familyMembers, setFamilyMembers] = useState(DEMO_FAMILY_MEMBERS);
+  // Family & Dependent Vault State (Starts empty with Self only for clean new accounts)
+  const [familyMembers, setFamilyMembers] = useState([
+    { id: 'fam-self', name: 'Raghavendra (Self)', relationship: 'Self', isSelf: true, documents: [] }
+  ]);
   const [selectedMemberId, setSelectedMemberId] = useState(initialMemberId || 'fam-self');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState({
