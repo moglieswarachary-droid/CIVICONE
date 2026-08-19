@@ -1,7 +1,8 @@
 // src/components/VirtualCard.jsx - Official CivicOne Digital Citizen Identity Card
+// High-Reliability 3D Card Architecture (Card Wrapper -> Card Inner -> Card Face Front / Back)
 // Indian Identity Signature: Deep Indigo (#101B3D) + Ivory (#F8F7F2) + Ashoka Blue (#1A4F9C) + Tricolor Security Filament
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   ShieldCheck, QrCode, RotateCw, Share2, Download, CheckCircle2,
   Copy, X, Radio, MapPin, Calendar, Phone, Lock, Fingerprint,
@@ -9,6 +10,7 @@ import {
 } from 'lucide-react';
 
 export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerification, onCardUpdate }) {
+  // Single boolean state controlling the 3D flip
   const [isFlipped, setIsFlipped] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -19,9 +21,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
   const [copied, setCopied] = useState(false);
   const [downloadingImage, setDownloadingImage] = useState(false);
 
-  const cardRef = useRef(null);
-
-  // Dynamic Citizen Information
+  // Dynamic Citizen Information from authenticated user profile / props
   const civicId = citizen?.citizenId || card?.civicId || citizen?.civicId || 'CIV-AP-710646-823';
   const citizenName = citizen?.fullName || citizen?.name || citizen?.displayName || 'Raghavendra';
   const photoUrl = citizen?.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300";
@@ -49,7 +49,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
     setIsFlipped(prev => !prev);
   };
 
-  // NFC Simulation Trigger with Honest Feedback
+  // NFC Simulation Trigger with Honest Demonstration Feedback
   const handleTriggerNfc = () => {
     setShowNfcModal(true);
     setNfcScanning(true);
@@ -205,20 +205,12 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
   return (
     <div style={{ maxWidth: '540px', width: '100%', margin: '0 auto' }}>
 
-      {/* 3D ROTATABLE DIGITAL IDENTITY CARD (IN-PLACE ROTATION) */}
+      {/* 3D ROTATABLE DIGITAL IDENTITY CARD WRAPPER */}
       <div
-        ref={cardRef}
         tabIndex={0}
         role="region"
         aria-label="CivicOne Normal Citizen Digital Identity Card. Press Enter or Space to flip."
-        className={`card-container-3d ${isFlipped ? 'flipped' : ''}`}
-        style={{
-          width: '100%',
-          aspectRatio: '1.586',
-          position: 'relative',
-          cursor: 'pointer',
-          borderRadius: '20px'
-        }}
+        className="card-wrapper"
         onClick={handleFlipCard}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -226,14 +218,16 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             handleFlipCard();
           }
         }}
+        style={{ cursor: 'pointer' }}
       >
-        <div className="card-inner-3d">
+        {/* CARD INNER ELEMENT — Sole element rotated via rotateY(180deg) */}
+        <div className={`card-inner ${isFlipped ? 'is-flipped' : ''}`}>
 
           {/* =========================================================================
-              FRONT OF DIGITAL IDENTITY CARD (DEEP INDIGO NAVY & IVORY SURFACE)
+              FRONT FACE (Deep Indigo Navy Surface)
               ========================================================================= */}
           <div
-            className="card-front-3d security-pattern-bg"
+            className="card-face card-front security-pattern-bg"
             style={{
               background: 'linear-gradient(135deg, #101B3D 0%, #1E2F6B 55%, #0C1530 100%)',
               padding: '22px 24px',
@@ -242,10 +236,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               boxShadow: '0 20px 45px -10px rgba(16, 27, 61, 0.5), 0 0 15px rgba(26, 79, 156, 0.2)',
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'space-between',
-              position: 'relative',
-              overflow: 'hidden',
-              borderRadius: '20px'
+              justifyContent: 'space-between'
             }}
           >
             {/* Subtle Hologram Shimmer */}
@@ -267,7 +258,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             </svg>
 
             {/* CARD HEADER SECTION */}
-            <div style={{ zIndex: 2 }}>
+            <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 
                 {/* Left: CivicOne Logo & Identity Title */}
@@ -330,7 +321,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             </div>
 
             {/* CARD MAIN PROFILE SECTION (Two-Column Layout) */}
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', margin: '4px 0', zIndex: 2 }}>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', margin: '4px 0' }}>
               
               {/* Left Column: Citizen Portrait Photograph */}
               <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -438,8 +429,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               alignItems: 'flex-end',
               borderTop: '1px solid rgba(217, 222, 232, 0.25)',
               paddingTop: '6px',
-              fontSize: '0.65rem',
-              zIndex: 2
+              fontSize: '0.65rem'
             }}>
               
               {/* Left: Citizen Status & Security Reference */}
@@ -483,10 +473,10 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
 
 
           {/* =========================================================================
-              BACK OF DIGITAL IDENTITY CARD (IVORY WHITE #F8F7F2 SURFACE)
+              BACK FACE (Ivory White #F8F7F2 Surface)
               ========================================================================= */}
           <div
-            className="card-back-3d security-pattern-ivory"
+            className="card-face card-back security-pattern-ivory"
             style={{
               backgroundColor: '#F8F7F2',
               padding: '20px 24px',
@@ -495,10 +485,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               boxShadow: '0 20px 45px -10px rgba(16, 27, 61, 0.35)',
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'space-between',
-              position: 'relative',
-              overflow: 'hidden',
-              borderRadius: '20px'
+              justifyContent: 'space-between'
             }}
           >
             {/* Header Section */}
@@ -639,7 +626,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
         {/* Button 2: View QR */}
         <button
           type="button"
-          onClick={() => setShowQrModal(true)}
+          onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
           aria-label="View Enlarged QR Code"
           style={{
             backgroundColor: '#FFFFFF',
@@ -666,7 +653,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
         {/* Button 3: NFC Tap */}
         <button
           type="button"
-          onClick={handleTriggerNfc}
+          onClick={(e) => { e.stopPropagation(); handleTriggerNfc(); }}
           aria-label="Simulate NFC Tap Contactless Verification"
           style={{
             backgroundColor: '#FFFFFF',
@@ -693,7 +680,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
         {/* Button 4: Share */}
         <button
           type="button"
-          onClick={handleShareCard}
+          onClick={(e) => { e.stopPropagation(); handleShareCard(); }}
           aria-label="Share or Export Identity Card"
           style={{
             backgroundColor: '#FFFFFF',
