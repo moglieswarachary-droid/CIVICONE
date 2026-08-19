@@ -187,34 +187,36 @@ input, select, textarea {
   color: #475569;
 }
 
-/* CivicOne Virtual Card Shimmer & Flip Effect */
+/* CivicOne Virtual Card Shimmer & 3D Flip Effect */
 .card-container-3d {
-  perspective: 1000px;
+  perspective: 1200px;
+  -webkit-perspective: 1200px;
 }
 
 .card-inner-3d {
   position: relative;
   width: 100%;
   height: 100%;
-  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transform-style: preserve-3d;
-}
-
-.card-container-3d.flipped .card-inner-3d {
-  transform: rotateY(180deg);
+  -webkit-transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .card-front-3d, .card-back-3d {
   position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  border-radius: var(--radius-lg);
+  -webkit-backface-visibility: hidden;
+  border-radius: 22px;
   overflow: hidden;
+  will-change: transform;
 }
 
 .card-back-3d {
   transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
 }
 
 /* Holographic Overlays */
