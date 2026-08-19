@@ -14,59 +14,10 @@ import AdminPortal from './components/AdminPortal.jsx';
 import PublicQRVerification from './components/PublicQRVerification.jsx';
 import DesktopWorkstationGuard from './components/DesktopWorkstationGuard.jsx';
 
-const DEFAULT_OFFICIAL_CITIZEN = {
-  id: 'cit-9000000001',
-  citizenId: 'CIV-AP-710646-823',
-  civicId: 'CIV-AP-710646-823',
-  fullName: 'Raghavendra',
-  displayName: 'Raghavendra',
-  name: 'Raghavendra',
-  mobile: '+91 90000 00001',
-  email: 'raghavendra.demo@civicone.gov.in',
-  dateOfBirth: '15/08/1995',
-  dob: '15/08/1995',
-  gender: 'Male',
-  state: 'Andhra Pradesh',
-  address: 'Door 4-12, MG Road, Vijayawada, Andhra Pradesh 520002',
-  tier: 'STANDARD',
-  goldPassStatus: 'standard',
-  verificationStatus: 'Verified Citizen',
-  identityStatus: 'Verified',
-  maskedAadhaar: 'XXXX XXXX 8234',
-  isDemo: true,
-  demoLabel: 'OFFICIAL CITIZEN PROFILE'
-};
-
 export default function App() {
   // Views: 'landing' | 'gate' | 'citizen' | 'organization-gate' | 'organization' | 'authority-gate' | 'authority' | 'police' | 'admin-gate' | 'admin' | 'verify'
-  const [currentView, setCurrentView] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const rawHash = window.location.hash.replace('#', '');
-      const path = window.location.pathname;
-      if (rawHash === 'citizen' || path.startsWith('/citizen')) return 'citizen';
-      if (rawHash === 'organization-gate' || rawHash === 'organization-access') return 'organization-gate';
-      if (rawHash === 'organization' || rawHash === 'org' || path.startsWith('/org')) return 'organization';
-      if (rawHash === 'owner-admin' || rawHash === 'admin' || rawHash === 'admin-gate' || path.startsWith('/owner-admin')) return 'admin-gate';
-      if (rawHash === 'police' || rawHash.startsWith('police-') || path.startsWith('/police')) return 'police';
-      if (rawHash === 'authority-gate' || rawHash === 'authority' || path.startsWith('/authority')) return 'authority-gate';
-      if (rawHash === 'gate' || rawHash === 'citizen-login') return 'gate';
-      if (rawHash === 'verify' || path.startsWith('/verify')) return 'verify';
-    }
-    return 'landing';
-  });
-
-  const [authenticatedCitizen, setAuthenticatedCitizen] = useState(() => {
-    try {
-      const stored = localStorage.getItem('civicone_current_citizen');
-      if (stored) return JSON.parse(stored);
-    } catch (e) {}
-    if (typeof window !== 'undefined') {
-      const rawHash = window.location.hash.replace('#', '');
-      if (rawHash === 'citizen') return DEFAULT_OFFICIAL_CITIZEN;
-    }
-    return null;
-  });
-
+  const [currentView, setCurrentView] = useState('landing');
+  const [authenticatedCitizen, setAuthenticatedCitizen] = useState(null);
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState(null);
   const [authenticatedAdmin, setAuthenticatedAdmin] = useState(null);
   const [verifyToken, setVerifyToken] = useState('CIV-TOKEN-CIV-DEMO-10001-SECURE-2026');
@@ -106,7 +57,6 @@ export default function App() {
       } else if (rawHash === 'gate' || rawHash === 'citizen-login') {
         setCurrentView('gate');
       } else if (rawHash === 'citizen') {
-        setAuthenticatedCitizen(prev => prev || DEFAULT_OFFICIAL_CITIZEN);
         setCurrentView('citizen');
       } else if (path.startsWith('/verify') || rawHash === 'verify' || token) {
         if (token) setVerifyToken(token);
@@ -136,9 +86,6 @@ export default function App() {
 
   // Handle Citizen Login Authentication Completion
   const handleAuthSuccess = (citizenData) => {
-    try {
-      localStorage.setItem('civicone_current_citizen', JSON.stringify(citizenData));
-    } catch (e) {}
     setAuthenticatedCitizen(citizenData);
     changeView('citizen');
   };
@@ -161,9 +108,6 @@ export default function App() {
 
   // Handle Logout
   const handleLogout = () => {
-    try {
-      localStorage.removeItem('civicone_current_citizen');
-    } catch (e) {}
     setAuthenticatedCitizen(null);
     setAuthenticatedOfficer(null);
     setAuthenticatedAdmin(null);

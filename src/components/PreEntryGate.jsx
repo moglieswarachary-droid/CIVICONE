@@ -41,39 +41,6 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
   const [successMsg, setSuccessMsg] = useState('');
   const otpRefs = useRef([]);
 
-  // Instant Demo Citizen Login
-  const handleFastDemoLogin = () => {
-    setLoading(true);
-    setErrorMsg('');
-    setTimeout(() => {
-      const demoCitizen = {
-        id: 'cit-9000000001',
-        citizenId: 'CIV-AP-710646-823',
-        civicId: 'CIV-AP-710646-823',
-        fullName: 'Raghavendra',
-        displayName: 'Raghavendra',
-        name: 'Raghavendra',
-        mobile: '+91 90000 00001',
-        email: 'raghavendra.demo@civicone.gov.in',
-        dateOfBirth: '15/08/1995',
-        dob: '15/08/1995',
-        gender: 'Male',
-        state: 'Andhra Pradesh',
-        address: 'Door 4-12, MG Road, Vijayawada, Andhra Pradesh 520002',
-        tier: 'STANDARD',
-        goldPassStatus: 'standard',
-        verificationStatus: 'Verified Citizen',
-        identityStatus: 'Verified',
-        maskedAadhaar: 'XXXX XXXX 8234',
-        isDemo: true,
-        demoLabel: 'OFFICIAL CITIZEN PROFILE'
-      };
-      authStorage.setToken('CIV-TOKEN-CIV-AP-710646-823-SECURE');
-      setLoading(false);
-      onAuthenticated(demoCitizen);
-    }, 150);
-  };
-
   // Handle Login with Mobile + MPIN
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -89,43 +56,54 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
     setErrorMsg('');
     setLoading(true);
 
-    const cleanPhone = loginPhone.replace(/\D/g, '').slice(-10);
-    let localCitizen = null;
-    try {
-      const stored = JSON.parse(localStorage.getItem('civicone_registered_citizens') || '[]');
-      localCitizen = stored.find(c => (c.mobile || '').replace(/\D/g, '').slice(-10) === cleanPhone);
-    } catch (e) {}
+    const res = await safeFetchJson('/api/auth/citizen-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: loginPhone, mpin: loginMpin })
+    });
+    setLoading(false);
 
-    if (!localCitizen) {
-      localCitizen = {
-        id: `cit-${cleanPhone}`,
-        citizenId: cleanPhone === '9000000001' ? 'CIV-AP-710646-823' : `CIV-AP-${cleanPhone.slice(-6)}`,
-        civicId: cleanPhone === '9000000001' ? 'CIV-AP-710646-823' : `CIV-AP-${cleanPhone.slice(-6)}`,
-        fullName: cleanPhone === '9000000001' ? 'Raghavendra' : 'Verified Citizen',
-        displayName: cleanPhone === '9000000001' ? 'Raghavendra' : 'Citizen',
-        name: cleanPhone === '9000000001' ? 'Raghavendra' : 'Verified Citizen',
-        mobile: `+91 ${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`,
-        email: cleanPhone === '9000000001' ? 'raghavendra.demo@civicone.gov.in' : `citizen.${cleanPhone.slice(-4)}@civicone.in`,
-        dateOfBirth: '15/08/1995',
-        dob: '15/08/1995',
-        gender: 'Male',
-        state: 'Andhra Pradesh',
-        address: 'Door 4-12, MG Road, Vijayawada, Andhra Pradesh 520002',
-        tier: 'STANDARD',
-        goldPassStatus: 'standard',
-        verificationStatus: 'Verified Citizen',
-        identityStatus: 'Verified',
-        maskedAadhaar: `XXXX XXXX ${cleanPhone.slice(-4) || '8234'}`,
-        isDemo: true,
-        demoLabel: 'OFFICIAL CITIZEN PROFILE'
-      };
-    }
+    if (res.ok && res.data.success) {
+      if (res.data.token) authStorage.setToken(res.data.token);
+      onAuthenticated(res.data.citizen);
+    } else if (res.status === 404 || res.status === 0 || !res.ok) {
+      // Graceful client fallback for static hosting (Netlify) & offline demo
+      const cleanPhone = loginPhone.replace(/\D/g, '').slice(-10);
+      let localCitizen = null;
+      try {
+        const stored = JSON.parse(localStorage.getItem('civicone_registered_citizens') || '[]');
+        localCitizen = stored.find(c => (c.mobile || '').replace(/\D/g, '').slice(-10) === cleanPhone);
+      } catch (e) {}
 
-    setTimeout(() => {
+      if (!localCitizen) {
+        localCitizen = {
+          id: `cit-${cleanPhone}`,
+          citizenId: cleanPhone === '9000000001' ? 'CIV-DEMO-10001' : `CIV-IND-${cleanPhone.slice(-5)}`,
+          fullName: cleanPhone === '9000000001' ? 'Aarav Kumar' : 'Verified Citizen',
+          displayName: cleanPhone === '9000000001' ? 'Aarav' : 'Citizen',
+          name: cleanPhone === '9000000001' ? 'Aarav Kumar' : 'Verified Citizen',
+          mobile: `+91 ${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`,
+          email: cleanPhone === '9000000001' ? 'aarav.demo@civicone.example' : `citizen.${cleanPhone.slice(-4)}@civicone.in`,
+          dateOfBirth: '15-07-2004',
+          dob: '15-07-2004',
+          gender: 'Male',
+          state: 'Andhra Pradesh',
+          address: 'Door 4-12, MG Road, Vijayawada, Andhra Pradesh 520002',
+          tier: 'STANDARD',
+          goldPassStatus: 'standard',
+          verificationStatus: 'Verified Citizen',
+          identityStatus: 'Verified',
+          maskedAadhaar: `XXXX XXXX ${cleanPhone.slice(-4) || '1001'}`,
+          isDemo: true,
+          demoLabel: 'DEMO DATA — NOT A REAL CITIZEN'
+        };
+      }
+
       authStorage.setToken(`CIV-TOKEN-${localCitizen.citizenId}-SECURE`);
-      setLoading(false);
       onAuthenticated(localCitizen);
-    }, 200);
+    } else {
+      setErrorMsg(res.data.error || "Login failed. Please check your credentials.");
+    }
   };
 
   // Handle Registration Step 1: Send Registration OTP
@@ -419,87 +397,36 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
 
         {/* ----------------- MODE A: EXISTING LOGIN ----------------- */}
         {authMode === 'LOGIN' && (
-          <div>
-            {/* Quick 1-Click Access Card */}
-            <div style={{
-              backgroundColor: '#EFF6FF',
-              borderRadius: '16px',
-              border: '1.5px solid #BFDBFE',
-              padding: '14px 16px',
-              marginBottom: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '12px'
-            }}>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#101B3D' }}>
-                  ⚡ Quick Demo Citizen Access
-                </div>
-                <div style={{ fontSize: '0.725rem', color: '#1A4F9C', fontWeight: 600 }}>
-                  Log in instantly as <strong>Raghavendra</strong> (CIV-AP-710646-823)
-                </div>
+          <form onSubmit={handleLoginSubmit}>
+            <div style={{ marginBottom: '18px' }}>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '8px', letterSpacing: '0.04em' }}>
+                REGISTERED MOBILE NUMBER
+              </label>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: '14px', top: '13px', color: '#0B5ED7', fontWeight: 800, fontSize: '0.95rem' }}>+91</span>
+                <input
+                  type="tel"
+                  maxLength={10}
+                  value={loginPhone}
+                  onChange={(e) => setLoginPhone(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Enter 10-digit mobile"
+                  style={{
+                    width: '100%',
+                    padding: '13px 14px 13px 52px',
+                    borderRadius: '12px',
+                    backgroundColor: '#F8FAFC',
+                    border: '1.5px solid #CBD5E1',
+                    color: '#0B1F3A',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    outline: 'none',
+                    transition: 'border-color 0.2s'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#0B5ED7'}
+                  onBlur={(e) => e.target.style.borderColor = '#CBD5E1'}
+                />
               </div>
-              <button
-                type="button"
-                onClick={handleFastDemoLogin}
-                disabled={loading}
-                style={{
-                  backgroundColor: '#0B5ED7',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '10px',
-                  padding: '8px 14px',
-                  fontWeight: 800,
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  boxShadow: '0 2px 8px rgba(11, 94, 215, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                1-Click Login →
-              </button>
             </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#E2E8F0' }} />
-              <span style={{ fontSize: '0.725rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase' }}>or enter credentials</span>
-              <div style={{ flex: 1, height: '1px', backgroundColor: '#E2E8F0' }} />
-            </div>
-
-            <form onSubmit={handleLoginSubmit}>
-              <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '8px', letterSpacing: '0.04em' }}>
-                  REGISTERED MOBILE NUMBER
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: '14px', top: '13px', color: '#0B5ED7', fontWeight: 800, fontSize: '0.95rem' }}>+91</span>
-                  <input
-                    type="tel"
-                    maxLength={10}
-                    value={loginPhone}
-                    onChange={(e) => setLoginPhone(e.target.value.replace(/\D/g, ''))}
-                    placeholder="Enter 10-digit mobile"
-                    style={{
-                      width: '100%',
-                      padding: '13px 14px 13px 52px',
-                      borderRadius: '12px',
-                      backgroundColor: '#F8FAFC',
-                      border: '1.5px solid #CBD5E1',
-                      color: '#0B1F3A',
-                      fontWeight: 700,
-                      fontSize: '1rem',
-                      outline: 'none',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = '#0B5ED7'}
-                    onBlur={(e) => e.target.style.borderColor = '#CBD5E1'}
-                  />
-                </div>
-              </div>
 
             <div style={{ marginBottom: '26px' }}>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '8px', letterSpacing: '0.04em' }}>
@@ -555,8 +482,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
               {loading ? <RefreshCw className="animate-spin" size={20} /> : <>Login to Citizen Vault <ArrowRight size={18} /></>}
             </button>
           </form>
-        </div>
-      )}
+        )}
 
         {/* ----------------- MODE B: CREATE NEW ACCOUNT ----------------- */}
         {authMode === 'REGISTER' && (
