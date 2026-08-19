@@ -20,8 +20,8 @@ export const ORGANIZATION_SECTORS = [
     emoji: '🎓',
     badgeColor: '#059669',
     badgeBg: '#ECFDF5',
-    description: 'Universities, colleges, schools, education boards, and accredited skill training institutions.',
-    orgCount: 5
+    description: 'Universities, affiliated colleges, intermediate institutions, K-12 schools, and government-certified technology institutions.',
+    orgCount: 4
   },
   {
     id: 'healthcare',
@@ -31,8 +31,8 @@ export const ORGANIZATION_SECTORS = [
     emoji: '🏥',
     badgeColor: '#DC2626',
     badgeBg: '#FEF2F2',
-    description: 'Hospitals, medical research institutions, and state health scheme authorities.',
-    orgCount: 3
+    description: 'Government hospitals and private healthcare networks providing emergency care, inpatient services, and patient verification.',
+    orgCount: 2
   },
   {
     id: 'banking_finance',
@@ -42,8 +42,8 @@ export const ORGANIZATION_SECTORS = [
     emoji: '🏦',
     badgeColor: '#D97706',
     badgeBg: '#FEF3C7',
-    description: 'Government banks, private banks, NBFCs, insurance institutions, and FinTech companies.',
-    orgCount: 9
+    description: 'Government banks, private banks, mutual funds & investment firms, and insurance institutions.',
+    orgCount: 4
   },
   {
     id: 'private_sector',
@@ -53,8 +53,8 @@ export const ORGANIZATION_SECTORS = [
     emoji: '🏢',
     badgeColor: '#7C3AED',
     badgeBg: '#F3E8FF',
-    description: 'Corporate enterprises, HR background verification, technology firms, and commercial businesses.',
-    orgCount: 6
+    description: 'Registered commercial companies and corporate employers for background verification.',
+    orgCount: 2
   }
 ];
 
@@ -210,394 +210,254 @@ export const ORGANIZATION_CONFIGS = {
     logoEmoji: '🏛️',
     categoryName: 'Civic Body',
     integrationStatus: 'Prototype / Simulated',
-    description: 'Municipal Corporation for birth/death certificates, property tax, trade license, and local civic services.',
-    roles: ['Municipal Admin', 'Civic Inspector', 'Verifier', 'Auditor'],
+    description: 'Municipal Corporation dedicated to farming schemes, seedings distribution, sanitation cleaning, and municipal water supply services.',
+    roles: ['Municipal Admin', 'Agricultural & Water Officer', 'Sanitation Inspector', 'Auditor'],
     capabilities: [
-      'Residence Verification',
-      'Municipal Certificate Verification',
-      'Civic Credential Verification'
+      'Farming Scheme Verification',
+      'Seedings Distribution Audit',
+      'Cleaning & Sanitation Verification',
+      'Water Supply Management'
     ],
-    allowedCategories: ['Identity', 'Civic', 'Property'],
-    allowedDocTypes: ['Birth Certificate', 'Property Tax Record', 'Trade Licence', 'Residence Proof']
+    allowedCategories: ['Farming', 'Seedings', 'Cleaning', 'Water'],
+    allowedDocTypes: ['Farming Subsidy Proof', 'Seedings Allotment Certificate', 'Water Supply Record', 'Sanitation Clearance']
   },
 
   // -------------------------------------------------------------
   // 2. EDUCATION SECTOR
   // -------------------------------------------------------------
-  'university': {
-    id: 'university',
-    slug: 'university',
-    sector: 'education',
-    sectorTitle: 'Education',
-    name: 'University',
-    roleCode: 'UNIVERSITY_ADMIN',
-    logoEmoji: '🎓',
-    categoryName: 'Higher Education',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'University registrar portal for degree verification, semester marksheets, and academic credential issuance.',
-    roles: ['University Admin', 'Registrar', 'Academic Officer', 'Verifier', 'Auditor'],
-    capabilities: [
-      'Student Verification',
-      'Degree Verification',
-      'Marksheet Verification',
-      'Academic Credential Verification',
-      'Certificate Issuance',
-      'Certificate Revocation'
-    ],
-    allowedCategories: ['Education', 'Identity'],
-    allowedDocTypes: ['Degree Certificate', 'Semester Marksheet', 'Transfer Certificate', 'Enrollment ID']
-  },
   'college': {
     id: 'college',
     slug: 'college',
     sector: 'education',
     sectorTitle: 'Education',
-    name: 'College',
+    name: 'College / University',
     roleCode: 'COLLEGE_ADMIN',
-    logoEmoji: '🏛️',
+    logoEmoji: '🎓',
     categoryName: 'Higher Education',
     integrationStatus: 'Prototype / Simulated',
-    description: 'Higher education college portal for student verification, diploma certificates, and course completion.',
-    roles: ['College Admin', 'Dean of Academics', 'Verification Officer', 'Auditor'],
+    description: 'Universities, affiliated colleges, autonomous colleges, engineering colleges, degree colleges and higher education institutions.',
+    roles: ['College Admin', 'Dean of Academics', 'Registrar', 'Auditor'],
     capabilities: [
       'Student Verification',
-      'Academic Verification',
-      'Certificate Verification',
-      'Certificate Issuance'
+      'Degree Verification',
+      'Marksheet Verification',
+      'Academic Certificate Locking',
+      'New Admission Verification'
     ],
     allowedCategories: ['Education', 'Identity'],
-    allowedDocTypes: ['College ID Card', 'Diploma Certificate', 'Bonafide Certificate', 'Marksheet']
+    allowedDocTypes: ['Degree Certificate', 'Semester Marksheet', 'Transfer Certificate', '10th Certificate', '12th Certificate']
+  },
+  'intermediate': {
+    id: 'intermediate',
+    slug: 'intermediate',
+    sector: 'education',
+    sectorTitle: 'Education',
+    name: 'Intermediate / PUC / +12',
+    roleCode: 'INTER_ADMIN',
+    logoEmoji: '🏛️',
+    categoryName: 'Pre-University & Higher Secondary',
+    integrationStatus: 'Prototype / Simulated',
+    description: 'Intermediate colleges, Pre-University Colleges, Higher Secondary and +12 educational institutions.',
+    roles: ['Principal', 'Intermediate Admin', 'Verification Officer', 'Auditor'],
+    capabilities: [
+      'Student Verification',
+      'Stream Verification (MPC/BiPC/MEC/CEC)',
+      '10th Marksheet Verification',
+      'Certificate Locking'
+    ],
+    allowedCategories: ['Education', 'Identity'],
+    allowedDocTypes: ['10th Marksheet', 'Intermediate Transfer Certificate', 'Bonafide Certificate']
   },
   'school': {
     id: 'school',
     slug: 'school',
     sector: 'education',
     sectorTitle: 'Education',
-    name: 'School',
+    name: 'Schools',
     roleCode: 'SCHOOL_ADMIN',
     logoEmoji: '🏫',
-    categoryName: 'School Education',
+    categoryName: 'K-12 Recognized Schools',
     integrationStatus: 'Prototype / Simulated',
-    description: 'K-12 school portal for student identity, transfer certificates, and grade progress records.',
+    description: 'State Board, CBSE, ICSE and other recognized schools.',
     roles: ['School Admin', 'Principal', 'Teacher Verification Officer', 'Auditor'],
     capabilities: [
       'Student Verification',
-      'Student Credential Verification',
-      'Certificate Verification'
+      'Class & Section Roll Verification',
+      'Parent/Guardian Verification',
+      'Certificate Verification & Lock'
     ],
     allowedCategories: ['Education', 'Identity'],
     allowedDocTypes: ['School ID Card', 'Transfer Certificate', 'Grade Report', 'Birth Certificate']
   },
-  'education_board': {
-    id: 'education_board',
-    slug: 'education-board',
+  'technology': {
+    id: 'technology',
+    slug: 'technology',
     sector: 'education',
     sectorTitle: 'Education',
-    name: 'Education Board',
-    roleCode: 'EDU_BOARD_ADMIN',
-    logoEmoji: '📋',
-    categoryName: 'State / Central Secondary Board',
+    name: 'Government-Certified Technology Institutions',
+    roleCode: 'TECH_INST_ADMIN',
+    logoEmoji: '💻',
+    categoryName: 'Skill Development & Technical Training',
     integrationStatus: 'Prototype / Simulated',
-    description: 'CBSE/ICSE/State Board portal for 10th & 12th board marksheet authentication and passing certificate issuance.',
-    roles: ['Board Admin', 'Controller of Examinations', 'Verification Officer', 'Auditor'],
+    description: 'Government-certified technical training institutions, skill development centers and approved technology education providers.',
+    roles: ['Institute Admin', 'Technical Assessor', 'Certification Officer', 'Auditor'],
     capabilities: [
-      'Marksheet Verification',
-      'Certificate Verification',
-      'Student Verification',
-      'Academic Credential Verification'
-    ],
-    allowedCategories: ['Education', 'Identity'],
-    allowedDocTypes: ['10th Marksheet', '12th Marksheet', 'Passing Certificate', 'Migration Certificate']
-  },
-  'skill_institution': {
-    id: 'skill_institution',
-    slug: 'skill-institution',
-    sector: 'education',
-    sectorTitle: 'Education',
-    name: 'Skill / Training Institution',
-    roleCode: 'SKILL_INST_ADMIN',
-    logoEmoji: '🛠️',
-    categoryName: 'Vocational Training',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'NSDC/Skill India training provider for vocational certificates, trade qualifications, and apprenticeship records.',
-    roles: ['Institute Admin', 'Skill Assessor', 'Certification Officer', 'Auditor'],
-    capabilities: [
-      'Skill Certificate Verification',
-      'Training Verification',
-      'Qualification Verification',
-      'Certificate Issuance'
+      'Student Skill Verification',
+      'Technical Certification Issuance',
+      'Course Completion Audit',
+      'Citizen Skill Synchronization'
     ],
     allowedCategories: ['Education', 'Skill'],
-    allowedDocTypes: ['NSDC Certificate', 'Vocational Skill Badge', 'Apprenticeship Record']
+    allowedDocTypes: ['Skill Certificate', 'Technical Certification ID', 'Apprenticeship Record']
   },
 
   // -------------------------------------------------------------
   // 3. HEALTHCARE SECTOR
   // -------------------------------------------------------------
-  'hospital': {
-    id: 'hospital',
-    slug: 'hospital',
+  'gov_hospital': {
+    id: 'gov_hospital',
+    slug: 'gov-hospital',
     sector: 'healthcare',
     sectorTitle: 'Healthcare',
-    name: 'Hospital',
-    roleCode: 'HOSPITAL_ADMIN',
+    name: 'Government Hospital',
+    roleCode: 'GOV_HOSPITAL_ADMIN',
     logoEmoji: '🏥',
-    categoryName: 'Medical Services',
+    categoryName: 'Public Healthcare Facility',
     integrationStatus: 'Prototype / Simulated',
-    description: 'Hospital patient onboarding, consent-driven medical records access, and vaccination record verification.',
-    roles: ['Hospital Admin', 'Medical Records Officer', 'Consent Coordinator', 'Auditor'],
+    description: 'Government hospitals and public healthcare facilities providing emergency care, inpatient services, medical treatment and citizen healthcare services.',
+    roles: ['Government Hospital Admin', 'Chief Medical Officer', 'Emergency Doctor', 'Medical Records Officer', 'Auditor'],
     capabilities: [
       'Patient Identity Verification',
-      'Consent Requests',
-      'Authorized Data Access',
-      'Healthcare Credential Verification',
-      'Verification History'
+      'Citizen ID Verification',
+      'Medical Record Verification',
+      'Emergency Patient Registration',
+      'Patient Transfer Management',
+      'Blood Requirement Management',
+      'Blood Donor Management',
+      'Insurance Verification'
     ],
     allowedCategories: ['Healthcare', 'Identity'],
-    allowedDocTypes: ['ABHA Health Card', 'Vaccination Record', 'Medical Report', 'Discharge Summary']
+    allowedDocTypes: ['ABHA Health Card', 'Emergency Casualty Report', 'Medical History Summary', 'Patient Transfer Token']
   },
-  'medical_institution': {
-    id: 'medical_institution',
-    slug: 'medical-institution',
+  'priv_hospital': {
+    id: 'priv_hospital',
+    slug: 'priv-hospital',
     sector: 'healthcare',
     sectorTitle: 'Healthcare',
-    name: 'Medical Institution',
-    roleCode: 'MEDICAL_INST_ADMIN',
-    logoEmoji: '🔬',
-    categoryName: 'Research & Labs',
+    name: 'Private Hospital',
+    roleCode: 'PRIV_HOSPITAL_ADMIN',
+    logoEmoji: '🏨',
+    categoryName: 'Private Healthcare Network',
     integrationStatus: 'Prototype / Simulated',
-    description: 'Diagnostic labs & medical research centers for consent-driven test results and clinical credentials.',
-    roles: ['Lab Admin', 'Pathologist', 'Verification Officer', 'Auditor'],
+    description: 'Private hospitals and healthcare networks providing emergency care, inpatient services, medical treatment and authorized citizen healthcare verification.',
+    roles: ['Private Hospital Admin', 'Medical Director', 'Duty Doctor', 'Insurance Coordinator', 'Auditor'],
     capabilities: [
       'Patient Identity Verification',
-      'Medical Credential Verification',
-      'Authorized Data Access',
-      'Verification History'
+      'Citizen ID Verification',
+      'Medical Record Verification',
+      'Emergency Patient Registration',
+      'Patient Transfer Management',
+      'Blood Requirement Management',
+      'Blood Donor Management',
+      'Insurance Verification'
     ],
     allowedCategories: ['Healthcare', 'Identity'],
-    allowedDocTypes: ['Lab Report', 'Diagnostic Image Record', 'Patient Consent Token']
-  },
-  'health_authority': {
-    id: 'health_authority',
-    slug: 'health-authority',
-    sector: 'healthcare',
-    sectorTitle: 'Healthcare',
-    name: 'Health Authority',
-    roleCode: 'HEALTH_AUTH_ADMIN',
-    logoEmoji: '🩺',
-    categoryName: 'Public Health Scheme',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'National Health Authority (Ayushman Bharat / ABHA) for health scheme eligibility and health card issuance.',
-    roles: ['Health Admin', 'Scheme Officer', 'Verification Verifier', 'Auditor'],
-    capabilities: [
-      'Health Credential Verification',
-      'Health Scheme Eligibility',
-      'Authorized Citizen Verification',
-      'Health Service Verification'
-    ],
-    allowedCategories: ['Healthcare', 'Identity'],
-    allowedDocTypes: ['Ayushman Bharat Card', 'ABHA ID Record', 'Disability Certificate']
+    allowedDocTypes: ['ABHA Health Card', 'Private Insurance Claim Proof', 'Medical Summary', 'Patient Transfer Token']
   },
 
   // -------------------------------------------------------------
-  // 4. BANKING & FINANCE SECTOR
+  // 4. BANKING & FINANCE SECTOR (EXACTLY 4 CATEGORIES)
   // -------------------------------------------------------------
-  'government_bank': {
-    id: 'government_bank',
+  'gov_bank': {
+    id: 'gov_bank',
     slug: 'government-bank',
     sector: 'banking_finance',
     sectorTitle: 'Banking & Finance',
-    name: 'Government Bank',
+    name: 'Government Banks',
     roleCode: 'GOVT_BANK_ADMIN',
     logoEmoji: '🏦',
-    categoryName: 'Public Sector Bank',
+    categoryName: 'Public Sector Banking',
     integrationStatus: 'Prototype / Simulated',
-    description: 'State Bank & Public Sector Banks for eKYC, digital account opening, loan processing, and credit verification.',
-    roles: ['Bank Admin', 'KYC Manager', 'Loan Officer', 'Auditor'],
+    description: 'State Bank, public sector banks, regional rural banks, and government cooperative banks for eKYC, account opening, and loan processing.',
+    roles: ['Bank Admin', 'Branch Manager', 'KYC Officer', 'Loan Officer', 'Auditor'],
     capabilities: [
       'KYC Verification',
-      'Identity Verification',
-      'Address Verification',
-      'Credential Verification',
-      'Consent-Based Data Access',
-      'Verification History'
+      'Customer Identity Verification',
+      'PAN & Aadhaar Verification',
+      'Account Verification',
+      'Loan Processing'
     ],
     allowedCategories: ['Finance', 'Identity', 'Income'],
     allowedDocTypes: ['PAN Card', 'Aadhaar Identity', 'ITR Return', 'Bank Statement', 'Salary Slip']
   },
-  'private_bank': {
-    id: 'private_bank',
+  'priv_bank': {
+    id: 'priv_bank',
     slug: 'private-bank',
     sector: 'banking_finance',
     sectorTitle: 'Banking & Finance',
-    name: 'Private Bank',
+    name: 'Private Banks',
     roleCode: 'PRIVATE_BANK_ADMIN',
     logoEmoji: '🏛️',
-    categoryName: 'Commercial Private Bank',
+    categoryName: 'Private Commercial Banking',
     integrationStatus: 'Prototype / Simulated',
-    description: 'Private commercial banks for instant eKYC verification, credit card evaluation, and wealth management.',
-    roles: ['Bank Admin', 'KYC Officer', 'Credit Analyst', 'Auditor'],
+    description: 'Private commercial banks, banking groups, and digital private banks for digital eKYC, credit card evaluation, and wealth management.',
+    roles: ['Bank Admin', 'Branch Manager', 'KYC Officer', 'Credit Analyst', 'Auditor'],
     capabilities: [
       'KYC Verification',
-      'Identity Verification',
-      'Address Verification',
-      'Credential Verification',
-      'Consent-Based Data Access',
-      'Verification History'
+      'Customer Identity Verification',
+      'PAN Verification',
+      'Credit Score Evaluation',
+      'Digital Account Opening'
     ],
     allowedCategories: ['Finance', 'Identity'],
     allowedDocTypes: ['PAN Card', 'Aadhaar Identity', 'Form 16', 'Credit Score Certificate']
   },
-  'nbfc': {
-    id: 'nbfc',
-    slug: 'nbfc',
-    sector: 'banking_finance',
-    sectorTitle: 'Banking & Finance',
-    name: 'NBFC',
-    roleCode: 'NBFC_ADMIN',
-    logoEmoji: '💳',
-    categoryName: 'Non-Banking Financial Company',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'Non-Banking Finance Companies for micro-loans, vehicle finance, and instant digital credit underwriting.',
-    roles: ['NBFC Admin', 'Underwriter', 'Verification Officer', 'Auditor'],
-    capabilities: [
-      'Identity Verification',
-      'KYC Verification',
-      'Credential Verification',
-      'Consent-Based Data Access'
-    ],
-    allowedCategories: ['Finance', 'Identity'],
-    allowedDocTypes: ['PAN Card', 'Income Certificate', 'Aadhaar Identity']
-  },
-  'govt_financial_inst': {
-    id: 'govt_financial_inst',
-    slug: 'government-financial-institution',
-    sector: 'banking_finance',
-    sectorTitle: 'Banking & Finance',
-    name: 'Government Financial Institution',
-    roleCode: 'GOVT_FIN_INST_ADMIN',
-    logoEmoji: '🏢',
-    categoryName: 'Public Financial Institution',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'NABARD, SIDBI, EXIM Bank & public financial institutions for government scheme disbursement & enterprise credit.',
-    roles: ['Inst Admin', 'Disbursement Officer', 'Auditor'],
-    capabilities: [
-      'Identity Verification',
-      'Eligibility Verification',
-      'Credential Verification',
-      'Consent-Based Data Access'
-    ],
-    allowedCategories: ['Finance', 'Identity', 'Agriculture/MSME'],
-    allowedDocTypes: ['MSME Certificate', 'Farmer Land Deed', 'PAN Card', 'Aadhaar Identity']
-  },
-  'private_financial_inst': {
-    id: 'private_financial_inst',
-    slug: 'private-financial-institution',
-    sector: 'banking_finance',
-    sectorTitle: 'Banking & Finance',
-    name: 'Private Financial Institution',
-    roleCode: 'PRIVATE_FIN_INST_ADMIN',
-    logoEmoji: '📈',
-    categoryName: 'Private Financial Services',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'Asset management companies, mutual funds, and private financial advisory firms.',
-    roles: ['Inst Admin', 'Compliance Officer', 'Auditor'],
-    capabilities: [
-      'Identity Verification',
-      'Eligibility Verification',
-      'Credential Verification',
-      'Consent-Based Data Access'
-    ],
-    allowedCategories: ['Finance', 'Identity'],
-    allowedDocTypes: ['PAN Card', 'Demat Account Record', 'KYC Certificate']
-  },
-  'govt_insurance': {
-    id: 'govt_insurance',
-    slug: 'government-insurance',
-    sector: 'banking_finance',
-    sectorTitle: 'Banking & Finance',
-    name: 'Government Insurance',
-    roleCode: 'GOVT_INS_ADMIN',
-    logoEmoji: '🛡️',
-    categoryName: 'Public Sector Insurance',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'LIC & public insurance corporations for policy issuance, claim settlement, and identity verification.',
-    roles: ['Insurance Admin', 'Claims Inspector', 'Verifier', 'Auditor'],
-    capabilities: [
-      'Identity Verification',
-      'Policy Verification',
-      'Eligibility Verification',
-      'Credential Verification'
-    ],
-    allowedCategories: ['Finance', 'Identity', 'Insurance'],
-    allowedDocTypes: ['Aadhaar Identity', 'Medical Certificate', 'Policy Record']
-  },
-  'private_insurance': {
-    id: 'private_insurance',
-    slug: 'private-insurance',
-    sector: 'banking_finance',
-    sectorTitle: 'Banking & Finance',
-    name: 'Private Insurance',
-    roleCode: 'PRIVATE_INS_ADMIN',
-    logoEmoji: '☂️',
-    categoryName: 'Private Life & General Insurance',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'Private life, health & motor insurance companies for digital policy underwriting and instant claim checks.',
-    roles: ['Insurance Admin', 'Underwriter', 'Claim Assessor', 'Auditor'],
-    capabilities: [
-      'Identity Verification',
-      'Policy Verification',
-      'Eligibility Verification',
-      'Credential Verification'
-    ],
-    allowedCategories: ['Finance', 'Identity', 'Insurance'],
-    allowedDocTypes: ['Driving Licence', 'Vehicle RC', 'Aadhaar Identity', 'Medical Report']
-  },
-  'investment_inst': {
-    id: 'investment_inst',
+  'investment': {
+    id: 'investment',
     slug: 'investment-institution',
     sector: 'banking_finance',
     sectorTitle: 'Banking & Finance',
-    name: 'Investment Institution',
+    name: 'Mutual Funds & Investment',
     roleCode: 'INVEST_INST_ADMIN',
     logoEmoji: '📊',
-    categoryName: 'Stockbroking & Investments',
+    categoryName: 'Asset Management & Stockbroking',
     integrationStatus: 'Prototype / Simulated',
-    description: 'Stock exchanges, depositories (NSDL/CDSL), and broking firms for investor CKYC and demat verification.',
-    roles: ['Investment Admin', 'Compliance Officer', 'Auditor'],
+    description: 'Mutual fund companies, asset management companies, investment firms, stockbroking institutions, and depositories (NSDL/CDSL).',
+    roles: ['Investment Admin', 'Compliance Officer', 'Investor Relationship Manager', 'Auditor'],
     capabilities: [
-      'Identity Verification',
-      'Investor Verification',
-      'Credential Verification',
-      'Consent-Based Data Access'
+      'Investor Identity Verification',
+      'CKYC Verification',
+      'PAN & Demat Verification',
+      'Investment Account Verification',
+      'SIP & Mutual Fund Management'
     ],
     allowedCategories: ['Finance', 'Identity'],
-    allowedDocTypes: ['PAN Card', 'Bank Account Proof', 'Aadhaar Identity']
+    allowedDocTypes: ['PAN Card', 'Demat Account Record', 'KYC Certificate', 'Bank Account Proof']
   },
-  'fintech': {
-    id: 'fintech',
-    slug: 'fintech',
+  'insurance': {
+    id: 'insurance',
+    slug: 'insurance',
     sector: 'banking_finance',
     sectorTitle: 'Banking & Finance',
-    name: 'FinTech Company',
-    roleCode: 'FINTECH_ADMIN',
-    logoEmoji: '📱',
-    categoryName: 'Digital Payments & Neo-Banking',
+    name: 'Insurance',
+    roleCode: 'INSURANCE_ADMIN',
+    logoEmoji: '🛡️',
+    categoryName: 'Government & Private Insurance',
     integrationStatus: 'Prototype / Simulated',
-    description: 'Payment gateways, UPI apps, neo-banks, and digital lending platforms for instant zero-paper onboarding.',
-    roles: ['FinTech Admin', 'Risk Officer', 'Verifier', 'Auditor'],
+    description: 'Public sector insurance corporations and private life, health, motor, and general insurance providers.',
+    roles: ['Insurance Admin', 'Claims Officer', 'Underwriter', 'Policy Manager', 'Auditor'],
     capabilities: [
-      'KYC Verification',
-      'Identity Verification',
-      'Credential Verification',
-      'Consent-Based Data Access'
+      'Policyholder Verification',
+      'Policy Issuance & Renewal',
+      'Claim Settlement & Audit',
+      'KYC & Identity Verification'
     ],
-    allowedCategories: ['Finance', 'Identity'],
-    allowedDocTypes: ['Identity Status', 'PAN Status', 'Address Verification']
+    allowedCategories: ['Finance', 'Identity', 'Insurance'],
+    allowedDocTypes: ['Aadhaar Identity', 'PAN Card', 'Medical Certificate', 'Policy Record', 'Claim Receipt']
   },
 
   // -------------------------------------------------------------
-  // 5. PRIVATE SECTOR
+  // 5. PRIVATE SECTOR (EXACTLY 2 CATEGORIES: COMPANY & EMPLOYER)
   // -------------------------------------------------------------
   'company': {
     id: 'company',
@@ -639,87 +499,6 @@ export const ORGANIZATION_CONFIGS = {
     ],
     allowedCategories: ['Identity', 'Education', 'Employment'],
     allowedDocTypes: ['Degree Certificate', 'Relieving Letter', 'Aadhaar Identity']
-  },
-  'hr_recruitment': {
-    id: 'hr_recruitment',
-    slug: 'hr-recruitment',
-    sector: 'private_sector',
-    sectorTitle: 'Private Sector',
-    name: 'HR / Recruitment',
-    roleCode: 'HR_ADMIN',
-    logoEmoji: '👥',
-    categoryName: 'Human Resources',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'HR agencies & recruitment firms for candidate profile validation, degree checks, and experience proofs.',
-    roles: ['HR Admin', 'Recruiter', 'Background Executive', 'Auditor'],
-    capabilities: [
-      'Identity Verification',
-      'Background Check',
-      'Qualification Verification'
-    ],
-    allowedCategories: ['Identity', 'Education'],
-    allowedDocTypes: ['Degree Certificate', 'Marksheet', 'Aadhaar Identity']
-  },
-  'background_verification': {
-    id: 'background_verification',
-    slug: 'background-verification',
-    sector: 'private_sector',
-    sectorTitle: 'Private Sector',
-    name: 'Background Verification Agency',
-    roleCode: 'BGV_ADMIN',
-    logoEmoji: '🔍',
-    categoryName: 'Verification Agency',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'Third-party background verification (BGV) agencies executing consent-bound address & credential checks.',
-    roles: ['BGV Admin', 'Screening Officer', 'Field Auditor'],
-    capabilities: [
-      'Identity Verification',
-      'Address Verification',
-      'Credential Verification',
-      'Audit History'
-    ],
-    allowedCategories: ['Identity', 'Education', 'Property'],
-    allowedDocTypes: ['Address Proof', 'Degree Record', 'Identity Status']
-  },
-  'tech_company': {
-    id: 'tech_company',
-    slug: 'tech-company',
-    sector: 'private_sector',
-    sectorTitle: 'Private Sector',
-    name: 'Technology Company',
-    roleCode: 'TECH_CO_ADMIN',
-    logoEmoji: '💻',
-    categoryName: 'IT & Software Firm',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'IT & SaaS firms for remote developer identity verification, security clearance, and access tokens.',
-    roles: ['Tech Admin', 'Security Officer', 'Auditor'],
-    capabilities: [
-      'Identity Verification',
-      'Developer Credentials',
-      'Consent-Based Access'
-    ],
-    allowedCategories: ['Identity', 'Education'],
-    allowedDocTypes: ['Aadhaar Identity', 'Technical Certifications']
-  },
-  'corporate_org': {
-    id: 'corporate_org',
-    slug: 'corporate-org',
-    sector: 'private_sector',
-    sectorTitle: 'Private Sector',
-    name: 'Corporate Organization',
-    roleCode: 'CORP_ADMIN',
-    logoEmoji: '🏬',
-    categoryName: 'Multinational Corporate',
-    integrationStatus: 'Prototype / Simulated',
-    description: 'Multinational corporations for corporate governance, contractor verification, and executive onboarding.',
-    roles: ['Corp Admin', 'Governance Officer', 'Auditor'],
-    capabilities: [
-      'Corporate Verification',
-      'Employee Credential Verification',
-      'Identity Verification'
-    ],
-    allowedCategories: ['Identity', 'Education'],
-    allowedDocTypes: ['Aadhaar Identity', 'Degree Certificate', 'Employment Record']
   }
 };
 
