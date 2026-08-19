@@ -1,14 +1,13 @@
-// src/components/CitizenDashboard.jsx - Main Authenticated Citizen Portal Layout with Document Expiry Alerts & Attention Widget
-
 import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Search, Bell, User, LayoutDashboard, Ticket, FolderClosed,
   Grid, Landmark, Newspaper, Shield, HelpCircle, LogOut, Sun, Moon, CheckCircle2,
   ChevronRight, ChevronDown, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, Zap, Radio, Share2, FileText,
-  Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw
+  Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw, Milestone
 } from 'lucide-react';
 import VirtualCard from './VirtualCard.jsx';
 import CivicVault from './CivicVault.jsx';
+import MyJourney from './MyJourney.jsx';
 import ServicesSection from './ServicesSection.jsx';
 import UpdatesAndNews from './UpdatesAndNews.jsx';
 import SecurityCentre from './SecurityCentre.jsx';
@@ -133,6 +132,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       title: 'MAIN',
       items: [
         { id: 'home', label: 'Home', icon: LayoutDashboard },
+        { id: 'journey', label: 'My Journey', icon: Milestone },
         { id: 'card', label: 'My Civic Card', icon: Ticket },
         { id: 'vault', label: 'My Vault', icon: FolderClosed },
         { id: 'services', label: 'Services', icon: Grid }
@@ -151,6 +151,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       key: 'explore',
       title: 'EXPLORE',
       items: [
+        { id: 'tourism', label: 'CivicOne World', icon: Compass },
         { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
         { id: 'news', label: 'Daily News', icon: Newspaper }
       ]
@@ -464,12 +465,12 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 </span>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
                   {[
-                    { label: 'View Civic Card', icon: Ticket, action: () => handleSelectTab('card'), color: '#0B5ED7' },
+                    { label: 'My Journey', icon: Milestone, action: () => handleSelectTab('journey'), color: '#0B5ED7' },
+                    { label: 'View Civic Card', icon: Ticket, action: () => handleSelectTab('card'), color: '#0284C7' },
                     { label: 'Open Vault', icon: FolderClosed, action: () => handleSelectTab('vault'), color: '#059669' },
                     { label: 'Verify Document', icon: CheckCircle2, action: () => handleSelectTab('vault'), color: '#7C3AED' },
                     { label: 'Share Access', icon: Share2, action: () => handleSelectTab('privacy'), color: '#DC2626' },
                     { label: 'Check Services', icon: Grid, action: () => handleSelectTab('services'), color: '#D97706' },
-                    { label: 'Travel', icon: Plane, action: () => handleSelectTab('travel'), color: '#0284C7' },
                     { label: 'CivicOne World', icon: Compass, action: () => handleSelectTab('tourism'), color: '#166534' },
                     { label: 'Ask AI', icon: Sparkles, action: () => handleSelectTab('help'), color: '#8B5CF6' }
                   ].map((act, i) => (
@@ -590,6 +591,11 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
             </div>
           )}
 
+          {/* TAB: MY JOURNEY (CHRONOLOGICAL DOCUMENT LIFECYCLE) */}
+          {activeTab === 'journey' && (
+            <MyJourney citizen={currentCitizen} documents={documents} />
+          )}
+
           {/* TAB 2: VIRTUAL CIVIC CARD */}
           {activeTab === 'card' && (
             <div style={{ maxWidth: '520px', margin: '0 auto', paddingTop: '12px' }}>
@@ -605,6 +611,11 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           {/* TAB 3: DIGITAL VAULT */}
           {activeTab === 'vault' && (
             <CivicVault documents={documents} />
+          )}
+
+          {/* TAB: CIVICONE WORLD TOURISM & DESTINATIONS GUIDE */}
+          {activeTab === 'tourism' && (
+            <TourismGuide />
           )}
 
           {/* TAB 4: PRIVACY & ACCESS CONSENT */}
@@ -809,15 +820,13 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {[
-
+                  { id: 'journey', label: 'My Journey', icon: Milestone },
                   { id: 'activity', label: 'My Activity', icon: Activity },
                   { id: 'privacy', label: 'Access & Consent', icon: Lock },
                   { id: 'tourism', label: 'CivicOne World', icon: Compass },
-                  { id: 'travel', label: 'Travel & Bookings', icon: Plane },
                   { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
                   { id: 'news', label: 'Daily News', icon: Newspaper },
                   { id: 'security', label: 'Security Centre', icon: Shield },
-                  { id: 'privacy', label: 'Privacy Centre', icon: Lock },
                   { id: 'help', label: 'Help Centre', icon: HelpCircle },
                   { id: 'profile', label: 'Profile Settings', icon: User }
                 ].map(item => (
