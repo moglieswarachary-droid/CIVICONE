@@ -58,15 +58,28 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding, o
               backgroundColor: '#D97706',
               display: 'flex',
               alignItems: 'center',
-              justify: 'center',
+              justifyContent: 'center',
               fontSize: '1.25rem'
             }}>
               🏛️
             </div>
             <div>
-              <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 900, margin: 0, color: '#FFFFFF' }}>
-                CivicOne Organization Network
-              </h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 900, margin: 0, color: '#FFFFFF' }}>
+                  CivicOne Organization Network
+                </h1>
+                <span style={{
+                  fontSize: '0.65rem',
+                  backgroundColor: '#1E293B',
+                  border: '1px solid #334155',
+                  color: '#93C5FD',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '12px'
+                }}>
+                  🖥️ Desktop Workstation Session
+                </span>
+              </div>
               <p style={{ fontSize: '0.75rem', color: '#94A3B8', margin: 0 }}>
                 State-Wide Institutional Verification Gateway • Government, Banking, Education, Healthcare &amp; Employers
               </p>

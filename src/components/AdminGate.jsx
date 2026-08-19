@@ -100,9 +100,25 @@ export default function AdminGate({ onAuthenticated, onGoBackToLanding }) {
           background: 'linear-gradient(135deg, #4F46E5 0%, #312E81 100%)',
           color: '#FEF08A',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          marginBottom: '20px', boxShadow: '0 6px 18px rgba(79, 70, 229, 0.35)'
+          marginBottom: '16px', boxShadow: '0 6px 18px rgba(79, 70, 229, 0.35)'
         }}>
           <Crown size={32} />
+        </div>
+
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          backgroundColor: '#EEF2FF',
+          border: '1px solid #C7D2FE',
+          color: '#4338CA',
+          fontSize: '0.725rem',
+          fontWeight: 700,
+          padding: '4px 12px',
+          borderRadius: '20px',
+          marginBottom: '12px'
+        }}>
+          🖥️ Root Terminal Desktop Station Session Verified
         </div>
 
         <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.02em', marginBottom: '6px' }}>
