@@ -12,6 +12,7 @@ import PolicePortal from './components/PolicePortal.jsx';
 import AdminGate from './components/AdminGate.jsx';
 import AdminPortal from './components/AdminPortal.jsx';
 import PublicQRVerification from './components/PublicQRVerification.jsx';
+import DesktopWorkstationGuard from './components/DesktopWorkstationGuard.jsx';
 
 export default function App() {
   // Views: 'landing' | 'gate' | 'citizen' | 'organization-gate' | 'organization' | 'authority-gate' | 'authority' | 'police' | 'admin-gate' | 'admin' | 'verify'
@@ -147,70 +148,123 @@ export default function App() {
 
     case 'organization-gate':
       return (
-        <OrganizationGate
-          onAuthenticated={handleOpenOrgPortal}
+        <DesktopWorkstationGuard
+          portalType="organization"
+          portalTitle="Organization Access Gateway"
+          onSwitchToCitizen={() => changeView('gate')}
           onGoBackToLanding={() => changeView('landing')}
-          onOpenSuperAdmin={() => changeView('admin-gate')}
-        />
+        >
+          <OrganizationGate
+            onAuthenticated={handleOpenOrgPortal}
+            onGoBackToLanding={() => changeView('landing')}
+            onOpenSuperAdmin={() => changeView('admin-gate')}
+          />
+        </DesktopWorkstationGuard>
       );
 
     case 'organization':
       return (
-        <OrganizationPortal
-          initialOrgConfig={selectedOrgConfig}
-          onReturnHome={() => changeView('organization-gate')}
-        />
+        <DesktopWorkstationGuard
+          portalType="organization"
+          portalTitle="Organization Verification Workspace"
+          onSwitchToCitizen={() => changeView('gate')}
+          onGoBackToLanding={() => changeView('landing')}
+        >
+          <OrganizationPortal
+            initialOrgConfig={selectedOrgConfig}
+            onReturnHome={() => changeView('organization-gate')}
+          />
+        </DesktopWorkstationGuard>
       );
 
     case 'authority-gate':
       return (
-        <AuthorityGate
-          onAuthenticated={handleOfficerAuthSuccess}
+        <DesktopWorkstationGuard
+          portalType="authority"
+          portalTitle="Government Officer Portal Gateway"
+          onSwitchToCitizen={() => changeView('gate')}
           onGoBackToLanding={() => changeView('landing')}
-        />
+        >
+          <AuthorityGate
+            onAuthenticated={handleOfficerAuthSuccess}
+            onGoBackToLanding={() => changeView('landing')}
+          />
+        </DesktopWorkstationGuard>
       );
 
     case 'authority':
-      return authenticatedOfficer ? (
-        <AuthorityPortal
-          officer={authenticatedOfficer}
-          onReturnHome={handleLogout}
-        />
-      ) : (
-        <AuthorityGate
-          onAuthenticated={handleOfficerAuthSuccess}
+      return (
+        <DesktopWorkstationGuard
+          portalType="authority"
+          portalTitle="Government Officer Supervision Portal"
+          onSwitchToCitizen={() => changeView('gate')}
           onGoBackToLanding={() => changeView('landing')}
-        />
+        >
+          {authenticatedOfficer ? (
+            <AuthorityPortal
+              officer={authenticatedOfficer}
+              onReturnHome={handleLogout}
+            />
+          ) : (
+            <AuthorityGate
+              onAuthenticated={handleOfficerAuthSuccess}
+              onGoBackToLanding={() => changeView('landing')}
+            />
+          )}
+        </DesktopWorkstationGuard>
       );
 
     case 'police':
       return (
-        <PolicePortal
-          officer={authenticatedOfficer}
-          initialState={selectedOrgConfig?.state}
-          onReturnHome={handleLogout}
-        />
+        <DesktopWorkstationGuard
+          portalType="police"
+          portalTitle="Police & Law Enforcement Investigation Desk"
+          onSwitchToCitizen={() => changeView('gate')}
+          onGoBackToLanding={() => changeView('landing')}
+        >
+          <PolicePortal
+            officer={authenticatedOfficer}
+            initialState={selectedOrgConfig?.state}
+            onReturnHome={handleLogout}
+          />
+        </DesktopWorkstationGuard>
       );
 
     case 'admin-gate':
       return (
-        <AdminGate
-          onAuthenticated={handleAdminAuthSuccess}
+        <DesktopWorkstationGuard
+          portalType="admin"
+          portalTitle="Super Admin Control Gate"
+          onSwitchToCitizen={() => changeView('gate')}
           onGoBackToLanding={() => changeView('landing')}
-        />
+        >
+          <AdminGate
+            onAuthenticated={handleAdminAuthSuccess}
+            onGoBackToLanding={() => changeView('landing')}
+          />
+        </DesktopWorkstationGuard>
       );
 
     case 'admin':
-      return authenticatedAdmin ? (
-        <AdminPortal
-          admin={authenticatedAdmin}
-          onReturnHome={handleLogout}
-        />
-      ) : (
-        <AdminGate
-          onAuthenticated={handleAdminAuthSuccess}
+      return (
+        <DesktopWorkstationGuard
+          portalType="admin"
+          portalTitle="National Super Admin Supervision Console"
+          onSwitchToCitizen={() => changeView('gate')}
           onGoBackToLanding={() => changeView('landing')}
-        />
+        >
+          {authenticatedAdmin ? (
+            <AdminPortal
+              admin={authenticatedAdmin}
+              onReturnHome={handleLogout}
+            />
+          ) : (
+            <AdminGate
+              onAuthenticated={handleAdminAuthSuccess}
+              onGoBackToLanding={() => changeView('landing')}
+            />
+          )}
+        </DesktopWorkstationGuard>
       );
 
     case 'verify':
@@ -239,3 +293,4 @@ export default function App() {
       );
   }
 }
+

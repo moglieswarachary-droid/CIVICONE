@@ -113,13 +113,40 @@ export default function ServicesSection({ services: initialServices }) {
     setLoading(true);
     try {
       const res = await fetch(`/api/services/category/${catKey}`);
-      const result = await res.json();
-      setLoading(false);
-      if (result.success && result.data) {
-        setCategoryData(result.data);
+      if (res.ok) {
+        const result = await res.json();
+        if (result.success && result.data) {
+          setCategoryData(result.data);
+          setLoading(false);
+          return;
+        }
       }
+      throw new Error("offline");
     } catch (err) {
       setLoading(false);
+      // Fallback service data for static deployment
+      const catModule = categoryModules.find(c => c.key === catKey) || { label: catKey, provider: 'Government of India' };
+      const fallbackRecords = [
+        { id: 'rec-1', name: `${catModule.label} Primary Record`, status: 'VERIFIED', issuer: catModule.provider, issueDate: '15-01-2024', expiryDate: 'Lifetime', isPrivate: false },
+        { id: 'rec-2', name: `${catModule.label} Authorization Grant`, status: 'VERIFIED', issuer: 'National Identity Authority', issueDate: '01-02-2024', expiryDate: '31-12-2028', isPrivate: true }
+      ];
+      setCategoryData({
+        category: catModule.label,
+        provider: catModule.provider,
+        records: fallbackRecords,
+        vehicles: catKey === 'rto' ? [
+          { registrationNo: 'AP39 EQ 1001', model: 'TVS Jupiter 125 (Blue)', rcStatus: 'ACTIVE', insuranceStatus: 'VALID', insuranceExpiry: '14-10-2027', pucStatus: 'VALID', pucExpiry: '18-09-2026', fitnessStatus: 'VALID', rcExpiry: '31-12-2038' }
+        ] : null,
+        accessLogs: catKey === 'healthcare' ? [
+          { id: 'log-1', accessor: 'Apollo Hospitals Vijayawada', purpose: 'Diagnostic Consultation', timestamp: 'Yesterday, 04:30 PM', permission: 'GRANTED' },
+          { id: 'log-2', accessor: 'AIIMS New Delhi', purpose: 'Prescription Sync', timestamp: '12 Aug 2026, 11:15 AM', permission: 'GRANTED' }
+        ] : null,
+        qualificationTimeline: catKey === 'education' ? [
+          { year: '2020', level: 'Secondary School (10th CBSE)', board: 'CivicOne Model School — 94.2%' },
+          { year: '2022', level: 'Senior Secondary (12th MPC)', board: 'Board of Intermediate Education — 96.0%' },
+          { year: '2026', level: 'B.Tech Computer Science & Engineering', board: 'CivicOne Demo Institute (CGPA 8.9)' }
+        ] : null
+      });
     }
   };
 

@@ -1,14 +1,13 @@
-// src/components/CitizenDashboard.jsx - Main Authenticated Citizen Portal Layout with Document Expiry Alerts & Attention Widget
-
 import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Search, Bell, User, LayoutDashboard, Ticket, FolderClosed,
   Grid, Landmark, Newspaper, Shield, HelpCircle, LogOut, Sun, Moon, CheckCircle2,
   ChevronRight, ChevronDown, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, Zap, Radio, Share2, FileText,
-  Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw
+  Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw, Milestone
 } from 'lucide-react';
 import VirtualCard from './VirtualCard.jsx';
 import CivicVault from './CivicVault.jsx';
+import MyJourney from './MyJourney.jsx';
 import ServicesSection from './ServicesSection.jsx';
 import UpdatesAndNews from './UpdatesAndNews.jsx';
 import SecurityCentre from './SecurityCentre.jsx';
@@ -18,6 +17,7 @@ import AiAgentFloating from './AiAgentFloating.jsx';
 import PrivacyCenter from './PrivacyCenter.jsx';
 import TourismGuide from './TourismGuide.jsx';
 import TravelBookingHub from './TravelBookingHub.jsx';
+import ZkProofGeneratorModal from './ZkProofGeneratorModal.jsx';
 import {
   DEMO_CARD, DEMO_DOCUMENTS, DEMO_GOVT_UPDATES, DEMO_NEWS,
   DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST, calculateDocExpiryStatus
@@ -38,6 +38,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   const [demoCitizens, setDemoCitizens] = useState(DEMO_CITIZENS_LIST);
   const [currentCitizen, setCurrentCitizen] = useState(citizen);
   const [targetTravelCity, setTargetTravelCity] = useState('');
+  const [showZkModal, setShowZkModal] = useState(false);
 
   // Collapsible Group States for Desktop Sidebar
   const [openGroups, setOpenGroups] = useState({
@@ -54,15 +55,25 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
   // Fetch initial dashboard data & demo accounts from REST API backend
   useEffect(() => {
+    const fetchJsonSafe = async (url) => {
+      try {
+        const r = await fetch(url);
+        if (!r.ok) return {};
+        return await r.json();
+      } catch (e) {
+        return {};
+      }
+    };
+
     async function loadDashboardData() {
       try {
         const [cardRes, docsRes, notifRes, govtRes, newsRes, demoRes] = await Promise.all([
-          fetch('/api/card/me').then(r => r.json()),
-          fetch('/api/vault/documents').then(r => r.json()),
-          fetch('/api/notifications').then(r => r.json()),
-          fetch('/api/updates/govt').then(r => r.json()),
-          fetch('/api/updates/news').then(r => r.json()),
-          fetch('/api/citizens/demo').then(r => r.json())
+          fetchJsonSafe('/api/card/me'),
+          fetchJsonSafe('/api/vault/documents'),
+          fetchJsonSafe('/api/notifications'),
+          fetchJsonSafe('/api/updates/govt'),
+          fetchJsonSafe('/api/updates/news'),
+          fetchJsonSafe('/api/citizens/demo')
         ]);
 
         if (cardRes.citizen) setCurrentCitizen(cardRes.citizen);
@@ -77,8 +88,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       }
     }
     loadDashboardData();
-    const interval = setInterval(loadDashboardData, 4000);
-    return () => clearInterval(interval);
   }, []);
 
   // Switch Demo Citizen Account Handler
@@ -89,20 +98,28 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ citizenId })
       });
-      const data = await res.json();
-      if (data.success) {
-        setCurrentCitizen(data.citizen);
-        setCardData(data.card);
-        setDocuments(data.documents);
-        const [notifRes, demoRes] = await Promise.all([
-          fetch('/api/notifications').then(r => r.json()),
-          fetch('/api/citizens/demo').then(r => r.json())
-        ]);
-        if (notifRes.notifications) setNotifications(notifRes.notifications);
-        if (demoRes.demoCitizens) setDemoCitizens(demoRes.demoCitizens);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setCurrentCitizen(data.citizen);
+          setCardData(data.card);
+          setDocuments(data.documents);
+          return;
+        }
       }
+      throw new Error("offline");
     } catch (err) {
-      console.log("Demo switch failed");
+      // Local fallback for switching demo citizens on Netlify/offline
+      const target = demoCitizens.find(c => c.citizenId === citizenId) || DEMO_CITIZENS_LIST.find(c => c.citizenId === citizenId);
+      if (target) {
+        setCurrentCitizen(target);
+        setCardData({
+          ...DEMO_CARD,
+          holderName: (target.fullName || target.name || '').toUpperCase(),
+          civicId: target.citizenId,
+          maskedAadhaar: target.maskedAadhaar || 'XXXX XXXX 1001'
+        });
+      }
     }
   };
 
@@ -117,6 +134,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       title: 'MAIN',
       items: [
         { id: 'home', label: 'Home', icon: LayoutDashboard },
+        { id: 'journey', label: 'My Journey', icon: Milestone },
         { id: 'card', label: 'My Civic Card', icon: Ticket },
         { id: 'vault', label: 'My Vault', icon: FolderClosed },
         { id: 'services', label: 'Services', icon: Grid }
@@ -135,6 +153,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       key: 'explore',
       title: 'EXPLORE',
       items: [
+        { id: 'tourism', label: 'CivicOne World', icon: Compass },
         { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
         { id: 'news', label: 'Daily News', icon: Newspaper }
       ]
@@ -448,12 +467,13 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 </span>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
                   {[
-                    { label: 'View Civic Card', icon: Ticket, action: () => handleSelectTab('card'), color: '#0B5ED7' },
+                    { label: 'My Journey', icon: Milestone, action: () => handleSelectTab('journey'), color: '#0B5ED7' },
+                    { label: 'View Civic Card', icon: Ticket, action: () => handleSelectTab('card'), color: '#0284C7' },
                     { label: 'Open Vault', icon: FolderClosed, action: () => handleSelectTab('vault'), color: '#059669' },
+                    { label: 'ZK Privacy Share', icon: ShieldCheck, action: () => setShowZkModal(true), color: '#1A4F9C' },
                     { label: 'Verify Document', icon: CheckCircle2, action: () => handleSelectTab('vault'), color: '#7C3AED' },
                     { label: 'Share Access', icon: Share2, action: () => handleSelectTab('privacy'), color: '#DC2626' },
                     { label: 'Check Services', icon: Grid, action: () => handleSelectTab('services'), color: '#D97706' },
-                    { label: 'Travel', icon: Plane, action: () => handleSelectTab('travel'), color: '#0284C7' },
                     { label: 'CivicOne World', icon: Compass, action: () => handleSelectTab('tourism'), color: '#166534' },
                     { label: 'Ask AI', icon: Sparkles, action: () => handleSelectTab('help'), color: '#8B5CF6' }
                   ].map((act, i) => (
@@ -574,6 +594,11 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
             </div>
           )}
 
+          {/* TAB: MY JOURNEY (CHRONOLOGICAL DOCUMENT LIFECYCLE) */}
+          {activeTab === 'journey' && (
+            <MyJourney citizen={currentCitizen} documents={documents} />
+          )}
+
           {/* TAB 2: VIRTUAL CIVIC CARD */}
           {activeTab === 'card' && (
             <div style={{ maxWidth: '520px', margin: '0 auto', paddingTop: '12px' }}>
@@ -589,6 +614,11 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           {/* TAB 3: DIGITAL VAULT */}
           {activeTab === 'vault' && (
             <CivicVault documents={documents} />
+          )}
+
+          {/* TAB: CIVICONE WORLD TOURISM & DESTINATIONS GUIDE */}
+          {activeTab === 'tourism' && (
+            <TourismGuide />
           )}
 
           {/* TAB 4: PRIVACY & ACCESS CONSENT */}
@@ -793,15 +823,13 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {[
-
+                  { id: 'journey', label: 'My Journey', icon: Milestone },
                   { id: 'activity', label: 'My Activity', icon: Activity },
                   { id: 'privacy', label: 'Access & Consent', icon: Lock },
                   { id: 'tourism', label: 'CivicOne World', icon: Compass },
-                  { id: 'travel', label: 'Travel & Bookings', icon: Plane },
                   { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
                   { id: 'news', label: 'Daily News', icon: Newspaper },
                   { id: 'security', label: 'Security Centre', icon: Shield },
-                  { id: 'privacy', label: 'Privacy Centre', icon: Lock },
                   { id: 'help', label: 'Help Centre', icon: HelpCircle },
                   { id: 'profile', label: 'Profile Settings', icon: User }
                 ].map(item => (
@@ -839,7 +867,18 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
 
 
-      <AiAgentFloating />
+      <AiAgentFloating
+        citizen={currentCitizen}
+        documents={documents}
+        onNavigateTab={handleSelectTab}
+      />
+
+      {showZkModal && (
+        <ZkProofGeneratorModal
+          citizen={currentCitizen}
+          onClose={() => setShowZkModal(false)}
+        />
+      )}
 
     </div>
   );
