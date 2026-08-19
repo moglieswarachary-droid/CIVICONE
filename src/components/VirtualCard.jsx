@@ -1,11 +1,11 @@
-// src/components/VirtualCard.jsx - Official CivicOne Digital Identity Card (Single Tier: NORMAL CITIZEN)
-// Precision High-Security Digital Credential with Sovereign Navy & Blue Styling
+// src/components/VirtualCard.jsx - Official CivicOne Digital Citizen Identity Card
+// Indian Identity Signature: Deep Indigo (#101B3D) + Ivory (#F8F7F2) + Ashoka Blue (#1A4F9C) + Tricolor Security Filament
 
 import React, { useState, useRef } from 'react';
 import {
   ShieldCheck, QrCode, RotateCw, Share2, Download, CheckCircle2,
-  Copy, X, Eye, EyeOff, Radio, Mail, MapPin, Calendar, Phone,
-  Lock, Fingerprint, ExternalLink, Shield, Key, Sparkles, Check
+  Copy, X, Radio, MapPin, Calendar, Phone, Lock, Fingerprint,
+  ExternalLink, Shield, Key, Sparkles, Check, Info
 } from 'lucide-react';
 
 export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerification, onCardUpdate }) {
@@ -28,7 +28,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
   const dob = citizen?.dob || citizen?.dateOfBirth || '15/08/1995';
   const gender = citizen?.gender || 'Male';
   const state = citizen?.state || 'Andhra Pradesh';
-  const jurisdiction = `Republic of India • ${state}`;
+  const jurisdiction = `${state}, India`;
   const validFrom = card?.issueDate || '15/01/2024';
   const validUntil = card?.expiryDate || '14/01/2034';
   const ledgerHash = card?.ledgerHash || '0x99a4c82b710e64b8a15c3d2e';
@@ -49,7 +49,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
     setIsFlipped(prev => !prev);
   };
 
-  // NFC Simulation Trigger
+  // NFC Simulation Trigger with Honest Feedback
   const handleTriggerNfc = () => {
     setShowNfcModal(true);
     setNfcScanning(true);
@@ -66,8 +66,8 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `CivicOne Official Digital Identity - ${citizenName}`,
-          text: `Official CivicOne Verified Identity Card for ${citizenName}. Civic ID: ${civicId}`,
+          title: `CivicOne Official Digital Citizen Identity - ${citizenName}`,
+          text: `Official CivicOne Verified Citizen Identity Card for ${citizenName}. Civic ID: ${civicId}`,
           url: verificationUrl
         });
         return;
@@ -86,65 +86,76 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
     canvas.height = 630; // CR80 standard ID aspect ratio 1.586
     const ctx = canvas.getContext('2d');
 
-    // 1. Background Gradient (Deep Navy to Civic Blue)
+    // 1. Background Gradient (Deep Indigo Navy)
     const grad = ctx.createLinearGradient(0, 0, 1000, 630);
-    grad.addColorStop(0, '#0B1F3A');
-    grad.addColorStop(0.5, '#073B8C');
-    grad.addColorStop(1, '#0B5ED7');
+    grad.addColorStop(0, '#101B3D');
+    grad.addColorStop(0.6, '#1E2F6B');
+    grad.addColorStop(1, '#0C1530');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 1000, 630);
 
-    // Silver/Cyan Perimeter Border
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-    ctx.lineWidth = 3;
+    // Soft Silver Perimeter Border
+    ctx.strokeStyle = '#D9DEE8';
+    ctx.lineWidth = 2.5;
     ctx.strokeRect(16, 16, 968, 598);
 
+    // Indian Tricolor Security Filament Line
+    const triGrad = ctx.createLinearGradient(16, 105, 984, 105);
+    triGrad.addColorStop(0, '#FF9933');
+    triGrad.addColorStop(0.33, '#FF9933');
+    triGrad.addColorStop(0.33, '#FFFFFF');
+    triGrad.addColorStop(0.66, '#FFFFFF');
+    triGrad.addColorStop(0.66, '#138808');
+    triGrad.addColorStop(1, '#138808');
+    ctx.fillStyle = triGrad;
+    ctx.fillRect(16, 105, 968, 4);
+
     // 2. Header
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 36px Inter, sans-serif';
-    ctx.fillText('CivicOne DIGITAL IDENTITY', 50, 70);
+    ctx.fillStyle = '#F8F7F2';
+    ctx.font = 'bold 34px Inter, sans-serif';
+    ctx.fillText('CIVICONE DIGITAL CITIZEN IDENTITY', 50, 70);
 
     ctx.fillStyle = '#93C5FD';
-    ctx.font = 'bold 16px Inter, sans-serif';
-    ctx.fillText('NATIONAL SOVEREIGN CITIZEN CREDENTIAL', 50, 98);
+    ctx.font = 'bold 15px Inter, sans-serif';
+    ctx.fillText('VERIFIED CITIZEN CREDENTIAL • NATIONAL DIGITAL IDENTITY', 50, 95);
 
     // 3. Status Badge
     ctx.fillStyle = '#064E3B';
-    ctx.fillRect(720, 42, 230, 44);
+    ctx.fillRect(730, 42, 220, 44);
     ctx.strokeStyle = '#34D399';
     ctx.lineWidth = 2;
-    ctx.strokeRect(720, 42, 230, 44);
+    ctx.strokeRect(730, 42, 220, 44);
     ctx.fillStyle = '#A7F3D0';
     ctx.font = 'bold 16px Inter, sans-serif';
-    ctx.fillText('✓ VERIFIED IDENTITY', 740, 70);
+    ctx.fillText('✓ VERIFIED', 780, 70);
 
     // 4. Citizen Info
-    ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = '#F8F7F2';
     ctx.font = 'bold 42px Inter, sans-serif';
     ctx.fillText(citizenName, 220, 220);
 
     ctx.fillStyle = '#93C5FD';
     ctx.font = 'bold 24px monospace';
-    ctx.fillText(`Civic ID: ${civicId}`, 220, 265);
+    ctx.fillText(`CIVIC ID: ${civicId}`, 220, 265);
 
-    ctx.fillStyle = '#E2E8F0';
+    ctx.fillStyle = '#D9DEE8';
     ctx.font = '20px Inter, sans-serif';
-    ctx.fillText(`DOB: ${dob}   |   Gender: ${gender}`, 220, 310);
-    ctx.fillText(`Jurisdiction: ${jurisdiction}`, 220, 350);
-    ctx.fillText(`Validity: ${validFrom} – ${validUntil}`, 220, 390);
+    ctx.fillText(`DOB: ${dob}   |   GENDER: ${gender}`, 220, 310);
+    ctx.fillText(`STATE / REGION: ${jurisdiction}`, 220, 350);
+    ctx.fillText(`VALIDITY: ${validFrom} – ${validUntil}`, 220, 390);
 
     // 5. Tier Label Bottom
-    ctx.fillStyle = '#60A5FA';
-    ctx.font = 'bold 24px Inter, sans-serif';
+    ctx.fillStyle = '#93C5FD';
+    ctx.font = 'bold 22px Inter, sans-serif';
     ctx.fillText('● NORMAL CITIZEN', 50, 560);
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.fillStyle = 'rgba(217, 222, 232, 0.65)';
     ctx.font = '14px monospace';
     ctx.fillText(`PKI: ${verificationRef} • LEDGER: ${ledgerHash.slice(0, 16)}...`, 50, 590);
 
     setTimeout(() => {
       const link = document.createElement('a');
-      link.download = `CivicOne_Card_${civicId}.png`;
+      link.download = `CivicOne_Citizen_Card_${civicId}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
       setDownloadingImage(false);
@@ -152,60 +163,61 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
   };
 
   // Reusable Scannable Dynamic QR Code
-  const renderQrCode = (size = 110) => {
+  const renderQrCode = (size = 100, labelUnder = true) => {
     const qrPayload = `https://verify.civicone.gov.in/verify?id=${encodeURIComponent(civicId)}&tier=NORMAL&name=${encodeURIComponent(citizenName)}&v=${encodeURIComponent(ledgerHash.slice(0, 10))}`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrPayload)}&color=0B1F3A&bgcolor=FFFFFF`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrPayload)}&color=101B3D&bgcolor=F8F7F2`;
 
     return (
       <div style={{
         position: 'relative',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#F8F7F2',
         padding: '6px',
         borderRadius: '10px',
-        border: '2px solid #93C5FD',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-        display: 'inline-block'
+        border: '1.5px solid #D9DEE8',
+        boxShadow: '0 4px 12px rgba(16, 27, 61, 0.15)',
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
         <img
           src={qrUrl}
           alt={`Official QR Code for Civic ID ${civicId}`}
           style={{ width: `${size}px`, height: `${size}px`, display: 'block', borderRadius: '4px' }}
         />
-        <div style={{
-          position: 'absolute',
-          bottom: '2px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          fontSize: '6px',
-          fontWeight: 900,
-          color: '#0B1F3A',
-          letterSpacing: '0.5px',
-          backgroundColor: 'rgba(255,255,255,0.95)',
-          padding: '1px 4px',
-          borderRadius: '3px'
-        }}>
-          CIVIC-VERIFIED
-        </div>
+        {labelUnder && (
+          <div style={{
+            fontSize: '6.5px',
+            fontWeight: 900,
+            color: '#101B3D',
+            letterSpacing: '0.6px',
+            textTransform: 'uppercase',
+            marginTop: '3px',
+            whiteSpace: 'nowrap'
+          }}>
+            SCAN TO VERIFY
+          </div>
+        )}
       </div>
     );
   };
 
   return (
-    <div style={{ maxWidth: '480px', width: '100%', margin: '0 auto' }}>
+    <div style={{ maxWidth: '540px', width: '100%', margin: '0 auto' }}>
 
       {/* 3D ROTATABLE DIGITAL IDENTITY CARD (IN-PLACE ROTATION) */}
       <div
         ref={cardRef}
         tabIndex={0}
         role="region"
-        aria-label="Official CivicOne Normal Citizen Digital Identity Card. Press Enter or Space to flip."
+        aria-label="CivicOne Normal Citizen Digital Identity Card. Press Enter or Space to flip."
         className={`card-container-3d ${isFlipped ? 'flipped' : ''}`}
         style={{
           width: '100%',
           aspectRatio: '1.586',
           position: 'relative',
           cursor: 'pointer',
-          borderRadius: '18px'
+          borderRadius: '20px'
         }}
         onClick={handleFlipCard}
         onKeyDown={(e) => {
@@ -218,133 +230,129 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
         <div className="card-inner-3d">
 
           {/* =========================================================================
-              FRONT OF DIGITAL IDENTITY CARD (NORMAL CITIZEN)
+              FRONT OF DIGITAL IDENTITY CARD (DEEP INDIGO NAVY & IVORY SURFACE)
               ========================================================================= */}
           <div
             className="card-front-3d security-pattern-bg"
             style={{
-              background: 'linear-gradient(135deg, #0B1F3A 0%, #073B8C 50%, #0B5ED7 100%)',
-              padding: '18px 20px',
-              color: '#FFFFFF',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              boxShadow: '0 20px 45px -10px rgba(11, 31, 58, 0.45), 0 0 15px rgba(11, 94, 215, 0.15)',
+              background: 'linear-gradient(135deg, #101B3D 0%, #1E2F6B 55%, #0C1530 100%)',
+              padding: '22px 24px',
+              color: '#F8F7F2',
+              border: '1.5px solid rgba(217, 222, 232, 0.4)',
+              boxShadow: '0 20px 45px -10px rgba(16, 27, 61, 0.5), 0 0 15px rgba(26, 79, 156, 0.2)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              borderRadius: '20px'
             }}
           >
-            {/* Shimmer Overlay */}
+            {/* Subtle Hologram Shimmer */}
             <div className="hologram-shimmer" />
-
-            {/* Holographic Security Foil Strip (Iridescent Cyan & Silver) */}
-            <div
-              className="hologram-security-strip"
-              style={{ right: '88px' }}
-            />
 
             {/* Fine Guilloche Micro-Security Pattern Overlay (SVG) */}
             <svg
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: 0.08 }}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: 0.07 }}
               xmlns="http://www.w3.org/2000/svg"
             >
               <defs>
-                <pattern id="guilloche-blue" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M0 20 Q 10 0, 20 20 T 40 20" fill="none" stroke="#93C5FD" strokeWidth="0.5" />
-                  <path d="M20 0 Q 30 20, 20 40 T 20 0" fill="none" stroke="#93C5FD" strokeWidth="0.5" />
-                  <circle cx="20" cy="20" r="8" fill="none" stroke="#93C5FD" strokeWidth="0.4" />
+                <pattern id="civic-guilloche" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M0 20 Q 10 0, 20 20 T 40 20" fill="none" stroke="#D9DEE8" strokeWidth="0.5" />
+                  <path d="M20 0 Q 30 20, 20 40 T 20 0" fill="none" stroke="#1A4F9C" strokeWidth="0.5" />
+                  <circle cx="20" cy="20" r="7" fill="none" stroke="#38BDF8" strokeWidth="0.4" />
                 </pattern>
               </defs>
-              <rect width="100%" height="100%" fill="url(#guilloche-blue)" />
+              <rect width="100%" height="100%" fill="url(#civic-guilloche)" />
             </svg>
 
-            {/* Microtext Security Header Line */}
-            <div className="microtext-security" style={{ color: '#93C5FD' }}>
-              CIVICONE SECURE IDENTITY VERIFICATION SYSTEM • NATIONAL DIGITAL IDENTITY FRAMEWORK • AUTHENTICATED CREDENTIAL •
-            </div>
-
             {/* CARD HEADER SECTION */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 2 }}>
-              
-              {/* Branding & Sovereign Seal */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ zIndex: 2 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                
+                {/* Left: CivicOne Logo & Identity Title */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                  <div style={{
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(26, 79, 156, 0.4)',
+                    border: '1px solid rgba(217, 222, 232, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                  }}>
+                    <ShieldCheck size={20} style={{ color: '#38BDF8' }} />
+                  </div>
+                  <div>
+                    <div style={{
+                      fontWeight: 900,
+                      fontSize: '0.95rem',
+                      letterSpacing: '0.04em',
+                      lineHeight: 1.1,
+                      color: '#F8F7F2'
+                    }}>
+                      CIVICONE <span style={{ fontSize: '0.725rem', fontWeight: 800, color: '#93C5FD' }}>DIGITAL CITIZEN IDENTITY</span>
+                    </div>
+                    <div style={{
+                      fontSize: '0.575rem',
+                      color: '#38BDF8',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.08em',
+                      fontWeight: 700
+                    }}>
+                      VERIFIED CITIZEN
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Compact Verification Badge */}
                 <div style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.16)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  backgroundColor: 'rgba(19, 136, 8, 0.2)',
+                  border: '1.5px solid #34D399',
+                  padding: '3px 10px',
+                  borderRadius: '20px',
+                  fontSize: '0.675rem',
+                  fontWeight: 800,
+                  color: '#A7F3D0',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  gap: '4px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
                 }}>
-                  <ShieldCheck size={18} style={{ color: '#60A5FA' }} />
-                </div>
-                <div>
-                  <div style={{
-                    fontWeight: 900,
-                    fontSize: '0.95rem',
-                    letterSpacing: '0.04em',
-                    lineHeight: 1.1,
-                    color: '#FFFFFF'
-                  }}>
-                    CivicOne <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#93C5FD' }}>DIGITAL IDENTITY</span>
-                  </div>
-                  <div style={{
-                    fontSize: '0.55rem',
-                    color: '#93C5FD',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    fontWeight: 700
-                  }}>
-                    National Verified Citizen ID
-                  </div>
+                  ✓ VERIFIED
                 </div>
               </div>
 
-              {/* Status Badge */}
-              <div style={{
-                backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                border: '1px solid #34D399',
-                padding: '3px 10px',
-                borderRadius: '20px',
-                fontSize: '0.65rem',
-                fontWeight: 800,
-                color: '#A7F3D0',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
-              }}>
-                ✓ VERIFIED IDENTITY
-              </div>
+              {/* Signature Indian Tricolor Security Filament Line */}
+              <div className="tricolor-filament-line" />
             </div>
 
-            {/* CARD MAIN PROFILE BODY */}
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'center', margin: '6px 0', zIndex: 2 }}>
+            {/* CARD MAIN PROFILE SECTION (Two-Column Layout) */}
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', margin: '4px 0', zIndex: 2 }}>
               
-              {/* Photo in Identity Frame with Micro-Hologram Corner Marks */}
-              <div style={{ position: 'relative' }}>
+              {/* Left Column: Citizen Portrait Photograph */}
+              <div style={{ position: 'relative', flexShrink: 0 }}>
                 <img
                   src={photoUrl}
                   alt={citizenName}
                   style={{
-                    width: '68px',
-                    height: '76px',
-                    borderRadius: '10px',
+                    width: '74px',
+                    height: '88px', // 4:5 portrait aspect ratio
+                    borderRadius: '11px',
                     objectFit: 'cover',
-                    border: '2px solid rgba(255, 255, 255, 0.9)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                    border: '1.5px solid #F8F7F2',
+                    boxShadow: '0 4px 14px rgba(16, 27, 61, 0.4)'
                   }}
                 />
-                {/* Official Photo Verification Hologram Seal */}
+                {/* Official Photo Verification Seal Overlay */}
                 <div style={{
                   position: 'absolute',
                   bottom: '-3px',
                   right: '-3px',
-                  backgroundColor: '#0B1F3A',
-                  border: '1px solid #60A5FA',
+                  backgroundColor: '#101B3D',
+                  border: '1px solid #38BDF8',
                   borderRadius: '50%',
                   width: '18px',
                   height: '18px',
@@ -352,18 +360,19 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <Shield size={11} style={{ color: '#60A5FA' }} />
+                  <Shield size={11} style={{ color: '#38BDF8' }} />
                 </div>
               </div>
 
-              {/* Citizen Details */}
+              {/* Right Column: Citizen Identity Information */}
               <div style={{ flex: 1, minWidth: 0 }}>
+                {/* Citizen Full Name */}
                 <h2 style={{
-                  fontSize: '1.15rem',
+                  fontSize: '1.2rem',
                   fontWeight: 900,
-                  color: '#FFFFFF',
+                  color: '#F8F7F2',
                   letterSpacing: '-0.01em',
-                  marginBottom: '2px',
+                  marginBottom: '3px',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
@@ -371,71 +380,75 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   {citizenName}
                 </h2>
 
+                {/* Civic ID with Copy Helper */}
                 <div style={{
-                  fontSize: '0.75rem',
+                  fontSize: '0.775rem',
                   fontWeight: 800,
-                  color: '#BFDBFE',
+                  color: '#93C5FD',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '4px',
+                  marginBottom: '2px'
                 }}>
-                  <span>Civic ID:</span>
-                  <span style={{ fontFamily: 'monospace', fontWeight: 900, letterSpacing: '0.3px' }}>{civicId}</span>
+                  <span style={{ color: '#D9DEE8', fontSize: '0.7rem', fontWeight: 700 }}>CIVIC ID:</span>
+                  <span style={{ fontFamily: 'monospace', fontWeight: 900, letterSpacing: '0.3px', color: '#F8F7F2' }}>{civicId}</span>
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); copyToClipboard(civicId); }}
-                    style={{ background: 'none', color: '#BFDBFE', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
+                    style={{ background: 'none', color: '#93C5FD', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.85 }}
                     title="Copy Civic ID"
+                    aria-label="Copy Civic ID"
                   >
                     <Copy size={11} />
                   </button>
                 </div>
 
-                <div style={{ fontSize: '0.675rem', color: 'rgba(255,255,255,0.85)', marginTop: '2px' }}>
-                  DOB: <strong>{dob}</strong> &bull; Gender: <strong>{gender}</strong>
+                {/* DOB & Gender */}
+                <div style={{ fontSize: '0.7rem', color: '#D9DEE8', marginBottom: '2px' }}>
+                  <span style={{ color: '#93C5FD', fontWeight: 700 }}>DOB:</span> <strong style={{ color: '#F8F7F2' }}>{dob}</strong> &bull; <span style={{ color: '#93C5FD', fontWeight: 700 }}>GENDER:</span> <strong style={{ color: '#F8F7F2' }}>{gender}</strong>
                 </div>
 
+                {/* State / Region */}
                 <div style={{
-                  fontSize: '0.625rem',
-                  color: '#93C5FD',
-                  marginTop: '2px',
+                  fontSize: '0.675rem',
+                  color: '#38BDF8',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px'
                 }}>
-                  <MapPin size={10} />
-                  <span>{jurisdiction}</span>
+                  <MapPin size={11} />
+                  <span><strong>STATE / REGION:</strong> {jurisdiction}</span>
                 </div>
               </div>
 
-              {/* Front Scannable QR Code Thumbnail */}
+              {/* Integrated Front QR Code Area */}
               <div
                 onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
-                style={{ cursor: 'pointer' }}
-                title="Click to expand dynamic scannable QR Code"
+                style={{ cursor: 'pointer', flexShrink: 0 }}
+                title="Click to view scannable QR verification modal"
               >
-                {renderQrCode(46)}
+                {renderQrCode(46, true)}
               </div>
             </div>
 
-            {/* CARD FOOTER & DIGITAL SIGNATURE */}
+            {/* CARD FOOTER & DIGITAL CITIZEN SIGNATURE */}
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-end',
-              borderTop: '1px solid rgba(255,255,255,0.2)',
+              borderTop: '1px solid rgba(217, 222, 232, 0.25)',
               paddingTop: '6px',
               fontSize: '0.65rem',
               zIndex: 2
             }}>
               
-              {/* Bottom Tier Label & PKI Mark */}
+              {/* Left: Citizen Status & Security Reference */}
               <div>
                 <div style={{
                   fontWeight: 900,
-                  fontSize: '0.7rem',
+                  fontSize: '0.725rem',
                   letterSpacing: '0.06em',
-                  color: '#60A5FA',
+                  color: '#93C5FD',
                   textTransform: 'uppercase',
                   display: 'flex',
                   alignItems: 'center',
@@ -446,21 +459,21 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 </div>
                 <div style={{
                   fontSize: '0.55rem',
-                  color: 'rgba(255,255,255,0.6)',
+                  color: 'rgba(217, 222, 232, 0.65)',
                   fontFamily: 'monospace'
                 }}>
                   PKI: {verificationRef}
                 </div>
               </div>
 
-              {/* Flip Hint */}
+              {/* Right: Interactive Flip Hint */}
               <div style={{
-                fontSize: '0.625rem',
-                color: '#93C5FD',
-                fontWeight: 700,
+                fontSize: '0.65rem',
+                color: '#38BDF8',
+                fontWeight: 800,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '3px'
+                gap: '4px'
               }}>
                 <RotateCw size={11} /> Tap to Flip
               </div>
@@ -470,79 +483,87 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
 
 
           {/* =========================================================================
-              BACK OF DIGITAL IDENTITY CARD (NORMAL CITIZEN)
+              BACK OF DIGITAL IDENTITY CARD (IVORY WHITE #F8F7F2 SURFACE)
               ========================================================================= */}
           <div
-            className="card-back-3d security-pattern-bg"
+            className="card-back-3d security-pattern-ivory"
             style={{
-              background: 'linear-gradient(135deg, #08162A 0%, #0B1F3A 60%, #073B8C 100%)',
-              padding: '16px 18px',
-              color: '#FFFFFF',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
-              boxShadow: '0 20px 45px -10px rgba(11, 31, 58, 0.45)',
+              backgroundColor: '#F8F7F2',
+              padding: '20px 24px',
+              color: '#172033',
+              border: '1.5px solid #D9DEE8',
+              boxShadow: '0 20px 45px -10px rgba(16, 27, 61, 0.35)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              borderRadius: '20px'
             }}
           >
-            {/* Shimmer Overlay */}
-            <div className="hologram-shimmer" />
+            {/* Header Section */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <div>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 900,
+                    color: '#101B3D',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}>
+                    <Lock size={13} style={{ color: '#1A4F9C' }} />
+                    SECURITY & VERIFICATION
+                  </div>
+                  <div style={{ fontSize: '0.575rem', color: '#64748B', fontWeight: 700 }}>
+                    CIVICONE DIGITAL IDENTITY
+                  </div>
+                </div>
 
-            {/* Back Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 2 }}>
-              <div style={{
-                fontSize: '0.725rem',
-                fontWeight: 900,
-                color: '#93C5FD',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}>
-                <Lock size={13} style={{ color: '#60A5FA' }} />
-                BACKSIDE SECURITY FEATURES
+                <div style={{
+                  fontSize: '0.625rem',
+                  fontWeight: 800,
+                  color: '#1A4F9C',
+                  backgroundColor: '#EAF3FF',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  border: '1px solid #BFDBFE'
+                }}>
+                  SECURE IDENTITY
+                </div>
               </div>
 
-              <div style={{
-                fontSize: '0.625rem',
-                fontWeight: 800,
-                color: '#4ADE80',
-                backgroundColor: 'rgba(74, 222, 128, 0.15)',
-                padding: '2px 8px',
-                borderRadius: '12px',
-                border: '1px solid #4ADE80'
-              }}>
-                AUTHENTICATED
-              </div>
+              {/* Signature Indian Tricolor Security Filament Line */}
+              <div className="tricolor-filament-line" />
             </div>
 
-            {/* Back Main Content (Split Grid: Left Features, Right Large QR Code) */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '14px', alignItems: 'center', margin: '4px 0', zIndex: 2 }}>
+            {/* Back Main Content (Split Grid: Left Structured Cards, Right Large QR Code) */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '14px', alignItems: 'center', margin: '4px 0' }}>
               
-              {/* Left Column: Security Specifications */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '0.675rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                  <Fingerprint size={12} style={{ color: '#60A5FA' }} />
-                  <span><strong>Multi-Factor Identity:</strong> Grade A+ Verified</span>
+              {/* Left Column: Structured Identity Security Specifications */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.675rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#172033' }}>
+                  <Fingerprint size={12} style={{ color: '#1A4F9C' }} />
+                  <span><strong>Multi-Factor Identity:</strong> <span style={{ color: '#101B3D' }}>Grade-A Verified</span></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                  <Key size={12} style={{ color: '#60A5FA' }} />
-                  <span><strong>Secure Digital Auth:</strong> Dual-Key PKI Token</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#172033' }}>
+                  <Key size={12} style={{ color: '#1A4F9C' }} />
+                  <span><strong>Digital Authentication:</strong> <span style={{ color: '#101B3D' }}>Dual-Key PKI Token</span></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                  <ShieldCheck size={12} style={{ color: '#60A5FA' }} />
-                  <span><strong>Verification Ref:</strong> <span style={{ fontFamily: 'monospace' }}>{verificationRef.slice(0, 16)}</span></span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#172033' }}>
+                  <ShieldCheck size={12} style={{ color: '#1A4F9C' }} />
+                  <span><strong>Verification Ref:</strong> <span style={{ fontFamily: 'monospace', color: '#101B3D' }}>{verificationRef.slice(0, 16)}</span></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                  <Radio size={12} style={{ color: '#60A5FA' }} />
-                  <span><strong>NFC Authentication:</strong> ISO/IEC 14443 Type A</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#172033' }}>
+                  <Radio size={12} style={{ color: '#1A4F9C' }} />
+                  <span><strong>NFC Authentication:</strong> <span style={{ color: '#101B3D' }}>ISO/IEC 14443 Type A</span></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-                  <Phone size={12} style={{ color: '#F87171' }} />
-                  <span><strong>Emergency Contact:</strong> <strong style={{ color: '#67E8F9' }}>112</strong> (Helpline)</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#172033' }}>
+                  <Phone size={12} style={{ color: '#DC2626' }} />
+                  <span><strong>Emergency Contact:</strong> <strong style={{ color: '#DC2626' }}>112</strong> (National Helpline)</span>
                 </div>
               </div>
 
@@ -552,28 +573,24 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 style={{ textAlign: 'center', cursor: 'pointer' }}
                 title="Click to view high-resolution QR modal"
               >
-                {renderQrCode(76)}
-                <div style={{ fontSize: '0.55rem', color: '#93C5FD', fontWeight: 800, marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  SCAN TO VERIFY
-                </div>
+                {renderQrCode(72, true)}
               </div>
             </div>
 
             {/* Back Footer */}
             <div style={{
-              backgroundColor: 'rgba(255,255,255,0.06)',
+              backgroundColor: '#EFF6FF',
               borderRadius: '8px',
               padding: '6px 10px',
               fontSize: '0.625rem',
-              color: '#BFDBFE',
-              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#1E2F6B',
+              border: '1px solid #DBEAFE',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              zIndex: 2
+              justifyContent: 'space-between'
             }}>
-              <span>Verify at: <strong style={{ color: '#FFFFFF' }}>verify.civicone.gov.in</strong></span>
-              <span style={{ fontFamily: 'monospace', color: '#FFFFFF' }}>{civicId}</span>
+              <span>VERIFY CIVICONE DIGITAL IDENTITY: <strong style={{ color: '#101B3D' }}>verify.civicone.gov.in</strong></span>
+              <span style={{ fontFamily: 'monospace', color: '#101B3D', fontWeight: 800 }}>{civicId}</span>
             </div>
 
           </div>
@@ -598,24 +615,24 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
           onClick={handleFlipCard}
           aria-label="Flip Digital Identity Card"
           style={{
-            backgroundColor: 'var(--bg-card)',
-            border: '1.5px solid var(--border-light)',
+            backgroundColor: '#FFFFFF',
+            border: '1.5px solid #E2E8F0',
             borderRadius: '12px',
             padding: '12px 6px',
             fontSize: '0.775rem',
             fontWeight: 800,
-            color: 'var(--text-main)',
+            color: '#101B3D',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '5px',
-            boxShadow: 'var(--shadow-sm)',
+            boxShadow: '0 2px 6px rgba(16, 27, 61, 0.06)',
             cursor: 'pointer',
             transition: 'all 0.2s'
           }}
           className="hover-card"
         >
-          <RotateCw size={18} style={{ color: '#0B5ED7' }} />
+          <RotateCw size={18} style={{ color: '#1A4F9C' }} />
           <span>Flip Card</span>
         </button>
 
@@ -625,24 +642,24 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
           onClick={() => setShowQrModal(true)}
           aria-label="View Enlarged QR Code"
           style={{
-            backgroundColor: 'var(--bg-card)',
-            border: '1.5px solid var(--border-light)',
+            backgroundColor: '#FFFFFF',
+            border: '1.5px solid #E2E8F0',
             borderRadius: '12px',
             padding: '12px 6px',
             fontSize: '0.775rem',
             fontWeight: 800,
-            color: 'var(--text-main)',
+            color: '#101B3D',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '5px',
-            boxShadow: 'var(--shadow-sm)',
+            boxShadow: '0 2px 6px rgba(16, 27, 61, 0.06)',
             cursor: 'pointer',
             transition: 'all 0.2s'
           }}
           className="hover-card"
         >
-          <QrCode size={18} style={{ color: '#0B5ED7' }} />
+          <QrCode size={18} style={{ color: '#1A4F9C' }} />
           <span>View QR</span>
         </button>
 
@@ -652,24 +669,24 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
           onClick={handleTriggerNfc}
           aria-label="Simulate NFC Tap Contactless Verification"
           style={{
-            backgroundColor: 'var(--bg-card)',
-            border: '1.5px solid var(--border-light)',
+            backgroundColor: '#FFFFFF',
+            border: '1.5px solid #E2E8F0',
             borderRadius: '12px',
             padding: '12px 6px',
             fontSize: '0.775rem',
             fontWeight: 800,
-            color: 'var(--text-main)',
+            color: '#101B3D',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '5px',
-            boxShadow: 'var(--shadow-sm)',
+            boxShadow: '0 2px 6px rgba(16, 27, 61, 0.06)',
             cursor: 'pointer',
             transition: 'all 0.2s'
           }}
           className="hover-card"
         >
-          <Radio size={18} style={{ color: '#0B5ED7' }} />
+          <Radio size={18} style={{ color: '#1A4F9C' }} />
           <span>NFC Tap</span>
         </button>
 
@@ -679,24 +696,24 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
           onClick={handleShareCard}
           aria-label="Share or Export Identity Card"
           style={{
-            backgroundColor: 'var(--bg-card)',
-            border: '1.5px solid var(--border-light)',
+            backgroundColor: '#FFFFFF',
+            border: '1.5px solid #E2E8F0',
             borderRadius: '12px',
             padding: '12px 6px',
             fontSize: '0.775rem',
             fontWeight: 800,
-            color: 'var(--text-main)',
+            color: '#101B3D',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '5px',
-            boxShadow: 'var(--shadow-sm)',
+            boxShadow: '0 2px 6px rgba(16, 27, 61, 0.06)',
             cursor: 'pointer',
             transition: 'all 0.2s'
           }}
           className="hover-card"
         >
-          <Share2 size={18} style={{ color: '#0B5ED7' }} />
+          <Share2 size={18} style={{ color: '#1A4F9C' }} />
           <span>Share</span>
         </button>
       </div>
@@ -709,7 +726,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
         <div style={{
           position: 'fixed',
           inset: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.8)',
+          backgroundColor: 'rgba(16, 27, 61, 0.82)',
           backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
@@ -725,7 +742,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             width: '100%',
             position: 'relative',
             textAlign: 'center',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
+            boxShadow: '0 25px 50px rgba(16, 27, 61, 0.35)',
             border: '2px solid #DBEAFE'
           }}>
             <button
@@ -737,34 +754,34 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               <X size={22} />
             </button>
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#0B5ED7', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', backgroundColor: '#EFF6FF', padding: '4px 12px', borderRadius: '12px', marginBottom: '10px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#1A4F9C', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', backgroundColor: '#EFF6FF', padding: '4px 12px', borderRadius: '12px', marginBottom: '10px' }}>
               <ShieldCheck size={14} /> OFFICIAL VERIFICATION QR
             </div>
 
-            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '4px' }}>
-              CivicOne Verification QR Code
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#101B3D', marginBottom: '4px' }}>
+              SCAN TO VERIFY THIS CIVICONE DIGITAL IDENTITY
             </h3>
             <p style={{ fontSize: '0.825rem', color: '#64748B', marginBottom: '20px' }}>
-              Scan with any authorized reader to instantly verify <strong>{citizenName}</strong>'s credential.
+              Scan with any authorized reader to instantly verify <strong>{citizenName}</strong>'s digital identity credential.
             </p>
 
             {/* High Resolution Scannable QR */}
             <div style={{
               padding: '20px',
-              backgroundColor: '#F8FAFC',
+              backgroundColor: '#F8F7F2',
               borderRadius: '20px',
               display: 'inline-block',
               marginBottom: '20px',
-              border: '2px solid #E2E8F0',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
+              border: '2px solid #D9DEE8',
+              boxShadow: '0 4px 16px rgba(16, 27, 61, 0.08)'
             }}>
-              {renderQrCode(200)}
+              {renderQrCode(200, false)}
             </div>
 
             {/* Token Info Box */}
             <div style={{
               fontSize: '0.8rem',
-              color: '#073B8C',
+              color: '#1E2F6B',
               backgroundColor: '#EAF3FF',
               padding: '12px 16px',
               borderRadius: '12px',
@@ -784,7 +801,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 onClick={() => copyToClipboard(verificationUrl)}
                 style={{
                   flex: 1,
-                  backgroundColor: copied ? '#198754' : '#0B5ED7',
+                  backgroundColor: copied ? '#198754' : '#1A4F9C',
                   color: '#FFFFFF',
                   padding: '12px',
                   borderRadius: '12px',
@@ -825,13 +842,13 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
 
 
       {/* =========================================================================
-          MODAL 2: NFC TAP SIMULATION (With Clear Simulation Disclaimer)
+          MODAL 2: NFC TAP SIMULATION (With Honest Demonstration Disclaimer)
           ========================================================================= */}
       {showNfcModal && (
         <div style={{
           position: 'fixed',
           inset: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.8)',
+          backgroundColor: 'rgba(16, 27, 61, 0.82)',
           backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
@@ -847,7 +864,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             width: '100%',
             position: 'relative',
             textAlign: 'center',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
+            boxShadow: '0 25px 50px rgba(16, 27, 61, 0.35)',
             border: '2px solid #DBEAFE'
           }}>
             <button
@@ -859,15 +876,15 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               <X size={20} />
             </button>
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#EFF6FF', color: '#0B5ED7', padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, marginBottom: '12px' }}>
-              <Radio size={14} /> CONTACTLESS TERMINAL
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#EFF6FF', color: '#1A4F9C', padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, marginBottom: '12px' }}>
+              <Radio size={14} /> CONTACTLESS NFC AUTHENTICATION
             </div>
 
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '6px' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#101B3D', marginBottom: '6px' }}>
               NFC Contactless Simulation
             </h3>
 
-            {/* Clear Disclaimer */}
+            {/* Clear Disclaimer as requested */}
             <div style={{
               fontSize: '0.725rem',
               color: '#64748B',
@@ -877,7 +894,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               border: '1px solid #E2E8F0',
               marginBottom: '20px'
             }}>
-              ℹ️ <em>Visual terminal simulation for devices and browsers without direct Web-NFC hardware access.</em>
+              ℹ️ <em>Visual terminal demonstration for browsers and devices without direct Web-NFC hardware access.</em>
             </div>
 
             {nfcScanning && (
@@ -886,21 +903,21 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   width: '88px',
                   height: '88px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(11, 94, 215, 0.12)',
-                  border: '3px solid #0B5ED7',
+                  backgroundColor: 'rgba(26, 79, 156, 0.12)',
+                  border: '3px solid #1A4F9C',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 16px auto',
                   animation: 'pulseGlow 1.5s infinite ease-in-out'
                 }}>
-                  <Radio size={42} style={{ color: '#0B5ED7' }} />
+                  <Radio size={42} style={{ color: '#1A4F9C' }} />
                 </div>
-                <div style={{ fontWeight: 800, color: '#0B5ED7', fontSize: '0.9rem' }}>
+                <div style={{ fontWeight: 800, color: '#1A4F9C', fontSize: '0.9rem' }}>
                   Emitting Contactless Signal...
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '4px' }}>
-                  Hold near sovereign access terminal
+                  Hold near sovereign identity terminal
                 </div>
               </div>
             )}
@@ -934,14 +951,14 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   marginTop: '10px',
                   marginBottom: '20px'
                 }}>
-                  <strong>Payload:</strong> Normal Citizen Card ({civicId}) validated for contactless transit / venue entry.
+                  <strong>Payload:</strong> CivicOne Citizen Card ({civicId}) validated for contactless transit / terminal check-in.
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowNfcModal(false)}
                   style={{
                     width: '100%',
-                    backgroundColor: '#0B5ED7',
+                    backgroundColor: '#1A4F9C',
                     color: '#FFFFFF',
                     padding: '11px',
                     borderRadius: '12px',
@@ -967,7 +984,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
         <div style={{
           position: 'fixed',
           inset: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.8)',
+          backgroundColor: 'rgba(16, 27, 61, 0.82)',
           backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
@@ -982,7 +999,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             maxWidth: '440px',
             width: '100%',
             position: 'relative',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
+            boxShadow: '0 25px 50px rgba(16, 27, 61, 0.35)',
             border: '2px solid #DBEAFE'
           }}>
             <button
@@ -994,16 +1011,16 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               <X size={22} />
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0B5ED7', fontWeight: 900, fontSize: '1.25rem', marginBottom: '6px' }}>
-              <Share2 size={22} /> Share & Export Identity Card
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1A4F9C', fontWeight: 900, fontSize: '1.25rem', marginBottom: '6px' }}>
+              <Share2 size={22} /> Share & Export Citizen Identity Card
             </div>
             <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '20px' }}>
-              Export an official high-resolution image of your <strong>Normal Citizen</strong> card.
+              Export an official high-resolution image of your <strong>CivicOne Digital Citizen Card</strong>.
             </p>
 
             <div style={{ backgroundColor: '#F8FAFC', padding: '14px', borderRadius: '14px', border: '1px solid #E2E8F0', marginBottom: '20px' }}>
               <div style={{ fontSize: '0.725rem', fontWeight: 700, color: '#64748B', marginBottom: '4px' }}>OFFICIAL VERIFICATION LINK</div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0B1F3A', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#101B3D', fontFamily: 'monospace', wordBreak: 'break-all' }}>
                 {verificationUrl}
               </div>
             </div>
@@ -1016,7 +1033,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 disabled={downloadingImage}
                 style={{
                   width: '100%',
-                  backgroundColor: '#0B5ED7',
+                  backgroundColor: '#1A4F9C',
                   color: '#FFFFFF',
                   padding: '13px',
                   borderRadius: '12px',
@@ -1041,7 +1058,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 style={{
                   width: '100%',
                   backgroundColor: copied ? '#198754' : '#F1F5F9',
-                  color: copied ? '#FFFFFF' : '#0B1F3A',
+                  color: copied ? '#FFFFFF' : '#101B3D',
                   padding: '11px',
                   borderRadius: '12px',
                   fontWeight: 800,
