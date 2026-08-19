@@ -572,11 +572,22 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                       className="hover-card"
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <img
-                          src={member.avatar}
-                          alt={member.name}
-                          style={{ width: '44px', height: '44px', borderRadius: '12px', objectFit: 'cover', border: '2px solid #4F46E5' }}
-                        />
+                        <div style={{
+                          width: '44px',
+                          height: '44px',
+                          borderRadius: '12px',
+                          backgroundColor: member.themeColor || '#4F46E5',
+                          color: '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 900,
+                          fontSize: '1rem',
+                          boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)',
+                          flexShrink: 0
+                        }}>
+                          {member.initials || (member.name ? member.name.substring(0, 2).toUpperCase() : 'FM')}
+                        </div>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{member.name}</strong>

@@ -317,9 +317,8 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
       relationship: newMemberForm.relationship,
       age: parseInt(newMemberForm.age) || 10,
       gender: newMemberForm.gender,
-      avatar: newMemberForm.gender === 'Female'
-        ? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300'
-        : 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=300',
+      initials: newMemberForm.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'FM',
+      themeColor: newMemberForm.gender === 'Female' ? '#7C3AED' : '#0284C7',
       civicId: `CIV-AP-${Math.floor(100000 + Math.random() * 900000)}-${Math.floor(100 + Math.random() * 900)}`,
       guardianStatus: 'Legal Sovereign Guardian & Primary Caretaker',
       docCount: 1,
@@ -625,11 +624,22 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
                   transition: 'all 0.15s'
                 }}
               >
-                <img
-                  src={member.avatar}
-                  alt={member.name}
-                  style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: isSelected ? '1.5px solid #38BDF8' : '1px solid #CBD5E1' }}
-                />
+                <div style={{
+                  width: '30px',
+                  height: '30px',
+                  borderRadius: '50%',
+                  backgroundColor: isSelected ? '#38BDF8' : (member.themeColor || '#1A4F9C'),
+                  color: isSelected ? '#101B3D' : '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 900,
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.02em',
+                  flexShrink: 0
+                }}>
+                  {member.initials || (member.name ? member.name.substring(0, 2).toUpperCase() : 'FM')}
+                </div>
                 <div style={{ textAlign: 'left' }}>
                   <div style={{ fontSize: '0.825rem', fontWeight: 800, lineHeight: 1.1 }}>{member.name}</div>
                   <div style={{ fontSize: '0.675rem', color: isSelected ? '#93C5FD' : '#64748B', fontWeight: 700 }}>
@@ -657,11 +667,22 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
           gap: '12px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <img
-              src={activeMember.avatar}
-              alt={activeMember.name}
-              style={{ width: '48px', height: '48px', borderRadius: '12px', objectFit: 'cover', border: '2px solid #1A4F9C' }}
-            />
+            <div style={{
+              width: '46px',
+              height: '46px',
+              borderRadius: '14px',
+              backgroundColor: activeMember.themeColor || '#1A4F9C',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 900,
+              fontSize: '1.1rem',
+              boxShadow: '0 4px 12px rgba(26, 79, 156, 0.25)',
+              flexShrink: 0
+            }}>
+              {activeMember.initials || (activeMember.name ? activeMember.name.substring(0, 2).toUpperCase() : 'FM')}
+            </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#101B3D' }}>{activeMember.name}</h3>
