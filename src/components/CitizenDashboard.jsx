@@ -17,7 +17,6 @@ import AiAgentFloating from './AiAgentFloating.jsx';
 import PrivacyCenter from './PrivacyCenter.jsx';
 import TourismGuide from './TourismGuide.jsx';
 import TravelBookingHub from './TravelBookingHub.jsx';
-import ZkProofGeneratorModal from './ZkProofGeneratorModal.jsx';
 import {
   DEMO_CARD, DEMO_DOCUMENTS, DEMO_GOVT_UPDATES, DEMO_NEWS,
   DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST, calculateDocExpiryStatus
@@ -38,7 +37,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   const [demoCitizens, setDemoCitizens] = useState(DEMO_CITIZENS_LIST);
   const [currentCitizen, setCurrentCitizen] = useState(citizen);
   const [targetTravelCity, setTargetTravelCity] = useState('');
-  const [showZkModal, setShowZkModal] = useState(false);
 
   // Collapsible Group States for Desktop Sidebar
   const [openGroups, setOpenGroups] = useState({
@@ -470,7 +468,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     { label: 'My Journey', icon: Milestone, action: () => handleSelectTab('journey'), color: '#0B5ED7' },
                     { label: 'View Civic Card', icon: Ticket, action: () => handleSelectTab('card'), color: '#0284C7' },
                     { label: 'Open Vault', icon: FolderClosed, action: () => handleSelectTab('vault'), color: '#059669' },
-                    { label: 'ZK Privacy Share', icon: ShieldCheck, action: () => setShowZkModal(true), color: '#1A4F9C' },
                     { label: 'Verify Document', icon: CheckCircle2, action: () => handleSelectTab('vault'), color: '#7C3AED' },
                     { label: 'Share Access', icon: Share2, action: () => handleSelectTab('privacy'), color: '#DC2626' },
                     { label: 'Check Services', icon: Grid, action: () => handleSelectTab('services'), color: '#D97706' },
@@ -872,13 +869,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         documents={documents}
         onNavigateTab={handleSelectTab}
       />
-
-      {showZkModal && (
-        <ZkProofGeneratorModal
-          citizen={currentCitizen}
-          onClose={() => setShowZkModal(false)}
-        />
-      )}
 
     </div>
   );

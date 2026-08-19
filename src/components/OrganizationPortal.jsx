@@ -468,9 +468,9 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
                           <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '2px solid #E2E8F0', textAlign: 'left' }}>
                             <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Student Civic ID</th>
                             <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Requested Document</th>
-                            <th style={{ padding: '12px', fontWeight 800, color: '#475569' }}>Purpose</th>
-                            <th style={{ padding: '12px', fontWeight 800, color: '#475569' }}>Student Accept Status</th>
-                            <th style={{ padding: '12px', fontWeight 800, color: '#475569' }}>College Action</th>
+                            <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Purpose</th>
+                            <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>Student Accept Status</th>
+                            <th style={{ padding: '12px', fontWeight: 800, color: '#475569' }}>College Action</th>
                           </tr>
                         </thead>
                         <tbody>

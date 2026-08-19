@@ -8,7 +8,6 @@ import {
   Copy, X, Radio, MapPin, Calendar, Phone, Lock, Fingerprint,
   ExternalLink, Shield, Key, Sparkles, Check, Info
 } from 'lucide-react';
-import ZkProofGeneratorModal from './ZkProofGeneratorModal.jsx';
 
 export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerification, onCardUpdate }) {
   // Single boolean state controlling the 3D flip
@@ -16,7 +15,6 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
   const [showQrModal, setShowQrModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showNfcModal, setShowNfcModal] = useState(false);
-  const [showZkProofModal, setShowZkProofModal] = useState(false);
 
   const [nfcScanning, setNfcScanning] = useState(false);
   const [nfcSuccess, setNfcSuccess] = useState(false);
@@ -1015,31 +1013,6 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {/* ZK Proof Generator Option */}
-              <button
-                type="button"
-                onClick={() => { setShowShareModal(false); setShowZkProofModal(true); }}
-                style={{
-                  width: '100%',
-                  backgroundColor: '#101B3D',
-                  color: '#FFFFFF',
-                  padding: '13px',
-                  borderRadius: '12px',
-                  fontWeight: 800,
-                  fontSize: '0.9rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 12px rgba(16, 27, 61, 0.2)'
-                }}
-              >
-                <ShieldCheck size={18} style={{ color: '#38BDF8' }} />
-                Generate Zero-Knowledge Proof (Hide PII)
-              </button>
-
               {/* Download PNG Button */}
               <button
                 type="button"
@@ -1091,14 +1064,6 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             </div>
           </div>
         </div>
-      )}
-
-      {/* ZERO-KNOWLEDGE PROOF GENERATOR MODAL */}
-      {showZkProofModal && (
-        <ZkProofGeneratorModal
-          citizen={citizen}
-          onClose={() => setShowZkProofModal(false)}
-        />
       )}
 
     </div>
