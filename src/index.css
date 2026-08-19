@@ -191,7 +191,15 @@ input, select, textarea {
 .card-container-3d {
   perspective: 1200px;
   -webkit-perspective: 1200px;
+  perspective-origin: 50% 50%;
+  -webkit-perspective-origin: 50% 50%;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.586 / 1;
+  isolation: isolate;
+  contain: layout style;
   outline: none;
+  user-select: none;
 }
 
 .card-container-3d:focus-visible {
@@ -201,32 +209,51 @@ input, select, textarea {
 }
 
 .card-inner-3d {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.7s cubic-bezier(0.4, 0.0, 0.2, 1);
-  transform-style: preserve-3d;
-  -webkit-transform-style: preserve-3d;
-}
-
-.card-container-3d.flipped .card-inner-3d {
-  transform: rotateY(180deg);
-}
-
-.card-front-3d, .card-back-3d {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  transform-origin: 50% 50%;
+  -webkit-transform-origin: 50% 50%;
+  transition: transform 0.65s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.card-container-3d.flipped .card-inner-3d {
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+}
+
+.card-front-3d, .card-back-3d {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  -webkit-transform-origin: 50% 50%;
   border-radius: 18px;
   overflow: hidden;
   box-sizing: border-box;
 }
 
+.card-front-3d {
+  transform: rotateY(0deg);
+  -webkit-transform: rotateY(0deg);
+  z-index: 2;
+}
+
 .card-back-3d {
   transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+  z-index: 1;
 }
 
 /* Reduced Motion Accessibility */
