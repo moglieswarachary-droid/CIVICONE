@@ -845,23 +845,7 @@ export const db = {
     }
   ],
 
-  shareRequests: [
-    {
-      id: "req-demo-201",
-      orgId: "org-hotel",
-      orgName: "CIVIQONE Grand Hotel",
-      roleCode: "HOTEL_ACCESS_ADMIN",
-      citizenCivicId: "CIV-DEMO-10001",
-      docId: "doc-aarav-04",
-      docName: "Indian Passport",
-      purpose: "Hotel Guest Registration & Check-in",
-      accessType: "Limited Hotel View",
-      requestedExpiry: "3 Days",
-      requestedAt: "14 Aug 2026, 09:30 AM",
-      status: "PENDING",
-      isDemo: true
-    }
-  ],
+  shareRequests: [],
 
   // 6. PRIVACY ACCESS AUDIT LOGS
   auditLogs: [
@@ -874,42 +858,11 @@ export const db = {
       ip: "49.37.142.90",
       timestamp: "14 Aug 2026, 08:00 AM",
       status: "SUCCESS"
-    },
-    {
-      id: "sec-demo-02",
-      citizenId: "CIV-DEMO-10001",
-      event: "Academic Access Granted to CIVIQONE Demo College",
-      device: "Citizen Consent Engine",
-      location: "Vijayawada, India",
-      ip: "49.37.142.90",
-      timestamp: "14 Aug 2026, 08:30 AM",
-      status: "SUCCESS"
     }
   ],
 
   // 7. NOTIFICATIONS
-  notifications: [
-    {
-      id: "notif-demo-01",
-      citizenId: "CIV-DEMO-10001",
-      title: "New Access Request: CIVIQONE Grand Hotel",
-      category: "Consent",
-      message: "CIVIQONE Grand Hotel requested limited guest verification access to your Passport for Hotel Check-in.",
-      timestamp: "15 minutes ago",
-      read: false,
-      type: "info"
-    },
-    {
-      id: "notif-demo-02",
-      citizenId: "CIV-DEMO-10001",
-      title: "Academic Access Granted",
-      category: "Consent",
-      message: "CIVIQONE Demo College was granted View Only access to your Course Admission Record.",
-      timestamp: "1 hour ago",
-      read: true,
-      type: "success"
-    }
-  ],
+  notifications: [],
 
   // 8. TOURISM DESTINATIONS DATASET (CIVIQONE WORLD)
   destinations: [

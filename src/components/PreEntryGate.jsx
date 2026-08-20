@@ -212,7 +212,15 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
 
     if (regRes.ok && regRes.data.success) {
       if (regRes.data.token) authStorage.setToken(regRes.data.token);
-      setRegisteredCitizen(regRes.data.citizen);
+      const cit = regRes.data.citizen;
+      try {
+        localStorage.setItem(`civiqone_citizen_docs_${cit.citizenId}`, JSON.stringify([]));
+        localStorage.setItem(`civiqone_family_${cit.citizenId}`, JSON.stringify([
+          { id: 'fam-self', name: `${cit.fullName || 'Citizen'} (Self)`, relationship: 'Self', isSelf: true, documents: [] }
+        ]));
+        localStorage.setItem('civiqone_active_citizen', JSON.stringify(cit));
+      } catch (e) {}
+      setRegisteredCitizen(cit);
       setRegStep('SUCCESS_ID');
     } else {
       // Local fallback for unique Civic ID creation
@@ -247,6 +255,11 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
         const stored = JSON.parse(localStorage.getItem('civiqone_registered_citizens') || '[]');
         stored.push(newCitizen);
         localStorage.setItem('civiqone_registered_citizens', JSON.stringify(stored));
+        localStorage.setItem(`civiqone_citizen_docs_${uniqueCivicId}`, JSON.stringify([]));
+        localStorage.setItem(`civiqone_family_${uniqueCivicId}`, JSON.stringify([
+          { id: 'fam-self', name: `${newCitizen.fullName || 'Citizen'} (Self)`, relationship: 'Self', isSelf: true, documents: [] }
+        ]));
+        localStorage.setItem('civiqone_active_citizen', JSON.stringify(newCitizen));
       } catch (e) {}
 
       authStorage.setToken(`CIV-TOKEN-${uniqueCivicId}-SECURE`);

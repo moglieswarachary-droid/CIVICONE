@@ -37,7 +37,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   const [activeTab, setActiveTab] = useState(getTabFromUrl);
   const [tabHistory, setTabHistory] = useState(() => [getTabFromUrl()]);
   const [theme, setTheme] = useState(() => initialTheme || localStorage.getItem('civiqone_theme') || 'light');
-  const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [documents, setDocuments] = useState(DEMO_DOCUMENTS);
   const [govtUpdates, setGovtUpdates] = useState(DEMO_GOVT_UPDATES);
@@ -63,6 +63,19 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   });
   const [targetTravelCity, setTargetTravelCity] = useState('');
   const [familyVaultMemberId, setFamilyVaultMemberId] = useState('fam-self');
+  const [familyMembers, setFamilyMembers] = useState(() => {
+    try {
+      const cid = citizen?.citizenId;
+      if (cid) {
+        const cached = localStorage.getItem(`civiqone_family_${cid}`);
+        if (cached) return JSON.parse(cached);
+      }
+    } catch (e) {}
+    if (citizen?.citizenId === 'CIV-DEMO-10001') return DEMO_FAMILY_MEMBERS;
+    return [
+      { id: 'fam-self', name: `${citizen?.fullName || 'Citizen'} (Self)`, relationship: 'Self', isSelf: true, documents: [] }
+    ];
+  });
 
   const handleProfileUpdate = (updatedCitizen) => {
     setCurrentCitizen(prev => {
@@ -803,7 +816,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     </div>
                     <div>
                       <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--text-main)' }}>
-                        Family &amp; Dependent Vaults ({DEMO_FAMILY_MEMBERS.filter(m => m.id !== 'fam-self').length})
+                        Family &amp; Dependent Vaults ({familyMembers.filter(m => m.id !== 'fam-self').length})
                       </h3>
                       <p style={{ fontSize: '0.775rem', color: 'var(--text-light)', marginTop: '2px' }}>
                         Manage official credentials for minor children &amp; senior parents under legal sovereign guardianship
@@ -812,7 +825,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                   </div>
 
                   <button
-                    onClick={() => handleSelectTab('family-vault', 'fam-child-1')}
+                    onClick={() => handleSelectTab('vault', 'fam-self')}
                     style={{
                       backgroundColor: '#4F46E5',
                       color: '#FFFFFF',
@@ -832,74 +845,95 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                  {DEMO_FAMILY_MEMBERS.filter(m => m.id !== 'fam-self').map(member => (
-                    <div
-                      key={member.id}
-                      style={{
-                        backgroundColor: 'var(--bg-main)',
-                        borderRadius: '16px',
-                        border: '1px solid var(--border-light)',
-                        padding: '16px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        gap: '12px'
-                      }}
-                      className="hover-card"
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{
-                          width: '44px',
-                          height: '44px',
-                          borderRadius: '12px',
-                          backgroundColor: member.themeColor || '#4F46E5',
-                          color: '#FFFFFF',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 900,
-                          fontSize: '1rem',
-                          boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)',
-                          flexShrink: 0
-                        }}>
-                          {member.initials || (member.name ? member.name.substring(0, 2).toUpperCase() : 'FM')}
-                        </div>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{member.name}</strong>
-                            <span style={{ backgroundColor: '#EEF2FF', color: '#4F46E5', fontSize: '0.675rem', fontWeight: 800, padding: '2px 6px', borderRadius: '6px' }}>
-                              {member.relationship}
-                            </span>
-                          </div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginTop: '2px' }}>
-                            Civic ID: <strong>{member.civicId}</strong>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-light)', paddingTop: '10px' }}>
-                        <span style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <CheckCircle2 size={13} /> {member.documents?.length || member.docCount || 0} Verified Documents
-                        </span>
-
-                        <button
-                          onClick={() => handleSelectTab('family-vault', member.id)}
-                          style={{
-                            backgroundColor: '#4F46E5',
-                            color: '#FFFFFF',
-                            padding: '6px 12px',
-                            borderRadius: '8px',
-                            fontSize: '0.75rem',
-                            fontWeight: 800,
-                            border: 'none',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          View Vault →
-                        </button>
-                      </div>
+                  {familyMembers.filter(m => m.id !== 'fam-self').length === 0 ? (
+                    <div style={{
+                      backgroundColor: 'var(--bg-main)',
+                      borderRadius: '16px',
+                      border: '1.5px dashed var(--border-light)',
+                      padding: '24px 16px',
+                      textAlign: 'center',
+                      gridColumn: '1 / -1',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      <Users size={28} style={{ color: '#4F46E5', opacity: 0.6 }} />
+                      <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>No Family Members Added</strong>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-light)', margin: 0 }}>
+                        Your family vault has no dependents. You can add family members manually in the Vault.
+                      </p>
                     </div>
-                  ))}
+                  ) : (
+                    familyMembers.filter(m => m.id !== 'fam-self').map(member => (
+                      <div
+                        key={member.id}
+                        style={{
+                          backgroundColor: 'var(--bg-main)',
+                          borderRadius: '16px',
+                          border: '1px solid var(--border-light)',
+                          padding: '16px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          gap: '12px'
+                        }}
+                        className="hover-card"
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '12px',
+                            backgroundColor: member.themeColor || '#4F46E5',
+                            color: '#FFFFFF',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 900,
+                            fontSize: '1rem',
+                            boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)',
+                            flexShrink: 0
+                          }}>
+                            {member.initials || (member.name ? member.name.substring(0, 2).toUpperCase() : 'FM')}
+                          </div>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{member.name}</strong>
+                              <span style={{ backgroundColor: '#EEF2FF', color: '#4F46E5', fontSize: '0.675rem', fontWeight: 800, padding: '2px 6px', borderRadius: '6px' }}>
+                                {member.relationship}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginTop: '2px' }}>
+                              Civic ID: <strong>{member.civicId || 'CIV-FAM-DEP'}</strong>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-light)', paddingTop: '10px' }}>
+                          <span style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <CheckCircle2 size={13} /> {member.documents?.length || member.docCount || 0} Verified Documents
+                          </span>
+
+                          <button
+                            onClick={() => handleSelectTab('vault', member.id)}
+                            style={{
+                              backgroundColor: '#4F46E5',
+                              color: '#FFFFFF',
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              fontSize: '0.75rem',
+                              fontWeight: 800,
+                              border: 'none',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            View Vault →
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 

@@ -32,9 +32,19 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
   const [shareResult, setShareResult] = useState(null);
 
   // Family & Dependent Vault State (Starts empty with Self only for clean new accounts)
-  const [familyMembers, setFamilyMembers] = useState([
-    { id: 'fam-self', name: 'Raghavendra (Self)', relationship: 'Self', isSelf: true, documents: [] }
-  ]);
+  const [familyMembers, setFamilyMembers] = useState(() => {
+    try {
+      const cid = citizen?.citizenId;
+      if (cid) {
+        const cached = localStorage.getItem(`civiqone_family_${cid}`);
+        if (cached) return JSON.parse(cached);
+      }
+    } catch (e) {}
+    if (citizen?.citizenId === 'CIV-DEMO-10001') return DEMO_FAMILY_MEMBERS;
+    return [
+      { id: 'fam-self', name: `${citizen?.fullName || citizen?.name || 'Citizen'} (Self)`, relationship: 'Self', isSelf: true, documents: [] }
+    ];
+  });
   const [selectedMemberId, setSelectedMemberId] = useState(initialMemberId || 'fam-self');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState({
@@ -375,7 +385,14 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
       ]
     };
 
-    setFamilyMembers(prev => [...prev, newMember]);
+    const updated = [...familyMembers, newMember];
+    setFamilyMembers(updated);
+    try {
+      const cid = citizen?.citizenId;
+      if (cid) {
+        localStorage.setItem(`civiqone_family_${cid}`, JSON.stringify(updated));
+      }
+    } catch (e) {}
     setSelectedMemberId(newId);
     setShowAddMemberModal(false);
     setNewMemberForm({
