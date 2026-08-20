@@ -17,11 +17,11 @@ const SUPPORTED_LANGUAGES = [
 ];
 
 const LOCALIZED_GREETINGS = {
-  en: "Hello! I am CIVIQONE AI, your multilingual digital identity assistant. Speak or type to navigate portals, query documents, and check verifications.",
-  te: "నమస్కారం! నేను సివిక్ వన్ AI ని. మీ డిజిటల్ గుర్తింపు మరియు పత్రాల సహాయకుడిని. మాట్లాడండి లేదా టైప్ చేసి మీ పత్రాలను శోధించండి.",
-  hi: "नमस्ते! मैं सिविकवन एआई हूँ। आपकी डिजिटल पहचान और दस्तावेज़ सहायक। पोर्टल नेविगेट करने या दस्तावेज़ों की जाँच के लिए बोलें या टाइप करें।",
-  ta: "வணக்கம்! நான் சிவிக்ஒன் AI. உங்கள் டிஜிட்டல் அடையாள உதவியாளர். ஆவணங்களை பார்க்க அல்லது தேட பேசுங்கள் அல்லது தட்டச்சு செய்யுங்கள்.",
-  kn: "ನಮಸ್ಕಾರ! ನಾನು ಸಿವಿಕ್ ಒನ್ AI. ನಿಮ್ಮ ಡಿಜಿಟಲ್ ಗುರುತಿನ ಸಹಾಯಕ. ನಿಮ್ಮ ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಲು ಮಾತನಾಡಿ ಅಥವಾ ಟೈಪ್ ಮಾಡಿ."
+  en: "Hello! I am CIVIQONES AI, your multilingual digital identity assistant. Speak or type to navigate portals, query documents, and check verifications.",
+  te: "నమస్కారం! నేను CIVIQONES AI ని. మీ డిజిటల్ గుర్తింపు మరియు పత్రాల సహాయకుడిని. మాట్లాడండి లేదా టైప్ చేసి మీ పత్రాలను శోధించండి.",
+  hi: "नमस्ते! मैं CIVIQONES AI हूँ। आपकी डिजिटल पहचान और दस्तावेज़ सहायक। पोर्टल नेविगेट करने या दस्तावेज़ों की जाँच के लिए बोलें या टाइप करें।",
+  ta: "வணக்கம்! நான் CIVIQONES AI. உங்கள் டிஜிட்டல் அடையாள உதவியாளர். ஆவணங்களை பார்க்க அல்லது தேட பேசுங்கள் அல்லது தட்டச்சு செய்யுங்கள்.",
+  kn: "ನಮಸ್ಕಾರ! ನಾನು CIVIQONES AI. ನಿಮ್ಮ ಡಿಜಿಟಲ್ ಗುರುತಿನ ಸಹಾಯಕ. ನಿಮ್ಮ ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಲು ಮಾತನಾಡಿ ಅಥವಾ ಟೈಪ್ ಮಾಡಿ."
 };
 
 const QUICK_SUGGESTIONS = {
@@ -70,6 +70,120 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(true);
+
+  // DRAGGABLE POSITION STATE & BOUNDARY CONSTRAINTS
+  const clampCoordinates = (x, y) => {
+    const btnSize = 64;
+    const margin = 12;
+    const winW = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const winH = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const minX = margin;
+    const maxX = Math.max(margin, winW - btnSize - margin);
+    const minY = margin;
+    const maxY = Math.max(margin, winH - btnSize - margin);
+
+    return {
+      x: Math.min(Math.max(x, minX), maxX),
+      y: Math.min(Math.max(y, minY), maxY)
+    };
+  };
+
+  const getInitialPosition = () => {
+    try {
+      const saved = localStorage.getItem('civiqones_ai_pos');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
+          return clampCoordinates(parsed.x, parsed.y);
+        }
+      }
+    } catch (e) {}
+
+    const winW = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const winH = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const defaultX = Math.max(16, winW - 88);
+    const defaultY = Math.max(16, winH - (winW <= 768 ? 96 : 88));
+    return clampCoordinates(defaultX, defaultY);
+  };
+
+  const [position, setPosition] = useState(getInitialPosition);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef(null);
+  const hasDraggedRef = useRef(false);
+
+  // Viewport resize and orientation listener to keep bot clamped inside screen
+  useEffect(() => {
+    const handleResize = () => {
+      setPosition(prev => {
+        if (!prev) return getInitialPosition();
+        return clampCoordinates(prev.x, prev.y);
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, []);
+
+  // Pointer Drag Handlers (Unified Touch & Mouse Dragging)
+  const handlePointerDown = (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (err) {}
+    
+    hasDraggedRef.current = false;
+    dragStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialX: position.x,
+      initialY: position.y
+    };
+    setIsDragging(true);
+  };
+
+  const handlePointerMove = (e) => {
+    if (!isDragging || !dragStartRef.current) return;
+    
+    const deltaX = e.clientX - dragStartRef.current.startX;
+    const deltaY = e.clientY - dragStartRef.current.startY;
+
+    if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+      hasDraggedRef.current = true;
+    }
+
+    const nextX = dragStartRef.current.initialX + deltaX;
+    const nextY = dragStartRef.current.initialY + deltaY;
+    setPosition(clampCoordinates(nextX, nextY));
+  };
+
+  const handlePointerUp = (e) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+
+    if (!hasDraggedRef.current) {
+      // User tapped or clicked without dragging -> Toggle Open Chat
+      setIsOpen(prev => !prev);
+    } else {
+      // User dragged -> Persist position
+      try {
+        localStorage.setItem('civiqones_ai_pos', JSON.stringify(position));
+      } catch (err) {}
+    }
+    dragStartRef.current = null;
+  };
+
+  const handlePointerCancel = () => {
+    setIsDragging(false);
+    dragStartRef.current = null;
+  };
 
   const citizenName = citizen?.fullName || citizen?.name || 'Citizen';
   const civicId = citizen?.citizenId || 'CIV-AP-710646-823';
@@ -278,62 +392,113 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
     processUserQuery(prompt, selectedLang);
   };
 
+  const getChatWindowStyle = () => {
+    const winW = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const winH = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const chatWidth = Math.min(winW * 0.92, 410);
+    const chatHeight = Math.min(winH * 0.85, 560);
+    const margin = 12;
+
+    // Open above the bot if there's enough space, otherwise below or centered
+    let top = position.y - chatHeight - 12;
+    if (top < margin) {
+      top = position.y + 72;
+      if (top + chatHeight > winH - margin) {
+        top = Math.max(margin, (winH - chatHeight) / 2);
+      }
+    }
+
+    // Horizontal placement relative to bot
+    let left = position.x - chatWidth + 64;
+    if (left < margin) {
+      left = position.x;
+      if (left + chatWidth > winW - margin) {
+        left = Math.max(margin, (winW - chatWidth) / 2);
+      }
+    }
+
+    left = Math.min(Math.max(left, margin), Math.max(margin, winW - chatWidth - margin));
+    top = Math.min(Math.max(top, margin), Math.max(margin, winH - chatHeight - margin));
+
+    return {
+      position: 'fixed',
+      left: `${left}px`,
+      top: `${top}px`,
+      width: `${chatWidth}px`,
+      height: `${chatHeight}px`,
+      borderRadius: '24px',
+      boxShadow: '0 25px 60px rgba(16, 27, 61, 0.35)',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      backgroundColor: '#FFFFFF',
+      border: '1.5px solid #CBD5E1',
+      zIndex: 100
+    };
+  };
+
   return (
-    <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 99 }}>
-      
-      {/* FLOATING TRIGGER BUTTON WITH PULSING VOICE RINGS */}
+    <>
+      {/* FLOATING DRAGGABLE TRIGGER BUTTON WITH PULSING VOICE RINGS */}
       {!isOpen && (
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
+        <div
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
           style={{
-            width: '64px',
-            height: '64px',
-            borderRadius: '50%',
-            backgroundColor: '#101B3D',
-            color: '#FFFFFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 10px 28px rgba(16, 27, 61, 0.45), 0 0 0 3px rgba(26, 79, 156, 0.3)',
-            cursor: 'pointer',
-            border: '2px solid #38BDF8',
-            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+            position: 'fixed',
+            left: `${position.x}px`,
+            top: `${position.y}px`,
+            zIndex: 99,
+            touchAction: 'none',
+            userSelect: 'none',
+            cursor: isDragging ? 'grabbing' : 'grab'
           }}
-          className="pulse-glow"
-          title="Open Multilingual CIVIQONE AI Assistant"
-          aria-label="Open Multilingual CIVIQONE AI Assistant"
         >
-          <div style={{ position: 'relative' }}>
-            <Bot size={30} style={{ color: '#38BDF8' }} />
-            <span style={{
-              position: 'absolute',
-              top: '-4px',
-              right: '-4px',
-              width: '10px',
-              height: '10px',
+          <button
+            type="button"
+            style={{
+              width: '64px',
+              height: '64px',
               borderRadius: '50%',
-              backgroundColor: '#10B981',
-              border: '2px solid #101B3D'
-            }} />
-          </div>
-        </button>
+              backgroundColor: '#101B3D',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: isDragging
+                ? '0 18px 38px rgba(16, 27, 61, 0.6), 0 0 0 4px rgba(56, 189, 248, 0.6)'
+                : '0 10px 28px rgba(16, 27, 61, 0.45), 0 0 0 3px rgba(26, 79, 156, 0.3)',
+              cursor: isDragging ? 'grabbing' : 'grab',
+              border: '2px solid #38BDF8',
+              transform: isDragging ? 'scale(1.08)' : 'scale(1)',
+              transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s'
+            }}
+            className="pulse-glow"
+            title="CIVIQONES AI — Drag anywhere to move, tap to open"
+            aria-label="Open Multilingual CIVIQONES AI Assistant"
+          >
+            <div style={{ position: 'relative', pointerEvents: 'none' }}>
+              <Bot size={30} style={{ color: '#38BDF8' }} />
+              <span style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                backgroundColor: '#10B981',
+                border: '2px solid #101B3D'
+              }} />
+            </div>
+          </button>
+        </div>
       )}
 
       {/* CHATBOT MAIN WINDOW PANEL */}
       {isOpen && (
-        <div style={{
-          width: 'min(92vw, 410px)',
-          height: '560px',
-          borderRadius: '24px',
-          boxShadow: '0 25px 60px rgba(16, 27, 61, 0.35)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          backgroundColor: '#FFFFFF',
-          border: '1.5px solid #CBD5E1',
-          zIndex: 100
-        }}>
+        <div style={getChatWindowStyle()}>
           
           {/* HEADER SECTION (Deep Indigo Surface) */}
           <div style={{
@@ -359,7 +524,7 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
                 </div>
                 <div>
                   <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#F8F7F2', lineHeight: 1.1 }}>
-                    CIVIQONE AI 2.0
+                    CIVIQONES AI
                   </h3>
                   <span style={{ fontSize: '0.65rem', color: '#34D399', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10B981' }} />
@@ -380,7 +545,7 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
                 <button
                   type="button"
                   onClick={() => {
-                    if (isSpeaking) window.speechSynthesis.cancel();
+                    if (isSpeaking && window.speechSynthesis) window.speechSynthesis.cancel();
                     setIsOpen(false);
                   }}
                   style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '4px' }}
@@ -609,7 +774,7 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
             <button
               type="button"
               onClick={toggleVoiceInput}
-              title={isListening ? "Stop Listening" : "Speak to CIVIQONE AI"}
+              title={isListening ? "Stop Listening" : "Speak to CIVIQONES AI"}
               style={{
                 width: '40px',
                 height: '40px',
@@ -672,6 +837,6 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
         </div>
       )}
 
-    </div>
+    </>
   );
 }
