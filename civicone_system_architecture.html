@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicOne — System Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f0f4f8;
+    padding: 24px;
+    color: #1a202c;
+  }
+
+  .page {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.12);
+    padding: 28px 32px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .page-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: #1a202c;
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    display: block;
+    padding: 8px 28px;
+    border-radius: 8px;
+    margin-bottom: 22px;
+    letter-spacing: 0.5px;
+  }
+
+  .system-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 24px;
+    background: #f7fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 24px;
+  }
+
+  .flow-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+  }
+
+  .flow-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 800;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.13);
+  }
+
+  .flow-label { font-size: 11.5px; font-weight: 600; color: #2d3748; max-width: 90px; line-height: 1.3; }
+  .flow-sublabel { font-size: 10px; color: #718096; max-width: 90px; line-height: 1.2; }
+
+  .flow-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 0 8px;
+    min-width: 80px;
+  }
+  .flow-arrow-label {
+    font-size: 9.5px; font-weight: 600; color: #4a5568; white-space: nowrap;
+    background: #edf2f7; border-radius: 4px; padding: 2px 6px;
+  }
+  .arrow-line { display: flex; align-items: center; gap: 2px; color: #4a5568; font-size: 18px; }
+
+  .node-client { background: linear-gradient(135deg, #e9d8fd, #b794f4); color: #44337a; }
+  .node-react  { background: linear-gradient(135deg, #bee3f8, #63b3ed); color: #1a365d; }
+  .node-server { background: linear-gradient(135deg, #fefcbf, #f6e05e); color: #744210; }
+  .node-db     { background: linear-gradient(135deg, #c6f6d5, #68d391); color: #1c4532; }
+
+  .main-body {
+    display: grid;
+    grid-template-columns: 170px 1fr 180px;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .panel-header {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 10px;
+    border-radius: 8px 8px 0 0;
+    letter-spacing: 0.3px;
+  }
+
+  .panel-body {
+    border: 2px solid #e2e8f0;
+    border-radius: 0 0 10px 10px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .role-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    background: #f7fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #2d3748;
+  }
+
+  .role-connector { display: flex; justify-content: center; align-items: center; font-size: 14px; color: #a0aec0; height: 12px; }
+
+  .module-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+  .module-divider { height: 1.5px; background: #e2e8f0; margin: 4px 0; }
+
+  .module-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f7fafc;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 7px;
+    padding: 6px 10px;
+    gap: 6px;
+  }
+  .module-item.full    { border-color: #4299e1; background: #ebf8ff; }
+  .module-item.partial { border-color: #ed8936; background: #fffaf0; }
+
+  .module-text { font-size: 10.5px; font-weight: 600; color: #2d3748; line-height: 1.3; flex: 1; }
+  .lock-icon   { font-size: 12px; flex-shrink: 0; }
+  .lock-full   { color: #2b6cb0; }
+  .lock-partial{ color: #c05621; }
+
+  .section-label {
+    font-size: 10px; font-weight: 700; color: #718096;
+    text-transform: uppercase; letter-spacing: 0.6px; padding: 2px 0 0 2px;
+  }
+
+  .service-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: #f7fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+  }
+  .service-logo {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; flex-shrink: 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .service-name { font-size: 11px; font-weight: 600; color: #2d3748; line-height: 1.3; }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 8px 20px;
+    background: #fffff0;
+    border: 1.5px solid #faf089;
+    border-radius: 20px;
+    width: fit-content;
+    margin: 10px auto 16px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #2d3748; }
+
+  .bottom-section {
+    display: grid;
+    grid-template-columns: 160px 1fr 160px;
+    gap: 14px;
+    margin-top: 4px;
+  }
+
+  .general-header {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    text-align: center; font-size: 12px; font-weight: 700;
+    padding: 7px 10px; border-radius: 8px 8px 0 0;
+  }
+
+  .general-box {
+    border: 2px dashed #a0aec0;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 12px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .gen-module { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 88px; }
+
+  .gen-icon-wrap {
+    width: 58px; height: 58px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; background: #fff; border: 2px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .all-users-badge {
+    width: 58px; height: 58px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; font-size: 9px; font-weight: 700;
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    border: 3px solid #ed8936; box-shadow: 0 2px 8px rgba(237,137,54,0.3); color: #7b341e;
+  }
+  .all-users-badge .lock-big { font-size: 18px; }
+  .gen-label { font-size: 10.5px; font-weight: 600; color: #2d3748; text-align: center; line-height: 1.3; }
+
+  .side-box { border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .side-box-title { font-size: 11.5px; font-weight: 700; color: #2d3748; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 2px; }
+
+  .ai-logo { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; color: #2d3748; }
+  .ai-logo-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-title">🏛️ System Architecture — CivicOne Digital Identity Platform</div>
+
+  <!-- TOP SYSTEM FLOW -->
+  <div class="system-flow">
+    <div class="flow-node">
+      <div class="flow-icon node-client">🖥️</div>
+      <div class="flow-label">Client System</div>
+      <div class="flow-sublabel">Browser · Mobile</div>
+    </div>
+
+    <div class="flow-arrow">
+      <div class="flow-arrow-label">Client Req / Res</div>
+      <div class="arrow-line">←&nbsp;━━━&nbsp;→</div>
+    </div>
+
+    <div class="flow-node">
+      <div class="flow-icon node-react">⚛️</div>
+      <div class="flow-label">React SPA</div>
+      <div class="flow-sublabel">Vite · Web Application</div>
+    </div>
+
+    <div class="flow-arrow">
+      <div class="flow-arrow-label">Server Req / Res</div>
+      <div class="arrow-line">←&nbsp;━━━&nbsp;→</div>
+    </div>
+
+    <div class="flow-node">
+      <div class="flow-icon node-server">🖧</div>
+      <div class="flow-label">Dual Backend Server</div>
+      <div class="flow-sublabel">FastAPI + Node.js</div>
+    </div>
+
+    <div class="flow-arrow">
+      <div class="flow-arrow-label">Data Retrieval</div>
+      <div class="arrow-line">←&nbsp;━━━&nbsp;→</div>
+    </div>
+
+    <div class="flow-node">
+      <div class="flow-icon node-db">🗄️</div>
+      <div class="flow-label">Database</div>
+      <div class="flow-sublabel">SQLite → PostgreSQL</div>
+    </div>
+
+    <div style="margin-left: 24px; border-left: 3px solid #e2e8f0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
+      <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;color:#c05621;">
+        <span style="font-size:18px;">🔐</span> Authentication
+      </div>
+      <div style="background:#ebf8ff; border:1.5px solid #90cdf4; border-radius:8px; padding:6px 10px; font-size:10px; font-weight:600; color:#2b6cb0; line-height:1.6;">
+        Mobile OTP (60s TTL)<br>
+        Aadhaar OTP (300s TTL)<br>
+        JWT Token (Stateless)
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN BODY -->
+  <div class="main-body">
+
+    <!-- LEFT: USER ROLES -->
+    <div>
+      <div class="panel-header">👥 User Roles</div>
+      <div class="panel-body">
+        <div class="role-item" style="border-color:#4299e1; background:#ebf8ff;"><span style="font-size:18px;">🧑</span> Citizen</div>
+        <div class="role-connector">↕</div>
+        <div class="role-item" style="border-color:#48bb78; background:#f0fff4;"><span style="font-size:18px;">👮</span> Authority Officer</div>
+        <div class="role-connector">↕</div>
+        <div class="role-item" style="border-color:#9f7aea; background:#faf5ff;"><span style="font-size:18px;">🏢</span> Organization</div>
+        <div class="role-connector">↕</div>
+        <div class="role-item" style="border-color:#f56565; background:#fff5f5;"><span style="font-size:18px;">🚔</span> Police</div>
+        <div class="role-connector">↕</div>
+        <div class="role-item" style="border-color:#ed8936; background:#fffaf0;"><span style="font-size:18px;">🌐</span> Public / QR</div>
+        <div class="role-connector">↕</div>
+        <div class="role-item" style="border-color:#e53e3e; background:#fff5f5;"><span style="font-size:18px;">🛡️</span> Super Admin</div>
+      </div>
+    </div>
+
+    <!-- CENTER: RESTRICTED FUNCTIONAL MODULES -->
+    <div>
+      <div class="panel-header">🔒 Restricted Functional Modules</div>
+      <div class="panel-body">
+
+        <div class="section-label">🧑 Citizen</div>
+        <div class="module-row">
+          <div class="module-item full"><span class="module-text">🪪 Virtual ID Card &amp; QR Code</span><span class="lock-icon lock-full">🔒</span></div>
+          <div class="module-item full"><span class="module-text">📁 CivicVault — Document Store</span><span class="lock-icon lock-full">🔒</span></div>
+          <div class="module-item full"><span class="module-text">🔏 Privacy &amp; Consent Center</span><span class="lock-icon lock-full">🔒</span></div>
+          <div class="module-item full"><span class="module-text">⚙️ Government Services Catalog</span><span class="lock-icon lock-full">🔒</span></div>
+          <div class="module-item full"><span class="module-text">✈️ Travel Booking Hub</span><span class="lock-icon lock-full">🔒</span></div>
+          <div class="module-item partial"><span class="module-text">💳 Gold Pass Subscription</span><span class="lock-icon lock-partial">🔓</span></div>
+        </div>
+
+        <div class="module-divider"></div>
+
+        <div class="section-label">👮 Authority Officer</div>
+        <div class="module-row">
+          <div class="module-item full"><span class="module-text">🔍 Citizen Lookup &amp; Verification</span><span class="lock-icon lock-full">🔒</span></div>
+          <div class="module-item full"><span class="module-text">📋 Consent-Based Document Access</span><span class="lock-icon lock-full">🔒</span></div>
+          <div class="module-item partial"><span class="module-text">📊 State-level Analytics</span><span class="lock-icon lock-partial">🔓</span></div>
+          <div class="module-item partial"><span class="module-text">🗂️ Case &amp; Record Management</span><span class="lock-icon lock-partial">🔓</span></div>
+        </div>
+
+        <div class="module-divider"></div>
+
+        <div class="section-label">🏢 Organization</div>
+        <div class="module-row">
+          <div class="module-item partial"><span class="module-text">📄 Shared Citizen Documents</span><span class="lock-icon lock-partial">🔓</span></div>
+          <div class="module-item partial"><span class="module-text">🤝 Consent Token Verification</span><span class="lock-icon lock-partial">🔓</span></div>
+        </div>
+
+        <div class="module-divider"></div>
+
+        <div class="section-label">🚔 Police</div>
+        <div class="module-row">
+          <div class="module-item full"><span class="module-text">🚨 State-wise Law Enforcement Dashboard</span><span class="lock-icon lock-full">🔒</span></div>
+          <div class="module-item full"><span class="module-text">🆔 Citizen Identity Verification</span><span class="lock-icon lock-full">🔒</span></div>
+        </div>
+
+        <div class="module-divider"></div>
+
+        <div class="section-label">🛡️ Super Admin &nbsp;<span style="font-size:9px; background:#e53e3e; color:white; border-radius:4px; padding:1px 5px;">Ctrl+Shift+A</span></div>
+        <div class="module-row">
+          <div class="module-item full"><span class="module-text">👥 User &amp; Citizen Management</span><span class="lock-icon lock-full">🔒</span></div>
+          <div class="module-item full"><span class="module-text">🗄️ Database &amp; Data Management</span><span class="lock-icon lock-full">🔒</span></div>
+          <div class="module-item full"><span class="module-text">📊 System Analytics &amp; Monitoring</span><span class="lock-icon lock-full">🔒</span></div>
+          <div class="module-item full"><span class="module-text">💰 Transaction &amp; Payment Oversight</span><span class="lock-icon lock-full">🔒</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: EXTERNAL SERVICES -->
+    <div>
+      <div class="panel-header">🔗 External Services</div>
+      <div class="panel-body">
+        <div class="service-item">
+          <div class="service-logo" style="background:#ff6b35; color:white;">🪪</div>
+          <div class="service-name">UIDAI / Aadhaar<br><span style="font-size:9px;color:#718096;">Identity Auth</span></div>
+        </div>
+        <div class="service-item">
+          <div class="service-logo" style="background:#2b6cb0; color:white;">🔑</div>
+          <div class="service-name">JWT Auth<br><span style="font-size:9px;color:#718096;">Stateless Tokens</span></div>
+        </div>
+        <div class="service-item">
+          <div class="service-logo" style="background:#276749; color:white; font-size:12px; font-weight:800;">⚡</div>
+          <div class="service-name">FastAPI / Python<br><span style="font-size:9px;color:#718096;">Auth Backend</span></div>
+        </div>
+        <div class="service-item">
+          <div class="service-logo" style="background:#3c8239; color:white;">🟢</div>
+          <div class="service-name">Node.js / Express<br><span style="font-size:9px;color:#718096;">Mock API Server</span></div>
+        </div>
+        <div class="service-item">
+          <div class="service-logo" style="background:#744210; color:white; font-size:12px;">🗄️</div>
+          <div class="service-name">SQLite Database<br><span style="font-size:9px;color:#718096;">→ PostgreSQL (Prod)</span></div>
+        </div>
+        <div class="service-item">
+          <div class="service-logo" style="background:#805ad5; color:white; font-size:12px;">⚡</div>
+          <div class="service-name">Vite Build Tool<br><span style="font-size:9px;color:#718096;">SPA Bundler</span></div>
+        </div>
+        <div class="service-item">
+          <div class="service-logo" style="background:#c05621; color:white; font-size:12px;">💳</div>
+          <div class="service-name">Payment Gateway<br><span style="font-size:9px;color:#718096;">Gold Pass / UPI</span></div>
+        </div>
+        <div class="service-item">
+          <div class="service-logo" style="background:#1a202c; color:white; font-size:11px;">📱</div>
+          <div class="service-name">OTP Service<br><span style="font-size:9px;color:#718096;">Mobile Verification</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item"><span style="font-size:16px; color:#2b6cb0;">🔒</span> Full Access</div>
+    <div style="width:1px; background:#e2e8f0;"></div>
+    <div class="legend-item"><span style="font-size:16px; color:#c05621;">🔓</span> Partial Access</div>
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="bottom-section">
+
+    <!-- AI Services -->
+    <div class="side-box">
+      <div class="side-box-title">🤖 AI Services</div>
+      <div style="font-size:10px; color:#718096; margin-bottom:4px;">Floating AI Agent integrated in CitizenDashboard</div>
+      <div class="ai-logo"><div class="ai-logo-icon" style="background:#4285f4; color:white;">G</div><span>Gemini AI</span></div>
+      <div class="ai-logo"><div class="ai-logo-icon" style="background:#10a37f; color:white;">🤖</div><span>AI Agent API</span></div>
+      <div class="ai-logo"><div class="ai-logo-icon" style="background:#805ad5; color:white;">🧠</div><span>Civic Query Bot</span></div>
+      <div style="margin-top:4px; font-size:10px; font-weight:600; color:#4a5568; background:#f7fafc; border-radius:6px; padding:5px 8px;">
+        📡 POST /api/ai/query
+      </div>
+    </div>
+
+    <!-- General Functional Modules -->
+    <div>
+      <div class="general-header">🌐 General Functional Modules — All Users</div>
+      <div class="general-box">
+        <div class="gen-module">
+          <div class="gen-icon-wrap" style="border-color:#4299e1;">🪪</div>
+          <div class="gen-label">Virtual ID Card</div>
+        </div>
+        <div class="gen-module">
+          <div class="gen-icon-wrap" style="border-color:#9f7aea;">📁</div>
+          <div class="gen-label">Document Vault</div>
+        </div>
+        <div class="gen-module">
+          <div class="all-users-badge"><span class="lock-big">🔓</span><span>All<br>Users</span></div>
+          <div class="gen-label" style="color:#c05621; font-weight:700;">Open Access</div>
+        </div>
+        <div class="gen-module">
+          <div class="gen-icon-wrap" style="border-color:#48bb78;">📷</div>
+          <div class="gen-label">QR Verification</div>
+        </div>
+        <div class="gen-module">
+          <div class="gen-icon-wrap" style="border-color:#ed8936;">🗺️</div>
+          <div class="gen-label">Tourism Guide</div>
+        </div>
+        <div class="gen-module">
+          <div class="gen-icon-wrap" style="border-color:#e53e3e;">📰</div>
+          <div class="gen-label">Govt News &amp; Updates</div>
+        </div>
+        <div class="gen-module">
+          <div class="gen-icon-wrap" style="border-color:#2b6cb0;">👤</div>
+          <div class="gen-label">Profile Settings</div>
+        </div>
+        <div class="gen-module">
+          <div class="gen-icon-wrap" style="border-color:#805ad5;">🆘</div>
+          <div class="gen-label">Help Centre</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security -->
+    <div class="side-box">
+      <div class="side-box-title">🛡️ Security &amp; Audit</div>
+      <div style="font-size:10px; color:#718096; margin-bottom:4px;">Security Centre features</div>
+      <div class="ai-logo"><div class="ai-logo-icon" style="background:#e53e3e; color:white;">🔍</div><span>Audit Logs</span></div>
+      <div class="ai-logo"><div class="ai-logo-icon" style="background:#2b6cb0; color:white;">🔑</div><span>Session Mgmt</span></div>
+      <div class="ai-logo"><div class="ai-logo-icon" style="background:#276749; color:white;">🛡️</div><span>Consent Tracking</span></div>
+      <div class="ai-logo"><div class="ai-logo-icon" style="background:#744210; color:white;">📊</div><span>Access Analytics</span></div>
+      <div style="margin-top:4px; font-size:10px; font-weight:600; color:#4a5568; background:#f7fafc; border-radius:6px; padding:5px 8px;">
+        📡 GET /api/security/audit-logs
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div style="text-align:center; margin-top:18px; font-size:10px; color:#a0aec0; border-top:1px solid #e2e8f0; padding-top:12px;">
+    CivicOne Digital Identity Platform &nbsp;·&nbsp; Architecture v1.0 &nbsp;·&nbsp; Hackathon 2026
+    &nbsp;|&nbsp; Stack: React 18 + Vite &nbsp;·&nbsp; FastAPI (Python) &nbsp;·&nbsp; Node.js/Express &nbsp;·&nbsp; SQLite → PostgreSQL &nbsp;·&nbsp; JWT Auth
+  </div>
+
+</div>
+</body>
+</html>

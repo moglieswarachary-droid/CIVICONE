@@ -1,0 +1,33 @@
+from datetime import datetime, timedelta
+from jose import JWTError, jwt
+from typing import Optional
+# pyrefly: ignore [missing-import]
+from passlib.context import CryptContext
+
+# Secret key for JWT (In production, load this from environment variables)
+SECRET_KEY = "civicone-super-secret-key-replace-me"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+# Dynamic OTP Store (In-memory, mapping normalized phone to OTP data)
+# In production, use Redis or database for cross-worker persistence
+otp_store = {}
+aadhaar_otp_store = {}
