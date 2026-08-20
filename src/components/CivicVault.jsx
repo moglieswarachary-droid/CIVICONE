@@ -4,11 +4,11 @@ import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Car, GraduationCap, Award, FileText, Search, Plus, Share2, Eye,
   CheckCircle2, Clock, AlertCircle, X, Lock, Sparkles, ChevronRight, FileCheck,
-  RotateCcw, AlertTriangle, Building2, User, Users, Heart, Baby, Check
+  RotateCcw, AlertTriangle, Building2, User, Users, Heart, Baby, Check, ArrowLeft
 } from 'lucide-react';
 import { DEMO_DOCUMENTS, DEMO_FAMILY_MEMBERS, calculateDocExpiryStatus } from '../data/mockData.js';
 
-export default function CivicVault({ documents: initialDocs, onRefreshDocs, initialMemberId = 'fam-self' }) {
+export default function CivicVault({ documents: initialDocs, onRefreshDocs, initialMemberId = 'fam-self', onGoBack }) {
   const [documents, setDocuments] = useState(initialDocs && initialDocs.length > 0 ? initialDocs : DEMO_DOCUMENTS);
 
   // Requirement 3 & 4: Category & Type Filters State
@@ -505,6 +505,33 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
 
   return (
     <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 16px' }}>
+
+      {/* Back to Citizen Dashboard */}
+      {onGoBack && (
+        <div style={{ marginBottom: '16px' }}>
+          <button
+            type="button"
+            onClick={onGoBack}
+            style={{
+              backgroundColor: '#FFFFFF',
+              color: '#0B1F3A',
+              border: '1.5px solid #CBD5E1',
+              borderRadius: '12px',
+              padding: '8px 16px',
+              fontSize: '0.85rem',
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <ArrowLeft size={16} style={{ color: '#0B5ED7' }} /> Back to Dashboard
+          </button>
+        </div>
+      )}
 
       {/* HEADER & VAULT COMPACT SUMMARY */}
       <div style={{

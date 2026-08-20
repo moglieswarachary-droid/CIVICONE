@@ -6,7 +6,7 @@ import {
   Headphones, Search, FileText, ShieldCheck, Ticket, MessageSquare, Plus,
   CheckCircle2, ChevronDown, X, Lock, Compass, Building2, User,
   Mail, PhoneCall, Clock, Copy, Check, Send, AlertTriangle, ShieldAlert,
-  Zap, ArrowRight, UserCheck, RefreshCw, Radio, HelpCircle, Upload,
+  Zap, ArrowRight, ArrowLeft, UserCheck, RefreshCw, Radio, HelpCircle, Upload,
   Layers, AlertCircle, FileCheck, ExternalLink
 } from 'lucide-react';
 
@@ -14,7 +14,7 @@ const OFFICIAL_SUPPORT_EMAIL = 'civiqone.official.in@gmail.com';
 const TOLL_FREE_HELPLINE = '1800-248-4266';
 const EMERGENCY_FRAUD_HOTLINE = '1947-CIVIQ';
 
-export default function HelpCentre({ citizen = {} }) {
+export default function HelpCentre({ citizen = {}, onGoBack }) {
   const citizenName = citizen?.fullName || citizen?.name || 'Citizen';
   const civicId = citizen?.citizenId || 'CIV-DEMO-10001';
   const citizenMobile = citizen?.mobile || '+91 90000 00001';
@@ -278,6 +278,33 @@ export default function HelpCentre({ citizen = {} }) {
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px 12px' }}>
       
+      {/* Back to Citizen Dashboard */}
+      {onGoBack && (
+        <div style={{ marginBottom: '16px' }}>
+          <button
+            type="button"
+            onClick={onGoBack}
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              color: 'var(--text-main)',
+              border: '1.5px solid var(--border-light)',
+              borderRadius: '12px',
+              padding: '8px 16px',
+              fontSize: '0.85rem',
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <ArrowLeft size={16} style={{ color: 'var(--primary-blue)' }} /> Back to Dashboard
+          </button>
+        </div>
+      )}
+
       {/* 1. HERO HEADER: CIVIQONE Customer Care */}
       <div style={{
         background: 'linear-gradient(135deg, #071E3D 0%, #0B3C7B 50%, #0B5ED7 100%)',

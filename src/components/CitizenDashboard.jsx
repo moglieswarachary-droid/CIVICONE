@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Search, Bell, User, LayoutDashboard, Ticket, FolderClosed,
   Grid, Landmark, Newspaper, Shield, HelpCircle, LogOut, Sun, Moon, CheckCircle2,
-  ChevronRight, ChevronDown, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, Zap, Radio, Share2, FileText,
+  ChevronRight, ChevronDown, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, ArrowLeft, Zap, Radio, Share2, FileText,
   Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw, Milestone, Users,
   Headphones, PhoneCall, Mail
 } from 'lucide-react';
@@ -25,7 +25,17 @@ import {
 
 export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification, theme: initialTheme = 'light', onToggleTheme }) {
   // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'activity' | 'privacy' | 'notifications' | 'tourism' | 'travel' | 'govt-updates' | 'news' | 'security' | 'help' | 'ai' | 'profile'
-  const [activeTab, setActiveTab] = useState('home');
+  const getTabFromUrl = () => {
+    try {
+      const rawHash = window.location.hash.replace('#', '');
+      if (rawHash.startsWith('citizen/')) return rawHash.replace('citizen/', '') || 'home';
+      if (rawHash.startsWith('citizen-')) return rawHash.replace('citizen-', '') || 'home';
+    } catch (e) {}
+    return 'home';
+  };
+
+  const [activeTab, setActiveTab] = useState(getTabFromUrl);
+  const [tabHistory, setTabHistory] = useState(() => [getTabFromUrl()]);
   const [theme, setTheme] = useState(() => initialTheme || localStorage.getItem('civiqone_theme') || 'light');
   const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
@@ -219,19 +229,71 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
   const unreadNotifCount = notifications.filter(n => !n.read).length;
 
-  const handleSelectTab = (tabId, memberId = 'fam-self') => {
+  const handleSelectTab = (tabId, memberId = 'fam-self', pushHistory = true) => {
+    let resolvedTab = tabId;
     if (tabId === 'family-vault') {
       setFamilyVaultMemberId(memberId === 'fam-self' ? 'fam-child-1' : memberId);
-      setActiveTab('vault');
+      resolvedTab = 'vault';
     } else {
       if (tabId === 'vault') {
         setFamilyVaultMemberId(memberId);
       }
-      setActiveTab(tabId);
     }
+    setActiveTab(resolvedTab);
     setMobileMoreDrawerOpen(false);
+
+    setTabHistory(prev => (prev[prev.length - 1] === resolvedTab ? prev : [...prev, resolvedTab]));
+
+    if (pushHistory) {
+      const targetHash = resolvedTab === 'home' ? '#citizen' : `#citizen/${resolvedTab}`;
+      if (window.location.hash !== targetHash) {
+        try {
+          window.history.pushState({ view: 'citizen', tab: resolvedTab }, '', targetHash);
+        } catch (e) {
+          window.location.hash = targetHash;
+        }
+      }
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const handleGoBack = () => {
+    if (tabHistory.length > 1) {
+      const updated = [...tabHistory];
+      updated.pop();
+      const previousTab = updated[updated.length - 1] || 'home';
+      setTabHistory(updated);
+      handleSelectTab(previousTab, 'fam-self', true);
+    } else {
+      handleSelectTab('home', 'fam-self', true);
+    }
+  };
+
+  // Sync tab with browser URL hash and handle browser back/forward buttons
+  useEffect(() => {
+    const handleSyncTabFromHash = () => {
+      const rawHash = window.location.hash.replace('#', '');
+      let targetTab = 'home';
+      if (rawHash.startsWith('citizen/')) {
+        targetTab = rawHash.replace('citizen/', '') || 'home';
+      } else if (rawHash.startsWith('citizen-')) {
+        targetTab = rawHash.replace('citizen-', '') || 'home';
+      } else if (rawHash === 'citizen' || !rawHash) {
+        targetTab = 'home';
+      }
+
+      if (targetTab && targetTab !== activeTab) {
+        handleSelectTab(targetTab, 'fam-self', false);
+      }
+    };
+
+    window.addEventListener('popstate', handleSyncTabFromHash);
+    window.addEventListener('hashchange', handleSyncTabFromHash);
+    return () => {
+      window.removeEventListener('popstate', handleSyncTabFromHash);
+      window.removeEventListener('hashchange', handleSyncTabFromHash);
+    };
+  }, [activeTab]);
 
   // Requirement 22: Documents Requiring Attention Widget Calculation
   const docsRequiringAttention = documents.filter(d => {
@@ -567,6 +629,53 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         {/* MAIN DISPLAY PANEL (Synced Window Scroll) */}
         <main style={{ flex: 1, padding: '20px 24px', minWidth: 0 }}>
           
+          {/* BACK TO DASHBOARD NAVIGATION BAR (When inside any sub-section) */}
+          {activeTab !== 'home' && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              padding: '12px 18px',
+              backgroundColor: 'var(--bg-card)',
+              borderRadius: '16px',
+              border: '1px solid var(--border-light)',
+              boxShadow: 'var(--shadow-sm)',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <button
+                  type="button"
+                  onClick={handleGoBack}
+                  style={{
+                    backgroundColor: 'var(--light-blue)',
+                    color: 'var(--primary-blue)',
+                    border: '1px solid var(--border-blue)',
+                    borderRadius: '10px',
+                    padding: '7px 14px',
+                    fontSize: '0.825rem',
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <ArrowLeft size={16} /> Back to Dashboard
+                </button>
+                <span style={{ fontSize: '0.825rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  Citizen Portal / <strong style={{ color: 'var(--text-main)', textTransform: 'capitalize' }}>{activeTab.replace('-', ' ')}</strong>
+                </span>
+              </div>
+
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 700 }}>
+                CIVIQONE Verified Citizen Session
+              </div>
+            </div>
+          )}
+
           {/* TAB 1: CITIZEN HOME DASHBOARD (Requirement 16 & 22) */}
           {activeTab === 'home' && (
             <div>
@@ -861,7 +970,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* TAB: MY JOURNEY (CHRONOLOGICAL DOCUMENT LIFECYCLE) */}
           {activeTab === 'journey' && (
-            <MyJourney citizen={currentCitizen} documents={documents} />
+            <MyJourney citizen={currentCitizen} documents={documents} onGoBack={handleGoBack} />
           )}
 
           {/* TAB 2: VIRTUAL CIVIC CARD */}
@@ -872,23 +981,24 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 card={cardData || DEMO_CARD}
                 onNavigateToVerification={onNavigateToVerification}
                 onCardUpdate={(updatedCard) => setCardData(updatedCard)}
+                onGoBack={handleGoBack}
               />
             </div>
           )}
 
           {/* TAB 3: DIGITAL VAULT */}
           {activeTab === 'vault' && (
-            <CivicVault documents={documents} initialMemberId={familyVaultMemberId} />
+            <CivicVault documents={documents} initialMemberId={familyVaultMemberId} onGoBack={handleGoBack} />
           )}
 
           {/* TAB: CIVIQONE WORLD TOURISM & DESTINATIONS GUIDE */}
           {activeTab === 'tourism' && (
-            <TourismGuide />
+            <TourismGuide onGoBack={handleGoBack} />
           )}
 
           {/* TAB 4: PRIVACY & ACCESS CONSENT */}
           {activeTab === 'privacy' && (
-            <PrivacyCenter citizen={currentCitizen} />
+            <PrivacyCenter citizen={currentCitizen} onGoBack={handleGoBack} />
           )}
 
           {/* TAB: NOTIFICATIONS HUB */}
@@ -947,7 +1057,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* TAB 7: PUBLIC SERVICES */}
           {activeTab === 'services' && (
-            <ServicesSection />
+            <ServicesSection onGoBack={handleGoBack} />
           )}
 
           {/* TAB: MY ACTIVITY LOG & AUDIT HISTORY */}
@@ -982,7 +1092,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     borderRadius: '14px',
                     padding: '16px 20px',
                     display: 'flex',
-                    justify: 'space-between',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
                     gap: '12px'
@@ -1020,22 +1130,29 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* TAB: GOVT UPDATES & DAILY NEWS */}
           {(activeTab === 'govt-updates' || activeTab === 'news') && (
-            <UpdatesAndNews govtUpdates={govtUpdates} dailyNews={dailyNews} initialTab={activeTab === 'news' ? 'news' : 'govt'} />
+            <UpdatesAndNews govtUpdates={govtUpdates} dailyNews={dailyNews} initialTab={activeTab === 'news' ? 'news' : 'govt'} onGoBack={handleGoBack} />
           )}
 
           {/* TAB: SECURITY CENTRE */}
           {activeTab === 'security' && (
-            <SecurityCentre />
+            <SecurityCentre onGoBack={handleGoBack} />
           )}
 
           {/* TAB: HELP CENTRE & 24/7 CUSTOMER CARE */}
           {activeTab === 'help' && (
-            <HelpCentre citizen={currentCitizen} />
+            <HelpCentre citizen={currentCitizen} onGoBack={handleGoBack} />
           )}
 
           {/* TAB: PROFILE SETTINGS */}
           {activeTab === 'profile' && (
-            <ProfileSettings citizen={currentCitizen} onLogout={onLogout} card={cardData} onCardUpdate={(updatedCard) => setCardData(updatedCard)} onProfileUpdate={handleProfileUpdate} />
+            <ProfileSettings
+              citizen={currentCitizen}
+              onLogout={onLogout}
+              card={cardData}
+              onCardUpdate={(updatedCard) => setCardData(updatedCard)}
+              onProfileUpdate={handleProfileUpdate}
+              onGoBack={handleGoBack}
+            />
           )}
 
         </main>

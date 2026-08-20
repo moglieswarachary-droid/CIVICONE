@@ -64,6 +64,14 @@ export default function App() {
       const searchParams = new URLSearchParams(window.location.search);
       const token = searchParams.get('token');
 
+      let activeCitizenData = authenticatedCitizen;
+      if (!activeCitizenData) {
+        try {
+          const cached = localStorage.getItem('civiqone_active_citizen');
+          if (cached) activeCitizenData = JSON.parse(cached);
+        } catch (e) {}
+      }
+
       if (rawHash === 'organization-gate' || rawHash === 'organization-access') {
         setCurrentView('organization-gate');
       } else if (rawHash === 'organization' || rawHash === 'org' || rawHash.startsWith('org-') || path.startsWith('/org')) {
@@ -75,14 +83,22 @@ export default function App() {
       } else if (rawHash === 'authority-gate' || rawHash === 'authority' || path.startsWith('/authority')) {
         setCurrentView('authority-gate');
       } else if (rawHash === 'gate' || rawHash === 'citizen-login') {
-        setCurrentView('gate');
-      } else if (rawHash === 'citizen') {
+        if (activeCitizenData) {
+          setCurrentView('citizen');
+        } else {
+          setCurrentView('gate');
+        }
+      } else if (rawHash === 'citizen' || rawHash.startsWith('citizen')) {
         setCurrentView('citizen');
       } else if (path.startsWith('/verify') || rawHash === 'verify' || token) {
         if (token) setVerifyToken(token);
         setCurrentView('verify');
       } else if (!rawHash) {
-        setCurrentView('landing');
+        if (activeCitizenData) {
+          setCurrentView('citizen');
+        } else {
+          setCurrentView('landing');
+        }
       }
     };
 

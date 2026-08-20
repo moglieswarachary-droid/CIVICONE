@@ -5,11 +5,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   User, ShieldCheck, Lock, CheckCircle2, Phone, Mail, MapPin,
   Edit3, AlertTriangle, X, Check, Camera, Trash2, Save, RotateCcw,
-  Calendar, Building, FileText, AlertCircle, Info, ShieldAlert, Sparkles
+  Calendar, Building, FileText, AlertCircle, Info, ShieldAlert, Sparkles, ArrowLeft
 } from 'lucide-react';
 import { INDIA_STATES_AND_UTS } from '../data/mockData.js';
 
-export default function ProfileSettings({ citizen = {}, onLogout, onProfileUpdate }) {
+export default function ProfileSettings({ citizen = {}, onLogout, onProfileUpdate, onGoBack }) {
   // Extract initial values safely
   const initialCitizenId = citizen.citizenId || citizen.civicId || 'CIV-DEMO-10001';
   const initialFullName = citizen.fullName || citizen.name || citizen.displayName || 'Aarav Kumar';
@@ -267,6 +267,33 @@ export default function ProfileSettings({ citizen = {}, onLogout, onProfileUpdat
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px 16px' }}>
       
+      {/* Back to Citizen Dashboard */}
+      {onGoBack && (
+        <div style={{ marginBottom: '16px' }}>
+          <button
+            type="button"
+            onClick={onGoBack}
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              color: 'var(--text-main)',
+              border: '1.5px solid var(--border-light)',
+              borderRadius: '12px',
+              padding: '8px 16px',
+              fontSize: '0.85rem',
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <ArrowLeft size={16} style={{ color: 'var(--primary-blue)' }} /> Back to Dashboard
+          </button>
+        </div>
+      )}
+
       {/* 1. HEADER PROFILE HERO CARD */}
       <div style={{
         backgroundColor: 'var(--bg-card)',

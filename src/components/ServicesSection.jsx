@@ -7,7 +7,7 @@ import {
   Lock, RefreshCw, Sparkles, ExternalLink, Shield, AlertCircle, X, Check, Eye, Download, Share2
 } from 'lucide-react';
 
-export default function ServicesSection({ services: initialServices }) {
+export default function ServicesSection({ services: initialServices, onGoBack }) {
   // Navigation & Category View: null (All Services Grid) | 'government' | 'healthcare' | 'rto' | 'finance' | 'education' | 'professional' | 'organization' | 'personal'
   const [activeCategoryKey, setActiveCategoryKey] = useState(null);
   const [categoryData, setCategoryData] = useState(null);
@@ -30,6 +30,44 @@ export default function ServicesSection({ services: initialServices }) {
   const [workflowNotes, setWorkflowNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [workflowSuccess, setWorkflowSuccess] = useState(null);
+
+  // Return to All Services Handler
+  const handleReturnToServices = () => {
+    setActiveCategoryKey(null);
+    setCategoryData(null);
+    if (window.location.hash.includes('services/')) {
+      try {
+        window.history.pushState({ view: 'citizen', tab: 'services' }, '', '#citizen/services');
+      } catch (e) {
+        window.location.hash = '#citizen/services';
+      }
+    }
+  };
+
+  // Sync category view with browser back/forward buttons
+  useEffect(() => {
+    const handleSyncCategoryFromUrl = () => {
+      const rawHash = window.location.hash.replace('#', '');
+      if (rawHash.startsWith('citizen/services/')) {
+        const catKey = rawHash.replace('citizen/services/', '');
+        if (catKey && catKey !== activeCategoryKey) {
+          executeFetchCategoryService(catKey, false);
+        }
+      } else if (rawHash === 'citizen/services' || rawHash === 'citizen') {
+        if (activeCategoryKey) {
+          setActiveCategoryKey(null);
+          setCategoryData(null);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handleSyncCategoryFromUrl);
+    window.addEventListener('hashchange', handleSyncCategoryFromUrl);
+    return () => {
+      window.removeEventListener('popstate', handleSyncCategoryFromUrl);
+      window.removeEventListener('hashchange', handleSyncCategoryFromUrl);
+    };
+  }, [activeCategoryKey]);
 
   const handleDownloadRecord = (rec) => {
     setDownloadMsg(`Preparing cryptographically signed PDF for ${rec.name}...`);
@@ -108,9 +146,16 @@ export default function ServicesSection({ services: initialServices }) {
   };
 
   // Execute REST API Fetch for Scoped Category Service Dashboard
-  const executeFetchCategoryService = async (catKey) => {
+  const executeFetchCategoryService = async (catKey, pushHistory = true) => {
     setActiveCategoryKey(catKey);
     setLoading(true);
+    if (pushHistory) {
+      try {
+        window.history.pushState({ view: 'citizen', tab: 'services', cat: catKey }, '', `#citizen/services/${catKey}`);
+      } catch (e) {
+        window.location.hash = `#citizen/services/${catKey}`;
+      }
+    }
     try {
       const res = await fetch(`/api/services/category/${catKey}`);
       if (res.ok) {
@@ -215,7 +260,7 @@ export default function ServicesSection({ services: initialServices }) {
           {/* Dashboard Navigation Toolbar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
             <button
-              onClick={() => { setActiveCategoryKey(null); setCategoryData(null); }}
+              onClick={handleReturnToServices}
               style={{
                 backgroundColor: '#FFFFFF',
                 color: '#0B1F3A',
@@ -415,6 +460,32 @@ export default function ServicesSection({ services: initialServices }) {
       {/* VIEW 2: 8 CATEGORY SERVICE ENTRY POINTS GRID (Default Overview) */}
       {!activeCategoryKey && (
         <>
+          {onGoBack && (
+            <div style={{ marginBottom: '16px' }}>
+              <button
+                type="button"
+                onClick={onGoBack}
+                style={{
+                  backgroundColor: 'var(--bg-card)',
+                  color: 'var(--text-main)',
+                  border: '1.5px solid var(--border-light)',
+                  borderRadius: '12px',
+                  padding: '8px 16px',
+                  fontSize: '0.85rem',
+                  fontWeight: 800,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <ArrowLeft size={16} style={{ color: 'var(--primary-blue)' }} /> Back to Dashboard
+              </button>
+            </div>
+          )}
+
           <div style={{ marginBottom: '32px' }}>
             <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em', marginBottom: '4px' }}>
               CIVIQONE Department Services & Record Hubs
