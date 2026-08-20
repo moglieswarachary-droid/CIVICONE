@@ -261,10 +261,10 @@ export const travelService = {
 };
 
 export const aiService = {
-  sendQuery: (prompt) => safeFetch('/api/ai/query', {
+  sendQuery: (prompt, lang = 'en') => safeFetch('/api/ai/query', {
     method: 'POST',
     headers: authStorage.getHeaders(),
-    body: JSON.stringify({ prompt })
+    body: JSON.stringify({ prompt, lang })
   }, {
     reply: `I am CIVIQONE AI. Your queries are processed securely. Your identity profile and documents are verified with 100% cryptographic integrity.`
   })

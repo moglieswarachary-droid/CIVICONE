@@ -1,27 +1,27 @@
-// src/components/AiAgentFloating.jsx - Multilingual Voice-Enabled CIVIQONE AI Assistant 2.0
-// Supports Voice Input & Speech Synthesis in Telugu, Hindi, Tamil, Kannada, and English with Direct Portal Navigation
+// src/components/AiAgentFloating.jsx - Multilingual Voice-Enabled CIVIQONE AI Assistant
+// Supports English, Telugu, Tamil, Kannada, and Malayalam with Interactive Tap-to-Listen Text-To-Speech Controls
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Bot, X, Send, Mic, MicOff, Volume2, VolumeX, Sparkles, User,
   RefreshCw, ShieldCheck, ArrowRight, Compass, Ticket, FolderClosed,
-  Lock, Milestone, Globe2, Check, ExternalLink
+  Lock, Milestone, Globe2, Check, ExternalLink, Play, Pause, Square
 } from 'lucide-react';
 
 const SUPPORTED_LANGUAGES = [
-  { code: 'en', label: 'English', native: 'English', speechCode: 'en-IN' },
-  { code: 'te', label: 'Telugu', native: 'తెలుగు', speechCode: 'te-IN' },
-  { code: 'hi', label: 'Hindi', native: 'हिंदी', speechCode: 'hi-IN' },
-  { code: 'ta', label: 'Tamil', native: 'தமிழ்', speechCode: 'ta-IN' },
-  { code: 'kn', label: 'Kannada', native: 'ಕನ್ನಡ', speechCode: 'kn-IN' }
+  { code: 'en', label: 'English', native: 'English', speechCode: 'en-IN', fallbacks: ['en-IN', 'en-GB', 'en-US', 'en'] },
+  { code: 'te', label: 'Telugu', native: 'తెలుగు', speechCode: 'te-IN', fallbacks: ['te-IN', 'te'] },
+  { code: 'ta', label: 'Tamil', native: 'தமிழ்', speechCode: 'ta-IN', fallbacks: ['ta-IN', 'ta'] },
+  { code: 'kn', label: 'Kannada', native: 'ಕನ್ನಡ', speechCode: 'kn-IN', fallbacks: ['kn-IN', 'kn'] },
+  { code: 'ml', label: 'Malayalam', native: 'മലയാളം', speechCode: 'ml-IN', fallbacks: ['ml-IN', 'ml'] }
 ];
 
 const LOCALIZED_GREETINGS = {
-  en: "Hello! I am CIVIQONES AI, your multilingual digital identity assistant. Speak or type to navigate portals, query documents, and check verifications.",
-  te: "నమస్కారం! నేను CIVIQONES AI ని. మీ డిజిటల్ గుర్తింపు మరియు పత్రాల సహాయకుడిని. మాట్లాడండి లేదా టైప్ చేసి మీ పత్రాలను శోధించండి.",
-  hi: "नमस्ते! मैं CIVIQONES AI हूँ। आपकी डिजिटल पहचान और दस्तावेज़ सहायक। पोर्टल नेविगेट करने या दस्तावेज़ों की जाँच के लिए बोलें या टाइप करें।",
-  ta: "வணக்கம்! நான் CIVIQONES AI. உங்கள் டிஜிட்டல் அடையாள உதவியாளர். ஆவணங்களை பார்க்க அல்லது தேட பேசுங்கள் அல்லது தட்டச்சு செய்யுங்கள்.",
-  kn: "ನಮಸ್ಕಾರ! ನಾನು CIVIQONES AI. ನಿಮ್ಮ ಡಿಜಿಟಲ್ ಗುರುತಿನ ಸಹಾಯಕ. ನಿಮ್ಮ ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಲು ಮಾತನಾಡಿ ಅಥವಾ ಟೈಪ್ ಮಾಡಿ."
+  en: "Hello! I am CIVIQONE AI, your multilingual digital identity assistant. Speak or type to navigate portals, query documents, and check verifications.",
+  te: "నమస్కారం! నేను CIVIQONE AI ని. మీ డిజిటల్ గుర్తింపు మరియు పత్రాల సహాయకుడిని. మాట్లాడండి లేదా టైప్ చేసి మీ పత్రాలను శోధించండి.",
+  ta: "வணக்கம்! நான் CIVIQONE AI. உங்கள் டிஜிட்டல் அடையாள உதவியாளர். ஆவணங்களை பார்க்க அல்லது தேட பேசுங்கள் அல்லது தட்டச்சு செய்யுங்கள்.",
+  kn: "ನಮಸ್ಕಾರ! ನಾನು CIVIQONE AI. ನಿಮ್ಮ ಡಿಜಿಟಲ್ ಗುರುತಿನ ಸಹಾಯಕ. ನಿಮ್ಮ ದಾಖಲೆಗಳನ್ನು ಹುಡುಕಲು ಮಾತನಾಡಿ ಅಥವಾ ಟೈಪ್ ಮಾಡಿ.",
+  ml: "നമസ്കാരം! ഞാൻ CIVIQONE AI ആണ്. നിങ്ങളുടെ ഡിജിറ്റൽ തിരിച്ചറിയൽ രേഖാ സഹായി. പോർട്ടലുകൾ പരിശോധിക്കാനും രേഖകൾ കണ്ടെത്താനും സംസാരിക്കുകയോ ടൈപ്പ് ചെയ്യുകയോ ചെയ്യാം."
 };
 
 const QUICK_SUGGESTIONS = {
@@ -39,13 +39,6 @@ const QUICK_SUGGESTIONS = {
     { text: "పర్యాటక ప్రదేశాలు (CIVIQONE World)", tab: "tourism" },
     { text: "నా డ్రైవింగ్ లైసెన్స్ గడువు ఎప్పుడు?", query: "driving licence expiry" }
   ],
-  hi: [
-    { text: "मेरी जीवन यात्रा (My Journey) खोलें", tab: "journey" },
-    { text: "मेरा डिजिटल नागरिक कार्ड दिखाएं", tab: "card" },
-    { text: "मेरा डेटा किसके पास है?", tab: "privacy" },
-    { text: "सिविकवन वर्ल्ड (पर्यटन स्थल)", tab: "tourism" },
-    { text: "ड्राइविंग लाइसेंस कब समाप्त होगा?", query: "driving licence expiry" }
-  ],
   ta: [
     { text: "என் பயணம் (My Journey) திறக்கவும்", tab: "journey" },
     { text: "என் டிஜிட்டல் அட்டை காட்டு", tab: "card" },
@@ -59,17 +52,52 @@ const QUICK_SUGGESTIONS = {
     { text: "ನನ್ನ ಡೇಟಾ ಯಾರು ನೋಡುತ್ತಿದ್ದಾರೆ?", tab: "privacy" },
     { text: "ಪ್ರವಾಸ ಸ್ಥಳಗಳು (CIVIQONE World)", tab: "tourism" },
     { text: "ಡ್ರೈವಿಂಗ್ ಲೈಸೆನ್ಸ್ ಯಾವಾಗ ಮುಕ್ತಾಯ?", query: "driving licence expiry" }
+  ],
+  ml: [
+    { text: "എന്റെ യാത്ര (My Journey) കാണിക്കുക", tab: "journey" },
+    { text: "എന്റെ ഡിജിറ്റൽ സിറ്റിസൺ കാർഡ്", tab: "card" },
+    { text: "ആർക്കൊക്കെ എന്റെ വിവരങ്ങൾ കാണാം?", tab: "privacy" },
+    { text: "വിനോദസഞ്ചാര കേന്ദ്രങ്ങൾ (CIVIQONE World)", tab: "tourism" },
+    { text: "ഡ്രൈവിംഗ് ലൈസൻസ് കാലാവധി എപ്പോൾ?", query: "driving licence expiry" }
   ]
 };
 
 export default function AiAgentFloating({ citizen = {}, documents = [], onNavigateTab }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState('en');
+
+  // Initialize and persist language across session
+  const [selectedLang, setSelectedLang] = useState(() => {
+    try {
+      const saved = localStorage.getItem('civiqone_ai_lang');
+      if (saved && SUPPORTED_LANGUAGES.some(l => l.code === saved)) {
+        return saved;
+      }
+    } catch (e) {}
+    return 'en';
+  });
+
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(true);
+
+  // Per-message Text-to-Speech (TTS) state: { msgIndex: number | null, status: 'idle' | 'playing' | 'paused' }
+  const [ttsState, setTtsState] = useState({ msgIndex: null, status: 'idle' });
+  const voicesRef = useRef([]);
+
+  // Load available speech synthesis voices
+  useEffect(() => {
+    const loadVoices = () => {
+      if ('speechSynthesis' in window) {
+        voicesRef.current = window.speechSynthesis.getVoices() || [];
+      }
+    };
+
+    loadVoices();
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
 
   // DRAGGABLE POSITION STATE & BOUNDARY CONSTRAINTS
   const clampCoordinates = (x, y) => {
@@ -90,7 +118,7 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
 
   const getInitialPosition = () => {
     try {
-      const saved = localStorage.getItem('civiqones_ai_pos');
+      const saved = localStorage.getItem('civiqone_ai_pos') || localStorage.getItem('civiqones_ai_pos');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
@@ -174,7 +202,7 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
     } else {
       // User dragged -> Persist position
       try {
-        localStorage.setItem('civiqones_ai_pos', JSON.stringify(position));
+        localStorage.setItem('civiqone_ai_pos', JSON.stringify(position));
       } catch (err) {}
     }
     dragStartRef.current = null;
@@ -191,7 +219,8 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
   const [messages, setMessages] = useState([
     {
       sender: 'ai',
-      text: LOCALIZED_GREETINGS.en,
+      text: LOCALIZED_GREETINGS[selectedLang] || LOCALIZED_GREETINGS.en,
+      lang: selectedLang,
       actionTab: null
     }
   ]);
@@ -234,15 +263,25 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
     }
   }, [selectedLang]);
 
-  // Update greeting when language changes
+  // Update greeting when language changes and persist in session
   const handleLanguageChange = (langCode) => {
     setSelectedLang(langCode);
+    try {
+      localStorage.setItem('civiqone_ai_lang', langCode);
+    } catch (e) {}
+
+    // Stop any ongoing speech when switching languages
+    handleStopAudio();
+
     const greeting = LOCALIZED_GREETINGS[langCode] || LOCALIZED_GREETINGS.en;
+    const langNative = SUPPORTED_LANGUAGES.find(l => l.code === langCode)?.native || 'English';
+    
     setMessages(prev => [
       ...prev,
       {
         sender: 'ai',
-        text: `🌐 **Language switched to ${SUPPORTED_LANGUAGES.find(l => l.code === langCode)?.native}**.\n\n${greeting}`
+        text: `🌐 **Language switched to ${langNative}**.\n\n${greeting}`,
+        lang: langCode
       }
     ]);
   };
@@ -268,29 +307,137 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
     }
   };
 
-  // Text-To-Speech Output
-  const speakText = (text) => {
-    if (!('speechSynthesis' in window)) return;
+  // ==========================================
+  // TEXT-TO-SPEECH (TTS) / LISTEN ENGINE
+  // ==========================================
 
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
+  // Play audio for a specific AI response
+  const handlePlayAudio = (text, langCode, msgIndex) => {
+    if (!('speechSynthesis' in window)) {
+      alert("Text-to-speech is not supported in this browser.");
       return;
     }
 
-    // Clean markdown asterisks for cleaner audio
-    const cleanText = text.replace(/[*_#`]/g, '');
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    const langObj = SUPPORTED_LANGUAGES.find(l => l.code === selectedLang) || SUPPORTED_LANGUAGES[0];
-    utterance.lang = langObj.speechCode;
-    utterance.rate = 0.95;
+    // If currently paused on this exact message, resume it
+    if (ttsState.msgIndex === msgIndex && ttsState.status === 'paused') {
+      window.speechSynthesis.resume();
+      setTtsState({ msgIndex, status: 'playing' });
+      return;
+    }
 
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    // Stop any ongoing speech
+    window.speechSynthesis.cancel();
+
+    // Clean text for smooth, pleasant speech synthesis
+    const cleanText = text
+      .replace(/[*_#`~>]/g, '')
+      .replace(/https?:\/\/\S+/g, '')
+      .replace(/[•🟢🛡️🚗🗳️🌐]/g, ' ')
+      .trim();
+
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const targetLang = langCode || selectedLang || 'en';
+    const langObj = SUPPORTED_LANGUAGES.find(l => l.code === targetLang) || SUPPORTED_LANGUAGES[0];
+
+    const availableVoices = voicesRef.current.length > 0
+      ? voicesRef.current
+      : (window.speechSynthesis.getVoices() || []);
+
+    let selectedVoice = null;
+    if (availableVoices.length > 0) {
+      // 1. Check exact fallback list
+      for (const code of (langObj.fallbacks || [langObj.speechCode])) {
+        selectedVoice = availableVoices.find(v =>
+          v.lang.toLowerCase() === code.toLowerCase() ||
+          v.lang.toLowerCase().replace('_', '-').startsWith(code.toLowerCase())
+        );
+        if (selectedVoice) break;
+      }
+
+      // 2. Check language prefix (e.g., 'te', 'ta', 'kn', 'ml', 'en')
+      if (!selectedVoice) {
+        selectedVoice = availableVoices.find(v =>
+          v.lang.toLowerCase().startsWith(langObj.code)
+        );
+      }
+
+      // 3. Gracefully fallback to Indian accent voice or default voice without breaking
+      if (!selectedVoice) {
+        selectedVoice = availableVoices.find(v => v.lang.toLowerCase().includes('in'))
+          || availableVoices.find(v => v.default)
+          || availableVoices[0];
+      }
+    }
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+      utterance.lang = selectedVoice.lang;
+    } else {
+      utterance.lang = langObj.speechCode;
+    }
+
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    utterance.onstart = () => {
+      setTtsState({ msgIndex, status: 'playing' });
+    };
+
+    utterance.onend = () => {
+      setTtsState({ msgIndex: null, status: 'idle' });
+    };
+
+    utterance.onerror = (e) => {
+      if (e.error !== 'interrupted' && e.error !== 'canceled') {
+        console.warn("TTS Playback issue:", e);
+      }
+      setTtsState({ msgIndex: null, status: 'idle' });
+    };
+
+    utterance.onpause = () => {
+      setTtsState({ msgIndex, status: 'paused' });
+    };
+
+    utterance.onresume = () => {
+      setTtsState({ msgIndex, status: 'playing' });
+    };
 
     window.speechSynthesis.speak(utterance);
+    setTtsState({ msgIndex, status: 'playing' });
   };
+
+  // Pause audio
+  const handlePauseAudio = (msgIndex) => {
+    if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.pause();
+      setTtsState({ msgIndex, status: 'paused' });
+    }
+  };
+
+  // Resume audio
+  const handleResumeAudio = (msgIndex) => {
+    if ('speechSynthesis' in window && window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+      setTtsState({ msgIndex, status: 'playing' });
+    }
+  };
+
+  // Stop audio
+  const handleStopAudio = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setTtsState({ msgIndex: null, status: 'idle' });
+  };
+
+  // Stop speech when closing chatbot
+  useEffect(() => {
+    if (!isOpen) {
+      handleStopAudio();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -298,7 +445,9 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
     }
   }, [messages, isOpen]);
 
-  // Intelligent Multilingual Query Processor & Navigation Engine
+  // =========================================================================
+  // INTELLIGENT MULTILINGUAL QUERY PROCESSOR (5 LANGUAGES: EN, TE, TA, KN, ML)
+  // =========================================================================
   const processUserQuery = async (queryText, lang) => {
     if (!queryText.trim()) return;
 
@@ -312,61 +461,205 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
     let targetTab = null;
     let targetTabName = "";
 
-    // 1. Navigation Intelligence (Telugu, Hindi, Tamil, Kannada, English)
-    if (lower.includes("journey") || lower.includes("ప్రయాణం") || lower.includes("यात्रा") || lower.includes("பயணம்") || lower.includes("ಜೀವನ") || lower.includes("timeline") || lower.includes("birth certificate")) {
+    // 1. My Journey / Life Timeline / Birth Certificate
+    if (
+      lower.includes("journey") || lower.includes("timeline") || lower.includes("birth") ||
+      lower.includes("ప్రయాణం") || lower.includes("కాలక్రమం") || lower.includes("జనన") ||
+      lower.includes("பயணம்") || lower.includes("காலவரிசை") || lower.includes("பிறப்பு") ||
+      lower.includes("ಜೀವನ") || lower.includes("ಪ್ರಯಾಣ") || lower.includes("ಜನನ") ||
+      lower.includes("യാത്ര") || lower.includes("ജനന") || lower.includes("നാഴികക്കല്ലുകൾ")
+    ) {
       targetTab = "journey";
       targetTabName = "My Journey (Life Documents Timeline)";
       if (lang === 'te') {
         replyText = `ఖచ్చితంగా! మీ పుట్టిన తేదీ ధృవీకరణ పత్రం నుండి నేటి వరకు గల 15 మైలురాళ్ల **"నా ప్రయాణం"** విభాగాన్ని తెరుస్తున్నాను.`;
-      } else if (lang === 'hi') {
-        replyText = `बिल्कुल! आपके जन्म प्रमाण पत्र से लेकर आज तक के सभी 15 दस्तावेज़ों की **"मेरी जीवन यात्रा"** खोली जा रही है।`;
       } else if (lang === 'ta') {
         replyText = `நிச்சயமாக! உங்கள் பிறப்புச் சான்றிதழில் இருந்து அனைத்து 15 ஆவணங்களைக் கொண்ட **"என் பயணம்"** பகுதியை திறக்கிறேன்.`;
+      } else if (lang === 'kn') {
+        replyText = `ಖಂಡಿತವಾಗಿಯೂ! ನಿಮ್ಮ ಜನನ ಪ್ರಮಾಣಪತ್ರದಿಂದ ಇಂದಿನವರೆಗೆ 15 ಮೈಲಿಗಲ್ಲುಗಳನ್ನು ಹೊಂದಿರುವ **"ನನ್ನ ಪ್ರಯಾಣ"** ವಿಭಾಗವನ್ನು ತೆರೆಯುತ್ತಿದ್ದೇನೆ.`;
+      } else if (lang === 'ml') {
+        replyText = `തീർച്ചയായും! നിങ്ങളുടെ ജനന സർട്ടിഫിക്കറ്റ് മുതൽ ഇന്നുവരെയുള്ള 15 ജീവിത നാഴികക്കല്ലുകൾ അടങ്ങിയ **"എന്റെ യാത്ര"** തുറക്കുന്നു.`;
       } else {
         replyText = `Opening **My Journey**! You can inspect all 15 chronological life credentials from your Birth Certificate to Sovereign Identity.`;
       }
-    } else if (lower.includes("card") || lower.includes("కార్డ్") || lower.includes("గుర్తింపు") || lower.includes("कार्ड") || lower.includes("அட்டை") || lower.includes("ಗುರುತಿನ") || lower.includes("digital id") || lower.includes("qr")) {
+    }
+    // 2. Digital Citizen Card / QR Code / Identity Card
+    else if (
+      lower.includes("card") || lower.includes("digital id") || lower.includes("qr") || lower.includes("identity") ||
+      lower.includes("కార్డ్") || lower.includes("గుర్తింపు") || lower.includes("కార్డు") ||
+      lower.includes("அட்டை") || lower.includes("அடையாள") ||
+      lower.includes("ಕಾರ್ಡ್") || lower.includes("ಗುರುತಿನ") ||
+      lower.includes("കാർഡ്") || lower.includes("തിരിച്ചറിയൽ") || lower.includes("ഐഡി")
+    ) {
       targetTab = "card";
       targetTabName = "My Civic Card";
       if (lang === 'te') {
-        replyText = `మీ **సివిక్ వన్ డిజిటల్ సిటిజెన్ కార్డ్** (` + civicId + `) తెరవబడింది. 3D ఫ్లిప్ చేసి వెనుక వైపు భద్రతా వివరాలు చూడవచ్చు.`;
-      } else if (lang === 'hi') {
-        replyText = `आपका **सिविकवन डिजिटल नागरिक कार्ड** (` + civicId + `) खोल दिया गया है। 3D फ्लिप करके सुरक्षा कोड देख सकते हैं।`;
+        replyText = `మీ **CIVIQONE డిజిటల్ సిటిజెన్ కార్డ్** (${civicId}) తెరవబడింది. 3D ఫ్లిప్ చేసి వెనుక వైపు భద్రతా వివరాలు చూడవచ్చు.`;
+      } else if (lang === 'ta') {
+        replyText = `உங்கள் **CIVIQONE டிஜிட்டல் குடிமக்கள் அட்டை** (${civicId}) திறக்கப்படுகிறது. 3D சுழற்சி மூலம் பாதுகாப்பு விவரங்களை சரிபார்க்கலாம்.`;
+      } else if (lang === 'kn') {
+        replyText = `ನಿಮ್ಮ **CIVIQONE ಡಿಜಿಟಲ್ ಸಿಟಿಜನ್ ಕಾರ್ಡ್** (${civicId}) ತೆರೆಯಲಾಗಿದೆ. 3D ಫ್ಲಿಪ್ ಮಾಡಿ ಭದ್ರತಾ ವಿವರಗಳನ್ನು ವೀಕ್ಷಿಸಬಹುದು.`;
+      } else if (lang === 'ml') {
+        replyText = `നിങ്ങളുടെ **CIVIQONE ഡിജിറ്റൽ സിറ്റിസൺ കാർഡ്** (${civicId}) തുറക്കുന്നു. 3D ഫ്ലിപ്പ് വഴി സുരക്ഷാ വിവരങ്ങൾ പരിശോധിക്കാം.`;
       } else {
         replyText = `Opening your **CIVIQONE Digital Citizen Card** (${civicId}) with in-place 3D flip and scannable QR verification.`;
       }
-    } else if (lower.includes("family") || lower.includes("child") || lower.includes("dependent") || lower.includes("son") || lower.includes("daughter") || lower.includes("కుటుంబం") || lower.includes("పిల్లల") || lower.includes("తండ్రి") || lower.includes("परिवार") || lower.includes("बच्चे") || lower.includes("माता-पिता")) {
+    }
+    // 3. Family & Dependent Vault / Children / Father / Senior Parents
+    else if (
+      lower.includes("family") || lower.includes("child") || lower.includes("dependent") || lower.includes("son") || lower.includes("daughter") || lower.includes("parent") ||
+      lower.includes("కుటుంబం") || lower.includes("పిల్లల") || lower.includes("తండ్రి") ||
+      lower.includes("குடும்பம்") || lower.includes("குழந்தைகள்") || lower.includes("பெற்றோர்") ||
+      lower.includes("ಕುಟುಂಬ") || lower.includes("ಮಕ್ಕಳು") || lower.includes("ತಂದೆ") ||
+      lower.includes("കുടുംബം") || lower.includes("കുട്ടികൾ") || lower.includes("മാതാപിതാക്കൾ")
+    ) {
       targetTab = "vault";
       targetTabName = "Family & Dependent Vault";
-      replyText = lang === 'te'
-        ? `మీ **కుటుంబ & ఆధారపడిన వారి వాల్ట్** తెరుస్తున్నాను. ఇక్కడ మీ పిల్లలు (ఆరవ్, అనన్య) మరియు వయోవృద్ధ తండ్రి గారి అధికారిక పత్రాలు ఉన్నాయి.`
-        : `Opening your **Family & Dependent Vault**! You can manage verified credentials for your children (Aarav, Ananya) and senior parents with legal guardianship custody.`;
-    } else if (lower.includes("vault") || lower.includes("పత్రాలు") || lower.includes("దస్తావేజులు") || lower.includes("दस्तावेज़") || lower.includes("ஆவணங்கள்") || lower.includes("ದಾಖಲೆಗಳು") || lower.includes("documents")) {
+      if (lang === 'te') {
+        replyText = `మీ **కుటుంబ & ఆధారపడిన వారి వాల్ట్** తెరుస్తున్నాను. ఇక్కడ మీ పిల్లలు మరియు వయోవృద్ధ తల్లిదండ్రుల అధికారిక పత్రాలు ఉన్నాయి.`;
+      } else if (lang === 'ta') {
+        replyText = `உங்கள் **குடும்பம் மற்றும் சார்ந்திருப்போர் வால்ட்** திறக்கப்படுகிறது. உங்கள் குழந்தைகள் மற்றும் பெற்றோரின் சரிபார்க்கப்பட்ட ஆவணங்களை இங்கே நிர்வகிக்கலாம்.`;
+      } else if (lang === 'kn') {
+        replyText = `ನಿಮ್ಮ **ಕುಟುಂಬ ಮತ್ತು ಅವಲಂಬಿತರ ವಾಲ್ಟ್** ತೆರೆಯಲಾಗುತ್ತಿದೆ. ನಿಮ್ಮ ಮಕ್ಕಳು ಮತ್ತು ಪೋಷಕರ ಅಧಿಕೃತ ದಾಖಲೆಗಳನ್ನು ಇಲ್ಲಿ ನಿರ್ವಹಿಸಬಹುದು.`;
+      } else if (lang === 'ml') {
+        replyText = `നിങ്ങളുടെ **കുടുംബ & ആശ്രിത വോൾട്ട്** തുറക്കുന്നു. കുട്ടികളുടെയും മാതാപിതാക്കളുടെയും സാക്ഷ്യപ്പെടുത്തിയ രേഖകൾ ഇവിടെ കൈകാര്യം ചെയ്യാം.`;
+      } else {
+        replyText = `Opening your **Family & Dependent Vault**! You can manage verified credentials for your children and senior parents with legal guardianship custody.`;
+      }
+    }
+    // 4. Civic Vault / Documents / Credentials / Certificates
+    else if (
+      lower.includes("vault") || lower.includes("document") || lower.includes("certificate") ||
+      lower.includes("పత్రాలు") || lower.includes("దస్తావేజులు") || lower.includes("వాల్ట్") ||
+      lower.includes("ஆவணங்கள்") || lower.includes("வால்ட்") || lower.includes("சான்றிதழ்") ||
+      lower.includes("ದಾಖಲೆಗಳು") || lower.includes("ವಾಲ್ಟ್") || lower.includes("ಪತ್ರಗಳು") ||
+      lower.includes("വോൾട്ട്") || lower.includes("രേഖകൾ") || lower.includes("പ്രമാണങ്ങൾ")
+    ) {
       targetTab = "vault";
-      targetTabName = "My Vault";
-      replyText = lang === 'te'
-        ? `మీ **సివిక్ వాల్ట్** లోకి నావిగేట్ చేస్తున్నాను. ఇక్కడ మీ అధికారిక పత్రాలన్నీ భద్రపరచబడి ఉంటాయి.`
-        : `Navigating to **My Vault**. All your verified government documents and credentials are encrypted and stored here.`;
-    } else if (lower.includes("privacy") || lower.includes("consent") || lower.includes("access") || lower.includes("ఎవరి వద్ద") || lower.includes("యాక్సెస్") || lower.includes("डेटा") || lower.includes("அணுகல்")) {
+      targetTabName = "My Civic Vault";
+      if (lang === 'te') {
+        replyText = `మీ **సివిక్ వాల్ట్** లోకి నావిగేట్ చేస్తున్నాను. ఇక్కడ మీ అధికారిక పత్రాలన్నీ సురక్షితంగా భద్రపరచబడి ఉంటాయి.`;
+      } else if (lang === 'ta') {
+        replyText = `உங்கள் **CIVIQONE வால்ட்** பகுதிக்கு செல்கிறோம். உங்கள் அனைத்து அரசு ஆவணங்களும் இங்கு பாதுகாப்பாக சேமிக்கப்பட்டுள்ளன.`;
+      } else if (lang === 'kn') {
+        replyText = `ನಿಮ್ಮ **ಸಿವಿಕ್ ವಾಲ್ಟ್** ಗೆ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಿಮ್ಮ ಎಲ್ಲಾ ಅಧಿಕೃತ ದಾಖಲೆಗಳು ಇಲ್ಲಿ ಸುರಕ್ಷಿತವಾಗಿವೆ.`;
+      } else if (lang === 'ml') {
+        replyText = `നിങ്ങളുടെ **സിവിക് വോൾട്ടിലേക്ക്** പോകുന്നു. നിങ്ങളുടെ എല്ലാ ഔദ്യോഗിക രേഖകളും ഇവിടെ സുരക്ഷിതമായി സൂക്ഷിച്ചിരിക്കുന്നു.`;
+      } else {
+        replyText = `Navigating to **My Vault**. All your verified government documents and credentials are encrypted and stored here.`;
+      }
+    }
+    // 5. Privacy / Access & Consent / Data Sharing
+    else if (
+      lower.includes("privacy") || lower.includes("consent") || lower.includes("access") || lower.includes("data") ||
+      lower.includes("ఎవరి వద్ద") || lower.includes("యాక్సెస్") || lower.includes("గోప్యత") ||
+      lower.includes("அணுகல்") || lower.includes("தனியுரிமை") || lower.includes("அனுமதி") ||
+      lower.includes("ಯಾರು ನೋಡುತ್ತಿದ್ದಾರೆ") || lower.includes("ಗೌಪ್ಯತೆ") || lower.includes("ಅನುಮತಿ") ||
+      lower.includes("ആർക്കൊക്കെ") || lower.includes("സ്വകാര്യത") || lower.includes("അനുമതി")
+    ) {
       targetTab = "privacy";
       targetTabName = "My Access & Consent";
-      replyText = lang === 'te'
-        ? `మీ డేటాను చూసేందుకు అనుమతి పొందిన సంస్థల వివరాలను **"My Access & Consent"** లో చూడవచ్చు.`
-        : `Navigating to **My Access & Consent**. You can view which organizations (e.g. State Bank of India, Apollo Hospitals) hold view-only access.`;
-    } else if (lower.includes("tourism") || lower.includes("destination") || lower.includes("world") || lower.includes("పర్యాటక") || lower.includes("ప్రదేశాలు") || lower.includes("पर्यटन") || lower.includes("சுற்றுலா") || lower.includes("season") || lower.includes("విహారయాత్ర")) {
+      if (lang === 'te') {
+        replyText = `మీ డేటాను చూసేందుకు అనుమతి పొందిన సంస్థల వివరాలను **"My Access & Consent"** లో చూడవచ్చు.`;
+      } else if (lang === 'ta') {
+        replyText = `உங்கள் தகவல்களை அணுக அனுமதி பெற்ற நிறுவனங்களின் விவரங்களை **"My Access & Consent"** பகுதியில் பார்க்கலாம்.`;
+      } else if (lang === 'kn') {
+        replyText = `ನಿಮ್ಮ ಡೇಟಾವನ್ನು ವೀಕ್ಷಿಸಲು ಅನುಮತಿ ಪಡೆದ ಸಂಸ್ಥೆಗಳ ವಿವರಗಳನ್ನು **"My Access & Consent"** ನಲ್ಲಿ ನೋಡಬಹುದು.`;
+      } else if (lang === 'ml') {
+        replyText = `നിങ്ങളുടെ രേഖകൾ കാണാൻ അനുമതി ലഭിച്ച സ്ഥാപനങ്ങളുടെ വിവരങ്ങൾ **"My Access & Consent"** ൽ കാണാം.`;
+      } else {
+        replyText = `Navigating to **My Access & Consent**. You can view which organizations (e.g. State Bank of India, Apollo Hospitals) hold view-only access.`;
+      }
+    }
+    // 6. Tourism Guide / Destinations / CIVIQONE World
+    else if (
+      lower.includes("tourism") || lower.includes("destination") || lower.includes("world") || lower.includes("travel") || lower.includes("tour") ||
+      lower.includes("పర్యాటక") || lower.includes("ప్రదేశాలు") || lower.includes("విహారయాత్ర") ||
+      lower.includes("சுற்றுலா") || lower.includes("இடங்கள்") || lower.includes("பயணங்கள்") ||
+      lower.includes("ಪ್ರವಾಸ") || lower.includes("ಸ್ಥಳಗಳು") || lower.includes("ಪ್ರವಾಸೋದ್ಯಮ") ||
+      lower.includes("വിനോദസഞ്ചാരം") || lower.includes("സ്ഥലങ്ങൾ") || lower.includes("ടൂറിസം")
+    ) {
       targetTab = "tourism";
       targetTabName = "CIVIQONE World (Tourism Guide)";
-      replyText = lang === 'te'
-        ? `**సివిక్ వన్ వరల్డ్** పర్యాటక విభాగాన్ని తెరుస్తున్నాను. ఇక్కడ ప్రముఖ పర్యాటక ప్రదేశాలు మరియు ఉత్తమ సీజన్ల వివరాలు ఉన్నాయి.`
-        : `Opening **CIVIQONE World**! Explore curated Indian and global destinations with recommended visiting seasons and climate guides.`;
-    } else if (lower.includes("licence") || lower.includes("expire") || lower.includes("dl") || lower.includes("డ్రైవింగ్") || lower.includes("ड्राइविंग")) {
-      replyText = `🚗 **Smart Driving Licence Record**:\n• Status: 🟢 Active & Verified\n• License No: **AP02 20180094821**\n• Valid Until: **14-10-2028**\n• Issued By: Ministry of Road Transport & Highways (MoRTH).`;
-    } else if (lower.includes("aadhaar") || lower.includes("ఆధార్") || lower.includes("आधार")) {
-      replyText = `🛡️ **Aadhaar Sovereign Token**:\n• Reference: **XXXX XXXX 1001**\n• Biometrics: Captured & Verified\n• Status: 100% Cryptographically Encrypted (No raw Aadhaar data exposed).`;
-    } else {
-      replyText = lang === 'te'
-        ? `మీరు "${userQuery}" గురించి అడిగారు. మీ సివిక్ ఐడి **${civicId}** మరియు అన్ని పత్రాలు 100% ధృవీకరించబడి సురక్షితంగా ఉన్నాయి.`
-        : `I have processed your query regarding "${userQuery}". Your identity credential **${civicId}** and documents are cryptographically authenticated and active.`;
+      if (lang === 'te') {
+        replyText = `**CIVIQONE వరల్డ్** పర్యాటక విభాగాన్ని తెరుస్తున్నాను. ఇక్కడ ప్రముఖ పర్యాటక ప్రదేశాలు మరియు ఉత్తమ సీజన్ల వివరాలు ఉన్నాయి.`;
+      } else if (lang === 'ta') {
+        replyText = `**CIVIQONE World** சுற்றுலா பகுதியை திறக்கிறேன். சிறந்த சுற்றுலா தலங்கள் மற்றும் பயண வழிகாட்டிகளை இங்கே காணலாம்.`;
+      } else if (lang === 'kn') {
+        replyText = `**CIVIQONE World** ಪ್ರವಾಸ ವಿಭಾಗವನ್ನು ತೆರೆಯಲಾಗುತ್ತಿದೆ. ಪ್ರಮುಖ ಪ್ರವಾಸಿ ತಾಣಗಳು ಮತ್ತು ಹವಾಮಾನ ಮಾರ್ಗದರ್ಶಿಯನ್ನು ಅನ್ವೇಷಿಸಿ.`;
+      } else if (lang === 'ml') {
+        replyText = `**CIVIQONE World** ടൂറിസം വിഭാഗം തുറക്കുന്നു. പ്രമുഖ വിനോദസഞ്ചാര കേന്ദ്രങ്ങളും കാലാവസ്ഥാ വിവരങ്ങളും ഇവിടെ കാണാം.`;
+      } else {
+        replyText = `Opening **CIVIQONE World**! Explore curated Indian and global destinations with recommended visiting seasons and climate guides.`;
+      }
+    }
+    // 7. Driving Licence & Expiry Status
+    else if (
+      lower.includes("licence") || lower.includes("license") || lower.includes("dl") || lower.includes("expire") || lower.includes("expiry") ||
+      lower.includes("డ్రైవింగ్") || lower.includes("లైసెన్స్") ||
+      lower.includes("ஓட்டுநர்") || lower.includes("உரிமம்") ||
+      lower.includes("ಚಾಲನಾ") || lower.includes("ಪರವಾನಗಿ") ||
+      lower.includes("ഡ്രൈവിംഗ്") || lower.includes("ലൈസൻസ്")
+    ) {
+      if (lang === 'te') {
+        replyText = `🚗 **స్మార్ట్ డ్రైవింగ్ లైసెన్స్ వివరాలు**:\n• స్థితి: 🟢 యాక్టివ్ & ధృవీకరించబడింది\n• లైసెన్స్ నం: **AP02 20180094821**\n• చెల్లుబాటు గడువు: **14-10-2028**\n• జారీ చేసిన వారు: రవాణా మరియు రహదారుల మంత్రిత్వ శాఖ (MoRTH).`;
+      } else if (lang === 'ta') {
+        replyText = `🚗 **ஸ்மார்ட் ஓட்டுநர் உரிம விவரம்**:\n• நிலை: 🟢 செயலில் & சரிபார்க்கப்பட்டது\n• உரிம எண்: **AP02 20180094821**\n• செல்லுபடியாகும் தேதி: **14-10-2028**\n• வழங்கிய அமைப்பு: சாலைப் போக்குவரத்து அமைச்சகம் (MoRTH).`;
+      } else if (lang === 'kn') {
+        replyText = `🚗 **ಸ್ಮಾರ್ಟ್ ಚಾಲನಾ ಪರವಾನಗಿ ವಿವರ**:\n• ಸ್ಥಿತಿ: 🟢 ಸಕ್ರಿಯ ಮತ್ತು ಪರಿಶೀಲಿಸಲಾಗಿದೆ\n• ಪರವಾನಗಿ ಸಂಖ್ಯೆ: **AP02 20180094821**\n• ಮಾನ್ಯತೆಯ ದಿನಾಂಕ: **14-10-2028**\n• ನೀಡಿದವರು: ರಸ್ತೆ ಸಾರಿಗೆ ಮತ್ತು ಹೆದ್ದಾರಿ ಸಚಿವಾಲಯ (MoRTH).`;
+      } else if (lang === 'ml') {
+        replyText = `🚗 **സ്മാർട്ട് ഡ്രൈവിംഗ് ലൈസൻസ് വിവരങ്ങൾ**:\n• നില: 🟢 സജീവം & സാക്ഷ്യപ്പെടുത്തിയത്\n• ലൈസൻസ് നമ്പർ: **AP02 20180094821**\n• കാലാവധി: **14-10-2028**\n• നൽകിയത്: റോഡ് ഗതാഗത മന്ത്രാലയം (MoRTH).`;
+      } else {
+        replyText = `🚗 **Smart Driving Licence Record**:\n• Status: 🟢 Active & Verified\n• License No: **AP02 20180094821**\n• Valid Until: **14-10-2028**\n• Issued By: Ministry of Road Transport & Highways (MoRTH).`;
+      }
+    }
+    // 8. Aadhaar Sovereign Token
+    else if (
+      lower.includes("aadhaar") || lower.includes("ఆధార్") || lower.includes("ஆதார்") ||
+      lower.includes("ಆಧಾರ್") || lower.includes("ആധാർ")
+    ) {
+      if (lang === 'te') {
+        replyText = `🛡️ **ఆధార్ సార్వభౌమ టోకెన్**:\n• సూచన సంఖ్య: **XXXX XXXX 1001**\n• బయోమెట్రిక్స్: ధృవీకరించబడింది\n• స్థితి: 100% క్రిప్టోగ్రాఫికల్లీ సురక్షితం (రహస్య డేటా ఎక్కడా బయటకు వెల్లడికాదు).`;
+      } else if (lang === 'ta') {
+        replyText = `🛡️ **ஆதார் டோக்கன்**:\n• குறிப்பு எண்: **XXXX XXXX 1001**\n• பயோமெட்ரிக்ஸ்: சரிபார்க்கப்பட்டது\n• நிலை: 100% குறியாக்க முறையில் பாதுகாக்கப்பட்டது.`;
+      } else if (lang === 'kn') {
+        replyText = `🛡️ **ಆಧಾರ್ ಟೋಕನ್**:\n• ಉಲ್ಲೇಖ: **XXXX XXXX 1001**\n• ಬಯೋಮೆಟ್ರಿಕ್ಸ್: ಪರಿಶೀಲಿಸಲಾಗಿದೆ\n• ಸ್ಥಿತಿ: 100% ಗೂಢಲಿಪೀಕರಿಸಿದ ಸುರಕ್ಷಿತ ದಾಖಲೆ.`;
+      } else if (lang === 'ml') {
+        replyText = `🛡️ **ആധാർ ടോക്കൺ**:\n• റഫറൻസ്: **XXXX XXXX 1001**\n• ബയോമെട്രിക്സ്: പരിശോധിച്ചുറപ്പിച്ചു\n• നില: 100% ക്രിപ്റ്റോഗ്രാഫിക്കലായി സുരക്ഷിതം.`;
+      } else {
+        replyText = `🛡️ **Aadhaar Sovereign Token**:\n• Reference: **XXXX XXXX 1001**\n• Biometrics: Captured & Verified\n• Status: 100% Cryptographically Encrypted (No raw Aadhaar data exposed).`;
+      }
+    }
+    // 9. Voter ID / Electoral Record
+    else if (
+      lower.includes("voter") || lower.includes("epic") || lower.includes("election") ||
+      lower.includes("ఓటరు") || lower.includes("வாக்காளர்") || lower.includes("ಮತದಾರರ") || lower.includes("വോട്ടർ")
+    ) {
+      if (lang === 'te') {
+        replyText = `🗳️ **ఓటరు గుర్తింపు పత్రం**:\n• EPIC సంఖ్య: **CIV-VTR-99482**\n• నియోజకవర్గం: AP-102 (సెంట్రల్)\n• పోలింగ్ కేంద్రం: ప్రభుత్వ ఉన్నత పాఠశాల, బూత్ #4\n• స్థితి: 🟢 ఎన్నికల జాబితాలో యాక్టివ్.`;
+      } else if (lang === 'ta') {
+        replyText = `🗳️ **வாக்காளர் அடையாள பதிவு**:\n• EPIC எண்: **CIV-VTR-99482**\n• தொகுதி: AP-102 (மத்திய)\n• வாக்குச்சாவடி: அரசு உயர்நிலைப்பள்ளி, சாவடி #4\n• நிலை: 🟢 வாக்காளர் பட்டியலில் செயலில் உள்ளது.`;
+      } else if (lang === 'kn') {
+        replyText = `🗳️ **ಮತದಾರರ ಗುರುತಿನ ಚೀಟಿ**:\n• EPIC ಸಂಖ್ಯೆ: **CIV-VTR-99482**\n• ಕ್ಷೇತ್ರ: AP-102 (ಸೆಂಟ್ರಲ್)\n• ಮತಗಟ್ಟೆ: ಸರ್ಕಾರಿ ಪ್ರೌಢಶಾಲೆ, ಬೂತ್ #4\n• ಸ್ಥಿತಿ: 🟢 ಮತದಾರರ ಪಟ್ಟಿಯಲ್ಲಿ ಸಕ್ರಿಯವಾಗಿದೆ.`;
+      } else if (lang === 'ml') {
+        replyText = `🗳️ **വോട്ടർ തിരിച്ചറിയൽ രേഖ**:\n• EPIC നമ്പർ: **CIV-VTR-99482**\n• മണ്ഡലം: AP-102 (സെൻട്രൽ)\n• പോളിംഗ് സ്റ്റേഷൻ: ഗവ. ഹൈസ്കൂൾ, ബൂത്ത് #4\n• നില: 🟢 വോട്ടർ പട്ടികയിൽ സജീവം.`;
+      } else {
+        replyText = `🗳️ **Voter Identification Record**:\n• EPIC No: **CIV-VTR-99482**\n• Constituency: AP-102 (Central)\n• Polling Station: Govt High School, Booth #4\n• Status: 🟢 Active on Sovereign Electoral Roll.`;
+      }
+    }
+    // 10. Default / Contextual Fallback Response
+    else {
+      if (lang === 'te') {
+        replyText = `మీరు "${userQuery}" గురించి అడిగారు. మీ సివిక్ ఐడి **${civicId}** మరియు అన్ని పత్రాలు 100% ధృవీకరించబడి సురక్షితంగా ఉన్నాయి.`;
+      } else if (lang === 'ta') {
+        replyText = `நீங்கள் "${userQuery}" பற்றி கேட்டீர்கள். உங்கள் CIVIQONE ஐடி **${civicId}** மற்றும் அனைத்து ஆவணங்களும் பாதுகாப்பாக சரிபார்க்கப்பட்டுள்ளன.`;
+      } else if (lang === 'kn') {
+        replyText = `ನೀವು "${userQuery}" ಕುರಿತು ಕೇಳಿದ್ದೀರಿ. ನಿಮ್ಮ ಸಿವಿಕ್ ಐಡಿ **${civicId}** ಮತ್ತು ದಾಖಲೆಗಳು ಸುರಕ್ಷಿತವಾಗಿವೆ.`;
+      } else if (lang === 'ml') {
+        replyText = `നിങ്ങൾ "${userQuery}" സംബന്ധിച്ച് അന്വേഷിച്ചു. നിങ്ങളുടെ സിവിക് ഐഡി **${civicId}** ഉം രേഖകളും പൂർണ്ണമായും സുരക്ഷിതമാണ്.`;
+      } else {
+        replyText = `I have processed your query regarding "${userQuery}". Your identity credential **${civicId}** and documents are cryptographically authenticated and active in CIVIQONE.`;
+      }
     }
 
     setLoading(false);
@@ -375,15 +668,13 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
       {
         sender: 'ai',
         text: replyText,
+        lang: lang,
         actionTab: targetTab,
         actionLabel: targetTabName
       }
     ]);
 
-    // Speak response if voice was used
-    if (isListening || selectedLang !== 'en') {
-      speakText(replyText);
-    }
+    // NOTE: Strict requirement: Do NOT automatically play audio. Audio plays only when user taps Listen.
   };
 
   const handleFormSubmit = (e) => {
@@ -395,8 +686,8 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
   const getChatWindowStyle = () => {
     const winW = typeof window !== 'undefined' ? window.innerWidth : 1200;
     const winH = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const chatWidth = Math.min(winW * 0.92, 410);
-    const chatHeight = Math.min(winH * 0.85, 560);
+    const chatWidth = Math.min(winW * 0.92, 420);
+    const chatHeight = Math.min(winH * 0.85, 580);
     const margin = 12;
 
     // Open above the bot if there's enough space, otherwise below or centered
@@ -439,7 +730,7 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
 
   return (
     <>
-      {/* FLOATING DRAGGABLE TRIGGER BUTTON WITH PULSING VOICE RINGS */}
+      {/* FLOATING DRAGGABLE TRIGGER BUTTON */}
       {!isOpen && (
         <div
           onPointerDown={handlePointerDown}
@@ -476,8 +767,8 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
               transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s'
             }}
             className="pulse-glow"
-            title="CIVIQONES AI — Drag anywhere to move, tap to open"
-            aria-label="Open Multilingual CIVIQONES AI Assistant"
+            title="CIVIQONE AI — Drag anywhere to move, tap to open"
+            aria-label="Open Multilingual CIVIQONE AI Assistant"
           >
             <div style={{ position: 'relative', pointerEvents: 'none' }}>
               <Bot size={30} style={{ color: '#38BDF8' }} />
@@ -500,86 +791,99 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
       {isOpen && (
         <div style={getChatWindowStyle()}>
           
-          {/* HEADER SECTION (Deep Indigo Surface) */}
+          {/* HEADER SECTION */}
           <div style={{
             backgroundColor: '#101B3D',
             color: '#FFFFFF',
-            padding: '16px 20px',
+            padding: '14px 18px',
             borderBottom: '1px solid rgba(255,255,255,0.1)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{
-                  width: '38px',
-                  height: '38px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '10px',
                   backgroundColor: 'rgba(26, 79, 156, 0.6)',
                   border: '1px solid #38BDF8',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#38BDF8'
+                  color: '#38BDF8',
+                  flexShrink: 0
                 }}>
                   <Bot size={22} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#F8F7F2', lineHeight: 1.1 }}>
-                    CIVIQONES AI
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#F8F7F2', lineHeight: 1.1, margin: 0 }}>
+                    CIVIQONE AI
                   </h3>
-                  <span style={{ fontSize: '0.65rem', color: '#34D399', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ fontSize: '0.65rem', color: '#34D399', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
                     <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10B981' }} />
-                    Voice-Enabled Multilingual Assistant
+                    Multilingual Voice Assistant
                   </span>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => setIsSpeaking(prev => !prev)}
-                  title={isSpeaking ? "Mute Speech" : "Speech Output Active"}
-                  style={{ background: 'none', border: 'none', color: isSpeaking ? '#38BDF8' : '#94A3B8', cursor: 'pointer', padding: '4px' }}
-                >
-                  {isSpeaking ? <Volume2 size={18} /> : <VolumeX size={18} />}
-                </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <button
                   type="button"
                   onClick={() => {
-                    if (isSpeaking && window.speechSynthesis) window.speechSynthesis.cancel();
+                    handleStopAudio();
                     setIsOpen(false);
                   }}
-                  style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '4px' }}
-                  aria-label="Close Assistant"
+                  style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  aria-label="Close CIVIQONE AI"
+                  title="Close"
                 >
                   <X size={20} />
                 </button>
               </div>
             </div>
 
-            {/* Indian Language Selector Chips */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-              <Globe2 size={14} style={{ color: '#93C5FD', flexShrink: 0 }} />
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <button
-                  key={lang.code}
-                  type="button"
-                  onClick={() => handleLanguageChange(lang.code)}
-                  style={{
-                    backgroundColor: selectedLang === lang.code ? '#1A4F9C' : 'rgba(255,255,255,0.08)',
-                    color: selectedLang === lang.code ? '#FFFFFF' : '#CBD5E1',
-                    border: selectedLang === lang.code ? '1px solid #38BDF8' : '1px solid rgba(255,255,255,0.15)',
-                    padding: '3px 8px',
-                    borderRadius: '14px',
-                    fontSize: '0.675rem',
-                    fontWeight: selectedLang === lang.code ? 800 : 600,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {lang.native}
-                </button>
-              ))}
+            {/* 5-Language Selector inside Chatbot */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              overflowX: 'auto',
+              padding: '4px 0 2px 0',
+              scrollbarWidth: 'none'
+            }}>
+              <span style={{ fontSize: '0.68rem', color: '#93C5FD', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <Globe2 size={13} /> Lang:
+              </span>
+              {SUPPORTED_LANGUAGES.map((lang) => {
+                const isSelected = selectedLang === lang.code;
+                return (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => handleLanguageChange(lang.code)}
+                    style={{
+                      backgroundColor: isSelected ? '#1D4ED8' : 'rgba(255,255,255,0.08)',
+                      color: isSelected ? '#FFFFFF' : '#CBD5E1',
+                      border: isSelected ? '1.5px solid #38BDF8' : '1px solid rgba(255,255,255,0.18)',
+                      padding: '3px 9px',
+                      borderRadius: '14px',
+                      fontSize: '0.7rem',
+                      fontWeight: isSelected ? 800 : 600,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      boxShadow: isSelected ? '0 0 8px rgba(56, 189, 248, 0.35)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title={`Switch to ${lang.label} (${lang.native})`}
+                    aria-label={`Select ${lang.label}`}
+                  >
+                    {isSelected && <Check size={11} style={{ color: '#38BDF8', strokeWidth: 3 }} />}
+                    <span>{lang.native}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -593,77 +897,225 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
             gap: '12px',
             backgroundColor: '#F8FAFC'
           }}>
-            {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                style={{
-                  alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                  maxWidth: '86%',
-                  backgroundColor: msg.sender === 'user' ? '#101B3D' : '#FFFFFF',
-                  color: msg.sender === 'user' ? '#F8F7F2' : '#172033',
-                  padding: '12px 14px',
-                  borderRadius: msg.sender === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                  boxShadow: '0 2px 8px rgba(16, 27, 61, 0.06)',
-                  fontSize: '0.85rem',
-                  lineHeight: 1.45,
-                  border: msg.sender === 'user' ? '1px solid #1E2F6B' : '1.5px solid #E2E8F0',
-                  position: 'relative'
-                }}
-              >
-                <div style={{ whiteSpace: 'pre-line' }}>{msg.text}</div>
+            {messages.map((msg, idx) => {
+              const isAi = msg.sender === 'ai';
+              const isTtsActive = ttsState.msgIndex === idx;
 
-                {/* Direct Action Navigation Button if AI suggested a section */}
-                {msg.actionTab && onNavigateTab && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onNavigateTab(msg.actionTab);
-                      setIsOpen(false);
-                    }}
-                    style={{
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                    maxWidth: '88%',
+                    backgroundColor: msg.sender === 'user' ? '#101B3D' : '#FFFFFF',
+                    color: msg.sender === 'user' ? '#F8F7F2' : '#172033',
+                    padding: '12px 14px',
+                    borderRadius: msg.sender === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                    boxShadow: '0 2px 8px rgba(16, 27, 61, 0.06)',
+                    fontSize: '0.85rem',
+                    lineHeight: 1.45,
+                    border: msg.sender === 'user' ? '1px solid #1E2F6B' : '1.5px solid #E2E8F0',
+                    position: 'relative'
+                  }}
+                >
+                  <div style={{ whiteSpace: 'pre-line' }}>{msg.text}</div>
+
+                  {/* Direct Action Navigation Button if AI suggested a section */}
+                  {msg.actionTab && onNavigateTab && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleStopAudio();
+                        onNavigateTab(msg.actionTab);
+                        setIsOpen(false);
+                      }}
+                      style={{
+                        marginTop: '10px',
+                        backgroundColor: '#EFF6FF',
+                        color: '#1A4F9C',
+                        border: '1.5px solid #BFDBFE',
+                        padding: '8px 12px',
+                        borderRadius: '10px',
+                        fontWeight: 800,
+                        fontSize: '0.775rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.04)'
+                      }}
+                    >
+                      <span>Go to {msg.actionLabel || msg.actionTab}</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  )}
+
+                  {/* INTERACTIVE TAP-TO-LISTEN TEXT-TO-SPEECH CONTROLS ON AI RESPONSES */}
+                  {isAi && (
+                    <div style={{
                       marginTop: '10px',
-                      backgroundColor: '#EFF6FF',
-                      color: '#1A4F9C',
-                      border: '1.5px solid #BFDBFE',
-                      padding: '8px 12px',
-                      borderRadius: '10px',
-                      fontWeight: 800,
-                      fontSize: '0.775rem',
-                      display: 'inline-flex',
+                      paddingTop: '8px',
+                      borderTop: '1px solid #F1F5F9',
+                      display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.04)'
-                    }}
-                  >
-                    <span>Go to {msg.actionLabel || msg.actionTab}</span>
-                    <ArrowRight size={14} />
-                  </button>
-                )}
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                      flexWrap: 'wrap'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {(!isTtsActive || ttsState.status === 'idle') ? (
+                          <button
+                            type="button"
+                            onClick={() => handlePlayAudio(msg.text, msg.lang || selectedLang, idx)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              backgroundColor: '#F1F5F9',
+                              color: '#0F172A',
+                              border: '1px solid #CBD5E1',
+                              padding: '5px 10px',
+                              borderRadius: '8px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              transition: 'all 0.15s'
+                            }}
+                            title="Listen to this response aloud"
+                            aria-label="Listen to response"
+                          >
+                            <Volume2 size={14} style={{ color: '#0284C7' }} />
+                            <span>Listen</span>
+                          </button>
+                        ) : ttsState.status === 'playing' ? (
+                          <>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              backgroundColor: '#E0F2FE',
+                              color: '#0369A1',
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              fontSize: '0.7rem',
+                              fontWeight: 800
+                            }}>
+                              <Volume2 size={12} className="animate-pulse" />
+                              <span>Speaking...</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handlePauseAudio(idx)}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                backgroundColor: '#FEF3C7',
+                                color: '#92400E',
+                                border: '1px solid #FDE68A',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                              title="Pause voice"
+                            >
+                              <Pause size={12} />
+                              <span>Pause</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleStopAudio}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                backgroundColor: '#FEE2E2',
+                                color: '#B91C1C',
+                                border: '1px solid #FECACA',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                              title="Stop voice"
+                            >
+                              <Square size={11} />
+                              <span>Stop</span>
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              backgroundColor: '#FEF3C7',
+                              color: '#92400E',
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              fontSize: '0.7rem',
+                              fontWeight: 800
+                            }}>
+                              <Pause size={12} />
+                              <span>Paused</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleResumeAudio(idx)}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                backgroundColor: '#DCFCE7',
+                                color: '#166534',
+                                border: '1px solid #BBF7D0',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                              title="Resume voice"
+                            >
+                              <Play size={12} />
+                              <span>Resume</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleStopAudio}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                backgroundColor: '#FEE2E2',
+                                color: '#B91C1C',
+                                border: '1px solid #FECACA',
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                              title="Stop voice"
+                            >
+                              <Square size={11} />
+                              <span>Stop</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
 
-                {/* Speaker Button on AI response */}
-                {msg.sender === 'ai' && (
-                  <button
-                    type="button"
-                    onClick={() => speakText(msg.text)}
-                    style={{
-                      position: 'absolute',
-                      bottom: '4px',
-                      right: '6px',
-                      background: 'none',
-                      border: 'none',
-                      color: '#94A3B8',
-                      cursor: 'pointer',
-                      padding: '2px',
-                      opacity: 0.7
-                    }}
-                    title="Listen to this message"
-                  >
-                    <Volume2 size={13} />
-                  </button>
-                )}
-              </div>
-            ))}
+                      <span style={{ fontSize: '0.675rem', color: '#64748B', fontWeight: 600 }}>
+                        {SUPPORTED_LANGUAGES.find(l => l.code === (msg.lang || selectedLang))?.native}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
             {loading && (
               <div style={{
@@ -725,7 +1177,8 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
             borderTop: '1px solid #E2E8F0',
             display: 'flex',
             gap: '6px',
-            overflowX: 'auto'
+            overflowX: 'auto',
+            scrollbarWidth: 'none'
           }}>
             {(QUICK_SUGGESTIONS[selectedLang] || QUICK_SUGGESTIONS.en).map((item, i) => (
               <button
@@ -774,7 +1227,7 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
             <button
               type="button"
               onClick={toggleVoiceInput}
-              title={isListening ? "Stop Listening" : "Speak to CIVIQONES AI"}
+              title={isListening ? "Stop Listening" : "Speak to CIVIQONE AI"}
               style={{
                 width: '40px',
                 height: '40px',
@@ -789,6 +1242,7 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
                 flexShrink: 0,
                 transition: 'all 0.2s'
               }}
+              aria-label="Voice input"
             >
               {isListening ? <MicOff size={18} /> : <Mic size={18} />}
             </button>

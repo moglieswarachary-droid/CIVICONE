@@ -1195,7 +1195,7 @@ app.post('/api/travel/search', (req, res) => {
 // --- AI AGENT ENDPOINT ---
 
 app.post('/api/ai/query', (req, res) => {
-  const { prompt } = req.body;
+  const { prompt, lang = 'en' } = req.body;
   if (!prompt) {
     return res.status(400).json({ error: "Prompt is required." });
   }
@@ -1204,25 +1204,89 @@ app.post('/api/ai/query', (req, res) => {
   const citizen = db.citizens.find(c => c.citizenId === db.activeCitizenId) || db.citizens[0];
   let reply = "";
 
-  if (p.includes("expir") || p.includes("licence") || p.includes("dl")) {
+  if (p.includes("expir") || p.includes("licence") || p.includes("dl") || p.includes("డ్రైవింగ్") || p.includes("ஓட்டுநர்") || p.includes("ಚಾಲನಾ") || p.includes("ഡ്രൈവിംഗ്")) {
     const dl = db.documents.find(d => d.citizenId === citizen.citizenId && d.name.includes("Licence"));
-    reply = `Your **Smart Driving Licence** (${dl ? dl.refNo : citizen.governmentInfo.drivingLicence}) is valid until **${dl ? dl.expiryDate : '2042'}** (🟢 Verified Demo Record). You can initiate online renewal via Parivahan Sewa on CIVIQONE.`;
-  } else if (p.includes("aadhaar") || p.includes("identity")) {
-    reply = `Your CIVIQONE digital identity is linked to tokenized Aadhaar reference **${citizen.maskedAadhaar}**. Physical Aadhaar numbers are never stored or exposed on CIVIQONE for privacy compliance.`;
-  } else if (p.includes("vault") || p.includes("document")) {
+    const dlRef = dl ? dl.refNo : citizen.governmentInfo.drivingLicence;
+    const dlExpiry = dl ? dl.expiryDate : '14-10-2028';
+    
+    if (lang === 'te') {
+      reply = `మీ **స్మార్ట్ డ్రైవింగ్ లైసెన్స్** (${dlRef}) గడువు **${dlExpiry}** వరకు చెల్లుబాటులో ఉంది (🟢 ధృవీకరించబడిన రికార్డు).`;
+    } else if (lang === 'ta') {
+      reply = `உங்கள் **ஸ்மார்ட் ஓட்டுநர் உரிமம்** (${dlRef}) **${dlExpiry}** வரை செல்லுபடியாகும் (🟢 சரிபார்க்கப்பட்ட பதிவு).`;
+    } else if (lang === 'kn') {
+      reply = `ನಿಮ್ಮ **ಸ್ಮಾರ್ಟ್ ಚಾಲನಾ ಪರವಾನಗಿ** (${dlRef}) **${dlExpiry}** ರವರೆಗೆ ಮಾನ್ಯವಾಗಿದೆ (🟢 ಪರಿಶೀಲಿಸಿದ ದಾಖಲೆ).`;
+    } else if (lang === 'ml') {
+      reply = `നിങ്ങളുടെ **സ്മാർട്ട് ഡ്രൈവിംഗ് ലൈസൻസ്** (${dlRef}) **${dlExpiry}** വരെ സാധുവാണ് (🟢 സാക്ഷ്യപ്പെടുത്തിയത്).`;
+    } else {
+      reply = `Your **Smart Driving Licence** (${dlRef}) is valid until **${dlExpiry}** (🟢 Verified Record). You can initiate online renewal via Parivahan Sewa on CIVIQONE.`;
+    }
+  } else if (p.includes("aadhaar") || p.includes("identity") || p.includes("ఆధార్") || p.includes("ஆதார்") || p.includes("ಆಧಾರ್") || p.includes("ആധാർ")) {
+    if (lang === 'te') {
+      reply = `మీ CIVIQONE డిజిటల్ గుర్తింపు టోకెనైజ్డ్ ఆధార్ రెఫరెన్స్ **${citizen.maskedAadhaar}** కు అనుసంధానించబడింది.`;
+    } else if (lang === 'ta') {
+      reply = `உங்கள் CIVIQONE டிஜிட்டல் அடையாளம் ஆதார் குறிப்பு எண் **${citizen.maskedAadhaar}** உடன் இணைக்கப்பட்டுள்ளது.`;
+    } else if (lang === 'kn') {
+      reply = `ನಿಮ್ಮ CIVIQONE ಡಿಜಿಟಲ್ ಗುರುತು ಆಧಾರ್ ಉಲ್ಲೇಖ ಸಂಖ್ಯೆ **${citizen.maskedAadhaar}** ಗೆ ಲಿಂಕ್ ಆಗಿದೆ.`;
+    } else if (lang === 'ml') {
+      reply = `നിങ്ങളുടെ CIVIQONE ഡിജിറ്റൽ തിരിച്ചറിയൽ ആധാർ റഫറൻസ് **${citizen.maskedAadhaar}** മായി ബന്ധിപ്പിച്ചിരിക്കുന്നു.`;
+    } else {
+      reply = `Your CIVIQONE digital identity is linked to tokenized Aadhaar reference **${citizen.maskedAadhaar}**. Physical Aadhaar numbers are never stored or exposed on CIVIQONE for privacy compliance.`;
+    }
+  } else if (p.includes("vault") || p.includes("document") || p.includes("పత్రాలు") || p.includes("ஆவணங்கள்") || p.includes("ದಾಖಲೆಗಳು") || p.includes("രേഖകൾ")) {
     const count = db.documents.filter(d => d.citizenId === citizen.citizenId).length;
-    reply = `You currently have **${count} digital records** stored across Identity, Education, Government, Vehicle/RTO, Healthcare, and Travel categories in My Civic Vault.`;
-  } else if (p.includes("gold pass") || p.includes("gold")) {
-    reply = `Gold Pass status for **${citizen.fullName}** is **${citizen.goldPassStatus.toUpperCase()}**. Standard CIVIQONE Card is active by default. Upgrading to Gold Pass unlocks VIP identity verification and priority service desks.`;
-  } else if (p.includes("tour") || p.includes("dubai") || p.includes("travel") || p.includes("paris")) {
-    reply = `Explore **CIVIQONE World** tourism guide for travel destinations like Dubai, Paris, Tokyo, and Goa. Check budget estimates, best travel times, and book flights, buses, or trains with minimum identity sharing.`;
+    if (lang === 'te') {
+      reply = `మీ సివిక్ వాల్ట్‌లో ప్రస్తుతం **${count} డిజిటల్ పత్రాలు** సురక్షితంగా భద్రపరచబడి ఉన్నాయి.`;
+    } else if (lang === 'ta') {
+      reply = `உங்கள் சிவிக் வால்ட்டில் தற்போது **${count} டிஜிட்டல் ஆவணங்கள்** பாதுகாப்பாக சேமிக்கப்பட்டுள்ளன.`;
+    } else if (lang === 'kn') {
+      reply = `ನಿಮ್ಮ ಸಿವಿಕ್ ವಾಲ್ಟ್‌ನಲ್ಲಿ ಪ್ರಸ್ತುತ **${count} ಡಿಜಿಟಲ್ ದಾಖಲೆಗಳು** ಸುರಕ್ಷಿತವಾಗಿವೆ.`;
+    } else if (lang === 'ml') {
+      reply = `നിങ്ങളുടെ സിവിക് വോൾട്ടിൽ നിലവിൽ **${count} ഡിജിറ്റൽ രേഖകൾ** സുരക്ഷിതമായി സൂക്ഷിച്ചിരിക്കുന്നു.`;
+    } else {
+      reply = `You currently have **${count} digital records** stored across Identity, Education, Government, Vehicle/RTO, Healthcare, and Travel categories in My Civic Vault.`;
+    }
+  } else if (p.includes("gold pass") || p.includes("gold") || p.includes("గోల్డ్") || p.includes("கோல்ட்") || p.includes("ಗೋಲ್ಡ್") || p.includes("ഗോൾഡ്")) {
+    if (lang === 'te') {
+      reply = `**${citizen.fullName}** గారి గోల్డ్ పాస్ స్థితి: **${citizen.goldPassStatus.toUpperCase()}**. ప్రామాణిక CIVIQONE కార్డ్ సక్రియంగా ఉంది.`;
+    } else if (lang === 'ta') {
+      reply = `**${citizen.fullName}** அவர்களின் கோல்ட் பாஸ் நிலை: **${citizen.goldPassStatus.toUpperCase()}**.`;
+    } else if (lang === 'kn') {
+      reply = `**${citizen.fullName}** ಅವರ ಗೋಲ್ಡ್ ಪಾಸ್ ಸ್ಥಿತಿ: **${citizen.goldPassStatus.toUpperCase()}**.`;
+    } else if (lang === 'ml') {
+      reply = `**${citizen.fullName}** ന്റെ ഗോൾഡ് പാസ്സ് നില: **${citizen.goldPassStatus.toUpperCase()}**.`;
+    } else {
+      reply = `Gold Pass status for **${citizen.fullName}** is **${citizen.goldPassStatus.toUpperCase()}**. Standard CIVIQONE Card is active by default. Upgrading to Gold Pass unlocks VIP identity verification and priority service desks.`;
+    }
+  } else if (p.includes("tour") || p.includes("travel") || p.includes("destination") || p.includes("పర్యాటక") || p.includes("சுற்றுலா") || p.includes("ಪ್ರವಾಸ") || p.includes("വിനോദസഞ്ചാരം")) {
+    if (lang === 'te') {
+      reply = `భారతదేశం మరియు ప్రపంచ ప్రసిద్ధ పర్యాటక ప్రదేశాల కోసం **CIVIQONE World** గైడ్‌ను చూడండి.`;
+    } else if (lang === 'ta') {
+      reply = `பிரபல சுற்றுலா தலங்களை பார்வையிட **CIVIQONE World** வழிகாட்டியை ஆராயுங்கள்.`;
+    } else if (lang === 'kn') {
+      reply = `ಪ್ರಮುಖ ಪ್ರವಾಸಿ ತಾಣಗಳನ್ನು ಅನ್ವೇಷಿಸಲು **CIVIQONE World** ಮಾರ್ಗದರ್ಶಿಯನ್ನು ನೋಡಿ.`;
+    } else if (lang === 'ml') {
+      reply = `പ്രമുഖ വിനോദസഞ്ചാര കേന്ദ്രങ്ങൾക്കായി **CIVIQONE World** ടൂറിസം ഗൈഡ് പരിശോധിക്കുക.`;
+    } else {
+      reply = `Explore **CIVIQONE World** tourism guide for travel destinations like Dubai, Paris, Tokyo, and Goa. Check budget estimates, best travel times, and book flights, buses, or trains with minimum identity sharing.`;
+    }
   } else {
-    reply = `I am CIVIQONE AI, your official digital identity assistant. I can help you check document expiry dates, search vault records, verify credentials, explore tourism destinations, and manage data consent. How can I assist you further?`;
+    if (lang === 'te') {
+      reply = `నేను CIVIQONE AI ని, మీ అధికారిక డిజిటల్ గుర్తింపు సహాయకుడిని. పత్రాల తనిఖీ, వాల్ట్ రికార్డులు, పర్యాటకం మరియు సేవలకు మీకు సహాయం చేయగలను.`;
+    } else if (lang === 'ta') {
+      reply = `நான் CIVIQONE AI, உங்கள் அதிகாரப்பூர்வ டிஜிட்டல் அடையாள உதவியாளர். ஆவணங்களை சரிபார்க்கவும் சேவைகளை பெறவும் நான் உங்களுக்கு உதவுகிறேன்.`;
+    } else if (lang === 'kn') {
+      reply = `ನಾನು CIVIQONE AI, ನಿಮ್ಮ ಅಧಿಕೃತ ಡಿಜಿಟಲ್ ಗುರುತಿನ ಸಹಾಯಕ. ದಾಖಲೆಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ಮತ್ತು ಸೇವೆಗಳನ್ನು ಪಡೆಯಲು ನಾನು ನಿಮಗೆ ಸಹಾಯ ಮಾಡುತ್ತೇನೆ.`;
+    } else if (lang === 'ml') {
+      reply = `ഞാൻ CIVIQONE AI ആണ്, നിങ്ങളുടെ ഔദ്യോഗിക ഡിജിറ്റൽ തിരിച്ചറിയൽ രേഖാ സഹായി. രേഖകൾ പരിശോധിക്കാനും സേവനങ്ങൾ ലഭ്യമാക്കാനും ഞാൻ സഹായിക്കാം.`;
+    } else {
+      reply = `I am CIVIQONE AI, your official digital identity assistant. I can help you check document expiry dates, search vault records, verify credentials, explore tourism destinations, and manage data consent. How can I assist you further?`;
+    }
   }
 
   return res.json({
     query: prompt,
     reply,
+    lang,
     timestamp: new Date().toISOString()
   });
 });
