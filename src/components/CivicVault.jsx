@@ -24,14 +24,17 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
   const [copyToast, setCopyToast] = useState('');
   const [showCategoryModal, setShowCategoryModal] = useState(null); // 'government' | 'rto' | 'academic' | null
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [showShareModal, setShowShareModal] = useState(null);
   const [showVerifyModal, setShowVerifyModal] = useState(null);
   const [showAuditModal, setShowAuditModal] = useState(null);
   const [shareDuration, setShareDuration] = useState('1 hour');
   const [shareResult, setShareResult] = useState(null);
 
-  // Family & Dependent Vault State
-  const [familyMembers, setFamilyMembers] = useState(DEMO_FAMILY_MEMBERS);
+  // Family & Dependent Vault State (Starts empty with Self only for clean new accounts)
+  const [familyMembers, setFamilyMembers] = useState([
+    { id: 'fam-self', name: 'Raghavendra (Self)', relationship: 'Self', isSelf: true, documents: [] }
+  ]);
   const [selectedMemberId, setSelectedMemberId] = useState(initialMemberId || 'fam-self');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState({
@@ -187,10 +190,42 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
     return getCategoryRank(a.category) - getCategoryRank(b.category);
   });
 
+  // Handle File Selection from Browser Device
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setSelectedFile(file);
+
+    let cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+    cleanName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+
+    let derivedCat = 'government';
+    let derivedIssuer = 'UIDAI / National Authority';
+    const lower = cleanName.toLowerCase();
+
+    if (lower.includes('dl') || lower.includes('driving') || lower.includes('licence') || lower.includes('rc') || lower.includes('vehicle') || lower.includes('car')) {
+      derivedCat = 'rto';
+      derivedIssuer = 'MoRTH / RTO Department';
+    } else if (lower.includes('b.tech') || lower.includes('degree') || lower.includes('marksheet') || lower.includes('edu') || lower.includes('school') || lower.includes('college')) {
+      derivedCat = 'academic';
+      derivedIssuer = 'University Academic Board';
+    } else if (lower.includes('pan')) {
+      derivedIssuer = 'Income Tax Department';
+    }
+
+    setUploadForm({
+      ...uploadForm,
+      name: cleanName,
+      category: derivedCat,
+      issuer: derivedIssuer,
+      refNo: `REF-${Math.floor(100000 + Math.random() * 900000)}`
+    });
+  };
+
   // Submit Upload Form with REST API integration
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
-    if (!uploadForm.name || !uploadForm.issuer) return;
+    if (!uploadForm.name) return;
 
     setUploading(true);
     try {
@@ -1386,76 +1421,86 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
         </div>
       )}
 
-      {/* REQUIREMENT 11: ENHANCED ADD DOCUMENT MODAL */}
+      {/* STREAMLINED FILE UPLOAD MODAL */}
       {showUploadModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 31, 58, 0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '16px' }}>
-          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '32px', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-            <button onClick={() => setShowUploadModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', color: '#64748B', border: 'none', cursor: 'pointer' }}>
-              <X size={22} />
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 31, 58, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '16px' }}>
+          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '32px', maxWidth: '540px', width: '100%', position: 'relative', boxShadow: '0 25px 60px rgba(0,0,0,0.35)' }}>
+            
+            <button onClick={() => { setShowUploadModal(false); setSelectedFile(null); }} style={{ position: 'absolute', top: '20px', right: '20px', background: '#F1F5F9', border: 'none', color: '#64748B', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <X size={20} />
             </button>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '16px' }}>
-              Add Document to Vault
-            </h3>
-            <form onSubmit={handleUploadSubmit}>
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Document Name *</label>
-                <input type="text" value={uploadForm.name} onChange={(e) => setUploadForm({ ...uploadForm, name: e.target.value })} required placeholder="e.g. B.Tech Degree Certificate, Driving Licence" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.875rem' }} />
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '16px', backgroundColor: '#EAF3FF', color: '#0B5ED7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Plus size={26} />
               </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Category *</label>
-                  <select value={uploadForm.category} onChange={(e) => setUploadForm({ ...uploadForm, category: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.875rem', backgroundColor: '#FFFFFF' }}>
-                    <option value="government">Government Authorized</option>
-                    <option value="rto">RTO &amp; Vehicles</option>
-                    <option value="academic">Academic</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Document Type *</label>
-                  <select value={uploadForm.type} onChange={(e) => setUploadForm({ ...uploadForm, type: e.target.value })} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.875rem', backgroundColor: '#FFFFFF' }}>
-                    <option value="document">Document (📄)</option>
-                    <option value="certificate">Certificate (🏅)</option>
-                  </select>
-                </div>
+              <div>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0B1F3A' }}>Add Document to Vault</h3>
+                <p style={{ fontSize: '0.825rem', color: '#64748B', marginTop: '2px' }}>Choose a document or image file directly from your computer or device.</p>
               </div>
+            </div>
 
-              {uploadForm.category === 'academic' && (
-                <div style={{ backgroundColor: '#F5F3FF', padding: '12px', borderRadius: '12px', border: '1px solid #DDD6FE', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#6D28D9', display: 'block', marginBottom: '8px' }}>
-                    🎓 Academic Details
-                  </span>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <input type="text" value={uploadForm.institution} onChange={(e) => setUploadForm({ ...uploadForm, institution: e.target.value })} placeholder="Institution / Board Name" style={{ padding: '8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }} />
-                    <input type="text" value={uploadForm.degree} onChange={(e) => setUploadForm({ ...uploadForm, degree: e.target.value })} placeholder="Degree / Course Name" style={{ padding: '8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }} />
-                  </div>
+            <form onSubmit={handleUploadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              
+              {/* FILE PICKER ZONE */}
+              <div style={{ border: '2px dashed #0B5ED7', borderRadius: '16px', padding: '24px', textAlign: 'center', backgroundColor: '#F8FAFC', cursor: 'pointer', position: 'relative' }}>
+                <input
+                  type="file"
+                  accept="image/*,.pdf,.doc,.docx"
+                  onChange={handleFileChange}
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
+                />
+                <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: '#EAF3FF', color: '#0B5ED7', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                  <FileText size={28} />
                 </div>
-              )}
-
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Issuing Authority *</label>
-                <input type="text" value={uploadForm.issuer} onChange={(e) => setUploadForm({ ...uploadForm, issuer: e.target.value })} required placeholder="e.g. UIDAI, Parivahan, University Board" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.875rem' }} />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Credential Number</label>
-                  <input type="text" value={uploadForm.refNo} onChange={(e) => setUploadForm({ ...uploadForm, refNo: e.target.value })} placeholder="Optional" style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }} />
+                <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0B1F3A' }}>
+                  {selectedFile ? `📄 Selected File: ${selectedFile.name}` : '📁 Click to Choose File from Device'}
                 </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Issue Date</label>
-                  <input type="text" value={uploadForm.issueDate} onChange={(e) => setUploadForm({ ...uploadForm, issueDate: e.target.value })} style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Expiry Date</label>
-                  <input type="text" value={uploadForm.expiryDate} onChange={(e) => setUploadForm({ ...uploadForm, expiryDate: e.target.value })} style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.8rem' }} />
+                <div style={{ fontSize: '0.775rem', color: '#64748B', marginTop: '4px' }}>
+                  {selectedFile ? `File Size: ${(selectedFile.size / 1024).toFixed(1)} KB` : 'Supports PDF, PNG, JPG, JPEG & Digital Certificates'}
                 </div>
               </div>
 
-              <button type="submit" disabled={uploading} style={{ width: '100%', backgroundColor: '#0B5ED7', color: '#FFFFFF', padding: '12px', borderRadius: '12px', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
-                {uploading ? 'Saving Document...' : 'Save Document to Vault 🚀'}
+              {/* DOCUMENT NAME (PRE-FILLED OR EDITABLE) */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                  Document Name
+                </label>
+                <input
+                  type="text"
+                  value={uploadForm.name}
+                  onChange={(e) => setUploadForm({ ...uploadForm, name: e.target.value })}
+                  placeholder="e.g. Aadhaar Card, Driving Licence, B.Tech Marksheet"
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1.5px solid #CBD5E1', fontSize: '0.875rem', fontWeight: 700, color: '#0F172A' }}
+                  required
+                />
+              </div>
+
+              {/* CATEGORY SELECTOR */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
+                  Category
+                </label>
+                <select
+                  value={uploadForm.category}
+                  onChange={(e) => setUploadForm({ ...uploadForm, category: e.target.value })}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1.5px solid #CBD5E1', fontSize: '0.875rem', fontWeight: 700, color: '#0F172A', backgroundColor: '#FFFFFF' }}
+                >
+                  <option value="government">🏛️ Government Authorized</option>
+                  <option value="rto">🚗 RTO &amp; Vehicles</option>
+                  <option value="academic">🎓 Academic &amp; Education</option>
+                </select>
+              </div>
+
+              {/* SUBMIT BUTTON */}
+              <button
+                type="submit"
+                disabled={uploading}
+                style={{ width: '100%', backgroundColor: '#0B5ED7', color: '#FFFFFF', padding: '14px', borderRadius: '14px', fontWeight: 800, fontSize: '0.95rem', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(11, 94, 215, 0.3)', marginTop: '6px' }}
+              >
+                {uploading ? 'Saving Document...' : 'Upload & Save Document to Vault 🚀'}
               </button>
+
             </form>
           </div>
         </div>
