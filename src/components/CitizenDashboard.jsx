@@ -3,7 +3,8 @@ import {
   ShieldCheck, Search, Bell, User, LayoutDashboard, Ticket, FolderClosed,
   Grid, Landmark, Newspaper, Shield, HelpCircle, LogOut, Sun, Moon, CheckCircle2,
   ChevronRight, ChevronDown, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, Zap, Radio, Share2, FileText,
-  Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw, Milestone, Users
+  Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw, Milestone, Users,
+  Headphones, PhoneCall, Mail
 } from 'lucide-react';
 import VirtualCard from './VirtualCard.jsx';
 import CivicVault from './CivicVault.jsx';
@@ -22,10 +23,10 @@ import {
   DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST, DEMO_FAMILY_MEMBERS, calculateDocExpiryStatus
 } from '../data/mockData.js';
 
-export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification }) {
+export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification, theme: initialTheme = 'light', onToggleTheme }) {
   // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'activity' | 'privacy' | 'notifications' | 'tourism' | 'travel' | 'govt-updates' | 'news' | 'security' | 'help' | 'ai' | 'profile'
   const [activeTab, setActiveTab] = useState('home');
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(() => initialTheme || localStorage.getItem('civicone_theme') || 'light');
   const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [documents, setDocuments] = useState(DEMO_DOCUMENTS);
@@ -38,6 +39,21 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   const [currentCitizen, setCurrentCitizen] = useState(citizen);
   const [targetTravelCity, setTargetTravelCity] = useState('');
   const [familyVaultMemberId, setFamilyVaultMemberId] = useState('fam-self');
+
+  // Sync with prop if it updates externally
+  useEffect(() => {
+    if (initialTheme && initialTheme !== theme) {
+      setTheme(initialTheme);
+    }
+  }, [initialTheme]);
+
+  const handleToggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('civicone_theme', nextTheme);
+    if (onToggleTheme) onToggleTheme();
+  };
 
   // Collapsible Group States for Desktop Sidebar
   const [openGroups, setOpenGroups] = useState({
@@ -162,10 +178,9 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       key: 'support',
       title: 'SECURITY & SUPPORT',
       items: [
+        { id: 'help', label: '24/7 Customer Care', icon: Headphones, badge: '24/7 LIVE', isLive: true },
         { id: 'security', label: 'Security Centre', icon: Shield },
-        { id: 'privacy', label: 'Privacy Centre', icon: Lock },
-        { id: 'help', label: 'CivicOne AI', icon: Sparkles },
-        { id: 'help', label: 'Help Centre', icon: HelpCircle }
+        { id: 'privacy', label: 'Privacy Centre', icon: Lock }
       ]
     },
     {
@@ -266,6 +281,41 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* Header Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+            {/* 24/7 Customer Care Quick Access */}
+            <button
+              onClick={() => handleSelectTab('help')}
+              title="24/7 National Citizen Care Desk"
+              style={{
+                backgroundColor: activeTab === 'help' ? 'var(--primary-blue)' : 'var(--bg-main)',
+                color: activeTab === 'help' ? '#FFFFFF' : 'var(--text-main)',
+                border: '1px solid var(--border-light)',
+                borderRadius: '10px',
+                padding: '7px 12px',
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+            >
+              <Headphones size={15} style={{ color: activeTab === 'help' ? '#FFFFFF' : 'var(--primary-blue)' }} />
+              <span className="hidden-mobile">24/7 Care</span>
+              <span className="live-pulse-dot" style={{ width: '6px', height: '6px' }} />
+            </button>
+
+            {/* Theme Toggle Button */}
+            <button
+              onClick={handleToggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+              className="theme-toggle-btn"
+              style={{ width: '38px', height: '38px', borderRadius: '10px' }}
+            >
+              {theme === 'dark' ? <Sun size={17} style={{ color: '#F59E0B' }} /> : <Moon size={17} style={{ color: '#0B5ED7' }} />}
+            </button>
 
             {/* Notifications */}
             <div style={{ position: 'relative' }}>
@@ -376,7 +426,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                             key={item.id}
                             onClick={() => handleSelectTab(item.id)}
                             style={{
-                              backgroundColor: isSelected ? '#0B5ED7' : 'transparent',
+                              backgroundColor: isSelected ? 'var(--primary-blue)' : 'transparent',
                               color: isSelected ? '#FFFFFF' : 'var(--text-muted)',
                               padding: '10px 14px',
                               borderRadius: '10px',
@@ -387,10 +437,30 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                               gap: '12px',
                               textAlign: 'left',
                               border: 'none',
-                              cursor: 'pointer'
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
                             }}
                           >
-                            <Icon size={18} /> {item.label}
+                            <Icon size={18} />
+                            <span>{item.label}</span>
+                            {item.badge && (
+                              <span style={{
+                                marginLeft: 'auto',
+                                fontSize: '0.625rem',
+                                backgroundColor: isSelected ? 'rgba(255, 255, 255, 0.25)' : 'rgba(16, 185, 129, 0.15)',
+                                color: isSelected ? '#FFFFFF' : 'var(--success)',
+                                border: `1px solid ${isSelected ? 'rgba(255, 255, 255, 0.4)' : 'rgba(16, 185, 129, 0.3)'}`,
+                                padding: '1px 6px',
+                                borderRadius: '8px',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}>
+                                {item.isLive && <span className="live-pulse-dot" style={{ width: '5px', height: '5px' }} />}
+                                {item.badge}
+                              </span>
+                            )}
                           </button>
                         );
                       })}
@@ -887,9 +957,9 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
             <SecurityCentre />
           )}
 
-          {/* TAB: HELP CENTRE */}
+          {/* TAB: HELP CENTRE & 24/7 CUSTOMER CARE */}
           {activeTab === 'help' && (
-            <HelpCentre />
+            <HelpCentre citizen={currentCitizen} />
           )}
 
           {/* TAB: PROFILE SETTINGS */}
@@ -947,6 +1017,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {[
+                  { id: 'help', label: '24/7 Customer Care', icon: Headphones, badge: '24/7 LIVE' },
                   { id: 'journey', label: 'My Journey', icon: Milestone },
                   { id: 'activity', label: 'My Activity', icon: Activity },
                   { id: 'privacy', label: 'Access & Consent', icon: Lock },
@@ -954,7 +1025,6 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                   { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
                   { id: 'news', label: 'Daily News', icon: Newspaper },
                   { id: 'security', label: 'Security Centre', icon: Shield },
-                  { id: 'help', label: 'Help Centre', icon: HelpCircle },
                   { id: 'profile', label: 'Profile Settings', icon: User }
                 ].map(item => (
                   <button
@@ -963,12 +1033,26 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     style={{
                       padding: '12px 14px', borderRadius: '10px', fontWeight: 700, fontSize: '0.875rem',
                       display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left',
-                      backgroundColor: activeTab === item.id ? '#0B5ED7' : 'transparent',
+                      backgroundColor: activeTab === item.id ? 'var(--primary-blue)' : 'transparent',
                       color: activeTab === item.id ? '#FFFFFF' : 'var(--text-main)',
                       border: 'none', cursor: 'pointer'
                     }}
                   >
-                    <item.icon size={18} /> {item.label}
+                    <item.icon size={18} />
+                    <span>{item.label}</span>
+                    {item.badge && (
+                      <span style={{
+                        marginLeft: 'auto',
+                        fontSize: '0.625rem',
+                        backgroundColor: activeTab === item.id ? 'rgba(255, 255, 255, 0.25)' : 'rgba(16, 185, 129, 0.15)',
+                        color: activeTab === item.id ? '#FFFFFF' : 'var(--success)',
+                        padding: '1px 6px',
+                        borderRadius: '6px',
+                        fontWeight: 800
+                      }}>
+                        {item.badge}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>

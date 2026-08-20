@@ -1,14 +1,13 @@
-// src/components/PreEntryGate.jsx - Citizen Authentication & Unique Civic ID Registration Gateway
-
 import React, { useState, useEffect, useRef } from 'react';
 import {
   ShieldCheck, Lock, Smartphone, ArrowRight, RefreshCw, CheckCircle2,
-  AlertCircle, Fingerprint, User, UserPlus, KeyRound, MapPin, Calendar, FileText
+  AlertCircle, Fingerprint, User, UserPlus, KeyRound, MapPin, Calendar, FileText,
+  Sun, Moon, ArrowLeft
 } from 'lucide-react';
 import { INDIA_STATES_AND_UTS } from '../data/mockData.js';
 import { authStorage } from '../services/api.js';
 
-export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
+export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme = 'light', onToggleTheme }) {
   // mode: 'LOGIN' | 'REGISTER'
   const [authMode, setAuthMode] = useState('LOGIN');
   
@@ -259,15 +258,61 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'radial-gradient(circle at 50% 15%, #DBEAFE 0%, #F8FAFC 55%, #EFF6FF 100%)',
+      background: theme === 'dark' ? 'radial-gradient(circle at 50% 15%, #0F2342 0%, #070F1E 100%)' : 'radial-gradient(circle at 50% 15%, #DBEAFE 0%, #F8FAFC 55%, #EFF6FF 100%)',
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '32px 16px',
-      color: '#0F172A',
+      color: 'var(--text-main)',
       position: 'relative',
       overflow: 'hidden'
     }}>
+      {/* Top Utility Bar (Back to Home & Theme Toggle) */}
+      <div style={{
+        width: '100%',
+        maxWidth: '480px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '16px',
+        position: 'relative',
+        zIndex: 20
+      }}>
+        {onGoBackToLanding && (
+          <button
+            onClick={onGoBackToLanding}
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-light)',
+              borderRadius: '10px',
+              padding: '8px 14px',
+              fontSize: '0.825rem',
+              fontWeight: 700,
+              color: 'var(--text-main)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+          >
+            <ArrowLeft size={16} /> Home
+          </button>
+        )}
+
+        {onToggleTheme && (
+          <button
+            onClick={onToggleTheme}
+            aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            className="theme-toggle-btn"
+          >
+            {theme === 'dark' ? <Sun size={18} style={{ color: '#F59E0B' }} /> : <Moon size={18} style={{ color: '#0B5ED7' }} />}
+          </button>
+        )}
+      </div>
+
       {/* Subtle Background Decorative Glows */}
       <div style={{
         position: 'absolute',
@@ -276,7 +321,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
         width: '450px',
         height: '450px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(147, 197, 253, 0.35) 0%, rgba(255,255,255,0) 70%)',
+        background: 'radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%)',
         filter: 'blur(40px)',
         pointerEvents: 'none'
       }} />
@@ -287,18 +332,18 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
         width: '450px',
         height: '450px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(186, 230, 253, 0.3) 0%, rgba(255,255,255,0) 70%)',
+        background: 'radial-gradient(circle, rgba(14, 165, 233, 0.12) 0%, transparent 70%)',
         filter: 'blur(40px)',
         pointerEvents: 'none'
       }} />
 
-      <div style={{
+      <div className="hover-card-lift" style={{
         width: '100%',
         maxWidth: '480px',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: 'var(--bg-card)',
         borderRadius: '24px',
-        border: '1.5px solid #DBEAFE',
-        boxShadow: '0 25px 50px -12px rgba(11, 94, 215, 0.12), 0 0 1px 1px rgba(11, 94, 215, 0.06)',
+        border: '1.5px solid var(--border-light)',
+        boxShadow: 'var(--shadow-lg)',
         padding: '36px 30px',
         position: 'relative',
         zIndex: 10
@@ -312,17 +357,17 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
             width: '60px',
             height: '60px',
             borderRadius: '18px',
-            background: 'linear-gradient(135deg, #0B5ED7 0%, #0284C7 100%)',
+            background: 'linear-gradient(135deg, var(--primary-blue) 0%, var(--deep-blue) 100%)',
             color: '#FFFFFF',
             marginBottom: '14px',
-            boxShadow: '0 8px 20px -4px rgba(11, 94, 215, 0.35)'
+            boxShadow: 'var(--shadow-blue)'
           }}>
             <ShieldCheck size={34} />
           </div>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '4px', letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '4px', letterSpacing: '-0.02em' }}>
             CivicOne Citizen Portal
           </h2>
-          <p style={{ fontSize: '0.875rem', color: '#64748B', fontWeight: 600 }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontWeight: 600 }}>
             National Sovereign Digital Identity Gateway
           </p>
         </div>
@@ -332,11 +377,11 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
           <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
-            backgroundColor: '#F1F5F9',
+            backgroundColor: 'var(--bg-main)',
             borderRadius: '14px',
             padding: '4px',
             marginBottom: '24px',
-            border: '1px solid #E2E8F0'
+            border: '1px solid var(--border-light)'
           }}>
             <button
               onClick={() => { setAuthMode('LOGIN'); setErrorMsg(''); setRegStep('FORM'); }}
@@ -347,9 +392,9 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
                 fontWeight: 800,
                 fontSize: '0.875rem',
                 cursor: 'pointer',
-                backgroundColor: authMode === 'LOGIN' ? '#0B5ED7' : 'transparent',
-                color: authMode === 'LOGIN' ? '#FFFFFF' : '#64748B',
-                boxShadow: authMode === 'LOGIN' ? '0 4px 12px rgba(11, 94, 215, 0.25)' : 'none',
+                backgroundColor: authMode === 'LOGIN' ? 'var(--primary-blue)' : 'transparent',
+                color: authMode === 'LOGIN' ? '#FFFFFF' : 'var(--text-muted)',
+                boxShadow: authMode === 'LOGIN' ? 'var(--shadow-blue)' : 'none',
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
@@ -364,9 +409,9 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding }) {
                 fontWeight: 800,
                 fontSize: '0.875rem',
                 cursor: 'pointer',
-                backgroundColor: authMode === 'REGISTER' ? '#0B5ED7' : 'transparent',
-                color: authMode === 'REGISTER' ? '#FFFFFF' : '#64748B',
-                boxShadow: authMode === 'REGISTER' ? '0 4px 12px rgba(11, 94, 215, 0.25)' : 'none',
+                backgroundColor: authMode === 'REGISTER' ? 'var(--primary-blue)' : 'transparent',
+                color: authMode === 'REGISTER' ? '#FFFFFF' : 'var(--text-muted)',
+                boxShadow: authMode === 'REGISTER' ? 'var(--shadow-blue)' : 'none',
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >

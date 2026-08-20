@@ -23,6 +23,20 @@ export default function App() {
   const [verifyToken, setVerifyToken] = useState('CIV-TOKEN-CIV-DEMO-10001-SECURE-2026');
   const [selectedOrgConfig, setSelectedOrgConfig] = useState(null);
 
+  // Global Persistent Theme State (Synced across all portals and gates)
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('civicone_theme') || 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('civicone_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   // Helper to change view and push browser history state
   const changeView = (newView, customHash = '') => {
     setCurrentView(newView);
@@ -126,6 +140,8 @@ export default function App() {
         <PreEntryGate
           onAuthenticated={handleAuthSuccess}
           onGoBackToLanding={() => changeView('landing')}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       );
 
@@ -138,11 +154,15 @@ export default function App() {
             setVerifyToken(token);
             changeView('verify');
           }}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       ) : (
         <PreEntryGate
           onAuthenticated={handleAuthSuccess}
           onGoBackToLanding={() => changeView('landing')}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       );
 
@@ -158,6 +178,8 @@ export default function App() {
             onAuthenticated={handleOpenOrgPortal}
             onGoBackToLanding={() => changeView('landing')}
             onOpenSuperAdmin={() => changeView('admin-gate')}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         </DesktopWorkstationGuard>
       );
@@ -173,6 +195,8 @@ export default function App() {
           <OrganizationPortal
             initialOrgConfig={selectedOrgConfig}
             onReturnHome={() => changeView('organization-gate')}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         </DesktopWorkstationGuard>
       );
@@ -188,6 +212,8 @@ export default function App() {
           <AuthorityGate
             onAuthenticated={handleOfficerAuthSuccess}
             onGoBackToLanding={() => changeView('landing')}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         </DesktopWorkstationGuard>
       );
@@ -204,11 +230,15 @@ export default function App() {
             <AuthorityPortal
               officer={authenticatedOfficer}
               onReturnHome={handleLogout}
+              theme={theme}
+              onToggleTheme={toggleTheme}
             />
           ) : (
             <AuthorityGate
               onAuthenticated={handleOfficerAuthSuccess}
               onGoBackToLanding={() => changeView('landing')}
+              theme={theme}
+              onToggleTheme={toggleTheme}
             />
           )}
         </DesktopWorkstationGuard>
@@ -226,6 +256,8 @@ export default function App() {
             officer={authenticatedOfficer}
             initialState={selectedOrgConfig?.state}
             onReturnHome={handleLogout}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         </DesktopWorkstationGuard>
       );
@@ -241,6 +273,8 @@ export default function App() {
           <AdminGate
             onAuthenticated={handleAdminAuthSuccess}
             onGoBackToLanding={() => changeView('landing')}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         </DesktopWorkstationGuard>
       );
@@ -257,11 +291,15 @@ export default function App() {
             <AdminPortal
               admin={authenticatedAdmin}
               onReturnHome={handleLogout}
+              theme={theme}
+              onToggleTheme={toggleTheme}
             />
           ) : (
             <AdminGate
               onAuthenticated={handleAdminAuthSuccess}
               onGoBackToLanding={() => changeView('landing')}
+              theme={theme}
+              onToggleTheme={toggleTheme}
             />
           )}
         </DesktopWorkstationGuard>
@@ -278,6 +316,8 @@ export default function App() {
               changeView('landing');
             }
           }}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       );
 
@@ -289,6 +329,8 @@ export default function App() {
           onOpenAuthorityPortal={() => changeView('authority-gate')}
           onOpenOwnerAdmin={() => changeView('admin-gate')}
           onOpenOrganizationGate={() => changeView('organization-gate')}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       );
   }

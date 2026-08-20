@@ -9,9 +9,9 @@ import EducationPortals from './organization/EducationPortals.jsx';
 import HealthcarePortals from './organization/HealthcarePortals.jsx';
 import BankingPortals from './organization/BankingPortals.jsx';
 import PrivateSectorPortals from './organization/PrivateSectorPortals.jsx';
-import { ArrowLeft, ShieldCheck, Crown } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Crown, Sun, Moon } from 'lucide-react';
 
-export default function OrganizationGate({ onAuthenticated, onGoBackToLanding, onOpenSuperAdmin }) {
+export default function OrganizationGate({ onAuthenticated, onGoBackToLanding, onOpenSuperAdmin, theme = 'light', onToggleTheme }) {
   // Steps: 'sectors' | 'selector' | 'login'
   const [step, setStep] = useState('sectors');
   const [selectedSector, setSelectedSector] = useState(null);
@@ -38,7 +38,7 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding, o
   const isPrivateSector = selectedSector?.id === 'private_sector' || selectedOrg?.sector === 'private_sector';
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC', color: '#0F172A' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
       
       {/* HEADER BAR */}
       <header style={{
@@ -87,6 +87,28 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding, o
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {onToggleTheme && (
+              <button
+                onClick={onToggleTheme}
+                aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+                title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '10px',
+                  background: '#1E293B',
+                  border: '1px solid #334155',
+                  color: '#FFFFFF',
+                  cursor: 'pointer'
+                }}
+              >
+                {theme === 'dark' ? <Sun size={17} style={{ color: '#F59E0B' }} /> : <Moon size={17} style={{ color: '#93C5FD' }} />}
+              </button>
+            )}
+
             {onOpenSuperAdmin && (
               <button
                 onClick={onOpenSuperAdmin}
@@ -108,24 +130,26 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding, o
               </button>
             )}
 
-            <button
-              onClick={onGoBackToLanding}
-              style={{
-                backgroundColor: 'transparent',
-                color: '#CBD5E1',
-                border: '1px solid #334155',
-                borderRadius: '10px',
-                padding: '8px 14px',
-                fontSize: '0.775rem',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                cursor: 'pointer'
-              }}
-            >
-              <ArrowLeft size={15} /> Exit to Main Hub
-            </button>
+            {onGoBackToLanding && (
+              <button
+                onClick={onGoBackToLanding}
+                style={{
+                  backgroundColor: '#1E293B',
+                  color: '#FFFFFF',
+                  border: '1px solid #334155',
+                  borderRadius: '10px',
+                  padding: '8px 14px',
+                  fontSize: '0.775rem',
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                <ArrowLeft size={15} /> Return Home
+              </button>
+            )}
           </div>
 
         </div>
