@@ -339,16 +339,26 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
   const handleApproveConsent = async (notifItem) => {
     try {
+      const cid = currentCitizen?.citizenId || citizen?.citizenId;
+      let vaultDocs = documents;
+      try {
+        const cached = localStorage.getItem(`civiqone_citizen_docs_${cid}`);
+        if (cached) vaultDocs = JSON.parse(cached);
+      } catch (e) {}
+
       await fetch('/api/consent/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           requestId: notifItem.requestId || notifItem.id || 'req-demo-hotel-1',
-          citizenCivicId: currentCitizen?.citizenId || citizen?.citizenId
+          citizenCivicId: cid,
+          citizen: currentCitizen || citizen,
+          documents: vaultDocs
         })
       });
     } catch (err) {}
-    setNotifications(notifications.map(n => n.id === notifItem.id ? {
+
+    setNotifications(prev => prev.map(n => (n.id === notifItem.id || (notifItem.requestId && n.requestId === notifItem.requestId)) ? {
       ...n,
       title: '🟢 Consent Approved!',
       message: `${n.message} (Status: ACCEPTED & Verified Records Shared)`,
@@ -359,7 +369,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   };
 
   const handleDeclineConsent = (notifItem) => {
-    setNotifications(notifications.map(n => n.id === notifItem.id ? {
+    setNotifications(prev => prev.map(n => (n.id === notifItem.id || (notifItem.requestId && n.requestId === notifItem.requestId)) ? {
       ...n,
       title: '🔴 Consent Declined',
       message: `${n.message} (Status: DECLINED BY CITIZEN)`,
@@ -1103,6 +1113,30 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 600 }}>{n.time || n.date || 'Today'}</span>
                         </div>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.4' }}>{n.message || n.summary || n.content}</p>
+
+                        {/* ACTION BUTTONS FOR CONSENT REQUEST NOTIFICATIONS */}
+                        {(n.type === 'CONSENT_REQUEST' || (n.title && (n.title.includes('Request') || n.title.includes('Access') || n.title.includes('Offer')))) && n.status !== 'APPROVED' && n.status !== 'DECLINED' && (
+                          <div style={{ display: 'flex', gap: '10px', marginTop: '12px', maxWidth: '320px' }}>
+                            <button
+                              onClick={() => handleApproveConsent(n)}
+                              style={{ flex: 1, backgroundColor: '#059669', color: '#FFFFFF', padding: '8px 14px', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', boxShadow: '0 2px 8px rgba(5, 150, 105, 0.2)' }}
+                            >
+                              🟢 ACCEPT &amp; SHARE
+                            </button>
+                            <button
+                              onClick={() => handleDeclineConsent(n)}
+                              style={{ flex: 1, backgroundColor: '#DC2626', color: '#FFFFFF', padding: '8px 14px', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                            >
+                              🔴 DECLINE
+                            </button>
+                          </div>
+                        )}
+
+                        {n.status === 'APPROVED' && (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#ECFDF5', color: '#047857', border: '1px solid #A7F3D0', padding: '4px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, marginTop: '8px' }}>
+                            <CheckCircle2 size={14} /> 🟢 Credentials Successfully Shared
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))

@@ -808,42 +808,7 @@ export const db = {
   ],
 
   // 5. CONSENT RECORDS & ACCESS PERMISSIONS
-  consentRecords: [
-    {
-      id: "share-demo-101",
-      citizenId: "cit-demo-10001",
-      citizenCivicId: "CIV-DEMO-10001",
-      docId: "doc-aarav-08",
-      docName: "B.Tech Computer Science Course Admission Record",
-      orgId: "org-college",
-      orgName: "CIVIQONE Demo College",
-      roleCode: "COLLEGE_ACCESS_ADMIN",
-      purpose: "B.Tech Admission Verification",
-      accessType: "View Only (Academic)",
-      createdAt: "14 Aug 2026, 08:30 AM",
-      expiryDate: "21 Aug 2026",
-      status: "ACTIVE",
-      watermarkText: "CONFIDENTIAL — AUTHORIZED FOR CIVIQONE DEMO COLLEGE — ADMISSION VERIFICATION — 14 AUG 2026",
-      isDemo: true
-    },
-    {
-      id: "share-demo-102",
-      citizenId: "cit-demo-10001",
-      citizenCivicId: "CIV-DEMO-10001",
-      docId: "doc-aarav-01",
-      docName: "Tokenized Aadhaar Record (KYC Only)",
-      orgId: "org-mobile",
-      orgName: "CIVIQONE Mobile Store",
-      roleCode: "MOBILE_SHOP_ACCESS_ADMIN",
-      purpose: "SIM Activation KYC Verification",
-      accessType: "Minimum KYC View Only",
-      createdAt: "14 Aug 2026, 09:10 AM",
-      expiryDate: "15 Aug 2026",
-      status: "ACTIVE",
-      watermarkText: "CONFIDENTIAL — MINIMUM KYC SHARED FOR CIVIQONE MOBILE STORE — 14 AUG 2026",
-      isDemo: true
-    }
-  ],
+  consentRecords: [],
 
   shareRequests: [],
 

@@ -986,9 +986,17 @@ app.get('/api/consent/citizen-requests', (req, res) => {
   return res.json({ requests });
 });
 
+// Reset Fresh State Endpoint (Clears all past demo/test records)
+app.post('/api/admin/reset-fresh-state', (req, res) => {
+  db.shareRequests = [];
+  db.consentRecords = [];
+  db.notifications = [];
+  return res.json({ success: true, message: 'All demo and test share requests, consent records, and notifications cleared.' });
+});
+
 // Approve Consent Request
 app.post('/api/consent/approve', (req, res) => {
-  const { requestId, citizenCivicId } = req.body;
+  const { requestId, citizenCivicId, citizen, documents } = req.body;
   let reqItem = (db.shareRequests || []).find(r => r.id === requestId);
   if (!reqItem && citizenCivicId) {
     reqItem = (db.shareRequests || []).find(r => r.citizenCivicId === citizenCivicId && r.status === 'PENDING');
@@ -1002,6 +1010,31 @@ app.post('/api/consent/approve', (req, res) => {
   }
 
   reqItem.status = "APPROVED";
+
+  // Sync citizen profile and documents if passed
+  if (citizen && citizen.citizenId) {
+    const existingCitIdx = (db.citizens || []).findIndex(c => c.citizenId === citizen.citizenId);
+    if (existingCitIdx >= 0) {
+      db.citizens[existingCitIdx] = { ...db.citizens[existingCitIdx], ...citizen };
+    } else {
+      if (!db.citizens) db.citizens = [];
+      db.citizens.push(citizen);
+    }
+  }
+
+  if (documents && Array.isArray(documents) && documents.length > 0) {
+    if (!db.documents) db.documents = [];
+    const targetCid = citizenCivicId || (citizen ? citizen.citizenId : reqItem.citizenCivicId);
+    // Remove existing and insert fresh
+    db.documents = db.documents.filter(d => d.citizenId !== targetCid);
+    documents.forEach(doc => {
+      db.documents.push({
+        ...doc,
+        citizenId: targetCid,
+        citizenCivicId: targetCid
+      });
+    });
+  }
 
   // Also update corresponding in-app notification status
   if (db.notifications) {
