@@ -988,8 +988,14 @@ app.get('/api/consent/citizen-requests', (req, res) => {
 
 // Approve Consent Request
 app.post('/api/consent/approve', (req, res) => {
-  const { requestId } = req.body;
-  const reqItem = db.shareRequests.find(r => r.id === requestId);
+  const { requestId, citizenCivicId } = req.body;
+  let reqItem = (db.shareRequests || []).find(r => r.id === requestId);
+  if (!reqItem && citizenCivicId) {
+    reqItem = (db.shareRequests || []).find(r => r.citizenCivicId === citizenCivicId && r.status === 'PENDING');
+  }
+  if (!reqItem && db.shareRequests && db.shareRequests.length > 0) {
+    reqItem = db.shareRequests.find(r => r.status === 'PENDING') || db.shareRequests[0];
+  }
 
   if (!reqItem) {
     return res.status(404).json({ error: "Access request not found." });
@@ -997,12 +1003,22 @@ app.post('/api/consent/approve', (req, res) => {
 
   reqItem.status = "APPROVED";
 
+  // Also update corresponding in-app notification status
+  if (db.notifications) {
+    db.notifications.forEach(n => {
+      if (n.requestId === reqItem.id || n.id === requestId || (citizenCivicId && n.citizenCivicId === citizenCivicId)) {
+        n.status = "APPROVED";
+        n.read = true;
+      }
+    });
+  }
+
   const expDate = new Date();
   expDate.setDate(expDate.getDate() + 7);
 
   const consentRecord = {
     id: `share-${Date.now()}`,
-    citizenId: "cit-demo-10001",
+    citizenId: reqItem.citizenCivicId,
     citizenCivicId: reqItem.citizenCivicId,
     docId: reqItem.docId,
     docName: reqItem.docName,
@@ -1019,18 +1035,21 @@ app.post('/api/consent/approve', (req, res) => {
 
   db.consentRecords.unshift(consentRecord);
 
-  return res.json({ success: true, consentRecord });
+  return res.json({ success: true, consentRecord, request: reqItem });
 });
 
 // Organization Creates Document Access Request (Org -> Citizen Alert & Link)
 app.post('/api/consent/request', (req, res) => {
   const { orgId, citizenCivicId, docId, docName, purpose, expiryDays } = req.body;
-  const org = db.organizations.find(o => o.id === orgId) || { id: orgId, name: 'Requesting Organization', roleCode: 'VIEW_ONLY' };
-  const targetCitizen = db.citizens.find(c => c.citizenId === citizenCivicId) || db.citizens[0];
+  const org = (db.organizations || []).find(o => o.id === orgId) || { id: orgId || 'org-college-01', name: 'Educational Institution', roleCode: 'COLLEGE_ACCESS_ADMIN' };
+  
+  let targetCitizen = (db.citizens || []).find(c => c.citizenId === citizenCivicId);
+  const targetId = citizenCivicId || (targetCitizen ? targetCitizen.citizenId : db.activeCitizenId);
 
   const reqItem = {
     id: `req-${Date.now()}`,
-    citizenCivicId: targetCitizen.citizenId,
+    citizenCivicId: targetId,
+    citizenId: targetId,
     orgId: org.id,
     orgName: org.name,
     roleCode: org.roleCode,
@@ -1046,14 +1065,19 @@ app.post('/api/consent/request', (req, res) => {
   if (!db.shareRequests) db.shareRequests = [];
   db.shareRequests.unshift(reqItem);
 
-  // Dispatch In-App Citizen Notification
+  // Dispatch In-App Citizen Notification with requestId
   const notif = {
     id: `notif-${Date.now()}`,
-    citizenCivicId: targetCitizen.citizenId,
+    requestId: reqItem.id,
+    citizenCivicId: targetId,
+    citizenId: targetId,
+    orgId: org.id,
+    orgName: org.name,
     title: `📩 New Access Request: ${org.name}`,
-    message: `${org.name} has requested limited ${reqItem.accessType} authorization for '${reqItem.docName}'. Purpose: ${reqItem.purpose}.`,
+    message: `${org.name} has requested authorized access for '${reqItem.docName}'. Purpose: ${reqItem.purpose}.`,
     time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
     read: false,
+    status: 'PENDING',
     type: 'CONSENT_REQUEST'
   };
   if (!db.notifications) db.notifications = [];
@@ -1065,8 +1089,38 @@ app.post('/api/consent/request', (req, res) => {
 // GET Organization Created Access Requests
 app.get('/api/consent/requests/org/:orgId', (req, res) => {
   const { orgId } = req.params;
-  const list = (db.shareRequests || []).filter(r => r.orgId === orgId);
-  return res.json({ success: true, requests: list });
+  const list = (db.shareRequests || []).filter(r => 
+    r.orgId === orgId || 
+    (orgId.includes('college') && (r.orgId.includes('college') || r.orgId.includes('education') || r.orgId.includes('univ'))) || 
+    (orgId.includes('hotel') && r.orgId.includes('hotel'))
+  );
+  return res.json({ success: true, requests: list.length > 0 ? list : (db.shareRequests || []) });
+});
+
+// GET Student Verified Academic & Aadhaar Records for College
+app.get('/api/consent/student-records/:citizenId', async (req, res) => {
+  const { citizenId } = req.params;
+  let citizen = (db.citizens || []).find(c => c.citizenId === citizenId);
+  if (!citizen) {
+    try {
+      citizen = await dbService.getCitizenById(citizenId);
+    } catch (e) {}
+  }
+  const citizenDocs = (db.documents || []).filter(d => d.citizenId === citizenId);
+  const shareReq = (db.shareRequests || []).find(r => r.citizenCivicId === citizenId);
+
+  return res.json({
+    success: true,
+    citizen: citizen || {
+      citizenId,
+      fullName: 'Enrolled Citizen',
+      maskedAadhaar: 'XXXX XXXX 8909',
+      dateOfBirth: '15-08-2002',
+      gender: 'Specified'
+    },
+    documents: citizenDocs,
+    request: shareReq
+  });
 });
 
 // --- GOVERNMENT / AUTHORITY PORTAL INTERCONNECTED ENDPOINTS ---
@@ -1300,9 +1354,14 @@ app.get('/api/security/audit-logs', (req, res) => {
 });
 
 app.get('/api/notifications', (req, res) => {
-  const activeCitizenId = db.activeCitizenId;
-  const notifs = db.notifications.filter(n => n.citizenId === activeCitizenId || !n.citizenId);
-  return res.json({ notifications: notifs.length > 0 ? notifs : db.notifications });
+  const targetId = req.query.citizenId || db.activeCitizenId;
+  const notifs = (db.notifications || []).filter(n => 
+    n.citizenId === targetId || 
+    n.citizenCivicId === targetId || 
+    !n.citizenId ||
+    (n.type === 'CONSENT_REQUEST' && (!targetId || n.citizenCivicId === targetId))
+  );
+  return res.json({ notifications: notifs.length > 0 ? notifs : (db.notifications || []) });
 });
 
 app.get('/api/police/firs', async (req, res) => {

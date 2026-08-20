@@ -117,10 +117,11 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
     async function loadDashboardData() {
       try {
+        const cid = currentCitizen?.citizenId || citizen?.citizenId || '';
         const [cardRes, docsRes, notifRes, govtRes, newsRes, demoRes] = await Promise.all([
           fetchJsonSafe('/api/card/me'),
-          fetchJsonSafe('/api/vault/documents'),
-          fetchJsonSafe('/api/notifications'),
+          fetchJsonSafe(`/api/vault/documents${cid ? `?citizenId=${cid}` : ''}`),
+          fetchJsonSafe(`/api/notifications${cid ? `?citizenId=${cid}` : ''}`),
           fetchJsonSafe('/api/updates/govt'),
           fetchJsonSafe('/api/updates/news'),
           fetchJsonSafe('/api/citizens/demo')
@@ -138,7 +139,29 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       }
     }
     loadDashboardData();
-  }, []);
+
+    // Real-time live polling for incoming notifications & admission/guest requests
+    const interval = setInterval(async () => {
+      try {
+        const cid = currentCitizen?.citizenId || citizen?.citizenId || '';
+        const notifRes = await fetchJsonSafe(`/api/notifications${cid ? `?citizenId=${cid}` : ''}`);
+        if (notifRes && notifRes.notifications) {
+          setNotifications(prev => {
+            const serverNotifs = notifRes.notifications;
+            return serverNotifs.map(sn => {
+              const existing = prev.find(p => p.id === sn.id);
+              if (existing && (existing.status === 'APPROVED' || existing.status === 'DECLINED')) {
+                return { ...sn, status: existing.status, read: existing.read, title: existing.title, message: existing.message };
+              }
+              return sn;
+            });
+          });
+        }
+      } catch (e) {}
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentCitizen?.citizenId]);
 
   // Switch Demo Citizen Account Handler
   const handleSwitchDemoAccount = async (citizenId) => {
@@ -306,17 +329,20 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       await fetch('/api/consent/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId: notifItem.requestId || 'req-demo-hotel-1' })
+        body: JSON.stringify({ 
+          requestId: notifItem.requestId || notifItem.id || 'req-demo-hotel-1',
+          citizenCivicId: currentCitizen?.citizenId || citizen?.citizenId
+        })
       });
     } catch (err) {}
     setNotifications(notifications.map(n => n.id === notifItem.id ? {
       ...n,
       title: '🟢 Consent Approved!',
-      message: `${n.message} (Status: ACCEPTED & Masked Aadhaar Shared)`,
+      message: `${n.message} (Status: ACCEPTED & Verified Records Shared)`,
       read: true,
       status: 'APPROVED'
     } : n));
-    alert('🟢 Consent Granted! Your Masked Aadhaar Card was shared with the organization for check-in verification.');
+    alert(`🟢 Consent Granted! Your requested credentials (Aadhaar / Academic) were securely shared with ${notifItem.orgName || 'the organization'}.`);
   };
 
   const handleDeclineConsent = (notifItem) => {

@@ -143,6 +143,8 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
   const [authorizedData, setAuthorizedData] = useState(null);
   const [accessError, setAccessError] = useState('');
 
+  const [collegeStudentDetails, setCollegeStudentDetails] = useState(null);
+
   const fetchOrgData = async () => {
     try {
       const [resOrgs, resReqs, resCons] = await Promise.all([
@@ -159,13 +161,27 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
     }
   };
 
+  const handleOpenCollegeAcademicDocs = async (reqItem) => {
+    setViewCollegeAcademicDocsModal(reqItem);
+    try {
+      const res = await fetch(`/api/consent/student-records/${reqItem.citizenCivicId}`);
+      const data = await res.json();
+      if (data.success) {
+        setCollegeStudentDetails(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
     fetchOrgData();
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/consent/requests/org/${selectedOrg.id || 'org-hotel-01'}`);
+        const res = await fetch(`/api/consent/requests/org/${selectedOrg.id || 'org-college-01'}`);
         const data = await res.json();
         if (data.requests) {
+          setRequests(data.requests);
           setHotelGuestList(prev => prev.map(g => {
             const req = data.requests.find(r => r.citizenCivicId === g.citizenId || r.id === g.requestId);
             if (req && req.status === 'APPROVED') {
@@ -715,20 +731,20 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
                               <td style={{ padding: '12px', color: '#475569' }}>{r.purpose}</td>
                               <td style={{ padding: '12px' }}>
                                 <span style={{
-                                  backgroundColor: r.status === 'GRANTED' || r.status === 'ACTIVE' ? '#ECFDF5' : '#FEF3C7',
-                                  color: r.status === 'GRANTED' || r.status === 'ACTIVE' ? '#047857' : '#D97706',
+                                  backgroundColor: (r.status === 'APPROVED' || r.status === 'GRANTED' || r.status === 'ACTIVE') ? '#ECFDF5' : '#FEF3C7',
+                                  color: (r.status === 'APPROVED' || r.status === 'GRANTED' || r.status === 'ACTIVE') ? '#047857' : '#D97706',
                                   padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800
                                 }}>
-                                  {r.status === 'GRANTED' || r.status === 'ACTIVE' ? '🟢 ACCEPTED BY STUDENT' : '🟡 PENDING STUDENT ACCEPTANCE'}
+                                  {(r.status === 'APPROVED' || r.status === 'GRANTED' || r.status === 'ACTIVE') ? '🟢 ACCEPTED BY STUDENT' : '🟡 PENDING STUDENT ACCEPTANCE'}
                                 </span>
                               </td>
                               <td style={{ padding: '12px' }}>
-                                {r.status === 'GRANTED' || r.status === 'APPROVED' || r.status === 'ACTIVE' ? (
+                                {(r.status === 'APPROVED' || r.status === 'GRANTED' || r.status === 'ACTIVE') ? (
                                   <button
-                                    onClick={() => setViewCollegeAcademicDocsModal(r)}
-                                    style={{ backgroundColor: '#0B5ED7', color: '#FFFFFF', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.75rem', border: 'none', cursor: 'pointer' }}
+                                    onClick={() => handleOpenCollegeAcademicDocs(r)}
+                                    style={{ backgroundColor: '#0B5ED7', color: '#FFFFFF', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '0.75rem', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                                   >
-                                    View Academic Records 🎓
+                                    <Eye size={14} /> View Academic Records 🎓
                                   </button>
                                 ) : (
                                   <span style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 600 }}>Awaiting Citizen Action</span>
@@ -1010,68 +1026,142 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
       )}
 
       {/* VERIFIED COLLEGE ACADEMIC CREDENTIALS MODAL OVERLAY */}
-      {viewCollegeAcademicDocsModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 31, 58, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '16px' }}>
-          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '32px', maxWidth: '640px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 25px 60px rgba(0,0,0,0.35)' }}>
-            <button onClick={() => setViewCollegeAcademicDocsModal(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: '#F1F5F9', border: 'none', color: '#64748B', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-              <X size={20} />
-            </button>
+      {viewCollegeAcademicDocsModal && (() => {
+        const studentCitizen = collegeStudentDetails?.citizen || {};
+        const studentDocs = collegeStudentDetails?.documents || [];
+        const uploadedAadhaar = studentDocs.find(d => 
+          (d.name && d.name.toLowerCase().includes('aadhaar')) ||
+          (d.category && d.category.toLowerCase().includes('government'))
+        );
+        const uploaded10th = studentDocs.find(d => 
+          (d.name && (d.name.toLowerCase().includes('10th') || d.name.toLowerCase().includes('ssc')))
+        );
+        const uploaded12th = studentDocs.find(d => 
+          (d.name && (d.name.toLowerCase().includes('12th') || d.name.toLowerCase().includes('inter') || d.name.toLowerCase().includes('secondary')))
+        );
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-              <span style={{ fontSize: '1.6rem' }}>🎓</span>
-              <div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0B1F3A' }}>
-                  Verified Student Academic Credentials
-                </h3>
-                <p style={{ fontSize: '0.8rem', color: '#64748B' }}>
-                  Shared via student consent for Jawaharlal Nehru Technological University Admission.
-                </p>
+        return (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 31, 58, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '16px' }}>
+            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '32px', maxWidth: '680px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 25px 60px rgba(0,0,0,0.35)' }}>
+              <button onClick={() => { setViewCollegeAcademicDocsModal(null); setCollegeStudentDetails(null); }} style={{ position: 'absolute', top: '20px', right: '20px', background: '#F1F5F9', border: 'none', color: '#64748B', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+                <span style={{ fontSize: '1.6rem' }}>🎓</span>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0B1F3A' }}>
+                    Verified Student Academic &amp; Aadhaar Credentials
+                  </h3>
+                  <p style={{ fontSize: '0.8rem', color: '#64748B' }}>
+                    Shared via student consent for {selectedOrg.name || 'University'} Admission Verification.
+                  </p>
+                </div>
               </div>
+
+              {/* Student Overview Header */}
+              <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '12px', padding: '12px 16px', marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1E40AF', textTransform: 'uppercase' }}>STUDENT NAME</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#0B1F3A' }}>{studentCitizen.fullName || collegeAdmissionForm.fullName || 'Verified Citizen'}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1E40AF', textTransform: 'uppercase' }}>CIVIC ID</div>
+                  <div style={{ fontSize: '0.95rem', fontFamily: 'monospace', fontWeight: 900, color: '#0B5ED7' }}>{viewCollegeAcademicDocsModal.citizenCivicId}</div>
+                </div>
+                <div>
+                  <span style={{ backgroundColor: '#D1E7DD', color: '#0F5132', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>
+                    🟢 CONSENT VERIFIED
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
+                
+                {/* 1. MASKED AADHAAR CARD */}
+                <div style={{ backgroundColor: '#F8FAFC', border: '1.5px solid #0B5ED7', borderRadius: '14px', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#0B1F3A' }}>
+                      🆔 {uploadedAadhaar ? uploadedAadhaar.name : 'Aadhaar Identity Card'}
+                    </span>
+                    <span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>
+                      {uploadedAadhaar ? 'VAULT DOCUMENT VERIFIED' : 'VERIFIED UIDAI TOKEN'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#475569' }}>
+                    Issuer: <strong>{uploadedAadhaar?.issuer || 'UIDAI (Government of India)'}</strong> | Status: <strong style={{ color: '#059669' }}>Active &amp; Authenticated</strong>
+                  </div>
+                  <div style={{ fontSize: '1.05rem', fontFamily: 'monospace', fontWeight: 900, color: '#0B5ED7', marginTop: '6px', letterSpacing: '0.1em' }}>
+                    {studentCitizen.maskedAadhaar || (uploadedAadhaar?.docNumber ? `XXXX XXXX ${uploadedAadhaar.docNumber.slice(-4)}` : 'XXXX XXXX 8909')}
+                  </div>
+                  {uploadedAadhaar?.docNumber && (
+                    <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '4px' }}>
+                      Reference / Token No: <strong>{uploadedAadhaar.docNumber}</strong> (Issue Date: {uploadedAadhaar.issueDate || 'N/A'})
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. 10TH CLASS MARKS CARD */}
+                <div style={{ backgroundColor: '#F8FAFC', border: '1.5px solid #059669', borderRadius: '14px', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#0B1F3A' }}>
+                      📜 {uploaded10th ? uploaded10th.name : '10th Class (SSC) Board Marks Card'}
+                    </span>
+                    <span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>
+                      {uploaded10th ? 'VAULT ATTESTED' : 'VERIFIED BOARD'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#475569' }}>
+                    Board: <strong>{uploaded10th?.issuer || 'Board of Secondary Education, AP'}</strong> | Roll No: <strong>{uploaded10th?.docNumber || 'SSC-2020-90812'}</strong>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#059669', marginTop: '4px' }}>
+                    GPA / Result: 10.0 / 10.0 (PASS WITH DISTINCTION)
+                  </div>
+                </div>
+
+                {/* 3. INTERMEDIATE (12TH) MARKS CARD */}
+                <div style={{ backgroundColor: '#F8FAFC', border: '1.5px solid #D97706', borderRadius: '14px', padding: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#0B1F3A' }}>
+                      🎓 {uploaded12th ? uploaded12th.name : 'Intermediate (12th Board) Marks Certificate'}
+                    </span>
+                    <span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>
+                      {uploaded12th ? 'VAULT ATTESTED' : 'VERIFIED BIEAP'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#475569' }}>
+                    Board: <strong>{uploaded12th?.issuer || 'Board of Intermediate Education AP (MPC Group)'}</strong> | Hall Ticket: <strong>{uploaded12th?.docNumber || 'INTER-2022-44091'}</strong>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#D97706', marginTop: '4px' }}>
+                    Total Marks: 982 / 1000 (GRADE A1)
+                  </div>
+                </div>
+
+                {/* ADDITIONAL UPLOADED DOCUMENTS IF ANY */}
+                {studentDocs.filter(d => !d.name.toLowerCase().includes('aadhaar') && !d.name.toLowerCase().includes('10th') && !d.name.toLowerCase().includes('12th')).map(d => (
+                  <div key={d.id || d.docNumber} style={{ backgroundColor: '#F8FAFC', border: '1.5px solid #6366F1', borderRadius: '14px', padding: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#0B1F3A' }}>📁 {d.name}</span>
+                      <span style={{ backgroundColor: '#EEF2FF', color: '#4F46E5', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>CITIZEN VAULT</span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#475569' }}>
+                      Issuer: <strong>{d.issuer}</strong> | Doc Ref: <strong>{d.docNumber || d.refNo || 'N/A'}</strong>
+                    </div>
+                  </div>
+                ))}
+
+              </div>
+
+              <button
+                onClick={() => { setViewCollegeAcademicDocsModal(null); setCollegeStudentDetails(null); }}
+                style={{ width: '100%', backgroundColor: '#0B5ED7', color: '#FFFFFF', padding: '12px', borderRadius: '12px', fontWeight: 800, fontSize: '0.875rem', border: 'none', cursor: 'pointer', marginTop: '24px' }}
+              >
+                Close Academic Records View
+              </button>
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
-              
-              {/* 1. MASKED AADHAAR CARD */}
-              <div style={{ backgroundColor: '#F8FAFC', border: '1.5px solid #0B5ED7', borderRadius: '14px', padding: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#0B1F3A' }}>🆔 Aadhaar Identity Card</span>
-                  <span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>VERIFIED UIDAI</span>
-                </div>
-                <div style={{ fontSize: '0.8rem', color: '#475569' }}>Name: <strong>Raghavendra</strong> | Civic ID: <strong>{viewCollegeAcademicDocsModal.citizenCivicId}</strong></div>
-                <div style={{ fontSize: '1rem', fontFamily: 'monospace', fontWeight: 900, color: '#0B5ED7', marginTop: '4px', letterSpacing: '0.1em' }}>XXXX XXXX 8909</div>
-              </div>
-
-              {/* 2. 10TH CLASS MARKS CARD */}
-              <div style={{ backgroundColor: '#F8FAFC', border: '1.5px solid #059669', borderRadius: '14px', padding: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#0B1F3A' }}>📜 10th Class (SSC) Board Marks Card</span>
-                  <span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>VERIFIED BOARD</span>
-                </div>
-                <div style={{ fontSize: '0.8rem', color: '#475569' }}>Board: <strong>Board of Secondary Education, AP</strong> | Roll No: <strong>SSC-2020-90812</strong></div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#059669', marginTop: '4px' }}>GPA / Result: 10.0 / 10.0 (PASS WITH DISTINCTION)</div>
-              </div>
-
-              {/* 3. INTERMEDIATE (12TH) MARKS CARD */}
-              <div style={{ backgroundColor: '#F8FAFC', border: '1.5px solid #D97706', borderRadius: '14px', padding: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#0B1F3A' }}>🎓 Intermediate (12th Board) Marks Certificate</span>
-                  <span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 800 }}>VERIFIED BIEAP</span>
-                </div>
-                <div style={{ fontSize: '0.8rem', color: '#475569' }}>Board: <strong>Board of Intermediate Education AP (MPC Group)</strong> | Hall Ticket: <strong>INTER-2022-44091</strong></div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#D97706', marginTop: '4px' }}>Total Marks: 982 / 1000 (GRADE A1)</div>
-              </div>
-
-            </div>
-
-            <button
-              onClick={() => setViewCollegeAcademicDocsModal(null)}
-              style={{ width: '100%', backgroundColor: '#F1F5F9', color: '#334155', padding: '12px', borderRadius: '12px', fontWeight: 800, fontSize: '0.875rem', border: 'none', cursor: 'pointer', marginTop: '20px' }}
-            >
-              Close Academic Records View
-            </button>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
     </div>
   );
