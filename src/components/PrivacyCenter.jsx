@@ -98,7 +98,7 @@ export default function PrivacyCenter({ citizen }) {
             <AlertCircle color="#D97706" size={20} /> Pending Access Requests ({pendingRequests.length})
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '16px' }}>
             {pendingRequests.map((r) => (
               <div key={r.id} style={{ backgroundColor: '#FFFBEB', borderRadius: '18px', border: '1.5px solid #FCD34D', padding: '20px' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#D97706', textTransform: 'uppercase', marginBottom: '6px' }}>
@@ -171,7 +171,7 @@ export default function PrivacyCenter({ citizen }) {
             No third-party organization currently holds active access consent to your records.
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '18px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '18px' }}>
             {activeConsents.map((c) => {
               const docTitle = c.docName || (c.orgName?.includes('Bank') ? 'Aadhaar & PAN Card Credentials' : 'ABHA Health Profile & Health Records');
               const grantedDate = c.createdAt || '14 Aug 2026';

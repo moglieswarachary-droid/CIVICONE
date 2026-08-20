@@ -605,6 +605,7 @@ input, select, textarea {
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
 .theme-toggle-btn:hover {
@@ -626,4 +627,139 @@ input, select, textarea {
 [data-theme="dark"] input::placeholder,
 [data-theme="dark"] textarea::placeholder {
   color: var(--text-light);
+}
+
+/* =========================================================================
+   COMPREHENSIVE RESPONSIVE ALIGNMENT & VIEWPORT ADAPTABILITY RULES
+   ========================================================================= */
+
+/* Universal Image, Media & Table Responsiveness */
+img, svg, video, canvas, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  max-width: 100%;
+}
+
+.table-responsive, .table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Universal Text Word-Break to prevent mobile container overflow */
+p, span, h1, h2, h3, h4, h5, h6, strong, div {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+/* Fluid Max-Width Containers */
+.container-responsive {
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(12px, 3vw, 24px);
+  padding-right: clamp(12px, 3vw, 24px);
+}
+
+/* Responsive Modal Card Bounds */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3vw, 24px);
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow-y: auto;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: min(92vw, 560px);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  margin: auto;
+}
+
+/* Responsive Breakpoints */
+
+/* Small Mobile Screens (320px - 480px) */
+@media (max-width: 480px) {
+  html, body {
+    font-size: 14px;
+  }
+
+  h1 { font-size: clamp(1.35rem, 5.5vw, 1.65rem) !important; }
+  h2 { font-size: clamp(1.15rem, 4.5vw, 1.35rem) !important; }
+  h3 { font-size: clamp(1rem, 4vw, 1.15rem) !important; }
+
+  /* Compact button paddings for tight mobile viewports */
+  button {
+    min-height: 40px;
+  }
+
+  .quick-action-dock {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .quick-action-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  /* 3D Card Scaling on small devices */
+  .card-wrapper, .card-container-3d {
+    max-width: 100%;
+  }
+
+  /* Reduce large fixed paddings */
+  .responsive-p-mobile {
+    padding: 16px 12px !important;
+  }
+}
+
+/* Standard Mobile & Phablet (481px - 768px) */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  /* Mobile bottom bar compensation */
+  main {
+    padding-bottom: calc(80px + var(--sab)) !important;
+  }
+}
+
+/* Tablet & iPad (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-grid-2col {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .tablet-p-reduced {
+    padding: 18px 16px !important;
+  }
+}
+
+/* Desktop & Large Monitors (> 1025px) */
+@media (min-width: 1025px) {
+  .desktop-only-flex {
+    display: flex !important;
+  }
+}
+
+/* Ultra-Wide Monitors (> 1920px) */
+@media (min-width: 1920px) {
+  .container-responsive,
+  main {
+    max-width: 1600px;
+  }
 }

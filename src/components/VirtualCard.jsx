@@ -591,7 +591,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
           ========================================================================= */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(68px, 1fr))',
         gap: '8px',
         marginTop: '16px'
       }}>

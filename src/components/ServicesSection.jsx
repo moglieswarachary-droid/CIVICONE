@@ -293,7 +293,7 @@ export default function ServicesSection({ services: initialServices }) {
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '14px' }}>
                     My Registered Vehicles (MoRTH / VAHAN Sync)
                   </h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '16px' }}>
                     {categoryData.vehicles.map((v, idx) => (
                       <div key={idx} style={{ backgroundColor: '#FFFFFF', borderRadius: '20px', padding: '20px', border: '1px solid #E2E8F0', boxShadow: 'var(--shadow-sm)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
@@ -373,12 +373,33 @@ export default function ServicesSection({ services: initialServices }) {
                       Issuer: <strong>{rec.issuer}</strong> | Ref: <strong>{rec.maskedId}</strong>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
-                      <button onClick={() => setSelectedRecordModal(rec)} style={{ backgroundColor: '#EAF3FF', color: '#0B5ED7', border: 'none', padding: '8px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>
-                        View Record
-                      </button>
-                      <button onClick={() => handleDownloadRecord(rec)} style={{ backgroundColor: '#F1F5F9', color: '#475569', border: 'none', padding: '8px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>
-                        Download PDF
+                    <div style={{ fontSize: '0.75rem', color: '#64748B', marginBottom: '12px' }}>
+                      Ref No: <strong style={{ color: '#0B1F3A' }}>{rec.refNo}</strong>
+                    </div>
+
+                    <div style={{ backgroundColor: '#F8FAFC', padding: '10px 14px', borderRadius: '10px', fontSize: '0.75rem', color: '#475569', marginBottom: '14px', border: '1px solid #E2E8F0' }}>
+                      {rec.details}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.7rem', color: '#94A3B8' }}>Issued: {rec.issuedDate}</span>
+                      <button
+                        onClick={() => handleTriggerWorkflow(rec)}
+                        style={{
+                          backgroundColor: '#EFF6FF',
+                          color: '#0B5ED7',
+                          border: '1px solid #BFDBFE',
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        Launch Service →
                       </button>
                     </div>
                   </div>
@@ -404,7 +425,7 @@ export default function ServicesSection({ services: initialServices }) {
           </div>
 
           {/* 8 Category Entry Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '20px', marginBottom: '40px' }}>
             {categoryModules.map(cat => {
               const IconComp = cat.icon;
               return (

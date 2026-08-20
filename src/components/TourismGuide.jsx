@@ -518,7 +518,7 @@ export default function TourismGuide({ onSelectTravelBooking }) {
           <p style={{ fontSize: '0.85rem' }}>Try clearing your search term or switching to "All Seasons".</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '24px' }}>
           {filteredDestinations.map((dest) => (
             <div
               key={dest.id}

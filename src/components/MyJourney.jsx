@@ -537,7 +537,7 @@ export default function MyJourney({ citizen, documents = [] }) {
       }}>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '16px' }}>
           {/* Search Box */}
-          <div style={{ flex: 1, minWidth: '260px', position: 'relative' }}>
+          <div style={{ flex: 1, minWidth: 'min(260px, 100%)', position: 'relative' }}>
             <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
             <input
               type="text"

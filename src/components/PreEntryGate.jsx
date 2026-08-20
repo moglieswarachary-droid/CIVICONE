@@ -735,7 +735,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '22px' }}>
+                <div style={{ display: 'flex', gap: 'clamp(4px, 1.8vw, 8px)', justifyContent: 'center', marginBottom: '22px', flexWrap: 'nowrap' }}>
                   {otpDigits.map((digit, idx) => (
                     <input
                       key={idx}
@@ -745,16 +745,17 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
                       value={digit}
                       onChange={(e) => handleOtpInput(idx, e.target.value)}
                       style={{
-                        width: '46px',
-                        height: '52px',
+                        width: 'clamp(36px, 11vw, 46px)',
+                        height: 'clamp(42px, 12vw, 52px)',
                         textAlign: 'center',
-                        fontSize: '1.3rem',
+                        fontSize: 'clamp(1.05rem, 3.5vw, 1.3rem)',
                         fontWeight: 800,
                         borderRadius: '10px',
                         backgroundColor: '#F8FAFC',
                         border: '1.5px solid #CBD5E1',
                         color: '#0B1F3A',
-                        outline: 'none'
+                        outline: 'none',
+                        padding: 0
                       }}
                     />
                   ))}

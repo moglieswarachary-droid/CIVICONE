@@ -737,7 +737,7 @@ export default function OrganizationDashboard({ session, onLogout }) {
               RTO Security &amp; Access Control Matrix
             </h3>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '20px' }}>
               
               <div style={{ backgroundColor: '#0B132B', padding: '24px', borderRadius: '18px', border: '1.5px solid #3A506B' }}>
                 <h4 style={{ fontSize: '1rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '12px' }}>Allowed Document Categories</h4>

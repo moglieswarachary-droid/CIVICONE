@@ -741,7 +741,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
       )}
 
       {/* REQUIREMENT 5: THREE CATEGORY OVERVIEW CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: '16px', marginBottom: '24px' }}>
         
         {/* CARD 1: GOVERNMENT AUTHORIZED */}
         <div style={{
@@ -1030,7 +1030,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
         </div>
       ) : (
         /* REQUIREMENT 8 & 16: RESPONSIVE DOCUMENT CARDS GRID WITH CLASSIFICATION BADGES */
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '20px', marginBottom: '40px' }}>
           {sortedDocs.map(doc => {
             const expInfo = calculateDocExpiryStatus(doc);
             const isExpired = expInfo.status === 'EXPIRED';
