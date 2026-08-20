@@ -17,7 +17,13 @@ import DesktopWorkstationGuard from './components/DesktopWorkstationGuard.jsx';
 export default function App() {
   // Views: 'landing' | 'gate' | 'citizen' | 'organization-gate' | 'organization' | 'authority-gate' | 'authority' | 'police' | 'admin-gate' | 'admin' | 'verify'
   const [currentView, setCurrentView] = useState('landing');
-  const [authenticatedCitizen, setAuthenticatedCitizen] = useState(null);
+  const [authenticatedCitizen, setAuthenticatedCitizen] = useState(() => {
+    try {
+      const active = localStorage.getItem('civiqone_active_citizen');
+      if (active) return JSON.parse(active);
+    } catch (e) {}
+    return null;
+  });
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState(null);
   const [authenticatedAdmin, setAuthenticatedAdmin] = useState(null);
   const [verifyToken, setVerifyToken] = useState('CIV-TOKEN-CIV-DEMO-10001-SECURE-2026');
@@ -101,6 +107,12 @@ export default function App() {
   // Handle Citizen Login Authentication Completion
   const handleAuthSuccess = (citizenData) => {
     setAuthenticatedCitizen(citizenData);
+    try {
+      localStorage.setItem('civiqone_active_citizen', JSON.stringify(citizenData));
+      if (citizenData?.citizenId) {
+        localStorage.setItem(`civiqone_citizen_${citizenData.citizenId}`, JSON.stringify(citizenData));
+      }
+    } catch (e) {}
     changeView('citizen');
   };
 
@@ -125,6 +137,9 @@ export default function App() {
     setAuthenticatedCitizen(null);
     setAuthenticatedOfficer(null);
     setAuthenticatedAdmin(null);
+    try {
+      localStorage.removeItem('civiqone_active_citizen');
+    } catch (e) {}
     changeView('landing');
   };
 

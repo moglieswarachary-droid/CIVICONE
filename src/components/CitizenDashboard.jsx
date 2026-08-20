@@ -36,9 +36,34 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   const [globalSearch, setGlobalSearch] = useState('');
   const [mobileMoreDrawerOpen, setMobileMoreDrawerOpen] = useState(false);
   const [demoCitizens, setDemoCitizens] = useState(DEMO_CITIZENS_LIST);
-  const [currentCitizen, setCurrentCitizen] = useState(citizen);
+  const [currentCitizen, setCurrentCitizen] = useState(() => {
+    try {
+      const cid = citizen?.citizenId;
+      if (cid) {
+        const cached = localStorage.getItem(`civiqone_citizen_${cid}`);
+        if (cached) return JSON.parse(cached);
+      }
+      const active = localStorage.getItem('civiqone_active_citizen');
+      if (active) {
+        const parsed = JSON.parse(active);
+        if (parsed?.citizenId === citizen?.citizenId) return parsed;
+      }
+    } catch (e) {}
+    return citizen;
+  });
   const [targetTravelCity, setTargetTravelCity] = useState('');
   const [familyVaultMemberId, setFamilyVaultMemberId] = useState('fam-self');
+
+  const handleProfileUpdate = (updatedCitizen) => {
+    setCurrentCitizen(prev => {
+      const merged = { ...prev, ...updatedCitizen };
+      try {
+        localStorage.setItem(`civiqone_citizen_${merged.citizenId}`, JSON.stringify(merged));
+        localStorage.setItem('civiqone_active_citizen', JSON.stringify(merged));
+      } catch (e) {}
+      return merged;
+    });
+  };
 
   // Sync with prop if it updates externally
   useEffect(() => {
@@ -963,7 +988,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* TAB: PROFILE SETTINGS */}
           {activeTab === 'profile' && (
-            <ProfileSettings citizen={currentCitizen} onLogout={onLogout} card={cardData} onCardUpdate={(updatedCard) => setCardData(updatedCard)} />
+            <ProfileSettings citizen={currentCitizen} onLogout={onLogout} card={cardData} onCardUpdate={(updatedCard) => setCardData(updatedCard)} onProfileUpdate={handleProfileUpdate} />
           )}
 
         </main>

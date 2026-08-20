@@ -402,21 +402,30 @@ export const dbService = {
     return log;
   },
 
-  // Update Citizen Profile Details (Mobile, Email)
+  // Update Citizen Profile Details (Photo, Email, Address Details)
   async updateCitizenProfile(citizenId, updates) {
-    const { mobile, email } = updates;
+    const { mobile, email, photo, profileImage, address, houseNo, street, city, mandal, district, state, pincode, addressDetails } = updates;
     const cleanMobile = mobile ? (mobile.startsWith('+91') ? mobile : `+91-${mobile}`) : undefined;
+    const resolvedPhoto = photo !== undefined ? photo : profileImage;
 
     try {
       if (prisma) {
+        const updateData = {
+          ...(cleanMobile && { mobile: cleanMobile, mobileMasked: cleanMobile }),
+          ...(email && { email, emailMasked: email }),
+          ...(resolvedPhoto !== undefined && { profileImage: resolvedPhoto }),
+          ...(address && { address }),
+          ...(state && { state })
+        };
         const updated = await prisma.citizen.update({
           where: { citizenId },
-          data: {
-            ...(cleanMobile && { mobile: cleanMobile, mobileMasked: cleanMobile }),
-            ...(email && { email, emailMasked: email })
-          }
+          data: updateData
         });
-        return updated;
+        return {
+          ...updated,
+          houseNo, street, city, mandal, district, pincode,
+          addressDetails: addressDetails || { houseNo, street, city, mandal, district, state, pincode }
+        };
       }
     } catch (err) {
       console.warn("Prisma update profile fallback:", err.message);
@@ -431,6 +440,30 @@ export const dbService = {
       if (email) {
         found.email = email;
         found.emailMasked = email;
+      }
+      if (resolvedPhoto !== undefined) {
+        found.photo = resolvedPhoto;
+        found.profileImage = resolvedPhoto;
+      }
+      if (address) found.address = address;
+      if (state) found.state = state;
+      if (houseNo) found.houseNo = houseNo;
+      if (street) found.street = street;
+      if (city) found.city = city;
+      if (mandal) found.mandal = mandal;
+      if (district) found.district = district;
+      if (pincode) found.pincode = pincode;
+      if (addressDetails) found.addressDetails = addressDetails;
+      else if (houseNo || street || city || mandal || district || state || pincode) {
+        found.addressDetails = {
+          houseNo: houseNo || found.houseNo || '',
+          street: street || found.street || '',
+          city: city || found.city || '',
+          mandal: mandal || found.mandal || '',
+          district: district || found.district || '',
+          state: state || found.state || '',
+          pincode: pincode || found.pincode || ''
+        };
       }
     }
     return found;

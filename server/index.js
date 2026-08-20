@@ -187,17 +187,17 @@ app.post('/api/auth/citizen-login', async (req, res) => {
   }
 });
 
-// PUT Update Citizen Profile Endpoint (Email & Mobile with Audit Logging)
+// PUT Update Citizen Profile Endpoint (Photo, Email, Address, etc.)
 app.put('/api/citizen/profile', async (req, res) => {
   try {
-    const { citizenId, mobile, email } = req.body;
+    const { citizenId, ...updates } = req.body;
     const targetId = citizenId || db.activeCitizenId;
 
-    const updated = await dbService.updateCitizenProfile(targetId, { mobile, email });
+    const updated = await dbService.updateCitizenProfile(targetId, updates);
 
     await dbService.addAuditLog({
       citizenId: targetId,
-      event: `Profile Credentials Updated (Mobile/Email Modified)`,
+      event: `Profile Updated (Personal/Address Details Modified)`,
       device: "Web Client",
       location: "India",
       ip: "49.37.142.90"
