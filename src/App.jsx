@@ -13,6 +13,7 @@ import AdminGate from './components/AdminGate.jsx';
 import AdminPortal from './components/AdminPortal.jsx';
 import PublicQRVerification from './components/PublicQRVerification.jsx';
 import DesktopWorkstationGuard from './components/DesktopWorkstationGuard.jsx';
+import { authStorage } from './services/api.js';
 
 export default function App() {
   // Views: 'landing' | 'gate' | 'citizen' | 'organization-gate' | 'organization' | 'authority-gate' | 'authority' | 'police' | 'admin-gate' | 'admin' | 'verify'
@@ -83,22 +84,19 @@ export default function App() {
       } else if (rawHash === 'authority-gate' || rawHash === 'authority' || path.startsWith('/authority')) {
         setCurrentView('authority-gate');
       } else if (rawHash === 'gate' || rawHash === 'citizen-login') {
+        setCurrentView('gate');
+      } else if (rawHash === 'citizen' || rawHash.startsWith('citizen')) {
         if (activeCitizenData) {
           setCurrentView('citizen');
         } else {
           setCurrentView('gate');
         }
-      } else if (rawHash === 'citizen' || rawHash.startsWith('citizen')) {
-        setCurrentView('citizen');
       } else if (path.startsWith('/verify') || rawHash === 'verify' || token) {
         if (token) setVerifyToken(token);
         setCurrentView('verify');
-      } else if (!rawHash) {
-        if (activeCitizenData) {
-          setCurrentView('citizen');
-        } else {
-          setCurrentView('landing');
-        }
+      } else {
+        // Direct URL visit without hash or explicit landing
+        setCurrentView('landing');
       }
     };
 
@@ -155,6 +153,7 @@ export default function App() {
     setAuthenticatedAdmin(null);
     try {
       localStorage.removeItem('civiqone_active_citizen');
+      authStorage.clearToken();
     } catch (e) {}
     changeView('landing');
   };
