@@ -321,11 +321,12 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             </div>
 
             {/* CARD MAIN PROFILE SECTION (Two-Column Layout) */}
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', margin: '4px 0' }}>
+            <div style={{ display: 'flex', gap: '14px', alignItems: 'center', margin: '3px 0' }}>
               
               {/* Left Column: Citizen Portrait Photograph */}
-              <div style={{ position: 'relative', flexShrink: 0 }}>
+              <div className="card-photo-col" style={{ position: 'relative', flexShrink: 0 }}>
                 <img
+                  className="card-profile-photo"
                   src={photoUrl}
                   alt={citizenName}
                   style={{
@@ -358,29 +359,35 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               {/* Right Column: Citizen Identity Information */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 {/* Citizen Full Name */}
-                <h2 style={{
-                  fontSize: '1.2rem',
-                  fontWeight: 900,
-                  color: '#F8F7F2',
-                  letterSpacing: '-0.01em',
-                  marginBottom: '3px',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
+                <h2
+                  className="card-citizen-name"
+                  style={{
+                    fontSize: '1.2rem',
+                    fontWeight: 900,
+                    color: '#F8F7F2',
+                    letterSpacing: '-0.01em',
+                    marginBottom: '3px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
                   {citizenName}
                 </h2>
 
                 {/* Civic ID with Copy Helper */}
-                <div style={{
-                  fontSize: '0.775rem',
-                  fontWeight: 800,
-                  color: '#93C5FD',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  marginBottom: '2px'
-                }}>
+                <div
+                  className="card-id-row"
+                  style={{
+                    fontSize: '0.775rem',
+                    fontWeight: 800,
+                    color: '#93C5FD',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    marginBottom: '2px'
+                  }}
+                >
                   <span style={{ color: '#D9DEE8', fontSize: '0.7rem', fontWeight: 700 }}>CIVIC ID:</span>
                   <span style={{ fontFamily: 'monospace', fontWeight: 900, letterSpacing: '0.3px', color: '#F8F7F2' }}>{civicId}</span>
                   <button
@@ -395,18 +402,21 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                 </div>
 
                 {/* DOB & Gender */}
-                <div style={{ fontSize: '0.7rem', color: '#D9DEE8', marginBottom: '2px' }}>
+                <div className="card-info-row" style={{ fontSize: '0.7rem', color: '#D9DEE8', marginBottom: '2px' }}>
                   <span style={{ color: '#93C5FD', fontWeight: 700 }}>DOB:</span> <strong style={{ color: '#F8F7F2' }}>{dob}</strong> &bull; <span style={{ color: '#93C5FD', fontWeight: 700 }}>GENDER:</span> <strong style={{ color: '#F8F7F2' }}>{gender}</strong>
                 </div>
 
                 {/* State / Region */}
-                <div style={{
-                  fontSize: '0.675rem',
-                  color: '#38BDF8',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}>
+                <div
+                  className="card-info-row"
+                  style={{
+                    fontSize: '0.675rem',
+                    color: '#38BDF8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
                   <MapPin size={11} />
                   <span><strong>STATE / REGION:</strong> {jurisdiction}</span>
                 </div>
@@ -414,6 +424,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
 
               {/* Integrated Front QR Code Area */}
               <div
+                className="card-qr-front"
                 onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
                 style={{ cursor: 'pointer', flexShrink: 0 }}
                 title="Click to view scannable QR verification modal"
@@ -423,14 +434,17 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             </div>
 
             {/* CARD FOOTER & DIGITAL CITIZEN SIGNATURE */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-end',
-              borderTop: '1px solid rgba(217, 222, 232, 0.25)',
-              paddingTop: '6px',
-              fontSize: '0.65rem'
-            }}>
+            <div
+              className="card-footer-front"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+                borderTop: '1px solid rgba(217, 222, 232, 0.25)',
+                paddingTop: '6px',
+                fontSize: '0.65rem'
+              }}
+            >
               
               {/* Left: Citizen Status & Security Reference */}
               <div>
@@ -531,7 +545,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '14px', alignItems: 'center', margin: '4px 0' }}>
               
               {/* Left Column: Structured Identity Security Specifications */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.675rem' }}>
+              <div className="card-back-list" style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.675rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#172033' }}>
                   <Fingerprint size={12} style={{ color: '#1A4F9C' }} />
                   <span><strong>Multi-Factor Identity:</strong> <span style={{ color: '#101B3D' }}>Grade-A Verified</span></span>
@@ -556,6 +570,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
 
               {/* Right Column: Large Dynamic Scannable QR Code */}
               <div
+                className="card-qr-back"
                 onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
                 style={{ textAlign: 'center', cursor: 'pointer' }}
                 title="Click to view high-resolution QR modal"
@@ -565,17 +580,20 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             </div>
 
             {/* Back Footer */}
-            <div style={{
-              backgroundColor: '#EFF6FF',
-              borderRadius: '8px',
-              padding: '6px 10px',
-              fontSize: '0.625rem',
-              color: '#1E2F6B',
-              border: '1px solid #DBEAFE',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+            <div
+              className="card-footer-back"
+              style={{
+                backgroundColor: '#EFF6FF',
+                borderRadius: '8px',
+                padding: '6px 10px',
+                fontSize: '0.625rem',
+                color: '#1E2F6B',
+                border: '1px solid #DBEAFE',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+            >
               <span>VERIFY CIVIQONE DIGITAL IDENTITY: <strong style={{ color: '#101B3D' }}>verify.civiqone.gov.in</strong></span>
               <span style={{ fontFamily: 'monospace', color: '#101B3D', fontWeight: 800 }}>{civicId}</span>
             </div>
