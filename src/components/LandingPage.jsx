@@ -53,7 +53,7 @@ export default function LandingPage({ onAccessCIVIQONE, onOpenAuthorityPortal, o
                 CIVIQONE
               </span>
               <span style={{ display: 'block', fontSize: '0.625rem', fontWeight: 700, color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '-3px' }}>
-                National Digital Identity &amp; Vault
+                One Citizen - One Trusted Identity
               </span>
             </div>
           </div>

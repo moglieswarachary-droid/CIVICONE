@@ -97,7 +97,7 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
       citizenId: hotelInputId.trim(),
       name: hotelInputId.includes('710646') ? 'Raghavendra' : 'Verified Citizen',
       photoUrl: null,
-      status: 'VALID CIVICONE IDENTITY'
+      status: 'VALID CIVIQONE IDENTITY'
     });
   };
 
