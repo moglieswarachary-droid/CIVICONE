@@ -21,6 +21,7 @@ export default function HelpCentre({ citizen = {} }) {
   const [search, setSearch] = useState('');
   const [selectedSection, setSelectedSection] = useState('All');
   const [activeFaqIndex, setActiveFaqIndex] = useState(null);
+  const [activeInfoSection, setActiveInfoSection] = useState('sla'); // 'sla' | 'directory' | 'emergency' | 'charter'
   
   // Modals & Active Channel States
   const [showTicketModal, setShowTicketModal] = useState(false);
@@ -739,6 +740,250 @@ export default function HelpCentre({ citizen = {} }) {
           </div>
         </div>
       )}
+
+      {/* COMPREHENSIVE CUSTOMER CARE INFORMATION & OPERATIONS DIRECTORY */}
+      <div style={{
+        backgroundColor: 'var(--bg-card)',
+        borderRadius: '24px',
+        padding: '28px',
+        border: '1.5px solid var(--border-light)',
+        boxShadow: 'var(--shadow-sm)',
+        marginBottom: '32px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-blue)', backgroundColor: 'var(--light-blue)', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                CITIZEN ASSISTANCE &amp; OPERATIONS INFO
+              </span>
+            </div>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
+              Customer Care Information &amp; Service Directory
+            </h2>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px', margin: 0 }}>
+              Round-the-clock service SLAs, departmental contact directory, emergency security protocols, and citizen rights charter.
+            </p>
+          </div>
+        </div>
+
+        {/* INFO TABS HEADER */}
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '20px', borderBottom: '1px solid var(--border-light)' }}>
+          {[
+            { id: 'sla', label: 'Service Timings & SLAs', icon: Clock },
+            { id: 'directory', label: 'Departmental Directory', icon: Building2 },
+            { id: 'emergency', label: 'Emergency Protocols', icon: ShieldAlert },
+            { id: 'charter', label: 'Citizen Rights & Charter', icon: ShieldCheck }
+          ].map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeInfoSection === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveInfoSection(tab.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 16px',
+                  borderRadius: '12px',
+                  border: '1px solid',
+                  borderColor: isActive ? 'var(--primary-blue)' : 'var(--border-light)',
+                  backgroundColor: isActive ? 'var(--primary-blue)' : 'var(--bg-main)',
+                  color: isActive ? '#FFFFFF' : 'var(--text-muted)',
+                  fontSize: '0.825rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <Icon size={16} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* TAB 1: SERVICE TIMINGS & SLAS */}
+        {activeInfoSection === 'sla' && (
+          <div className="animate-fade-in-scale" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+              <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#059669', textTransform: 'uppercase' }}>24/7/365 Non-Stop</span>
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px', marginBottom: '8px' }}>Emergency Assistance</h4>
+                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
+                  Immediate virtual card locking, remote credential invalidation, and fraud defense hotlines operate round the clock without interruption.
+                </p>
+                <div style={{ marginTop: '12px', fontSize: '0.775rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
+                  Response Guarantee: &lt; 2 Minutes
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#D97706', textTransform: 'uppercase' }}>Rapid Live Triage</span>
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px', marginBottom: '8px' }}>Live Assistant &amp; Callback</h4>
+                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
+                  Interactive triage assistant with common presets and direct automated 30-second callback dispatch for voice consultations.
+                </p>
+                <div style={{ marginTop: '12px', fontSize: '0.775rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
+                  Queue Speed: &lt; 15 Seconds
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#4F46E5', textTransform: 'uppercase' }}>Founder Pass SLA</span>
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px', marginBottom: '8px' }}>Gold Pass Priority</h4>
+                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
+                  Citizens holding an activated CivicOne Gold Pass receive priority queue dispatch and dedicated senior officer ticket assignment.
+                </p>
+                <div style={{ marginTop: '12px', fontSize: '0.775rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
+                  Turnaround: &lt; 15 Minutes
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#2563EB', textTransform: 'uppercase' }}>Official Email Desk</span>
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px', marginBottom: '8px' }}>Email Inquiries</h4>
+                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
+                  Direct email communication to <strong style={{ color: 'var(--text-main)' }}>civicone.official.in@gmail.com</strong> with automated tracking token generation.
+                </p>
+                <div style={{ marginTop: '12px', fontSize: '0.775rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
+                  First Response: &lt; 2 Hours
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: DEPARTMENTAL DIRECTORY */}
+        {activeInfoSection === 'directory' && (
+          <div className="animate-fade-in-scale" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <ShieldCheck size={18} style={{ color: 'var(--primary-blue)' }} />
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>UIDAI &amp; Aadhaar Identity Desk</strong>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                Assistance with dynamic masking, biometric lock flags, and name/DOB mismatch reconciliations.
+              </p>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontFamily: 'monospace' }}>
+                Routing Email: {OFFICIAL_SUPPORT_EMAIL} (Ref: UIDAI-01)
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <Compass size={18} style={{ color: '#059669' }} />
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>MoRTH Parivahan RTO Desk</strong>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                Driving License attestation, vehicle RC sync, and international permit cryptographic validation.
+              </p>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontFamily: 'monospace' }}>
+                Routing Email: {OFFICIAL_SUPPORT_EMAIL} (Ref: MORTH-02)
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <AlertTriangle size={18} style={{ color: '#DC2626' }} />
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>National Cybercrime Defense</strong>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                Urgent reporting of fraudulent QR scans, unauthorized biometric queries, and impersonation attempts.
+              </p>
+              <div style={{ fontSize: '0.75rem', color: '#DC2626', fontWeight: 800 }}>
+                Direct Hotline: 1947-CIVIC (Toll-Free, 24/7)
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <Building2 size={18} style={{ color: '#6366F1' }} />
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Organization Verification Audit</strong>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                Disputes regarding third-party verifier access (colleges, mobile stores, hotels, employers).
+              </p>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontFamily: 'monospace' }}>
+                Grievance Officer: {OFFICIAL_SUPPORT_EMAIL}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: EMERGENCY PROTOCOLS */}
+        {activeInfoSection === 'emergency' && (
+          <div className="animate-fade-in-scale" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '16px', padding: '16px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                <ShieldAlert size={20} style={{ color: '#DC2626' }} />
+                <strong style={{ fontSize: '0.95rem', color: '#DC2626' }}>Protocol 1: Lost Device or Compromised Phone</strong>
+              </div>
+              <p style={{ fontSize: '0.825rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.5 }}>
+                1. Dial <strong>1947-CIVIC</strong> or email <strong>{OFFICIAL_SUPPORT_EMAIL}</strong> immediately.<br/>
+                2. Request an <strong>Emergency Dynamic QR Freeze</strong> to invalidate all current digital identity tokens.<br/>
+                3. Once your replacement device is active, complete biometric/Aadhaar OTP verification to issue new cryptographic keys.
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', borderRadius: '16px', padding: '16px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                <Lock size={18} style={{ color: 'var(--primary-blue)' }} />
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Protocol 2: Revoking Third-Party Verifier Access</strong>
+              </div>
+              <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
+                Navigate to <strong>Privacy Centre → Access &amp; Consent</strong> in the Citizen Portal. Find the organization in the active consent registry and click <strong>Revoke Consent</strong>. Their decryption permissions are terminated across all gateways immediately.
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', borderRadius: '16px', padding: '16px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                <CheckCircle2 size={18} style={{ color: '#059669' }} />
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Protocol 3: Document Verification Dispute</strong>
+              </div>
+              <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
+                If an educational degree, driving license, or government certificate shows unexpected hash validation errors, click the <strong>Raise Ticket</strong> button above with the Document ID for immediate issuer ledger re-synchronization.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: CITIZEN RIGHTS & CHARTER */}
+        {activeInfoSection === 'charter' && (
+          <div className="animate-fade-in-scale" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <Lock size={18} style={{ color: '#059669' }} />
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Zero Plaintext Disclosure</strong>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
+                Your full Aadhaar number, PAN, and demographic details are never shared in plaintext. Only cryptographically signed verifiable claims are transmitted to authorized verifiers.
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <UserCheck size={18} style={{ color: 'var(--primary-blue)' }} />
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Explicit Consent Sovereign</strong>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
+                No agency, organization, or inspector can access your personal credentials without an explicit biometric or OTP authorization step initiated by you.
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <FileText size={18} style={{ color: '#D97706' }} />
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>DPDP Act 2023 Compliance</strong>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
+                CivicOne adheres strictly to the Digital Personal Data Protection Act, 2023, giving you the permanent right to review, rectify, or purge consent grants at any time.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* SEARCHABLE KNOWLEDGE BASE */}
       <div style={{

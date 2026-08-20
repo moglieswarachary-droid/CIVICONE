@@ -178,7 +178,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       key: 'support',
       title: 'SECURITY & SUPPORT',
       items: [
-        { id: 'help', label: '24/7 Customer Care', icon: Headphones, badge: '24/7 LIVE', isLive: true },
+        { id: 'help', label: 'Customer Care', icon: Headphones },
         { id: 'security', label: 'Security Centre', icon: Shield },
         { id: 'privacy', label: 'Privacy Centre', icon: Lock }
       ]
@@ -282,10 +282,10 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           {/* Header Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
-            {/* 24/7 Customer Care Quick Access */}
+            {/* Customer Care Quick Access */}
             <button
               onClick={() => handleSelectTab('help')}
-              title="24/7 National Citizen Care Desk"
+              title="National Citizen Customer Care Desk"
               style={{
                 backgroundColor: activeTab === 'help' ? 'var(--primary-blue)' : 'var(--bg-main)',
                 color: activeTab === 'help' ? '#FFFFFF' : 'var(--text-main)',
@@ -302,8 +302,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
               }}
             >
               <Headphones size={15} style={{ color: activeTab === 'help' ? '#FFFFFF' : 'var(--primary-blue)' }} />
-              <span className="hidden-mobile">24/7 Care</span>
-              <span className="live-pulse-dot" style={{ width: '6px', height: '6px' }} />
+              <span className="hidden-mobile">Customer Care</span>
             </button>
 
             {/* Theme Toggle Button */}
@@ -1017,7 +1016,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {[
-                  { id: 'help', label: '24/7 Customer Care', icon: Headphones, badge: '24/7 LIVE' },
+                  { id: 'help', label: 'Customer Care', icon: Headphones },
                   { id: 'journey', label: 'My Journey', icon: Milestone },
                   { id: 'activity', label: 'My Activity', icon: Activity },
                   { id: 'privacy', label: 'Access & Consent', icon: Lock },
