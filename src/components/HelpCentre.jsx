@@ -1,83 +1,81 @@
-// src/components/HelpCentre.jsx - 24/7 Advanced Citizen Care & Rapid Response Command Center
-// Connected with Official National Support Email: civicone.official.in@gmail.com
+// src/components/HelpCentre.jsx - CivicOne Customer Care Support Center
+// Official Support Channel: civicone.official.in@gmail.com
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Headphones, Search, FileText, ShieldCheck, Ticket, MessageSquare, Plus,
-  CheckCircle2, ChevronDown, X, Lock, Compass, Plane, Crown, Sparkles, Building2,
+  CheckCircle2, ChevronDown, X, Lock, Compass, Building2, User,
   Mail, PhoneCall, Clock, Copy, Check, Send, AlertTriangle, ShieldAlert,
-  Zap, ArrowRight, UserCheck, RefreshCw, Radio
+  Zap, ArrowRight, UserCheck, RefreshCw, Radio, HelpCircle, Upload,
+  Layers, AlertCircle, FileCheck, ExternalLink
 } from 'lucide-react';
 
 const OFFICIAL_SUPPORT_EMAIL = 'civicone.official.in@gmail.com';
-const TOLL_FREE_HELPLINE = '1800-248-4266'; // 1800-CIVIC-ONE
+const TOLL_FREE_HELPLINE = '1800-248-4266';
 const EMERGENCY_FRAUD_HOTLINE = '1947-CIVIC';
 
 export default function HelpCentre({ citizen = {} }) {
   const citizenName = citizen?.fullName || citizen?.name || 'Citizen';
   const civicId = citizen?.citizenId || 'CIV-DEMO-10001';
   const citizenMobile = citizen?.mobile || '+91 90000 00001';
+  const citizenEmail = citizen?.email || 'citizen.demo@civicone.gov.in';
 
+  // Active View / Scroll target refs
+  const formRef = useRef(null);
+  const faqRef = useRef(null);
+  const trackerRef = useRef(null);
+
+  // Search & FAQ state
   const [search, setSearch] = useState('');
-  const [selectedSection, setSelectedSection] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [activeFaqIndex, setActiveFaqIndex] = useState(null);
-  const [activeInfoSection, setActiveInfoSection] = useState('sla'); // 'sla' | 'directory' | 'emergency' | 'charter'
-  
-  // Modals & Active Channel States
-  const [showTicketModal, setShowTicketModal] = useState(false);
-  const [showLiveChatModal, setShowLiveChatModal] = useState(false);
-  const [showCallbackModal, setShowCallbackModal] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedRequestId, setCopiedRequestId] = useState(false);
 
-  // Ticket Form & Recent Tickets State
-  const [ticketForm, setTicketForm] = useState({
-    subject: '',
-    category: 'CivicOne ID & Aadhaar',
-    priority: 'HIGH',
-    message: ''
+  // Tracker State
+  const [searchTrackingId, setSearchTrackingId] = useState('');
+  const [trackingResult, setTrackingResult] = useState(null);
+  const [trackingError, setTrackingError] = useState('');
+
+  // Support Request Form State
+  const [formData, setFormData] = useState({
+    fullName: citizenName,
+    mobileNumber: citizenMobile,
+    emailAddress: citizenEmail,
+    department: 'General Citizen Platform',
+    category: 'Citizen Services',
+    description: '',
+    attachmentName: ''
   });
-  const [recentTickets, setRecentTickets] = useState([
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedRequest, setSubmittedRequest] = useState(null);
+
+  // List of Recent / Submitted Requests for Tracking
+  const [requestsList, setRequestsList] = useState([
     {
-      id: 'TKT-2026-9048',
-      subject: 'Aadhaar Masking Toggle Verification Query',
-      category: 'CivicOne ID',
-      priority: 'HIGH',
+      id: 'REQ-2026-90482',
+      category: 'Documents & Verification',
+      department: 'Digital Vault Attestation',
+      subject: 'Aadhaar Masking & Vault Sync Verification',
+      description: 'Requested verification check for demographic token sync.',
       status: 'RESOLVED',
-      sla: 'Resolved in 6 mins',
+      statusLabel: 'Resolved',
+      sla: 'Completed in 12 mins',
       timestamp: 'Today, 09:15 AM'
     },
     {
-      id: 'TKT-2026-8812',
+      id: 'REQ-2026-88120',
+      category: 'Applications',
+      department: 'Civic Pass Department',
       subject: 'Gold Pass Founder Membership Activation Status',
-      category: 'Gold Pass',
-      priority: 'URGENT',
-      status: 'IN_PROGRESS',
+      description: 'Inquiry regarding payment reconciliation and badge update.',
+      status: 'IN_REVIEW',
+      statusLabel: 'Under Officer Review',
       sla: 'Assigned to Senior Officer Sharma',
       timestamp: 'Today, 10:20 AM'
     }
   ]);
-  const [ticketSubmitted, setTicketSubmitted] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  // 30-Second Priority Callback State
-  const [callbackNumber, setCallbackNumber] = useState(citizenMobile);
-  const [callbackReason, setCallbackReason] = useState('Urgent Identity Verification Issue');
-  const [callbackStatus, setCallbackStatus] = useState(null); // 'COUNTDOWN' | 'CONNECTED'
-  const [countdownSeconds, setCountdownSeconds] = useState(30);
-
-  // Live Rapid Chat Simulator State
-  const [chatMessages, setChatMessages] = useState([
-    {
-      sender: 'agent',
-      name: 'CivicOne 24/7 Rapid Response Desk',
-      badge: 'OFFICIAL ASSISTANT',
-      text: `Namaste ${citizenName}! CivicOne 24/7 Emergency Citizen Care is online. How can our national duty officer assist you today?`,
-      time: 'Just now'
-    }
-  ]);
-  const [chatInput, setChatInput] = useState('');
-  const [chatTyping, setChatTyping] = useState(false);
-  const chatBottomRef = useRef(null);
 
   // Copy Email Helper
   const handleCopyEmail = () => {
@@ -86,183 +84,201 @@ export default function HelpCentre({ citizen = {} }) {
     setTimeout(() => setCopiedEmail(false), 2500);
   };
 
-  // Start Callback Countdown Simulation
-  const handleRequestCallback = (e) => {
-    e.preventDefault();
-    if (!callbackNumber) return;
-    setCallbackStatus('COUNTDOWN');
-    setCountdownSeconds(30);
+  // Scroll Helpers
+  const scrollToForm = (prefillCategory = null) => {
+    if (prefillCategory) {
+      setFormData(prev => ({ ...prev, category: prefillCategory }));
+    }
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  useEffect(() => {
-    let timer;
-    if (callbackStatus === 'COUNTDOWN' && countdownSeconds > 0) {
-      timer = setTimeout(() => setCountdownSeconds(prev => prev - 1), 1000);
-    } else if (callbackStatus === 'COUNTDOWN' && countdownSeconds === 0) {
-      setCallbackStatus('CONNECTED');
-    }
-    return () => clearTimeout(timer);
-  }, [callbackStatus, countdownSeconds]);
+  const scrollToFaqs = () => {
+    faqRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
-  // Send Chat Message & Simulated Fast Agent Response (< 1.5s)
-  const handleSendChatMessage = (presetText) => {
-    const textToSend = presetText || chatInput;
-    if (!textToSend.trim()) return;
+  const scrollToTracker = () => {
+    trackerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
-    const userMsg = {
-      sender: 'citizen',
-      name: citizenName,
-      text: textToSend,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
+  // Handle Form Submission
+  const handleSubmitRequest = (e) => {
+    e.preventDefault();
+    if (!formData.description.trim()) return;
 
-    setChatMessages(prev => [...prev, userMsg]);
-    if (!presetText) setChatInput('');
-    setChatTyping(true);
+    setIsSubmitting(true);
 
     setTimeout(() => {
-      setChatTyping(false);
-      let replyText = "Our 24/7 duty officer has received your priority query. Reference Token: CIV-CARE-" + Math.floor(100000 + Math.random() * 900000) + ". For complex grievances, you can also email us directly at " + OFFICIAL_SUPPORT_EMAIL;
+      const generatedId = `REQ-2026-${Math.floor(10000 + Math.random() * 90000)}`;
+      const newRequest = {
+        id: generatedId,
+        fullName: formData.fullName,
+        mobileNumber: formData.mobileNumber,
+        emailAddress: formData.emailAddress,
+        department: formData.department,
+        category: formData.category,
+        description: formData.description,
+        attachmentName: formData.attachmentName,
+        status: 'SUBMITTED',
+        statusLabel: 'Submitted & Queued',
+        sla: 'First Response in < 2 Hours',
+        timestamp: 'Just now'
+      };
 
-      const lower = textToSend.toLowerCase();
-      if (lower.includes('gold pass') || lower.includes('payment')) {
-        replyText = "Gold Pass transactions are verified in real-time. If your status shows standard, our automated ledger verifies webhook reconciliations instantly. Your ticket has been expedited under the 15-minute Founder SLA.";
-      } else if (lower.includes('aadhaar') || lower.includes('mask')) {
-        replyText = "Your Aadhaar number is securely stored in hardware-encrypted vaults. Only the last 4 digits are revealed when dynamic masking is enabled for authorized inspections.";
-      } else if (lower.includes('revoke') || lower.includes('organization') || lower.includes('access')) {
-        replyText = "You can immediately revoke any organization's access from your Privacy & Consent Matrix. Revocations take effect instantly across all state databases.";
-      } else if (lower.includes('lost') || lower.includes('freeze') || lower.includes('stolen')) {
-        replyText = "🚨 EMERGENCY PROTOCOL TRIGGERED: We have initiated a temporary security hold on tokenized verification attempts. Call our 24/7 Fraud Desk at 1947-CIVIC immediately.";
-      }
+      setSubmittedRequest(newRequest);
+      setRequestsList(prev => [newRequest, ...prev]);
+      setIsSubmitting(false);
 
-      setChatMessages(prev => [
+      // Reset form description & attachment
+      setFormData(prev => ({
         ...prev,
-        {
-          sender: 'agent',
-          name: 'Officer Rajesh Varma (Badge: CIV-AP-994)',
-          badge: 'SENIOR DUTY OFFICER',
-          text: replyText,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-    }, 1200);
+        description: '',
+        attachmentName: ''
+      }));
+    }, 800);
   };
 
-  useEffect(() => {
-    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages, chatTyping]);
-
-  // Submit Support Ticket
-  const handleTicketSubmit = async (e) => {
+  // Handle Tracking Search
+  const handleTrackSearch = (e) => {
     e.preventDefault();
-    if (!ticketForm.subject || !ticketForm.message) return;
-    setLoading(true);
-
-    const newTicket = {
-      id: `TKT-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-      subject: ticketForm.subject,
-      category: ticketForm.category,
-      priority: ticketForm.priority,
-      status: 'UNDER_OFFICER_REVIEW',
-      sla: ticketForm.priority === 'URGENT' ? '15-Min Express SLA' : '1-Hour Standard SLA',
-      timestamp: 'Just now'
-    };
-
-    try {
-      await fetch('/api/support/tickets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...ticketForm, citizenId: civicId, citizenEmail: citizen?.email })
-      });
-    } catch (err) {
-      // Local fallback
+    setTrackingError('');
+    if (!searchTrackingId.trim()) {
+      setTrackingResult(null);
+      return;
     }
 
-    setLoading(false);
-    setTicketSubmitted(newTicket);
-    setRecentTickets(prev => [newTicket, ...prev]);
-    setShowTicketModal(false);
-    setTicketForm({ subject: '', category: 'CivicOne ID & Aadhaar', priority: 'HIGH', message: '' });
+    const query = searchTrackingId.trim().toUpperCase();
+    const found = requestsList.find(r => r.id.toUpperCase() === query);
+
+    if (found) {
+      setTrackingResult(found);
+    } else {
+      setTrackingResult(null);
+      setTrackingError(`No active support request found matching ID: "${searchTrackingId}". Please verify your Support Request ID and try again.`);
+    }
   };
 
-  // FAQ Categories
-  const sections = [
-    { id: 'All', label: 'All Topics', icon: HelpCircle },
-    { id: '24/7 Care', label: '24/7 Support Desk', icon: Headphones },
-    { id: 'CivicOne ID', label: 'CivicOne ID & UIDAI', icon: ShieldCheck },
-    { id: 'Digital Vault', label: 'Digital Vault', icon: FileText },
-    { id: 'Cards', label: 'Civic Cards & QR', icon: Ticket },
-    { id: 'Gold Pass', label: 'Gold Pass Membership', icon: Crown },
-    { id: 'Doc Verification', label: 'Doc Verification', icon: CheckCircle2 },
-    { id: 'Org Access', label: 'Organization Access', icon: Building2 },
-    { id: 'Privacy', label: 'Privacy & Consent', icon: Lock },
-    { id: 'Security', label: 'Account Security', icon: ShieldAlert }
-  ];
-
-  const faqs = [
+  // 6 Support Domains Data
+  const supportDomains = [
     {
-      section: "24/7 Care",
-      q: "How fast does the CivicOne 24/7 Customer Care team respond?",
-      a: "Our AI + Officer Triage Desk responds within seconds (< 15 seconds average). For emergency disputes, identity theft, or lost device reports, citizens receive immediate callback assistance and live ticket routing to our official inbox: civicone.official.in@gmail.com."
+      number: '1',
+      title: 'General Support',
+      description: 'Get help with CivicOne features, services, navigation, and general platform-related questions.',
+      icon: HelpCircle,
+      categoryPrefill: 'Other',
+      tag: 'Platform & Guidance'
     },
     {
-      section: "24/7 Care",
-      q: "What is the official email for CivicOne citizen grievance escalation?",
-      a: `The official authorized support email is ${OFFICIAL_SUPPORT_EMAIL}. When emailing us, please include your unique Civic ID (${civicId}) for priority automated routing.`
+      number: '2',
+      title: 'Account & Profile Support',
+      description: 'Assistance with account registration, login problems, profile updates, mobile number or email updates, identity/profile-related issues, and account access problems.',
+      icon: User,
+      categoryPrefill: 'Account & Login',
+      tag: 'Credentials & Access'
     },
     {
-      section: "CivicOne ID",
-      q: "What is CivicOne ID and how does it protect my identity?",
-      a: "CivicOne ID is a unified national digital identity credential. It links verified government, education, RTO, and healthcare records without exposing sensitive plaintext numbers like Aadhaar or PAN directly."
+      number: '3',
+      title: 'Citizen Service Support',
+      description: 'Get assistance regarding CivicOne citizen services, applications, requests, submissions, and service status.',
+      icon: Layers,
+      categoryPrefill: 'Citizen Services',
+      tag: 'Civic Services'
     },
     {
-      section: "Digital Vault",
-      q: "How does the Digital Vault structure my documents?",
-      a: "The vault organizes credentials into 8 clear categories (Identity, Government, Education, Healthcare, RTO/Vehicles, Finance, Professional, Personal). Each document features cryptographic verification metadata."
+      number: '4',
+      title: 'Complaint & Grievance Support',
+      description: 'Report an issue, submit a complaint, or request assistance regarding a civic service or unresolved problem.',
+      icon: AlertTriangle,
+      categoryPrefill: 'Complaints & Grievances',
+      tag: 'Grievance Redressal'
     },
     {
-      section: "Cards",
-      q: "What is the dynamic QR code on my Civic Card?",
-      a: "The dynamic QR code contains a time-limited tokenized link. When scanned by an authorized verifier, it validates credential authenticity without embedding raw personal numbers inside the QR image."
+      number: '5',
+      title: 'Application & Request Tracking',
+      description: 'Need help checking the status of your submitted application or request? Use Customer Care to get guidance and track the appropriate service.',
+      icon: Clock,
+      categoryPrefill: 'Applications',
+      tag: 'Status & Tracking'
     },
     {
-      section: "Gold Pass",
-      q: "How do I activate the CivicOne Gold Pass?",
-      a: "Every citizen receives the Standard Civic Card initially. Gold Pass can be purchased from the Citizen Portal via secure online payment. Once approved, the Gold Pass status persists across session logins with 15-minute priority support SLA."
-    },
-    {
-      section: "Doc Verification",
-      q: "How does CivicOne re-verify document authenticity?",
-      a: "You can click 'Verify' on any vault item. CivicOne checks the issuer cryptographic signature and returns verification status indicators (Verified, Expiring Soon, or Pending)."
-    },
-    {
-      section: "Org Access",
-      q: "How do Colleges, Schools, Mobile Shops, and Hotels view citizen records?",
-      a: "Organizations receive strict least-privilege view-only access based on citizen consent. For example, Mobile Shops receive name & address KYC only; Hotels receive check-in guest verification badges only."
-    },
-    {
-      section: "Privacy",
-      q: "Can I instantly revoke an organization's access to my documents?",
-      a: "Yes! In the Privacy & Access Control Center, you can review active consents ('Who Has Access?') and click 'Revoke Consent' to immediately terminate access."
-    },
-    {
-      section: "Security",
-      q: "What should I do if I suspect unauthorized verification of my ID?",
-      a: "Open the 24/7 Live Support Chat and select 'Report Unauthorized Verification Attempt', or call the 24/7 National Emergency Fraud Helpline at 1947-CIVIC immediately."
+      number: '6',
+      title: 'Technical Support',
+      description: 'Report website errors, broken features, loading problems, verification issues, or other technical difficulties.',
+      icon: Zap,
+      categoryPrefill: 'Technical Issues',
+      tag: 'Bug Reports & Systems'
     }
   ];
 
-  const filteredFaqs = faqs.filter(faq => {
-    const matchesSection = selectedSection === 'All' || faq.section.toLowerCase().includes(selectedSection.toLowerCase());
+  // Support Categories List
+  const supportCategoriesList = [
+    'Account & Login',
+    'Citizen Services',
+    'Applications',
+    'Complaints & Grievances',
+    'Payments',
+    'Documents & Verification',
+    'Technical Issues',
+    'Other'
+  ];
+
+  // Department Dropdown Options
+  const departmentOptions = [
+    'General Citizen Platform',
+    'Identity & UIDAI / Aadhaar',
+    'Transport & Parivahan RTO',
+    'National Health Authority (ABHA)',
+    'Education & Degree Vault',
+    'Police Verification & PCC',
+    'Municipal & Urban Governance',
+    'Civic Pass & Founder Payments',
+    'Other Department'
+  ];
+
+  // FAQs Data
+  const faqData = [
+    {
+      category: 'General',
+      q: 'How do I contact CivicOne Customer Care?',
+      a: 'Use the Customer Care section to submit your support request with the required details, or reach our official support email directly at civicone.official.in@gmail.com. You can also dial our national toll-free helpline at 1800-248-4266.'
+    },
+    {
+      category: 'Tracking',
+      q: 'How can I track my complaint?',
+      a: 'Use your Support Request ID to check the current status of your complaint or support request in the "Track My Request" section below.'
+    },
+    {
+      category: 'General',
+      q: 'What if my issue is not listed?',
+      a: 'Select "Other" under Issue Category and clearly describe your issue. The support team will review and route it to the appropriate department.'
+    },
+    {
+      category: 'Documents',
+      q: 'Can I upload screenshots or supporting documents?',
+      a: 'Yes. Upload relevant screenshots or documents (PDF, JPG, PNG up to 10MB) when submitting your request to help our team understand and resolve your issue faster.'
+    },
+    {
+      category: 'Account',
+      q: 'How do I resolve login or profile update issues?',
+      a: 'Select "Account & Login" from the support form. For mobile or email updates, ensure your Aadhaar-linked registered mobile is active for verification OTPs.'
+    },
+    {
+      category: 'Security',
+      q: 'What should I do if I suspect unauthorized access or fraud?',
+      a: 'Immediately submit a request under "Complaints & Grievances" or dial our 24/7 National Emergency Fraud Hotline at 1947-CIVIC to freeze compromised digital identity credentials.'
+    }
+  ];
+
+  const filteredFaqs = faqData.filter(item => {
+    const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
     const query = search.toLowerCase();
-    const matchesSearch = !query || faq.q.toLowerCase().includes(query) || faq.a.toLowerCase().includes(query);
-    return matchesSection && matchesSearch;
+    const matchesSearch = !query || item.q.toLowerCase().includes(query) || item.a.toLowerCase().includes(query);
+    return matchesCategory && matchesSearch;
   });
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px 8px' }} className="animate-fade-in-scale">
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px 12px' }}>
       
-      {/* 24/7 OPERATIONAL COMMAND HERO BANNER */}
+      {/* 1. HERO HEADER: CivicOne Customer Care */}
       <div style={{
         background: 'linear-gradient(135deg, #071E3D 0%, #0B3C7B 50%, #0B5ED7 100%)',
         color: '#FFFFFF',
@@ -273,426 +289,765 @@ export default function HelpCentre({ citizen = {} }) {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        {/* Background Ambient Glow */}
-        <div style={{
-          position: 'absolute',
-          top: '-30%',
-          right: '-10%',
-          width: '350px',
-          height: '350px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%)',
-          pointerEvents: 'none'
-        }} />
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px', position: 'relative', zIndex: 2 }}>
-          <div>
-            {/* Live 24/7 Active Badge */}
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              backgroundColor: 'rgba(16, 185, 129, 0.2)',
-              border: '1px solid rgba(52, 211, 153, 0.4)',
-              color: '#A7F3D0',
-              padding: '6px 14px',
-              borderRadius: '20px',
-              fontSize: '0.8rem',
-              fontWeight: 800,
-              letterSpacing: '0.04em',
-              marginBottom: '14px'
-            }}>
-              <span className="live-pulse-dot" />
-              24/7 ACTIVE CITIZEN CARE &amp; RAPID RESPONSE DESK
-            </div>
-
-            <h1 style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.1rem)', fontWeight: 900, color: '#FFFFFF', margin: 0, letterSpacing: '-0.02em' }}>
-              National Citizen Care Command
-            </h1>
-            <p style={{ fontSize: '0.95rem', color: '#BFDBFE', marginTop: '6px', maxWidth: '640px', lineHeight: 1.5 }}>
-              Dedicated 24/7 assistance for identity verification, encrypted vault assistance, Gold Pass reconciliation, and emergency fraud defense.
-            </p>
-          </div>
-
-          {/* Quick Metrics Badge */}
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          
           <div style={{
-            backgroundColor: 'rgba(7, 15, 30, 0.65)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: '16px',
-            padding: '16px 20px',
-            display: 'flex',
-            flexDirection: 'column',
+            display: 'inline-flex',
+            alignItems: 'center',
             gap: '8px',
-            minWidth: '220px'
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
+            color: '#FFFFFF',
+            padding: '6px 14px',
+            borderRadius: '20px',
+            fontSize: '0.8rem',
+            fontWeight: 800,
+            marginBottom: '12px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-              <span style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 600 }}>Average Queue Speed:</span>
-              <span style={{ fontSize: '0.85rem', color: '#34D399', fontWeight: 800 }}>&lt; 15 Seconds</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-              <span style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 600 }}>Active Duty Officers:</span>
-              <span style={{ fontSize: '0.85rem', color: '#93C5FD', fontWeight: 800 }}>148 Nationwide</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-              <span style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 600 }}>SLA Resolution:</span>
-              <span style={{ fontSize: '0.85rem', color: '#FCD34D', fontWeight: 800 }}>99.84% First Call</span>
-            </div>
-          </div>
-        </div>
-
-        {/* OFFICIAL EMAIL QUICK ACCESS STRIP */}
-        <div style={{
-          marginTop: '24px',
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(8px)',
-          borderRadius: '14px',
-          padding: '12px 18px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.15)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Mail size={20} style={{ color: '#FCD34D' }} />
-            <div>
-              <span style={{ fontSize: '0.725rem', color: '#E2E8F0', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
-                Official National Citizen Support Inbox:
-              </span>
-              <span style={{ display: 'block', fontSize: '0.95rem', fontWeight: 800, color: '#FFFFFF', fontFamily: 'monospace' }}>
-                {OFFICIAL_SUPPORT_EMAIL}
-              </span>
-            </div>
+            <Headphones size={16} />
+            OFFICIAL CITIZEN SUPPORT DESK
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              onClick={handleCopyEmail}
-              style={{
-                backgroundColor: copiedEmail ? '#059669' : 'rgba(255, 255, 255, 0.2)',
-                color: '#FFFFFF',
-                border: 'none',
-                padding: '8px 14px',
-                borderRadius: '10px',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'all 0.2s'
-              }}
-            >
-              {copiedEmail ? <Check size={16} /> : <Copy size={16} />}
-              {copiedEmail ? 'Copied!' : 'Copy Email'}
-            </button>
+          <h1 style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.3rem)', fontWeight: 900, color: '#FFFFFF', margin: 0, letterSpacing: '-0.02em' }}>
+            CivicOne Customer Care
+          </h1>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#93C5FD', marginTop: '6px', marginBottom: '8px' }}>
+            We’re Here to Help You
+          </h2>
+          <p style={{ fontSize: '0.95rem', color: '#E2E8F0', maxWidth: '780px', lineHeight: 1.55, margin: 0 }}>
+            CivicOne Customer Care is your dedicated support center for assistance with CivicOne services, citizen services, account-related issues, applications, complaints, and general queries.
+          </p>
 
-            <a
-              href={`mailto:${OFFICIAL_SUPPORT_EMAIL}?subject=CivicOne%20Citizen%20Support%20Request%20-%20${civicId}&body=Hello%20CivicOne%20Support%20Team,%0D%0A%0D%0ACitizen%20Name:%20${encodeURIComponent(citizenName)}%0D%0ACivic%20ID:%20${encodeURIComponent(civicId)}%0D%0A%0D%0AProblem%20Description:%0D%0A`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                backgroundColor: '#FFFFFF',
-                color: '#073B8C',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '10px',
-                fontSize: '0.8rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                textDecoration: 'none',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-              }}
-            >
-              <Send size={15} /> Compose Email
-            </a>
+          {/* Official Email Strip */}
+          <div style={{
+            marginTop: '20px',
+            backgroundColor: 'rgba(7, 15, 30, 0.65)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: '14px',
+            padding: '12px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.15)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Mail size={20} style={{ color: '#FCD34D' }} />
+              <div>
+                <span style={{ fontSize: '0.725rem', color: '#CBD5E1', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
+                  Official Customer Care Email:
+                </span>
+                <span style={{ display: 'block', fontSize: '0.95rem', fontWeight: 800, color: '#FFFFFF', fontFamily: 'monospace' }}>
+                  {OFFICIAL_SUPPORT_EMAIL}
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                onClick={handleCopyEmail}
+                style={{
+                  backgroundColor: copiedEmail ? '#059669' : 'rgba(255, 255, 255, 0.15)',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                {copiedEmail ? <Check size={16} /> : <Copy size={16} />}
+                {copiedEmail ? 'Copied!' : 'Copy Email'}
+              </button>
+
+              <a
+                href={`mailto:${OFFICIAL_SUPPORT_EMAIL}?subject=CivicOne%20Citizen%20Support%20Request%20-%20${civicId}&body=Hello%20CivicOne%20Customer%20Care%20Team,%0D%0A%0D%0ACitizen%20Name:%20${encodeURIComponent(citizenName)}%0D%0ACivic%20ID:%20${encodeURIComponent(civicId)}%0D%0AMobile:%20${encodeURIComponent(citizenMobile)}%0D%0A%0D%0ADescription%20of%20the%20Issue:%0D%0A`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  color: '#073B8C',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '10px',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  textDecoration: 'none'
+                }}
+              >
+                <Send size={15} /> Send Mail
+              </a>
+            </div>
           </div>
+
         </div>
       </div>
 
-      {/* 4 INSTANT SUPPORT CHANNELS (GRID) */}
+      {/* 2. CUSTOMER CARE ACTIONS (4 Clear Action Buttons) */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '16px',
-        marginBottom: '32px'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gap: '12px',
+        marginBottom: '28px'
       }}>
         
-        {/* CHANNEL 1: 24/7 LIVE CHAT TRIAGE */}
-        <div className="hover-card-lift" style={{
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: '20px',
-          padding: '24px',
-          border: '1.5px solid var(--border-light)',
-          boxShadow: 'var(--shadow-sm)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}>
-          <div>
-            <div style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: '14px',
-              backgroundColor: 'rgba(11, 94, 215, 0.12)',
-              color: 'var(--primary-blue)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '14px'
-            }}>
-              <MessageSquare size={24} />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-              <span className="live-pulse-dot" />
-              <span style={{ fontSize: '0.725rem', color: 'var(--success)', fontWeight: 800 }}>LIVE OFFICER QUEUE</span>
-            </div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-              24/7 Rapid Live Chat
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.4 }}>
-              Instant conversational assistance with automated credential diagnostics and live officer dispatch.
-            </p>
-          </div>
+        <button
+          onClick={() => scrollToForm()}
+          style={{
+            backgroundColor: 'var(--primary-blue)',
+            color: '#FFFFFF',
+            border: 'none',
+            borderRadius: '16px',
+            padding: '16px 18px',
+            fontSize: '0.9rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            boxShadow: 'var(--shadow-sm)',
+            textAlign: 'left'
+          }}
+        >
+          <Plus size={20} />
+          <span>Submit a Support Request</span>
+        </button>
 
-          <button
-            onClick={() => setShowLiveChatModal(true)}
-            style={{
-              marginTop: '16px',
-              width: '100%',
-              backgroundColor: 'var(--primary-blue)',
-              color: '#FFFFFF',
-              padding: '11px',
-              borderRadius: '12px',
-              fontWeight: 800,
-              fontSize: '0.85rem',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              boxShadow: 'var(--shadow-blue)'
-            }}
-          >
-            Start Rapid Chat <ArrowRight size={16} />
-          </button>
-        </div>
+        <button
+          onClick={scrollToTracker}
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            color: 'var(--text-main)',
+            border: '1.5px solid var(--border-light)',
+            borderRadius: '16px',
+            padding: '16px 18px',
+            fontSize: '0.9rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          <Clock size={20} style={{ color: 'var(--primary-blue)' }} />
+          <span>Track My Request</span>
+        </button>
 
-        {/* CHANNEL 2: 30-SECOND PRIORITY CALLBACK */}
-        <div className="hover-card-lift" style={{
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: '20px',
-          padding: '24px',
-          border: '1.5px solid var(--border-light)',
-          boxShadow: 'var(--shadow-sm)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}>
-          <div>
-            <div style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: '14px',
-              backgroundColor: 'rgba(16, 185, 129, 0.12)',
-              color: 'var(--success)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '14px'
-            }}>
-              <PhoneCall size={24} />
-            </div>
-            <div style={{ fontSize: '0.725rem', color: 'var(--success)', fontWeight: 800, marginBottom: '4px' }}>
-              ⚡ 30-SECOND DIALER DISPATCH
-            </div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-              Request Instant Callback
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.4 }}>
-              Speak directly with an identity specialist. Automated dialer connects your mobile in &lt; 30 seconds.
-            </p>
-          </div>
+        <button
+          onClick={scrollToFaqs}
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            color: 'var(--text-main)',
+            border: '1.5px solid var(--border-light)',
+            borderRadius: '16px',
+            padding: '16px 18px',
+            fontSize: '0.9rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          <HelpCircle size={20} style={{ color: '#059669' }} />
+          <span>View FAQs</span>
+        </button>
 
-          <button
-            onClick={() => setShowCallbackModal(true)}
-            style={{
-              marginTop: '16px',
-              width: '100%',
-              backgroundColor: 'var(--bg-main)',
-              color: 'var(--text-main)',
-              border: '1.5px solid var(--border-light)',
-              padding: '11px',
-              borderRadius: '12px',
-              fontWeight: 800,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}
-          >
-            <PhoneCall size={16} /> Request Callback
-          </button>
-        </div>
-
-        {/* CHANNEL 3: TOLL-FREE NATIONAL HELPLINE */}
-        <div className="hover-card-lift" style={{
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: '20px',
-          padding: '24px',
-          border: '1.5px solid var(--border-light)',
-          boxShadow: 'var(--shadow-sm)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}>
-          <div>
-            <div style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: '14px',
-              backgroundColor: 'rgba(245, 158, 11, 0.12)',
-              color: '#D97706',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '14px'
-            }}>
-              <Headphones size={24} />
-            </div>
-            <div style={{ fontSize: '0.725rem', color: '#D97706', fontWeight: 800, marginBottom: '4px' }}>
-              ☎️ TOLL-FREE 24/7 / 365
-            </div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-              National Hotline
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.4 }}>
-              Dial toll-free nationwide for general inquiries or <strong>1947-CIVIC</strong> for immediate fraud defense.
-            </p>
-          </div>
-
-          <div style={{
-            marginTop: '16px',
-            backgroundColor: 'var(--bg-main)',
-            border: '1px solid var(--border-light)',
-            borderRadius: '12px',
-            padding: '10px 14px',
-            textAlign: 'center'
-          }}>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-light)', fontWeight: 700, display: 'block' }}>Direct Toll-Free Line:</span>
-            <a href="tel:18002484266" style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--primary-blue)', textDecoration: 'none' }}>
-              {TOLL_FREE_HELPLINE}
-            </a>
-          </div>
-        </div>
-
-        {/* CHANNEL 4: PRIORITY TICKET DESK */}
-        <div className="hover-card-lift" style={{
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: '20px',
-          padding: '24px',
-          border: '1.5px solid var(--border-light)',
-          boxShadow: 'var(--shadow-sm)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}>
-          <div>
-            <div style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: '14px',
-              backgroundColor: 'rgba(99, 102, 241, 0.12)',
-              color: '#6366F1',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '14px'
-            }}>
-              <Ticket size={24} />
-            </div>
-            <div style={{ fontSize: '0.725rem', color: '#6366F1', fontWeight: 800, marginBottom: '4px' }}>
-              🛡️ GUARANTEED SLA ESCALATION
-            </div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-              Raise Formal Ticket
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '6px', lineHeight: 1.4 }}>
-              Submit complex verification complaints with automated tracking and direct notification to our grievance team.
-            </p>
-          </div>
-
-          <button
-            onClick={() => setShowTicketModal(true)}
-            style={{
-              marginTop: '16px',
-              width: '100%',
-              backgroundColor: 'var(--bg-main)',
-              color: 'var(--text-main)',
-              border: '1.5px solid var(--border-light)',
-              padding: '11px',
-              borderRadius: '12px',
-              fontWeight: 800,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}
-          >
-            <Plus size={16} /> New Support Ticket
-          </button>
-        </div>
+        <button
+          onClick={() => scrollToForm('Complaints & Grievances')}
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            color: '#DC2626',
+            border: '1.5px solid rgba(220, 38, 38, 0.3)',
+            borderRadius: '16px',
+            padding: '16px 18px',
+            fontSize: '0.9rem',
+            fontWeight: 800,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          <AlertTriangle size={20} />
+          <span>Report an Issue</span>
+        </button>
 
       </div>
 
-      {/* RECENT TICKETS & LIVE DISPATCH STATUS */}
-      {recentTickets.length > 0 && (
+      {/* 3. IMPORTANT SECURITY NOTICE */}
+      <div style={{
+        backgroundColor: 'rgba(239, 68, 68, 0.08)',
+        border: '1.5px solid rgba(239, 68, 68, 0.35)',
+        borderRadius: '16px',
+        padding: '16px 20px',
+        marginBottom: '28px',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '14px'
+      }}>
+        <ShieldAlert size={24} style={{ color: '#DC2626', flexShrink: 0, marginTop: '2px' }} />
+        <div>
+          <strong style={{ fontSize: '0.95rem', color: '#DC2626', display: 'block', marginBottom: '2px' }}>
+            Important Security Notice
+          </strong>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', lineHeight: 1.45 }}>
+            For your security, never share passwords, OTPs, PINs, banking credentials, or other confidential authentication information with anyone through Customer Care.
+          </span>
+        </div>
+      </div>
+
+      {/* 4. HOW CAN WE HELP? (6 Support Domains) */}
+      <div style={{ marginBottom: '36px' }}>
+        <div style={{ marginBottom: '18px' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            SUPPORT CAPABILITIES
+          </span>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', margin: '4px 0 0 0' }}>
+            How Can We Help?
+          </h2>
+        </div>
+
         <div style={{
-          backgroundColor: 'var(--bg-card)',
-          borderRadius: '20px',
-          padding: '24px',
-          border: '1px solid var(--border-light)',
-          boxShadow: 'var(--shadow-sm)',
-          marginBottom: '32px'
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '16px'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Clock size={20} style={{ color: 'var(--primary-blue)' }} />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-                My Support Tickets &amp; SLA Tracker
-              </h3>
+          {supportDomains.map(item => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.number}
+                style={{
+                  backgroundColor: 'var(--bg-card)',
+                  borderRadius: '18px',
+                  padding: '22px',
+                  border: '1px solid var(--border-light)',
+                  boxShadow: 'var(--shadow-sm)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <div style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '12px',
+                      backgroundColor: 'var(--light-blue)',
+                      color: 'var(--primary-blue)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <Icon size={22} />
+                    </div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-light)', backgroundColor: 'var(--bg-main)', padding: '3px 8px', borderRadius: '6px' }}>
+                      Domain {item.number}
+                    </span>
+                  </div>
+
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', margin: '0 0 8px 0' }}>
+                    {item.number}. {item.title}
+                  </h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
+                    {item.description}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => scrollToForm(item.categoryPrefill)}
+                  style={{
+                    marginTop: '16px',
+                    backgroundColor: 'var(--bg-main)',
+                    color: 'var(--primary-blue)',
+                    border: '1px solid var(--border-light)',
+                    padding: '9px 14px',
+                    borderRadius: '10px',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span>Request {item.title}</span>
+                  <ArrowRight size={15} />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 5. CONTACT CUSTOMER CARE — SUBMIT A SUPPORT REQUEST */}
+      <div
+        ref={formRef}
+        style={{
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: '24px',
+          padding: '30px 24px',
+          border: '1.5px solid var(--border-light)',
+          boxShadow: 'var(--shadow-sm)',
+          marginBottom: '36px'
+        }}
+      >
+        <div style={{ marginBottom: '22px' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            DIRECT CITIZEN HELP DESK
+          </span>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', margin: '4px 0 2px 0' }}>
+            Submit a Support Request
+          </h2>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>
+            Fill in the required information below to submit a formal request. You will receive an official <strong>Support Request ID</strong> for real-time tracking.
+          </p>
+        </div>
+
+        {/* Success Confirmation Modal / Banner if just submitted */}
+        {submittedRequest && (
+          <div style={{
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            border: '1.5px solid #10B981',
+            borderRadius: '18px',
+            padding: '20px',
+            marginBottom: '24px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <CheckCircle2 size={24} style={{ color: '#10B981', flexShrink: 0, marginTop: '2px' }} />
+                <div>
+                  <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)', display: 'block' }}>
+                    Support Request Submitted Successfully!
+                  </strong>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '2px', display: 'block' }}>
+                    Your request has been routed to our duty team. Please save your Support Request ID for reference:
+                  </span>
+                  
+                  <div style={{
+                    marginTop: '10px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-light)',
+                    padding: '8px 14px',
+                    borderRadius: '10px'
+                  }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 800 }}>REQUEST ID:</span>
+                    <strong style={{ fontSize: '1.05rem', fontFamily: 'monospace', color: 'var(--primary-blue)' }}>
+                      {submittedRequest.id}
+                    </strong>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(submittedRequest.id);
+                        setCopiedRequestId(true);
+                        setTimeout(() => setCopiedRequestId(false), 2000);
+                      }}
+                      style={{
+                        backgroundColor: copiedRequestId ? '#059669' : 'var(--light-blue)',
+                        color: copiedRequestId ? '#FFFFFF' : 'var(--primary-blue)',
+                        border: 'none',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      {copiedRequestId ? <Check size={13} /> : <Copy size={13} />}
+                      {copiedRequestId ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setSubmittedRequest(null)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
             </div>
-            <button
-              onClick={() => setShowTicketModal(true)}
-              style={{
-                backgroundColor: 'var(--light-blue)',
-                color: 'var(--primary-blue)',
-                border: 'none',
-                padding: '6px 14px',
-                borderRadius: '10px',
-                fontSize: '0.775rem',
-                fontWeight: 800,
-                cursor: 'pointer'
-              }}
-            >
-              + Create Another Ticket
-            </button>
+          </div>
+        )}
+
+        {/* Support Request Form */}
+        <form onSubmit={handleSubmitRequest}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '18px',
+            marginBottom: '18px'
+          }}>
+            
+            {/* 1. Full Name */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '6px' }}>
+                Full Name <span style={{ color: '#DC2626' }}>*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.fullName}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                placeholder="Enter your full name"
+                style={{
+                  width: '100%',
+                  padding: '11px 14px',
+                  borderRadius: '12px',
+                  border: '1.5px solid var(--border-light)',
+                  backgroundColor: 'var(--bg-main)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.9rem'
+                }}
+              />
+            </div>
+
+            {/* 2. Registered Mobile Number */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '6px' }}>
+                Registered Mobile Number <span style={{ color: '#DC2626' }}>*</span>
+              </label>
+              <input
+                type="tel"
+                required
+                value={formData.mobileNumber}
+                onChange={(e) => setFormData({ ...formData, mobileNumber: e.target.value })}
+                placeholder="+91 90000 00000"
+                style={{
+                  width: '100%',
+                  padding: '11px 14px',
+                  borderRadius: '12px',
+                  border: '1.5px solid var(--border-light)',
+                  backgroundColor: 'var(--bg-main)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.9rem'
+                }}
+              />
+            </div>
+
+            {/* 3. Email Address */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '6px' }}>
+                Email Address <span style={{ color: '#DC2626' }}>*</span>
+              </label>
+              <input
+                type="email"
+                required
+                value={formData.emailAddress}
+                onChange={(e) => setFormData({ ...formData, emailAddress: e.target.value })}
+                placeholder="citizen@example.com"
+                style={{
+                  width: '100%',
+                  padding: '11px 14px',
+                  borderRadius: '12px',
+                  border: '1.5px solid var(--border-light)',
+                  backgroundColor: 'var(--bg-main)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.9rem'
+                }}
+              />
+            </div>
+
+            {/* 4. Service / Department */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '6px' }}>
+                Service / Department <span style={{ color: '#DC2626' }}>*</span>
+              </label>
+              <select
+                value={formData.department}
+                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '11px 14px',
+                  borderRadius: '12px',
+                  border: '1.5px solid var(--border-light)',
+                  backgroundColor: 'var(--bg-main)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.9rem'
+                }}
+              >
+                {departmentOptions.map(dept => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* 5. Issue Category (Required 8 Categories) */}
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '6px' }}>
+                Issue Category <span style={{ color: '#DC2626' }}>*</span>
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '11px 14px',
+                  borderRadius: '12px',
+                  border: '1.5px solid var(--border-light)',
+                  backgroundColor: 'var(--bg-main)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.9rem',
+                  fontWeight: 700
+                }}
+              >
+                {supportCategoriesList.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* 6. Description of the Issue */}
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '6px' }}>
+                Description of the Issue <span style={{ color: '#DC2626' }}>*</span>
+              </label>
+              <textarea
+                required
+                rows={4}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Please describe your issue, complaint, or inquiry in detail. Include any relevant reference IDs, timestamps, or application numbers."
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: '12px',
+                  border: '1.5px solid var(--border-light)',
+                  backgroundColor: 'var(--bg-main)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.9rem',
+                  resize: 'vertical'
+                }}
+              />
+            </div>
+
+            {/* 7. Supporting Document or Screenshot (Optional) */}
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '6px' }}>
+                Supporting Document or Screenshot (Optional)
+              </label>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '12px 16px',
+                border: '1.5px dashed var(--border-light)',
+                borderRadius: '12px',
+                backgroundColor: 'var(--bg-main)',
+                flexWrap: 'wrap'
+              }}>
+                <Upload size={18} style={{ color: 'var(--primary-blue)' }} />
+                <input
+                  type="file"
+                  id="care-file-upload"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setFormData({ ...formData, attachmentName: e.target.files[0].name });
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="care-file-upload"
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border-light)',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    color: 'var(--text-main)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Choose File
+                </label>
+                <span style={{ fontSize: '0.8rem', color: formData.attachmentName ? 'var(--primary-blue)' : 'var(--text-muted)' }}>
+                  {formData.attachmentName ? `Attached: ${formData.attachmentName}` : 'Upload error screenshots, PDF receipt, or identity proofs (Max 10MB)'}
+                </span>
+
+                {formData.attachmentName && (
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, attachmentName: '' })}
+                    style={{ background: 'none', border: 'none', color: '#DC2626', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', marginLeft: 'auto' }}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+
           </div>
 
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            style={{
+              backgroundColor: 'var(--primary-blue)',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '14px 28px',
+              fontSize: '0.925rem',
+              fontWeight: 800,
+              cursor: isSubmitting ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}
+          >
+            {isSubmitting ? <RefreshCw size={18} className="spin" /> : <Send size={18} />}
+            <span>{isSubmitting ? 'Submitting Request...' : 'Submit Support Request'}</span>
+          </button>
+        </form>
+      </div>
+
+      {/* 6. TRACK MY REQUEST SECTION */}
+      <div
+        ref={trackerRef}
+        style={{
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: '24px',
+          padding: '28px 24px',
+          border: '1.5px solid var(--border-light)',
+          boxShadow: 'var(--shadow-sm)',
+          marginBottom: '36px'
+        }}
+      >
+        <div style={{ marginBottom: '18px' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            STATUS VERIFICATION
+          </span>
+          <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-main)', margin: '4px 0 2px 0' }}>
+            Track My Request
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
+            Enter your <strong>Support Request ID</strong> to check the real-time progress of your complaint or grievance.
+          </p>
+        </div>
+
+        {/* Tracking Search Input */}
+        <form onSubmit={handleTrackSearch} style={{ display: 'flex', gap: '10px', maxWidth: '560px', marginBottom: '20px' }}>
+          <div style={{ position: 'relative', flex: 1 }}>
+            <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+            <input
+              type="text"
+              value={searchTrackingId}
+              onChange={(e) => setSearchTrackingId(e.target.value)}
+              placeholder="e.g. REQ-2026-90482"
+              style={{
+                width: '100%',
+                padding: '11px 14px 11px 38px',
+                borderRadius: '12px',
+                border: '1.5px solid var(--border-light)',
+                backgroundColor: 'var(--bg-main)',
+                color: 'var(--text-main)',
+                fontSize: '0.9rem',
+                fontFamily: 'monospace'
+              }}
+            />
+          </div>
+          <button
+            type="submit"
+            style={{
+              backgroundColor: 'var(--primary-blue)',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '0 20px',
+              borderRadius: '12px',
+              fontWeight: 800,
+              fontSize: '0.875rem',
+              cursor: 'pointer'
+            }}
+          >
+            Track
+          </button>
+        </form>
+
+        {trackingError && (
+          <div style={{ padding: '12px 16px', backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.3)', borderRadius: '12px', color: '#DC2626', fontSize: '0.85rem', marginBottom: '16px' }}>
+            {trackingError}
+          </div>
+        )}
+
+        {/* Tracking Result Card */}
+        {trackingResult && (
+          <div style={{
+            backgroundColor: 'var(--bg-main)',
+            border: '1.5px solid var(--border-light)',
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '20px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '12px' }}>
+              <div>
+                <span style={{ fontFamily: 'monospace', fontWeight: 900, color: 'var(--primary-blue)', fontSize: '1.05rem' }}>
+                  {trackingResult.id}
+                </span>
+                <span style={{ marginLeft: '10px', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-light)', backgroundColor: 'var(--bg-card)', padding: '2px 8px', borderRadius: '6px' }}>
+                  {trackingResult.category}
+                </span>
+              </div>
+
+              <span style={{
+                fontSize: '0.775rem',
+                fontWeight: 800,
+                padding: '4px 12px',
+                borderRadius: '12px',
+                backgroundColor: trackingResult.status === 'RESOLVED' ? 'var(--success-bg)' : 'var(--warning-bg)',
+                color: trackingResult.status === 'RESOLVED' ? 'var(--success-text)' : 'var(--warning-text)'
+              }}>
+                ● {trackingResult.statusLabel}
+              </span>
+            </div>
+
+            <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>
+              {trackingResult.subject || trackingResult.description}
+            </strong>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              Department: {trackingResult.department} | Logged: {trackingResult.timestamp}
+            </div>
+            <div style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--primary-blue)', fontWeight: 700 }}>
+              SLA Status: {trackingResult.sla}
+            </div>
+          </div>
+        )}
+
+        {/* Existing Active Requests List */}
+        <div>
+          <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '10px' }}>
+            Your Recent Support Requests ({requestsList.length})
+          </h4>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {recentTickets.map(tkt => (
+            {requestsList.map(req => (
               <div
-                key={tkt.id}
+                key={req.id}
                 style={{
                   backgroundColor: 'var(--bg-main)',
                   border: '1px solid var(--border-light)',
@@ -707,838 +1062,186 @@ export default function HelpCentre({ citizen = {} }) {
               >
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '0.8rem', color: 'var(--primary-blue)' }}>
-                      {tkt.id}
+                    <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '0.85rem', color: 'var(--primary-blue)' }}>
+                      {req.id}
                     </span>
                     <span style={{ fontSize: '0.7rem', backgroundColor: 'var(--light-blue)', color: 'var(--primary-blue)', padding: '2px 8px', borderRadius: '6px', fontWeight: 700 }}>
-                      {tkt.category}
+                      {req.category}
                     </span>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>
-                      {tkt.timestamp}
+                      {req.timestamp}
                     </span>
                   </div>
                   <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>
-                    {tkt.subject}
+                    {req.subject || req.description}
                   </strong>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    ⏱️ SLA Tracker: {tkt.sla}
+                    {req.sla}
                   </span>
                 </div>
 
                 <span style={{
-                  padding: '5px 12px',
-                  borderRadius: '20px',
+                  padding: '4px 12px',
+                  borderRadius: '16px',
                   fontSize: '0.75rem',
                   fontWeight: 800,
-                  backgroundColor: tkt.status === 'RESOLVED' ? 'var(--success-bg)' : 'var(--warning-bg)',
-                  color: tkt.status === 'RESOLVED' ? 'var(--success-text)' : 'var(--warning-text)'
+                  backgroundColor: req.status === 'RESOLVED' ? 'var(--success-bg)' : 'var(--warning-bg)',
+                  color: req.status === 'RESOLVED' ? 'var(--success-text)' : 'var(--warning-text)'
                 }}>
-                  ● {tkt.status === 'RESOLVED' ? 'Resolved' : 'In Officer Review'}
+                  ● {req.statusLabel}
                 </span>
               </div>
             ))}
           </div>
         </div>
-      )}
 
-      {/* COMPREHENSIVE CUSTOMER CARE INFORMATION & OPERATIONS DIRECTORY */}
-      <div style={{
-        backgroundColor: 'var(--bg-card)',
-        borderRadius: '24px',
-        padding: '28px',
-        border: '1.5px solid var(--border-light)',
-        boxShadow: 'var(--shadow-sm)',
-        marginBottom: '32px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-blue)', backgroundColor: 'var(--light-blue)', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                CITIZEN ASSISTANCE &amp; OPERATIONS INFO
-              </span>
-            </div>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
-              Customer Care Information &amp; Service Directory
-            </h2>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px', margin: 0 }}>
-              Round-the-clock service SLAs, departmental contact directory, emergency security protocols, and citizen rights charter.
-            </p>
-          </div>
-        </div>
-
-        {/* INFO TABS HEADER */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '20px', borderBottom: '1px solid var(--border-light)' }}>
-          {[
-            { id: 'sla', label: 'Service Timings & SLAs', icon: Clock },
-            { id: 'directory', label: 'Departmental Directory', icon: Building2 },
-            { id: 'emergency', label: 'Emergency Protocols', icon: ShieldAlert },
-            { id: 'charter', label: 'Citizen Rights & Charter', icon: ShieldCheck }
-          ].map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeInfoSection === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveInfoSection(tab.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '9px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid',
-                  borderColor: isActive ? 'var(--primary-blue)' : 'var(--border-light)',
-                  backgroundColor: isActive ? 'var(--primary-blue)' : 'var(--bg-main)',
-                  color: isActive ? '#FFFFFF' : 'var(--text-muted)',
-                  fontSize: '0.825rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <Icon size={16} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* TAB 1: SERVICE TIMINGS & SLAS */}
-        {activeInfoSection === 'sla' && (
-          <div className="animate-fade-in-scale" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
-              <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#059669', textTransform: 'uppercase' }}>24/7/365 Non-Stop</span>
-                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px', marginBottom: '8px' }}>Emergency Assistance</h4>
-                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
-                  Immediate virtual card locking, remote credential invalidation, and fraud defense hotlines operate round the clock without interruption.
-                </p>
-                <div style={{ marginTop: '12px', fontSize: '0.775rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
-                  Response Guarantee: &lt; 2 Minutes
-                </div>
-              </div>
-
-              <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#D97706', textTransform: 'uppercase' }}>Rapid Live Triage</span>
-                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px', marginBottom: '8px' }}>Live Assistant &amp; Callback</h4>
-                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
-                  Interactive triage assistant with common presets and direct automated 30-second callback dispatch for voice consultations.
-                </p>
-                <div style={{ marginTop: '12px', fontSize: '0.775rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
-                  Queue Speed: &lt; 15 Seconds
-                </div>
-              </div>
-
-              <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#4F46E5', textTransform: 'uppercase' }}>Founder Pass SLA</span>
-                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px', marginBottom: '8px' }}>Gold Pass Priority</h4>
-                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
-                  Citizens holding an activated CivicOne Gold Pass receive priority queue dispatch and dedicated senior officer ticket assignment.
-                </p>
-                <div style={{ marginTop: '12px', fontSize: '0.775rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
-                  Turnaround: &lt; 15 Minutes
-                </div>
-              </div>
-
-              <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#2563EB', textTransform: 'uppercase' }}>Official Email Desk</span>
-                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px', marginBottom: '8px' }}>Email Inquiries</h4>
-                <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
-                  Direct email communication to <strong style={{ color: 'var(--text-main)' }}>civicone.official.in@gmail.com</strong> with automated tracking token generation.
-                </p>
-                <div style={{ marginTop: '12px', fontSize: '0.775rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
-                  First Response: &lt; 2 Hours
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: DEPARTMENTAL DIRECTORY */}
-        {activeInfoSection === 'directory' && (
-          <div className="animate-fade-in-scale" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <ShieldCheck size={18} style={{ color: 'var(--primary-blue)' }} />
-                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>UIDAI &amp; Aadhaar Identity Desk</strong>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
-                Assistance with dynamic masking, biometric lock flags, and name/DOB mismatch reconciliations.
-              </p>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontFamily: 'monospace' }}>
-                Routing Email: {OFFICIAL_SUPPORT_EMAIL} (Ref: UIDAI-01)
-              </div>
-            </div>
-
-            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Compass size={18} style={{ color: '#059669' }} />
-                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>MoRTH Parivahan RTO Desk</strong>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
-                Driving License attestation, vehicle RC sync, and international permit cryptographic validation.
-              </p>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontFamily: 'monospace' }}>
-                Routing Email: {OFFICIAL_SUPPORT_EMAIL} (Ref: MORTH-02)
-              </div>
-            </div>
-
-            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <AlertTriangle size={18} style={{ color: '#DC2626' }} />
-                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>National Cybercrime Defense</strong>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
-                Urgent reporting of fraudulent QR scans, unauthorized biometric queries, and impersonation attempts.
-              </p>
-              <div style={{ fontSize: '0.75rem', color: '#DC2626', fontWeight: 800 }}>
-                Direct Hotline: 1947-CIVIC (Toll-Free, 24/7)
-              </div>
-            </div>
-
-            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Building2 size={18} style={{ color: '#6366F1' }} />
-                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Organization Verification Audit</strong>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
-                Disputes regarding third-party verifier access (colleges, mobile stores, hotels, employers).
-              </p>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontFamily: 'monospace' }}>
-                Grievance Officer: {OFFICIAL_SUPPORT_EMAIL}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: EMERGENCY PROTOCOLS */}
-        {activeInfoSection === 'emergency' && (
-          <div className="animate-fade-in-scale" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '16px', padding: '16px 20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <ShieldAlert size={20} style={{ color: '#DC2626' }} />
-                <strong style={{ fontSize: '0.95rem', color: '#DC2626' }}>Protocol 1: Lost Device or Compromised Phone</strong>
-              </div>
-              <p style={{ fontSize: '0.825rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.5 }}>
-                1. Dial <strong>1947-CIVIC</strong> or email <strong>{OFFICIAL_SUPPORT_EMAIL}</strong> immediately.<br/>
-                2. Request an <strong>Emergency Dynamic QR Freeze</strong> to invalidate all current digital identity tokens.<br/>
-                3. Once your replacement device is active, complete biometric/Aadhaar OTP verification to issue new cryptographic keys.
-              </p>
-            </div>
-
-            <div style={{ backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', borderRadius: '16px', padding: '16px 20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <Lock size={18} style={{ color: 'var(--primary-blue)' }} />
-                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Protocol 2: Revoking Third-Party Verifier Access</strong>
-              </div>
-              <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
-                Navigate to <strong>Privacy Centre → Access &amp; Consent</strong> in the Citizen Portal. Find the organization in the active consent registry and click <strong>Revoke Consent</strong>. Their decryption permissions are terminated across all gateways immediately.
-              </p>
-            </div>
-
-            <div style={{ backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', borderRadius: '16px', padding: '16px 20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <CheckCircle2 size={18} style={{ color: '#059669' }} />
-                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Protocol 3: Document Verification Dispute</strong>
-              </div>
-              <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
-                If an educational degree, driving license, or government certificate shows unexpected hash validation errors, click the <strong>Raise Ticket</strong> button above with the Document ID for immediate issuer ledger re-synchronization.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 4: CITIZEN RIGHTS & CHARTER */}
-        {activeInfoSection === 'charter' && (
-          <div className="animate-fade-in-scale" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
-            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <Lock size={18} style={{ color: '#059669' }} />
-                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Zero Plaintext Disclosure</strong>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
-                Your full Aadhaar number, PAN, and demographic details are never shared in plaintext. Only cryptographically signed verifiable claims are transmitted to authorized verifiers.
-              </p>
-            </div>
-
-            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <UserCheck size={18} style={{ color: 'var(--primary-blue)' }} />
-                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>Explicit Consent Sovereign</strong>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
-                No agency, organization, or inspector can access your personal credentials without an explicit biometric or OTP authorization step initiated by you.
-              </p>
-            </div>
-
-            <div style={{ backgroundColor: 'var(--bg-main)', padding: '18px', borderRadius: '16px', border: '1px solid var(--border-light)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                <FileText size={18} style={{ color: '#D97706' }} />
-                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>DPDP Act 2023 Compliance</strong>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.45 }}>
-                CivicOne adheres strictly to the Digital Personal Data Protection Act, 2023, giving you the permanent right to review, rectify, or purge consent grants at any time.
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* SEARCHABLE KNOWLEDGE BASE */}
-      <div style={{
-        backgroundColor: 'var(--bg-card)',
-        borderRadius: '24px',
-        padding: '28px',
-        border: '1px solid var(--border-light)',
-        boxShadow: 'var(--shadow-sm)'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
-            CivicOne Knowledge Base &amp; Self-Help Directory
+      {/* 7. FREQUENTLY ASKED QUESTIONS */}
+      <div
+        ref={faqRef}
+        style={{
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: '24px',
+          padding: '28px 24px',
+          border: '1.5px solid var(--border-light)',
+          boxShadow: 'var(--shadow-sm)'
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '22px' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            HELP DIRECTORY
+          </span>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', margin: '4px 0 2px 0' }}>
+            Frequently Asked Questions
           </h2>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Instant answers for identity protection, document sharing, and verification protocols.
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
+            Common questions regarding support requests, complaint tracking, and citizen service assistance.
           </p>
 
-          {/* Search Input */}
-          <div style={{ maxWidth: '600px', margin: '20px auto 0 auto', position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
+          {/* FAQ Search */}
+          <div style={{ maxWidth: '540px', margin: '16px auto 0 auto', position: 'relative' }}>
+            <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search help topics (e.g. 24/7 Care, Gold Pass, Masked Aadhaar, QR scan)..."
+              placeholder="Search questions (e.g. tracking, upload, email)..."
               style={{
                 width: '100%',
-                padding: '12px 16px 12px 46px',
-                borderRadius: '14px',
+                padding: '10px 14px 10px 38px',
+                borderRadius: '12px',
                 border: '1.5px solid var(--border-light)',
-                fontSize: '0.9rem',
-                backgroundColor: 'var(--bg-input)',
+                backgroundColor: 'var(--bg-main)',
                 color: 'var(--text-main)',
-                boxShadow: 'var(--shadow-sm)'
+                fontSize: '0.875rem'
               }}
             />
           </div>
         </div>
 
-        {/* Section Selector Chips */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '24px' }}>
-          {sections.map(sec => {
-            const Icon = sec.icon;
-            const isSelected = selectedSection === sec.id;
-            return (
-              <button
-                key={sec.id}
-                onClick={() => setSelectedSection(sec.id)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '20px',
-                  fontSize: '0.8rem',
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  backgroundColor: isSelected ? 'var(--primary-blue)' : 'var(--bg-main)',
-                  color: isSelected ? '#FFFFFF' : 'var(--text-muted)',
-                  border: isSelected ? 'none' : '1px solid var(--border-light)',
-                  whiteSpace: 'nowrap',
-                  cursor: 'pointer',
-                  boxShadow: 'var(--shadow-sm)',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <Icon size={15} /> {sec.label}
-              </button>
-            );
-          })}
-        </div>
-
         {/* FAQ Accordion List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {filteredFaqs.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              No help articles found matching "{search}". Use our 24/7 Rapid Live Chat or email us at <strong>{OFFICIAL_SUPPORT_EMAIL}</strong>!
-            </div>
-          ) : (
-            filteredFaqs.map((faq, idx) => (
+          {filteredFaqs.map((faq, idx) => {
+            const isOpen = activeFaqIndex === idx;
+            return (
               <div
                 key={idx}
                 style={{
+                  backgroundColor: 'var(--bg-main)',
                   border: '1px solid var(--border-light)',
                   borderRadius: '14px',
-                  overflow: 'hidden',
-                  backgroundColor: 'var(--bg-main)'
+                  overflow: 'hidden'
                 }}
               >
                 <button
-                  onClick={() => setActiveFaqIndex(activeFaqIndex === idx ? null : idx)}
+                  onClick={() => setActiveFaqIndex(isOpen ? null : idx)}
                   style={{
                     width: '100%',
-                    padding: '16px 20px',
-                    backgroundColor: 'transparent',
-                    textAlign: 'left',
-                    fontWeight: 700,
-                    fontSize: '0.925rem',
-                    color: 'var(--text-main)',
+                    padding: '16px 18px',
                     display: 'flex',
-                    justifyContent: 'space-between',
                     alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    background: 'none',
                     border: 'none',
-                    cursor: 'pointer'
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    color: 'var(--text-main)'
                   }}
                 >
-                  <div>
-                    <span style={{ fontSize: '0.675rem', color: 'var(--primary-blue)', fontWeight: 800, textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>
-                      {faq.section}
-                    </span>
-                    {faq.q}
-                  </div>
-                  <ChevronDown size={18} style={{ transform: activeFaqIndex === idx ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', color: 'var(--text-light)' }} />
+                  <strong style={{ fontSize: '0.925rem', fontWeight: 800 }}>{faq.q}</strong>
+                  <ChevronDown size={18} style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s', color: 'var(--text-light)', flexShrink: 0 }} />
                 </button>
-                {activeFaqIndex === idx && (
-                  <div style={{ padding: '16px 20px', fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.6, backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-light)' }}>
+
+                {isOpen && (
+                  <div style={{ padding: '0 18px 16px 18px', fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.55, borderTop: '1px solid var(--border-light)', paddingTop: '12px' }}>
                     {faq.a}
                   </div>
                 )}
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
+
+        {/* Need More Assistance Banner */}
+        <div style={{
+          marginTop: '24px',
+          padding: '16px 20px',
+          borderRadius: '14px',
+          backgroundColor: 'var(--bg-main)',
+          border: '1px solid var(--border-light)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div>
+            <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>Still have questions?</strong>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              Our customer care officers are ready to assist you.
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => scrollToForm()}
+              style={{
+                backgroundColor: 'var(--primary-blue)',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '8px 14px',
+                borderRadius: '10px',
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                cursor: 'pointer'
+              }}
+            >
+              Submit a Request
+            </button>
+            <a
+              href={`mailto:${OFFICIAL_SUPPORT_EMAIL}`}
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                color: 'var(--text-main)',
+                border: '1px solid var(--border-light)',
+                padding: '8px 14px',
+                borderRadius: '10px',
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <Mail size={14} /> Email Support
+            </a>
+          </div>
+        </div>
+
       </div>
-
-      {/* 24/7 RAPID LIVE CHAT MODAL */}
-      {showLiveChatModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(7, 15, 30, 0.75)', backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '16px'
-        }}>
-          <div className="animate-fade-in-scale" style={{
-            backgroundColor: 'var(--bg-card)', borderRadius: '24px',
-            maxWidth: '520px', width: '100%', height: '620px',
-            display: 'flex', flexDirection: 'column', overflow: 'hidden',
-            border: '1.5px solid var(--border-light)', boxShadow: 'var(--shadow-lg)'
-          }}>
-            {/* Chat Header */}
-            <div style={{
-              padding: '16px 20px',
-              backgroundColor: 'var(--primary-blue)',
-              color: '#FFFFFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{
-                  width: '38px', height: '38px', borderRadius: '10px',
-                  backgroundColor: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                  <Headphones size={20} />
-                </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, color: '#FFFFFF' }}>CivicOne 24/7 Support Desk</h4>
-                    <span style={{ fontSize: '0.625rem', backgroundColor: '#059669', padding: '1px 6px', borderRadius: '8px', fontWeight: 800 }}>LIVE</span>
-                  </div>
-                  <span style={{ fontSize: '0.7rem', color: '#DBEAFE' }}>Official Support: {OFFICIAL_SUPPORT_EMAIL}</span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowLiveChatModal(false)}
-                style={{ background: 'none', border: 'none', color: '#FFFFFF', cursor: 'pointer' }}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Chat Preset Shortcuts */}
-            <div style={{ padding: '10px 14px', backgroundColor: 'var(--bg-main)', borderBottom: '1px solid var(--border-light)', display: 'flex', gap: '6px', overflowX: 'auto' }}>
-              {[
-                "Gold Pass Payment Issue",
-                "Aadhaar Masking Query",
-                "Revoke Org Access",
-                "Lost Card Emergency Freeze"
-              ].map((query, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSendChatMessage(query)}
-                  style={{
-                    backgroundColor: 'var(--bg-card)',
-                    border: '1px solid var(--border-light)',
-                    padding: '4px 10px',
-                    borderRadius: '12px',
-                    fontSize: '0.725rem',
-                    fontWeight: 700,
-                    color: 'var(--text-main)',
-                    whiteSpace: 'nowrap',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {query}
-                </button>
-              ))}
-            </div>
-
-            {/* Chat Messages Log */}
-            <div style={{ flex: 1, padding: '16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', backgroundColor: 'var(--bg-main)' }}>
-              {chatMessages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    alignSelf: msg.sender === 'citizen' ? 'flex-end' : 'flex-start',
-                    maxWidth: '85%'
-                  }}
-                >
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-light)', marginBottom: '2px', textAlign: msg.sender === 'citizen' ? 'right' : 'left' }}>
-                    {msg.name} {msg.badge && <span style={{ fontWeight: 800, color: 'var(--primary-blue)' }}>• {msg.badge}</span>}
-                  </div>
-                  <div style={{
-                    backgroundColor: msg.sender === 'citizen' ? 'var(--primary-blue)' : 'var(--bg-card)',
-                    color: msg.sender === 'citizen' ? '#FFFFFF' : 'var(--text-main)',
-                    padding: '12px 16px',
-                    borderRadius: msg.sender === 'citizen' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                    fontSize: '0.875rem',
-                    lineHeight: 1.45,
-                    border: msg.sender === 'citizen' ? 'none' : '1px solid var(--border-light)',
-                    boxShadow: 'var(--shadow-sm)'
-                  }}>
-                    {msg.text}
-                  </div>
-                  <div style={{ fontSize: '0.65rem', color: 'var(--text-light)', marginTop: '2px', textAlign: msg.sender === 'citizen' ? 'right' : 'left' }}>
-                    {msg.time}
-                  </div>
-                </div>
-              ))}
-
-              {chatTyping && (
-                <div style={{ alignSelf: 'flex-start', backgroundColor: 'var(--bg-card)', padding: '8px 14px', borderRadius: '14px', border: '1px solid var(--border-light)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  Senior Officer is typing response...
-                </div>
-              )}
-              <div ref={chatBottomRef} />
-            </div>
-
-            {/* Chat Input Bar */}
-            <form
-              onSubmit={(e) => { e.preventDefault(); handleSendChatMessage(); }}
-              style={{ padding: '12px 16px', backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-light)', display: 'flex', gap: '8px' }}
-            >
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Type your message for instant officer response..."
-                style={{
-                  flex: 1,
-                  padding: '10px 14px',
-                  borderRadius: '12px',
-                  border: '1.5px solid var(--border-light)',
-                  backgroundColor: 'var(--bg-input)',
-                  color: 'var(--text-main)',
-                  fontSize: '0.875rem'
-                }}
-              />
-              <button
-                type="submit"
-                style={{
-                  backgroundColor: 'var(--primary-blue)',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '0 16px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <Send size={16} />
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* 30-SECOND CALLBACK MODAL */}
-      {showCallbackModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(7, 15, 30, 0.75)', backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '16px'
-        }}>
-          <div className="animate-fade-in-scale" style={{
-            backgroundColor: 'var(--bg-card)', borderRadius: '24px', padding: '32px',
-            maxWidth: '460px', width: '100%', position: 'relative', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-lg)'
-          }}>
-            <button
-              onClick={() => { setShowCallbackModal(false); setCallbackStatus(null); }}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-            >
-              <X size={20} />
-            </button>
-
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <div style={{
-                width: '54px', height: '54px', borderRadius: '16px',
-                backgroundColor: 'rgba(16, 185, 129, 0.12)', color: 'var(--success)',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px'
-              }}>
-                <PhoneCall size={28} />
-              </div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
-                Instant 30-Second Callback
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Our automated dialer connects you with an on-duty National Officer immediately.
-              </p>
-            </div>
-
-            {callbackStatus === 'COUNTDOWN' ? (
-              <div style={{ textAlign: 'center', padding: '24px 0' }}>
-                <div style={{
-                  width: '90px', height: '90px', borderRadius: '50%',
-                  border: '4px solid var(--primary-blue)', display: 'inline-flex',
-                  alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 900,
-                  color: 'var(--primary-blue)', marginBottom: '16px', animation: 'pulseLive 1.5s infinite'
-                }}>
-                  {countdownSeconds}s
-                </div>
-                <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                  Dispatching Call to {callbackNumber}...
-                </h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Please keep your phone ready. Officer Sharma is taking your line.
-                </p>
-              </div>
-            ) : callbackStatus === 'CONNECTED' ? (
-              <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                <div style={{
-                  width: '60px', height: '60px', borderRadius: '50%',
-                  backgroundColor: 'var(--success-bg)', color: 'var(--success-text)',
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px'
-                }}>
-                  <CheckCircle2 size={32} />
-                </div>
-                <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                  Call In Progress
-                </h4>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Your phone is ringing now from CivicOne National Care (+91 1800-CIVIC-ONE).
-                </p>
-                <button
-                  onClick={() => setShowCallbackModal(false)}
-                  style={{
-                    marginTop: '20px',
-                    backgroundColor: 'var(--primary-blue)',
-                    color: '#FFFFFF',
-                    padding: '10px 24px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    fontWeight: 700,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Done
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleRequestCallback}>
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '6px' }}>
-                    Your Registered Mobile Number *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={callbackNumber}
-                    onChange={(e) => setCallbackNumber(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '10px',
-                      border: '1.5px solid var(--border-light)',
-                      backgroundColor: 'var(--bg-input)',
-                      color: 'var(--text-main)',
-                      fontSize: '0.9rem',
-                      fontWeight: 700
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '6px' }}>
-                    Reason for Urgent Callback
-                  </label>
-                  <select
-                    value={callbackReason}
-                    onChange={(e) => setCallbackReason(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '10px',
-                      border: '1.5px solid var(--border-light)',
-                      backgroundColor: 'var(--bg-input)',
-                      color: 'var(--text-main)',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    <option value="Urgent Identity Verification Issue">Urgent Identity Verification Issue</option>
-                    <option value="Gold Pass Payment & Membership Query">Gold Pass Payment &amp; Membership Query</option>
-                    <option value="Unauthorized Organization Access Alert">Unauthorized Organization Access Alert</option>
-                    <option value="Lost Device Emergency Security Hold">Lost Device Emergency Security Hold</option>
-                    <option value="General Grievance Escalation">General Grievance Escalation</option>
-                  </select>
-                </div>
-
-                <button
-                  type="submit"
-                  style={{
-                    width: '100%',
-                    backgroundColor: 'var(--success)',
-                    color: '#FFFFFF',
-                    padding: '13px',
-                    borderRadius: '12px',
-                    fontWeight: 800,
-                    fontSize: '0.925rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  <PhoneCall size={18} /> Call Me Now (30 Seconds)
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* CREATE SUPPORT TICKET MODAL */}
-      {showTicketModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(7, 15, 30, 0.75)', backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '16px'
-        }}>
-          <div className="animate-fade-in-scale" style={{
-            backgroundColor: 'var(--bg-card)', borderRadius: '24px', padding: '32px',
-            maxWidth: '500px', width: '100%', position: 'relative', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-lg)'
-          }}>
-            <button
-              onClick={() => setShowTicketModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-            >
-              <X size={20} />
-            </button>
-
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <Ticket size={22} style={{ color: 'var(--primary-blue)' }} />
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
-                  Raise Priority Support Ticket
-                </h3>
-              </div>
-              <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)' }}>
-                Directly dispatched to <strong>{OFFICIAL_SUPPORT_EMAIL}</strong> and the National Officer Queue.
-              </p>
-            </div>
-
-            <form onSubmit={handleTicketSubmit}>
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>Subject *</label>
-                <input
-                  type="text"
-                  required
-                  value={ticketForm.subject}
-                  onChange={(e) => setTicketForm({ ...ticketForm, subject: e.target.value })}
-                  placeholder="Summary of issue (e.g. Gold Pass payment verification)..."
-                  style={{
-                    width: '100%', padding: '11px 14px', borderRadius: '10px',
-                    border: '1.5px solid var(--border-light)', backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', fontSize: '0.875rem'
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>Category</label>
-                  <select
-                    value={ticketForm.category}
-                    onChange={(e) => setTicketForm({ ...ticketForm, category: e.target.value })}
-                    style={{
-                      width: '100%', padding: '11px 14px', borderRadius: '10px',
-                      border: '1.5px solid var(--border-light)', backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', fontSize: '0.875rem'
-                    }}
-                  >
-                    <option value="CivicOne ID & Aadhaar">CivicOne ID &amp; Aadhaar</option>
-                    <option value="Digital Vault & Docs">Digital Vault &amp; Docs</option>
-                    <option value="Gold Pass Membership">Gold Pass Membership</option>
-                    <option value="Organization Access">Organization Access</option>
-                    <option value="Privacy & Consent">Privacy &amp; Consent</option>
-                    <option value="Security & Fraud">Security &amp; Fraud</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>Priority Level</label>
-                  <select
-                    value={ticketForm.priority}
-                    onChange={(e) => setTicketForm({ ...ticketForm, priority: e.target.value })}
-                    style={{
-                      width: '100%', padding: '11px 14px', borderRadius: '10px',
-                      border: '1.5px solid var(--border-light)', backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', fontSize: '0.875rem'
-                    }}
-                  >
-                    <option value="HIGH">High Priority (1-Hr SLA)</option>
-                    <option value="URGENT">Urgent (15-Min Express SLA)</option>
-                    <option value="NORMAL">Standard (4-Hr SLA)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>Description *</label>
-                <textarea
-                  rows={4}
-                  required
-                  value={ticketForm.message}
-                  onChange={(e) => setTicketForm({ ...ticketForm, message: e.target.value })}
-                  placeholder="Describe your issue in detail. Include transaction ID or organization name if applicable..."
-                  style={{
-                    width: '100%', padding: '11px 14px', borderRadius: '10px',
-                    border: '1.5px solid var(--border-light)', backgroundColor: 'var(--bg-input)', color: 'var(--text-main)', fontSize: '0.875rem', resize: 'vertical'
-                  }}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  backgroundColor: 'var(--primary-blue)',
-                  color: '#FFFFFF',
-                  padding: '13px',
-                  borderRadius: '12px',
-                  fontWeight: 800,
-                  fontSize: '0.925rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: 'var(--shadow-blue)'
-                }}
-              >
-                {loading ? 'Submitting to National Desk...' : 'Submit Priority Ticket'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
     </div>
   );
