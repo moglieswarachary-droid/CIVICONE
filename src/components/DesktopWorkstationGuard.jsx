@@ -144,7 +144,7 @@ export default function DesktopWorkstationGuard({
           </div>
           <div>
             <span style={{ fontSize: '1.1rem', fontWeight: 900, letterSpacing: '-0.02em', color: '#FFFFFF' }}>
-              CivicOne
+              CIVIQONE
             </span>
             <span style={{ display: 'block', fontSize: '0.6rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               National Gateway
@@ -373,7 +373,7 @@ export default function DesktopWorkstationGuard({
               gap: '6px'
             }}
           >
-            <Home size={15} /> CivicOne Home
+            <Home size={15} /> CIVIQONE Home
           </button>
         </div>
       </div>

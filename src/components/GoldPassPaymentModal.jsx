@@ -110,7 +110,7 @@ export default function GoldPassPaymentModal({ isOpen, onClose, onPaymentSuccess
               <Crown size={22} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#FFFFFF', margin: 0 }}>CivicOne Gold Pass Checkout</h3>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#FFFFFF', margin: 0 }}>CIVIQONE Gold Pass Checkout</h3>
               <span style={{ fontSize: '0.7rem', color: '#C7D2FE', fontWeight: 600 }}>256-Bit Encrypted Payment Gateway</span>
             </div>
           </div>
@@ -303,7 +303,7 @@ export default function GoldPassPaymentModal({ isOpen, onClose, onPaymentSuccess
                 Gold Pass Activated! 👑
               </h4>
               <p style={{ fontSize: '0.875rem', color: '#059669', fontWeight: 700, marginBottom: '20px' }}>
-                Payment verified by CivicOne server. Your Gold Pass entitlement is active.
+                Payment verified by CIVIQONE server. Your Gold Pass entitlement is active.
               </p>
 
               <div style={{ backgroundColor: '#F8FAFC', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0', fontSize: '0.8rem', textAlign: 'left', marginBottom: '20px' }}>

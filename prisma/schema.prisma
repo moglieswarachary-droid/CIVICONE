@@ -1,4 +1,4 @@
-// prisma/schema.prisma - CivicOne Relational Database Schema
+// prisma/schema.prisma - CIVIQONE Relational Database Schema
 
 datasource db {
   provider = "sqlite"

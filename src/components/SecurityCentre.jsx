@@ -45,7 +45,7 @@ export default function SecurityCentre({ securityLogs: initialLogs }) {
       
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0B1F3A', letterSpacing: '-0.02em' }}>
-          CivicOne Security Centre
+          CIVIQONE Security Centre
         </h1>
         <p style={{ fontSize: '0.9rem', color: '#475569', marginTop: '4px' }}>
           Monitor active device sessions, security audit logs, and account privacy permissions.

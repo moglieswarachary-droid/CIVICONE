@@ -1,4 +1,4 @@
-// src/config/organizationConfig.js - Centralized CivicOne Organization Portal Configuration & Sector Taxonomy
+// src/config/organizationConfig.js - Centralized CIVIQONE Organization Portal Configuration & Sector Taxonomy
 
 export const ORGANIZATION_SECTORS = [
   {

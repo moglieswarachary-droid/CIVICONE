@@ -1,7 +1,7 @@
 @echo off
-TITLE CivicOne Premium Gold Citizen Portal Launcher
+TITLE CIVIQONE Premium Gold Citizen Portal Launcher
 echo =================================================================
-echo   CivicOne Digital Identity & Premium Gold Citizen Portal
+echo   CIVIQONE Digital Identity & Premium Gold Citizen Portal
 echo =================================================================
 echo.
 
@@ -18,7 +18,7 @@ echo 📦 Building production web bundle (Vite)...
 %NODE_EXEC% "node_modules\vite\bin\vite.js" build
 
 echo.
-echo 🚀 Launching CivicOne Hosted Web Server on http://localhost:3001 ...
+echo 🚀 Launching CIVIQONE Hosted Web Server on http://localhost:3001 ...
 echo.
 
 %NODE_EXEC% server/index.js

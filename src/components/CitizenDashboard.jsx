@@ -26,7 +26,7 @@ import {
 export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification, theme: initialTheme = 'light', onToggleTheme }) {
   // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'activity' | 'privacy' | 'notifications' | 'tourism' | 'travel' | 'govt-updates' | 'news' | 'security' | 'help' | 'ai' | 'profile'
   const [activeTab, setActiveTab] = useState('home');
-  const [theme, setTheme] = useState(() => initialTheme || localStorage.getItem('civicone_theme') || 'light');
+  const [theme, setTheme] = useState(() => initialTheme || localStorage.getItem('civiqone_theme') || 'light');
   const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [documents, setDocuments] = useState(DEMO_DOCUMENTS);
@@ -51,14 +51,14 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
     document.documentElement.setAttribute('data-theme', nextTheme);
-    localStorage.setItem('civicone_theme', nextTheme);
+    localStorage.setItem('civiqone_theme', nextTheme);
     if (onToggleTheme) onToggleTheme();
   };
 
   // Collapsible Group States for Desktop Sidebar
   const [openGroups, setOpenGroups] = useState({
     main: true,
-    myCivicOne: true,
+    myCIVIQONE: true,
     explore: true,
     support: true,
     account: true
@@ -156,8 +156,8 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       ]
     },
     {
-      key: 'myCivicOne',
-      title: 'MY CIVICONE',
+      key: 'myCIVIQONE',
+      title: 'MY CIVIQONE',
       items: [
         { id: 'family-vault', label: 'Family Vault', icon: Users },
         { id: 'activity', label: 'My Activity', icon: Activity },
@@ -169,7 +169,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       key: 'explore',
       title: 'EXPLORE',
       items: [
-        { id: 'tourism', label: 'CivicOne World', icon: Compass },
+        { id: 'tourism', label: 'CIVIQONE World', icon: Compass },
         { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
         { id: 'news', label: 'Daily News', icon: Newspaper }
       ]
@@ -247,7 +247,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
               </div>
               <div>
                 <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                  CivicOne
+                  CIVIQONE
                 </span>
                 <span style={{ display: 'block', fontSize: '0.6rem', fontWeight: 800, color: '#0B5ED7', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '-4px' }}>
                   Citizen Portal
@@ -521,7 +521,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     </h1>
                   </div>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-light)', marginTop: '2px' }}>
-                    CivicOne ID: <strong>{currentCitizen.citizenId}</strong> | Aadhaar Ref: <strong>{currentCitizen.maskedAadhaar}</strong>
+                    CIVIQONE ID: <strong>{currentCitizen.citizenId}</strong> | Aadhaar Ref: <strong>{currentCitizen.maskedAadhaar}</strong>
                   </p>
                   <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
                     <span style={{ backgroundColor: '#D1E7DD', color: '#0F5132', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
@@ -551,7 +551,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     { label: 'Verify Document', icon: CheckCircle2, action: () => handleSelectTab('vault'), color: '#7C3AED' },
                     { label: 'Share Access', icon: Share2, action: () => handleSelectTab('privacy'), color: '#DC2626' },
                     { label: 'Check Services', icon: Grid, action: () => handleSelectTab('services'), color: '#D97706' },
-                    { label: 'CivicOne World', icon: Compass, action: () => handleSelectTab('tourism'), color: '#166534' },
+                    { label: 'CIVIQONE World', icon: Compass, action: () => handleSelectTab('tourism'), color: '#166534' },
                     { label: 'Ask AI', icon: Sparkles, action: () => handleSelectTab('help'), color: '#8B5CF6' }
                   ].map((act, i) => (
                     <button
@@ -809,7 +809,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
             <CivicVault documents={documents} initialMemberId={familyVaultMemberId} />
           )}
 
-          {/* TAB: CIVICONE WORLD TOURISM & DESTINATIONS GUIDE */}
+          {/* TAB: CIVIQONE WORLD TOURISM & DESTINATIONS GUIDE */}
           {activeTab === 'tourism' && (
             <TourismGuide />
           )}
@@ -899,7 +899,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 {[
                   { title: "Tokenized Identity Verification Completed", category: "UIDAI Verification", time: "Today, 10:42 AM", ip: "49.37.142.90", location: "Vijayawada, AP", status: "SUCCESS" },
                   { title: "Civic Card Aadhaar Unmasked Toggle", category: "Privacy Audit", time: "Today, 10:38 AM", ip: "49.37.142.90", location: "Web App", status: "SUCCESS" },
-                  { title: "Access Request Dispatched by CivicOne Grand Hotel", category: "Consent Request", time: "Today, 08:21 PM", ip: "164.100.42.10", location: "Hotel Check-in Desk", status: "PENDING" },
+                  { title: "Access Request Dispatched by CIVIQONE Grand Hotel", category: "Consent Request", time: "Today, 08:21 PM", ip: "164.100.42.10", location: "Hotel Check-in Desk", status: "PENDING" },
                   { title: "Civic ID Session Login Authenticated", category: "Security Auth", time: "18 Aug 2026, 07:15 PM", ip: "49.37.142.90", location: "Chrome / Windows", status: "SUCCESS" },
                   { title: "Driving Licence (DL-AP-2024-9984) Credential Issued", category: "Government Issuance", time: "15 Aug 2026, 03:20 PM", ip: "164.100.42.10", location: "RTO AP Headquarters", status: "VERIFIED" },
                   { title: "Consent Token Approved for State Health Registry", category: "Consent Clearance", time: "14 Aug 2026, 11:05 AM", ip: "49.37.142.90", location: "Health Portal", status: "ACTIVE" }
@@ -1010,7 +1010,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           }}>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <strong style={{ fontSize: '1.1rem', color: 'var(--text-main)' }}>CivicOne Features</strong>
+                <strong style={{ fontSize: '1.1rem', color: 'var(--text-main)' }}>CIVIQONE Features</strong>
                 <button onClick={() => setMobileMoreDrawerOpen(false)} style={{ background: 'none', color: 'var(--text-muted)', border: 'none' }}><X size={22} /></button>
               </div>
 
@@ -1020,7 +1020,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                   { id: 'journey', label: 'My Journey', icon: Milestone },
                   { id: 'activity', label: 'My Activity', icon: Activity },
                   { id: 'privacy', label: 'Access & Consent', icon: Lock },
-                  { id: 'tourism', label: 'CivicOne World', icon: Compass },
+                  { id: 'tourism', label: 'CIVIQONE World', icon: Compass },
                   { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
                   { id: 'news', label: 'Daily News', icon: Newspaper },
                   { id: 'security', label: 'Security Centre', icon: Shield },

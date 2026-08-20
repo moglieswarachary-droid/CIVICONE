@@ -167,7 +167,7 @@ export default function FinancialLogin({ orgConfig, onLoginSuccess, onGoBack }) 
           </h2>
 
           <p style={{ fontSize: '0.825rem', color: '#64748B', margin: 0 }}>
-            CivicOne Banking &amp; Financial Verification Gateway
+            CIVIQONE Banking &amp; Financial Verification Gateway
           </p>
         </div>
 
@@ -371,7 +371,7 @@ export default function FinancialLogin({ orgConfig, onLoginSuccess, onGoBack }) 
         </form>
 
         <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.725rem', color: '#94A3B8' }}>
-          CivicOne Financial Identity Network • RBI / SEBI / IRDAI Standard eKYC Protocols
+          CIVIQONE Financial Identity Network • RBI / SEBI / IRDAI Standard eKYC Protocols
         </div>
       </div>
     </div>

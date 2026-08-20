@@ -232,7 +232,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
         name: uploadForm.name,
         category: uploadForm.category || 'government',
         type: uploadForm.type || 'document',
-        issuer: uploadForm.issuer || 'CivicOne Authority',
+        issuer: uploadForm.issuer || 'CIVIQONE Authority',
         refNo: uploadForm.refNo || `REF-${Math.floor(100000 + Math.random() * 900000)}`,
         issueDate: uploadForm.issueDate || new Date().toLocaleDateString('en-GB'),
         expiryDate: uploadForm.expiryDate || 'N/A',
@@ -1375,7 +1375,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.825rem' }}>
               <div style={{ padding: '10px', borderRadius: '8px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
-                <strong>CivicOne Demo Authority</strong> (Credential Verification)<br />
+                <strong>CIVIQONE Demo Authority</strong> (Credential Verification)<br />
                 <span style={{ color: '#64748B' }}>14 Aug 2026, 08:30 AM — Status: AUTHORIZED VIEW</span>
               </div>
             </div>

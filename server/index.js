@@ -1,4 +1,4 @@
-// server/index.js - Express REST API Server for CivicOne
+// server/index.js - Express REST API Server for CIVIQONE
 
 import express from 'express';
 import cors from 'cors';
@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, '../dist')));
 
 // Logging Middleware
 app.use((req, res, next) => {
-  console.log(`[CivicOne Platform API] ${new Date().toISOString()} ${req.method} ${req.url}`);
+  console.log(`[CIVIQONE Platform API] ${new Date().toISOString()} ${req.method} ${req.url}`);
   next();
 });
 
@@ -320,7 +320,7 @@ app.post('/api/auth/admin-login', async (req, res) => {
 
   const adminSession = {
     adminId: `SUPERADMIN-01`,
-    username: username || "superadmin@civicone.gov.in",
+    username: username || "superadmin@civiqone.gov.in",
     role: "National Super Administrator",
     clearanceLevel: "MASTER ROOT CLEARANCE",
     sessionToken: `ADMIN-ROOT-${Date.now()}-SECURE`
@@ -560,7 +560,7 @@ app.get('/api/card/verify-qr/:token', (req, res) => {
       identityStatus: "Verified",
       accountStatus: "Active",
       holderName: "Authorized viewer only",
-      issuingAuthority: "CivicOne National Identity Authority",
+      issuingAuthority: "CIVIQONE National Identity Authority",
       cryptographicSignature: "VALID - SHA256 AUTHORIZED",
       timestamp: new Date().toISOString(),
       notice: "No sensitive Aadhaar numbers, bank details, or private documents are embedded in QR codes."
@@ -570,7 +570,7 @@ app.get('/api/card/verify-qr/:token', (req, res) => {
   return res.status(404).json({
     valid: false,
     status: "🔴 Invalid / Expired Credential",
-    message: "This verification token does not match any active authorized CivicOne credential."
+    message: "This verification token does not match any active authorized CIVIQONE credential."
   });
 });
 
@@ -719,7 +719,7 @@ app.get('/api/services/category/:catKey', (req, res) => {
 
   const data = mockCategoryData[catKey] || {
     categoryName: `${catKey.toUpperCase()} Services Hub`,
-    provider: "CivicOne Integrated National Gateway",
+    provider: "CIVIQONE Integrated National Gateway",
     records: [
       { id: `rec-${catKey}-01`, name: `${catKey.toUpperCase()} Official Credential`, docNumber: `DOC-${Date.now()}`, issuer: "National Issuing Authority", status: "VERIFIED" }
     ],
@@ -1115,7 +1115,7 @@ app.post('/api/authority/org/toggle-status', async (req, res) => {
   return res.json({ success: true, organization: updatedOrg });
 });
 
-// --- TOURISM GUIDE ENDPOINTS (CIVICONE WORLD) ---
+// --- TOURISM GUIDE ENDPOINTS (CIVIQONE WORLD) ---
 
 app.get('/api/tourism/destinations', (req, res) => {
   const { search, category } = req.query;
@@ -1206,18 +1206,18 @@ app.post('/api/ai/query', (req, res) => {
 
   if (p.includes("expir") || p.includes("licence") || p.includes("dl")) {
     const dl = db.documents.find(d => d.citizenId === citizen.citizenId && d.name.includes("Licence"));
-    reply = `Your **Smart Driving Licence** (${dl ? dl.refNo : citizen.governmentInfo.drivingLicence}) is valid until **${dl ? dl.expiryDate : '2042'}** (🟢 Verified Demo Record). You can initiate online renewal via Parivahan Sewa on CivicOne.`;
+    reply = `Your **Smart Driving Licence** (${dl ? dl.refNo : citizen.governmentInfo.drivingLicence}) is valid until **${dl ? dl.expiryDate : '2042'}** (🟢 Verified Demo Record). You can initiate online renewal via Parivahan Sewa on CIVIQONE.`;
   } else if (p.includes("aadhaar") || p.includes("identity")) {
-    reply = `Your CivicOne digital identity is linked to tokenized Aadhaar reference **${citizen.maskedAadhaar}**. Physical Aadhaar numbers are never stored or exposed on CivicOne for privacy compliance.`;
+    reply = `Your CIVIQONE digital identity is linked to tokenized Aadhaar reference **${citizen.maskedAadhaar}**. Physical Aadhaar numbers are never stored or exposed on CIVIQONE for privacy compliance.`;
   } else if (p.includes("vault") || p.includes("document")) {
     const count = db.documents.filter(d => d.citizenId === citizen.citizenId).length;
     reply = `You currently have **${count} digital records** stored across Identity, Education, Government, Vehicle/RTO, Healthcare, and Travel categories in My Civic Vault.`;
   } else if (p.includes("gold pass") || p.includes("gold")) {
-    reply = `Gold Pass status for **${citizen.fullName}** is **${citizen.goldPassStatus.toUpperCase()}**. Standard CivicOne Card is active by default. Upgrading to Gold Pass unlocks VIP identity verification and priority service desks.`;
+    reply = `Gold Pass status for **${citizen.fullName}** is **${citizen.goldPassStatus.toUpperCase()}**. Standard CIVIQONE Card is active by default. Upgrading to Gold Pass unlocks VIP identity verification and priority service desks.`;
   } else if (p.includes("tour") || p.includes("dubai") || p.includes("travel") || p.includes("paris")) {
-    reply = `Explore **CivicOne World** tourism guide for travel destinations like Dubai, Paris, Tokyo, and Goa. Check budget estimates, best travel times, and book flights, buses, or trains with minimum identity sharing.`;
+    reply = `Explore **CIVIQONE World** tourism guide for travel destinations like Dubai, Paris, Tokyo, and Goa. Check budget estimates, best travel times, and book flights, buses, or trains with minimum identity sharing.`;
   } else {
-    reply = `I am CivicOne AI, your official digital identity assistant. I can help you check document expiry dates, search vault records, verify credentials, explore tourism destinations, and manage data consent. How can I assist you further?`;
+    reply = `I am CIVIQONE AI, your official digital identity assistant. I can help you check document expiry dates, search vault records, verify credentials, explore tourism destinations, and manage data consent. How can I assist you further?`;
   }
 
   return res.json({
@@ -1274,7 +1274,7 @@ app.get('*', (req, res) => {
     const indexPath = path.join(__dirname, '../dist/index.html');
     return res.sendFile(indexPath, (err) => {
       if (err) {
-        res.status(500).send("CivicOne Frontend build assets not found. Please run build step first.");
+        res.status(500).send("CIVIQONE Frontend build assets not found. Please run build step first.");
       }
     });
   }
@@ -1282,7 +1282,7 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`=================================================`);
-  console.log(`  CivicOne Hosted Web App & API running on:`);
+  console.log(`  CIVIQONE Hosted Web App & API running on:`);
   console.log(`  👉 http://localhost:${PORT}`);
   console.log(`=================================================`);
 });

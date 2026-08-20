@@ -56,7 +56,7 @@ export default function TravelBookingHub({ citizen, initialDestination = '' }) {
       {/* HEADER */}
       <div style={{ marginBottom: '28px' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#EFF6FF', color: '#1D4ED8', padding: '6px 14px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
-          <Plane size={16} /> CIVICONE BOOK & TRAVEL
+          <Plane size={16} /> CIVIQONE BOOK & TRAVEL
         </div>
         <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em' }}>
           Global Transport & Booking Hub

@@ -1,4 +1,4 @@
-// src/components/TourismGuide.jsx - CivicOne World Tourism & Destinations Explorer with Seasonal Recommendations
+// src/components/TourismGuide.jsx - CIVIQONE World Tourism & Destinations Explorer with Seasonal Recommendations
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -418,7 +418,7 @@ export default function TourismGuide({ onSelectTravelBooking }) {
           letterSpacing: '0.06em',
           marginBottom: '10px'
         }}>
-          <Compass size={16} /> CIVICONE WORLD • GLOBAL & INDIAN DESTINATIONS
+          <Compass size={16} /> CIVIQONE WORLD • GLOBAL & INDIAN DESTINATIONS
         </div>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.02em', marginBottom: '6px' }}>
           Places & Destinations to Visit with Seasonal Guides
@@ -676,7 +676,7 @@ export default function TourismGuide({ onSelectTravelBooking }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
               <div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#EFF6FF', color: '#1D4ED8', padding: '4px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>
-                  <Compass size={14} /> CIVICONE WORLD DESTINATION GUIDE
+                  <Compass size={14} /> CIVIQONE WORLD DESTINATION GUIDE
                 </div>
                 <h2 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0B1F3A' }}>
                   {selectedDest.title}

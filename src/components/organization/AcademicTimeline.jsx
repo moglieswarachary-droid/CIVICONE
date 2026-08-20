@@ -188,7 +188,7 @@ export default function AcademicTimeline({ academicHistory, eduType = 'college' 
                     gap: '4px',
                     border: '1px solid #BFDBFE'
                   }}>
-                    <Lock size={11} /> Locked in CivicOne Vault
+                    <Lock size={11} /> Locked in CIVIQONE Vault
                   </span>
                 )}
               </div>

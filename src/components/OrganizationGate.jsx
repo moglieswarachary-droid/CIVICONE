@@ -66,7 +66,7 @@ export default function OrganizationGate({ onAuthenticated, onGoBackToLanding, o
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 900, margin: 0, color: '#FFFFFF' }}>
-                  CivicOne Organization Network
+                  CIVIQONE Organization Network
                 </h1>
                 <span style={{
                   fontSize: '0.65rem',

@@ -219,7 +219,7 @@ export default function PolicePortal({ officer, initialState, onReturnHome }) {
             </div>
             <div>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                CivicOne Law Enforcement &amp; Police Verification Workspace
+                CIVIQONE Law Enforcement &amp; Police Verification Workspace
               </div>
               <div style={{ fontSize: '0.75rem', color: '#6FFFE9' }}>
                 Authorized Police Portal — All 28 States &amp; 8 Union Territories

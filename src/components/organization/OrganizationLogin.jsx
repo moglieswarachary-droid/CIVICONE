@@ -475,7 +475,7 @@ export default function OrganizationLogin({ orgConfig, onLoginSuccess, onGoBack 
         </form>
 
         <div style={{ marginTop: '20px', fontSize: '0.75rem', color: '#64748B', textAlign: 'center' }}>
-          🔒 Protected by CivicOne Attribute-Scoped Access Matrix
+          🔒 Protected by CIVIQONE Attribute-Scoped Access Matrix
         </div>
 
       </div>

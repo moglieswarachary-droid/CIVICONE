@@ -25,7 +25,7 @@ export default function CompanyLogin({ orgConfig, onLoginSuccess, onGoBack }) {
 
   const [state, setState] = useState('Andhra Pradesh');
   const [companyType, setCompanyType] = useState('IT / Software');
-  const [companyName, setCompanyName] = useState('CivicOne Technologies Pvt. Ltd.');
+  const [companyName, setCompanyName] = useState('CIVIQONE Technologies Pvt. Ltd.');
   const [employerCode, setEmployerCode] = useState('EMP-CIVIC-001');
   const [email, setEmail] = useState('hr@company.example');
   const [password, setPassword] = useState('emp123');
@@ -139,7 +139,7 @@ export default function CompanyLogin({ orgConfig, onLoginSuccess, onGoBack }) {
           </h2>
 
           <p style={{ fontSize: '0.825rem', color: '#64748B', margin: 0 }}>
-            CivicOne Pre-Employment Background &amp; Credential Verification
+            CIVIQONE Pre-Employment Background &amp; Credential Verification
           </p>
         </div>
 
@@ -243,7 +243,7 @@ export default function CompanyLogin({ orgConfig, onLoginSuccess, onGoBack }) {
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="e.g. CivicOne Technologies Pvt. Ltd."
+              placeholder="e.g. CIVIQONE Technologies Pvt. Ltd."
               style={{
                 width: '100%',
                 padding: '10px 12px',
@@ -347,7 +347,7 @@ export default function CompanyLogin({ orgConfig, onLoginSuccess, onGoBack }) {
         </form>
 
         <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.725rem', color: '#94A3B8' }}>
-          CivicOne Corporate Identity Network • Attribute-Scoped Employment Verification
+          CIVIQONE Corporate Identity Network • Attribute-Scoped Employment Verification
         </div>
       </div>
     </div>

@@ -20,7 +20,7 @@ const CITIZEN_EMPLOYER_VAULT = {
     ],
     experience: '4 Years 7 Months',
     previousEmployment: [
-      { companyName: 'CivicOne Technologies', designation: 'AI/ML Senior Engineer', period: '2026 – Present', status: '✓ Verified' },
+      { companyName: 'CIVIQONE Technologies', designation: 'AI/ML Senior Engineer', period: '2026 – Present', status: '✓ Verified' },
       { companyName: 'ABC Technologies', designation: 'Software Engineer', period: '2024 – 2026', status: '✓ Verified' },
       { companyName: 'XYZ Solutions', designation: 'Junior Developer', period: '2022 – 2024', status: '✓ Verified' }
     ],
@@ -44,7 +44,7 @@ const CITIZEN_EMPLOYER_VAULT = {
     ],
     experience: '3 Years 2 Months',
     previousEmployment: [
-      { companyName: 'CivicOne Technologies', designation: 'Frontend Specialist', period: '2026 – Present', status: '✓ Verified' },
+      { companyName: 'CIVIQONE Technologies', designation: 'Frontend Specialist', period: '2026 – Present', status: '✓ Verified' },
       { companyName: 'Global Tech Systems', designation: 'UI Developer', period: '2023 – 2026', status: '✓ Verified' }
     ],
     skills: [

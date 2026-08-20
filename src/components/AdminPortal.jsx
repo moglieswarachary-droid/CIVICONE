@@ -170,13 +170,13 @@ export default function AdminPortal({ admin, onReturnHome }) {
             </div>
             <div>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                CivicOne Super Admin &amp; National Authority Portal
+                CIVIQONE Super Admin &amp; National Authority Portal
                 <span style={{ fontSize: '0.65rem', backgroundColor: '#312E81', color: '#818CF8', padding: '2px 8px', borderRadius: '6px', textTransform: 'uppercase', fontWeight: 800 }}>
                   Master Root Clearance
                 </span>
               </div>
               <div style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
-                Authenticated Master Administrator: {admin?.username || 'superadmin@civicone.gov.in'}
+                Authenticated Master Administrator: {admin?.username || 'superadmin@civiqone.gov.in'}
               </div>
             </div>
           </div>
@@ -679,7 +679,7 @@ export default function AdminPortal({ admin, onReturnHome }) {
                 Master Root Platform Supervision Notice
               </h3>
               <p style={{ fontSize: '0.85rem', color: '#94A3B8', lineHeight: 1.6 }}>
-                CivicOne Super Admin maintains platform-level infrastructure oversight, organization permissions, and government officer role assignments. Personal citizen vault data remains cryptographically protected and is not exposed in plaintext.
+                CIVIQONE Super Admin maintains platform-level infrastructure oversight, organization permissions, and government officer role assignments. Personal citizen vault data remains cryptographically protected and is not exposed in plaintext.
               </p>
             </div>
           </div>
@@ -706,7 +706,7 @@ export default function AdminPortal({ admin, onReturnHome }) {
               <tbody>
                 {[...PRIVATE_ORG_TYPES, ...GOVERNMENT_DEPARTMENTS].map(org => (
                   <tr key={org.id} style={{ borderBottom: '1px solid #334155' }}>
-                    <td style={{ padding: '14px 12px', fontWeight: 800, color: '#FFFFFF' }}>CivicOne Demo {org.name}</td>
+                    <td style={{ padding: '14px 12px', fontWeight: 800, color: '#FFFFFF' }}>CIVIQONE Demo {org.name}</td>
                     <td style={{ padding: '14px 12px', color: org.color || '#38BDF8', fontWeight: 700 }}>{org.name}</td>
                     <td style={{ padding: '14px 12px', color: '#94A3B8' }}>All 36 States &amp; UTs</td>
                     <td style={{ padding: '14px 12px', color: '#4ADE80', fontWeight: 800 }}>● ACTIVE</td>

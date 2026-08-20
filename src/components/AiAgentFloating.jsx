@@ -1,4 +1,4 @@
-// src/components/AiAgentFloating.jsx - Multilingual Voice-Enabled CivicOne AI Assistant 2.0
+// src/components/AiAgentFloating.jsx - Multilingual Voice-Enabled CIVIQONE AI Assistant 2.0
 // Supports Voice Input & Speech Synthesis in Telugu, Hindi, Tamil, Kannada, and English with Direct Portal Navigation
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -17,7 +17,7 @@ const SUPPORTED_LANGUAGES = [
 ];
 
 const LOCALIZED_GREETINGS = {
-  en: "Hello! I am CivicOne AI, your multilingual digital identity assistant. Speak or type to navigate portals, query documents, and check verifications.",
+  en: "Hello! I am CIVIQONE AI, your multilingual digital identity assistant. Speak or type to navigate portals, query documents, and check verifications.",
   te: "నమస్కారం! నేను సివిక్ వన్ AI ని. మీ డిజిటల్ గుర్తింపు మరియు పత్రాల సహాయకుడిని. మాట్లాడండి లేదా టైప్ చేసి మీ పత్రాలను శోధించండి.",
   hi: "नमस्ते! मैं सिविकवन एआई हूँ। आपकी डिजिटल पहचान और दस्तावेज़ सहायक। पोर्टल नेविगेट करने या दस्तावेज़ों की जाँच के लिए बोलें या टाइप करें।",
   ta: "வணக்கம்! நான் சிவிக்ஒன் AI. உங்கள் டிஜிட்டல் அடையாள உதவியாளர். ஆவணங்களை பார்க்க அல்லது தேட பேசுங்கள் அல்லது தட்டச்சு செய்யுங்கள்.",
@@ -29,14 +29,14 @@ const QUICK_SUGGESTIONS = {
     { text: "Open My Journey (Life Timeline)", tab: "journey" },
     { text: "Show my Digital Citizen Card", tab: "card" },
     { text: "Who has access to my data?", tab: "privacy" },
-    { text: "Explore CivicOne World destinations", tab: "tourism" },
+    { text: "Explore CIVIQONE World destinations", tab: "tourism" },
     { text: "When does my Driving Licence expire?", query: "driving licence expiry" }
   ],
   te: [
     { text: "నా ప్రయాణం (My Journey) చూపించు", tab: "journey" },
     { text: "నా డిజిటల్ సిటిజెన్ కార్డ్ చూడాలి", tab: "card" },
     { text: "నా డేటా ఎవరి వద్ద ఉంది?", tab: "privacy" },
-    { text: "పర్యాటక ప్రదేశాలు (CivicOne World)", tab: "tourism" },
+    { text: "పర్యాటక ప్రదేశాలు (CIVIQONE World)", tab: "tourism" },
     { text: "నా డ్రైవింగ్ లైసెన్స్ గడువు ఎప్పుడు?", query: "driving licence expiry" }
   ],
   hi: [
@@ -50,14 +50,14 @@ const QUICK_SUGGESTIONS = {
     { text: "என் பயணம் (My Journey) திறக்கவும்", tab: "journey" },
     { text: "என் டிஜிட்டல் அட்டை காட்டு", tab: "card" },
     { text: "எனது தரவை யார் அணுகுகிறார்கள்?", tab: "privacy" },
-    { text: "சுற்றுலா இடங்கள் (CivicOne World)", tab: "tourism" },
+    { text: "சுற்றுலா இடங்கள் (CIVIQONE World)", tab: "tourism" },
     { text: "ஓட்டுநர் உரிமம் எப்போது காலாவதியாகும்?", query: "driving licence expiry" }
   ],
   kn: [
     { text: "ನನ್ನ ಜೀವನ ಪ್ರಯಾಣ (My Journey)", tab: "journey" },
     { text: "ನನ್ನ ಡಿಜಿಟಲ್ ಕಾರ್ಡ್ ತೋರಿಸಿ", tab: "card" },
     { text: "ನನ್ನ ಡೇಟಾ ಯಾರು ನೋಡುತ್ತಿದ್ದಾರೆ?", tab: "privacy" },
-    { text: "ಪ್ರವಾಸ ಸ್ಥಳಗಳು (CivicOne World)", tab: "tourism" },
+    { text: "ಪ್ರವಾಸ ಸ್ಥಳಗಳು (CIVIQONE World)", tab: "tourism" },
     { text: "ಡ್ರೈವಿಂಗ್ ಲೈಸೆನ್ಸ್ ಯಾವಾಗ ಮುಕ್ತಾಯ?", query: "driving licence expiry" }
   ]
 };
@@ -219,7 +219,7 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
       } else if (lang === 'hi') {
         replyText = `आपका **सिविकवन डिजिटल नागरिक कार्ड** (` + civicId + `) खोल दिया गया है। 3D फ्लिप करके सुरक्षा कोड देख सकते हैं।`;
       } else {
-        replyText = `Opening your **CivicOne Digital Citizen Card** (${civicId}) with in-place 3D flip and scannable QR verification.`;
+        replyText = `Opening your **CIVIQONE Digital Citizen Card** (${civicId}) with in-place 3D flip and scannable QR verification.`;
       }
     } else if (lower.includes("family") || lower.includes("child") || lower.includes("dependent") || lower.includes("son") || lower.includes("daughter") || lower.includes("కుటుంబం") || lower.includes("పిల్లల") || lower.includes("తండ్రి") || lower.includes("परिवार") || lower.includes("बच्चे") || lower.includes("माता-पिता")) {
       targetTab = "vault";
@@ -241,10 +241,10 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
         : `Navigating to **My Access & Consent**. You can view which organizations (e.g. State Bank of India, Apollo Hospitals) hold view-only access.`;
     } else if (lower.includes("tourism") || lower.includes("destination") || lower.includes("world") || lower.includes("పర్యాటక") || lower.includes("ప్రదేశాలు") || lower.includes("पर्यटन") || lower.includes("சுற்றுலா") || lower.includes("season") || lower.includes("విహారయాత్ర")) {
       targetTab = "tourism";
-      targetTabName = "CivicOne World (Tourism Guide)";
+      targetTabName = "CIVIQONE World (Tourism Guide)";
       replyText = lang === 'te'
         ? `**సివిక్ వన్ వరల్డ్** పర్యాటక విభాగాన్ని తెరుస్తున్నాను. ఇక్కడ ప్రముఖ పర్యాటక ప్రదేశాలు మరియు ఉత్తమ సీజన్ల వివరాలు ఉన్నాయి.`
-        : `Opening **CivicOne World**! Explore curated Indian and global destinations with recommended visiting seasons and climate guides.`;
+        : `Opening **CIVIQONE World**! Explore curated Indian and global destinations with recommended visiting seasons and climate guides.`;
     } else if (lower.includes("licence") || lower.includes("expire") || lower.includes("dl") || lower.includes("డ్రైవింగ్") || lower.includes("ड्राइविंग")) {
       replyText = `🚗 **Smart Driving Licence Record**:\n• Status: 🟢 Active & Verified\n• License No: **AP02 20180094821**\n• Valid Until: **14-10-2028**\n• Issued By: Ministry of Road Transport & Highways (MoRTH).`;
     } else if (lower.includes("aadhaar") || lower.includes("ఆధార్") || lower.includes("आधार")) {
@@ -301,8 +301,8 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
             transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
           }}
           className="pulse-glow"
-          title="Open Multilingual CivicOne AI Assistant"
-          aria-label="Open Multilingual CivicOne AI Assistant"
+          title="Open Multilingual CIVIQONE AI Assistant"
+          aria-label="Open Multilingual CIVIQONE AI Assistant"
         >
           <div style={{ position: 'relative' }}>
             <Bot size={30} style={{ color: '#38BDF8' }} />
@@ -359,7 +359,7 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
                 </div>
                 <div>
                   <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#F8F7F2', lineHeight: 1.1 }}>
-                    CivicOne AI 2.0
+                    CIVIQONE AI 2.0
                   </h3>
                   <span style={{ fontSize: '0.65rem', color: '#34D399', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10B981' }} />
@@ -609,7 +609,7 @@ export default function AiAgentFloating({ citizen = {}, documents = [], onNaviga
             <button
               type="button"
               onClick={toggleVoiceInput}
-              title={isListening ? "Stop Listening" : "Speak to CivicOne AI"}
+              title={isListening ? "Stop Listening" : "Speak to CIVIQONE AI"}
               style={{
                 width: '40px',
                 height: '40px',

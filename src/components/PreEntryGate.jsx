@@ -70,7 +70,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
       const cleanPhone = loginPhone.replace(/\D/g, '').slice(-10);
       let localCitizen = null;
       try {
-        const stored = JSON.parse(localStorage.getItem('civicone_registered_citizens') || '[]');
+        const stored = JSON.parse(localStorage.getItem('civiqone_registered_citizens') || '[]');
         localCitizen = stored.find(c => (c.mobile || '').replace(/\D/g, '').slice(-10) === cleanPhone);
       } catch (e) {}
 
@@ -82,7 +82,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
           displayName: cleanPhone === '9000000001' ? 'Aarav' : 'Citizen',
           name: cleanPhone === '9000000001' ? 'Aarav Kumar' : 'Verified Citizen',
           mobile: `+91 ${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`,
-          email: cleanPhone === '9000000001' ? 'aarav.demo@civicone.example' : `citizen.${cleanPhone.slice(-4)}@civicone.in`,
+          email: cleanPhone === '9000000001' ? 'aarav.demo@civiqone.example' : `citizen.${cleanPhone.slice(-4)}@civiqone.in`,
           dateOfBirth: '15-07-2004',
           dob: '15-07-2004',
           gender: 'Male',
@@ -233,7 +233,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
         state: regState || 'Andhra Pradesh',
         address: regAddress || `${regState}, India`,
         mobile: `+91 ${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`,
-        email: regEmail || `${regName.toLowerCase().replace(/\s+/g, '.')}@civicone.in`,
+        email: regEmail || `${regName.toLowerCase().replace(/\s+/g, '.')}@civiqone.in`,
         maskedAadhaar: regAadhaar ? `XXXX XXXX ${regAadhaar.slice(-4)}` : 'XXXX XXXX 8899',
         tier: 'STANDARD',
         goldPassStatus: 'standard',
@@ -244,9 +244,9 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
       };
 
       try {
-        const stored = JSON.parse(localStorage.getItem('civicone_registered_citizens') || '[]');
+        const stored = JSON.parse(localStorage.getItem('civiqone_registered_citizens') || '[]');
         stored.push(newCitizen);
-        localStorage.setItem('civicone_registered_citizens', JSON.stringify(stored));
+        localStorage.setItem('civiqone_registered_citizens', JSON.stringify(stored));
       } catch (e) {}
 
       authStorage.setToken(`CIV-TOKEN-${uniqueCivicId}-SECURE`);
@@ -365,7 +365,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
             <ShieldCheck size={34} />
           </div>
           <h2 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '4px', letterSpacing: '-0.02em' }}>
-            CivicOne Citizen Portal
+            CIVIQONE Citizen Portal
           </h2>
           <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontWeight: 600 }}>
             National Sovereign Digital Identity Gateway
@@ -851,7 +851,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
             onMouseEnter={(e) => e.currentTarget.style.color = '#0B5ED7'}
             onMouseLeave={(e) => e.currentTarget.style.color = '#64748B'}
           >
-            ← Back to CivicOne Home
+            ← Back to CIVIQONE Home
           </button>
         </div>
       </div>

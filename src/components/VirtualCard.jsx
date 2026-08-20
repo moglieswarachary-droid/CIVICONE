@@ -1,4 +1,4 @@
-// src/components/VirtualCard.jsx - Official CivicOne Digital Citizen Identity Card
+// src/components/VirtualCard.jsx - Official CIVIQONE Digital Citizen Identity Card
 // High-Reliability 3D Card Architecture (Card Wrapper -> Card Inner -> Card Face Front / Back)
 // Indian Identity Signature: Deep Indigo (#101B3D) + Ivory (#F8F7F2) + Ashoka Blue (#1A4F9C) + Tricolor Security Filament
 
@@ -33,7 +33,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
   const validUntil = card?.expiryDate || '14/01/2034';
   const ledgerHash = card?.ledgerHash || '0x99a4c82b710e64b8a15c3d2e';
   const verificationRef = `REF-${civicId.replace(/[^A-Z0-9]/g, '')}-SEC`;
-  const verificationUrl = `https://verify.civicone.gov.in/card/${encodeURIComponent(civicId)}`;
+  const verificationUrl = `https://verify.civiqone.gov.in/card/${encodeURIComponent(civicId)}`;
 
   // Copy helper
   const copyToClipboard = (text) => {
@@ -66,8 +66,8 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `CivicOne Official Digital Citizen Identity - ${citizenName}`,
-          text: `Official CivicOne Verified Citizen Identity Card for ${citizenName}. Civic ID: ${civicId}`,
+          title: `CIVIQONE Official Digital Citizen Identity - ${citizenName}`,
+          text: `Official CIVIQONE Verified Citizen Identity Card for ${citizenName}. Civic ID: ${civicId}`,
           url: verificationUrl
         });
         return;
@@ -113,7 +113,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
     // 2. Header
     ctx.fillStyle = '#F8F7F2';
     ctx.font = 'bold 34px Inter, sans-serif';
-    ctx.fillText('CIVICONE DIGITAL CITIZEN IDENTITY', 50, 70);
+    ctx.fillText('CIVIQONE DIGITAL CITIZEN IDENTITY', 50, 70);
 
     ctx.fillStyle = '#93C5FD';
     ctx.font = 'bold 15px Inter, sans-serif';
@@ -155,7 +155,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
 
     setTimeout(() => {
       const link = document.createElement('a');
-      link.download = `CivicOne_Citizen_Card_${civicId}.png`;
+      link.download = `CIVIQONE_Citizen_Card_${civicId}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
       setDownloadingImage(false);
@@ -164,7 +164,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
 
   // Reusable Scannable Dynamic QR Code
   const renderQrCode = (size = 100, labelUnder = true) => {
-    const qrPayload = `https://verify.civicone.gov.in/verify?id=${encodeURIComponent(civicId)}&tier=NORMAL&name=${encodeURIComponent(citizenName)}&v=${encodeURIComponent(ledgerHash.slice(0, 10))}`;
+    const qrPayload = `https://verify.civiqone.gov.in/verify?id=${encodeURIComponent(civicId)}&tier=NORMAL&name=${encodeURIComponent(citizenName)}&v=${encodeURIComponent(ledgerHash.slice(0, 10))}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrPayload)}&color=101B3D&bgcolor=F8F7F2`;
 
     return (
@@ -209,7 +209,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
       <div
         tabIndex={0}
         role="region"
-        aria-label="CivicOne Normal Citizen Digital Identity Card. Press Enter or Space to flip."
+        aria-label="CIVIQONE Normal Citizen Digital Identity Card. Press Enter or Space to flip."
         className="card-wrapper"
         onClick={handleFlipCard}
         onKeyDown={(e) => {
@@ -261,7 +261,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 
-                {/* Left: CivicOne Logo & Identity Title */}
+                {/* Left: CIVIQONE Logo & Identity Title */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
                   <div style={{
                     width: '34px',
@@ -284,7 +284,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                       lineHeight: 1.1,
                       color: '#F8F7F2'
                     }}>
-                      CIVICONE <span style={{ fontSize: '0.725rem', fontWeight: 800, color: '#93C5FD' }}>DIGITAL CITIZEN IDENTITY</span>
+                      CIVIQONE <span style={{ fontSize: '0.725rem', fontWeight: 800, color: '#93C5FD' }}>DIGITAL CITIZEN IDENTITY</span>
                     </div>
                     <div style={{
                       fontSize: '0.575rem',
@@ -506,7 +506,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                     SECURITY & VERIFICATION
                   </div>
                   <div style={{ fontSize: '0.575rem', color: '#64748B', fontWeight: 700 }}>
-                    CIVICONE DIGITAL IDENTITY
+                    CIVIQONE DIGITAL IDENTITY
                   </div>
                 </div>
 
@@ -576,7 +576,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               alignItems: 'center',
               justifyContent: 'space-between'
             }}>
-              <span>VERIFY CIVICONE DIGITAL IDENTITY: <strong style={{ color: '#101B3D' }}>verify.civicone.gov.in</strong></span>
+              <span>VERIFY CIVIQONE DIGITAL IDENTITY: <strong style={{ color: '#101B3D' }}>verify.civiqone.gov.in</strong></span>
               <span style={{ fontFamily: 'monospace', color: '#101B3D', fontWeight: 800 }}>{civicId}</span>
             </div>
 
@@ -746,7 +746,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
             </div>
 
             <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#101B3D', marginBottom: '4px' }}>
-              SCAN TO VERIFY THIS CIVICONE DIGITAL IDENTITY
+              SCAN TO VERIFY THIS CIVIQONE DIGITAL IDENTITY
             </h3>
             <p style={{ fontSize: '0.825rem', color: '#64748B', marginBottom: '20px' }}>
               Scan with any authorized reader to instantly verify <strong>{citizenName}</strong>'s digital identity credential.
@@ -938,7 +938,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
                   marginTop: '10px',
                   marginBottom: '20px'
                 }}>
-                  <strong>Payload:</strong> CivicOne Citizen Card ({civicId}) validated for contactless transit / terminal check-in.
+                  <strong>Payload:</strong> CIVIQONE Citizen Card ({civicId}) validated for contactless transit / terminal check-in.
                 </div>
                 <button
                   type="button"
@@ -1002,7 +1002,7 @@ export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerif
               <Share2 size={22} /> Share & Export Citizen Identity Card
             </div>
             <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '20px' }}>
-              Export an official high-resolution image of your <strong>CivicOne Digital Citizen Card</strong>.
+              Export an official high-resolution image of your <strong>CIVIQONE Digital Citizen Card</strong>.
             </p>
 
             <div style={{ backgroundColor: '#F8FAFC', padding: '14px', borderRadius: '14px', border: '1px solid #E2E8F0', marginBottom: '20px' }}>

@@ -25,12 +25,12 @@ export default function App() {
 
   // Global Persistent Theme State (Synced across all portals and gates)
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('civicone_theme') || 'light';
+    return localStorage.getItem('civiqone_theme') || 'light';
   });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('civicone_theme', theme);
+    localStorage.setItem('civiqone_theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
@@ -325,7 +325,7 @@ export default function App() {
     default:
       return (
         <LandingPage
-          onAccessCivicOne={() => changeView('gate')}
+          onAccessCIVIQONE={() => changeView('gate')}
           onOpenAuthorityPortal={() => changeView('authority-gate')}
           onOpenOwnerAdmin={() => changeView('admin-gate')}
           onOpenOrganizationGate={() => changeView('organization-gate')}

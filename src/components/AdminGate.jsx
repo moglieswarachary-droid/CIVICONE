@@ -12,7 +12,7 @@ export default function AdminGate({ onAuthenticated, onGoBackToLanding }) {
 
   // Quick Demo Credentials Fill
   const handleFillDemo = () => {
-    setUsername('superadmin@civicone.gov.in');
+    setUsername('superadmin@civiqone.gov.in');
     setPasskey('superadmin123');
     setHardwareToken('MASTER-HW-KEY-9048');
     setErrorMsg('');
@@ -48,7 +48,7 @@ export default function AdminGate({ onAuthenticated, onGoBackToLanding }) {
       // Fallback admin session for dev
       onAuthenticated({
         adminId: 'SUPERADMIN-01',
-        username: username || 'superadmin@civicone.gov.in',
+        username: username || 'superadmin@civiqone.gov.in',
         role: 'National Super Administrator',
         clearanceLevel: 'MASTER ROOT CLEARANCE'
       });
@@ -189,7 +189,7 @@ export default function AdminGate({ onAuthenticated, onGoBackToLanding }) {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. superadmin@civicone.gov.in"
+              placeholder="e.g. superadmin@civiqone.gov.in"
               style={{
                 width: '100%',
                 padding: '12px 14px',

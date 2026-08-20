@@ -640,7 +640,7 @@ export default function OrganizationDashboard({ session, onLogout }) {
               Issue Verified Digital RTO Credential
             </h3>
             <p style={{ fontSize: '0.875rem', color: '#94A3B8', marginBottom: '28px' }}>
-              Issue an officially signed digital Driving Licence or RC certificate directly into a citizen's CivicOne vault.
+              Issue an officially signed digital Driving Licence or RC certificate directly into a citizen's CIVIQONE vault.
             </p>
 
             {issueMsg && (

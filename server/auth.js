@@ -1,9 +1,9 @@
-// server/auth.js - JWT Authentication & Cryptographic Utilities for CivicOne
+// server/auth.js - JWT Authentication & Cryptographic Utilities for CIVIQONE
 
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'civicone_super_secret_jwt_key_2026_prod_token';
+const JWT_SECRET = process.env.JWT_SECRET || 'civiqone_super_secret_jwt_key_2026_prod_token';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
 /**

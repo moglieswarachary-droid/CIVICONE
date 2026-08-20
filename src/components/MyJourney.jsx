@@ -126,7 +126,7 @@ export default function MyJourney({ citizen, documents = [] }) {
       keyDetails: {
         'Candidate Name': citizenName,
         'Roll Number': '10849201',
-        'School': 'CivicOne Model Public School',
+        'School': 'CIVIQONE Model Public School',
         'CGPA / Result': '9.6 CGPA (Distinction)',
         'Pass Year': 'May 2020'
       }
@@ -403,14 +403,14 @@ export default function MyJourney({ citizen, documents = [] }) {
     {
       step: 15,
       id: 'jour-15',
-      name: 'CivicOne Sovereign Digital Identity Credential',
-      officialTitle: 'CivicOne Sovereign Digital Identity Authority — Verified Citizen Pass',
+      name: 'CIVIQONE Sovereign Digital Identity Credential',
+      officialTitle: 'CIVIQONE Sovereign Digital Identity Authority — Verified Citizen Pass',
       category: 'SOVEREIGN',
       categoryLabel: 'Sovereign Milestone',
       icon: ShieldCheck,
       iconColor: '#0B5ED7',
       iconBg: '#EFF6FF',
-      issuer: 'CivicOne National Sovereign Authority',
+      issuer: 'CIVIQONE National Sovereign Authority',
       issueDate: '15-08-2026',
       year: '2026',
       ageMilestone: 'Age 22 (Present)',
@@ -418,7 +418,7 @@ export default function MyJourney({ citizen, documents = [] }) {
       status: 'ACTIVE CITIZEN TIER',
       verificationHash: '0x99f4c1a82d0e76b5193e449a',
       description: 'Official sovereign digital identity credential with instant QR verification, digital authentication, and offline cryptography.',
-      signatory: 'Chief Technology Officer, CivicOne Sovereign ID',
+      signatory: 'Chief Technology Officer, CIVIQONE Sovereign ID',
       keyDetails: {
         'Citizen': citizenName,
         'Civic ID': citizenId,

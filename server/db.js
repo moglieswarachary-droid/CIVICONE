@@ -1,4 +1,4 @@
-// server/db.js - Database Service Engine for CivicOne Platform
+// server/db.js - Database Service Engine for CIVIQONE Platform
 
 import { PrismaClient } from '@prisma/client';
 import { db as fallbackDb } from './mockDb.js';
@@ -119,7 +119,7 @@ export const dbService = {
 
     const hashedMpin = mpin ? await hashPassword(mpin) : null;
     const cleanMobile = (mobile || '').startsWith('+91') ? mobile : `+91-${mobile}`;
-    const userEmail = email || `${uniqueCivicId.toLowerCase()}@civicone.gov.in`;
+    const userEmail = email || `${uniqueCivicId.toLowerCase()}@civiqone.gov.in`;
     const maskedAadhaar = aadhaar ? `XXXX XXXX ${aadhaar.slice(-4)}` : `XXXX XXXX ${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newCitizen = {
@@ -305,7 +305,7 @@ export const dbService = {
     const newReq = {
       id: reqId,
       citizenId: reqData.citizenId || 'CIV-DEMO-10001',
-      requestingOrg: reqData.requestingOrg || 'CivicOne Partner Org',
+      requestingOrg: reqData.requestingOrg || 'CIVIQONE Partner Org',
       requestingRole: reqData.requestingRole || 'VERIFICATION_ADMIN',
       purpose: reqData.purpose || 'Credential Verification',
       scope: reqData.scope || 'Identity Status & Vault Credentials',

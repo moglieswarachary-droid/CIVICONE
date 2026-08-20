@@ -36,9 +36,9 @@ export default function ServicesSection({ services: initialServices }) {
     setTimeout(() => {
       setDownloadMsg('');
       const element = document.createElement("a");
-      const file = new Blob([`CivicOne Verified Credential Record\nDocument: ${rec.name}\nIssuer: ${rec.issuer}\nRef: ${rec.maskedId}\nStatus: VERIFIED\nTimestamp: ${new Date().toISOString()}`], {type: 'text/plain'});
+      const file = new Blob([`CIVIQONE Verified Credential Record\nDocument: ${rec.name}\nIssuer: ${rec.issuer}\nRef: ${rec.maskedId}\nStatus: VERIFIED\nTimestamp: ${new Date().toISOString()}`], {type: 'text/plain'});
       element.href = URL.createObjectURL(file);
-      element.download = `${rec.name.replace(/\s+/g, '_')}_CivicOne_Verified.txt`;
+      element.download = `${rec.name.replace(/\s+/g, '_')}_CIVIQONE_Verified.txt`;
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
@@ -142,9 +142,9 @@ export default function ServicesSection({ services: initialServices }) {
           { id: 'log-2', accessor: 'AIIMS New Delhi', purpose: 'Prescription Sync', timestamp: '12 Aug 2026, 11:15 AM', permission: 'GRANTED' }
         ] : null,
         qualificationTimeline: catKey === 'education' ? [
-          { year: '2020', level: 'Secondary School (10th CBSE)', board: 'CivicOne Model School — 94.2%' },
+          { year: '2020', level: 'Secondary School (10th CBSE)', board: 'CIVIQONE Model School — 94.2%' },
           { year: '2022', level: 'Senior Secondary (12th MPC)', board: 'Board of Intermediate Education — 96.0%' },
-          { year: '2026', level: 'B.Tech Computer Science & Engineering', board: 'CivicOne Demo Institute (CGPA 8.9)' }
+          { year: '2026', level: 'B.Tech Computer Science & Engineering', board: 'CIVIQONE Demo Institute (CGPA 8.9)' }
         ] : null
       });
     }
@@ -198,7 +198,7 @@ export default function ServicesSection({ services: initialServices }) {
         status: activeWorkflowService.title.includes("Sync") ? "Active Sync" : "Submitted / In Progress",
         appliedAt: "Just now",
         referenceNo: `${activeWorkflowService.category.substring(0, 3)}-REF-${Math.floor(10000 + Math.random() * 90000)}`,
-        notes: workflowNotes || "Application submitted via verified CivicOne credential link."
+        notes: workflowNotes || "Application submitted via verified CIVIQONE credential link."
       };
       setWorkflowSuccess(fallbackActivity);
       setActivities([fallbackActivity, ...activities]);
@@ -396,7 +396,7 @@ export default function ServicesSection({ services: initialServices }) {
         <>
           <div style={{ marginBottom: '32px' }}>
             <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em', marginBottom: '4px' }}>
-              CivicOne Department Services & Record Hubs
+              CIVIQONE Department Services & Record Hubs
             </h1>
             <p style={{ fontSize: '0.9rem', color: '#475569' }}>
               Select a service category to authenticate session, grant consent & enter dedicated department dashboard.
@@ -527,7 +527,7 @@ export default function ServicesSection({ services: initialServices }) {
             </div>
 
             <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0B1F3A', textAlign: 'center', marginBottom: '6px' }}>
-              Allow CivicOne to access {showConsentModal.label}?
+              Allow CIVIQONE to access {showConsentModal.label}?
             </h3>
             <p style={{ fontSize: '0.825rem', color: '#475569', textAlign: 'center', marginBottom: '20px' }}>
               Explicit citizen consent is required before querying sensitive department records.

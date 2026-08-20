@@ -1,5 +1,5 @@
-// src/components/HelpCentre.jsx - CivicOne Customer Care Support Center
-// Official Support Channel: civicone.official.in@gmail.com
+// src/components/HelpCentre.jsx - CIVIQONE Customer Care Support Center
+// Official Support Channel: civiqone.official.in@gmail.com
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
@@ -10,15 +10,15 @@ import {
   Layers, AlertCircle, FileCheck, ExternalLink
 } from 'lucide-react';
 
-const OFFICIAL_SUPPORT_EMAIL = 'civicone.official.in@gmail.com';
+const OFFICIAL_SUPPORT_EMAIL = 'civiqone.official.in@gmail.com';
 const TOLL_FREE_HELPLINE = '1800-248-4266';
-const EMERGENCY_FRAUD_HOTLINE = '1947-CIVIC';
+const EMERGENCY_FRAUD_HOTLINE = '1947-CIVIQ';
 
 export default function HelpCentre({ citizen = {} }) {
   const citizenName = citizen?.fullName || citizen?.name || 'Citizen';
   const civicId = citizen?.citizenId || 'CIV-DEMO-10001';
   const citizenMobile = citizen?.mobile || '+91 90000 00001';
-  const citizenEmail = citizen?.email || 'citizen.demo@civicone.gov.in';
+  const citizenEmail = citizen?.email || 'citizen.demo@civiqone.gov.in';
 
   // Active View / Scroll target refs
   const formRef = useRef(null);
@@ -162,7 +162,7 @@ export default function HelpCentre({ citizen = {} }) {
     {
       number: '1',
       title: 'General Support',
-      description: 'Get help with CivicOne features, services, navigation, and general platform-related questions.',
+      description: 'Get help with CIVIQONE features, services, navigation, and general platform-related questions.',
       icon: HelpCircle,
       categoryPrefill: 'Other',
       tag: 'Platform & Guidance'
@@ -178,7 +178,7 @@ export default function HelpCentre({ citizen = {} }) {
     {
       number: '3',
       title: 'Citizen Service Support',
-      description: 'Get assistance regarding CivicOne citizen services, applications, requests, submissions, and service status.',
+      description: 'Get assistance regarding CIVIQONE citizen services, applications, requests, submissions, and service status.',
       icon: Layers,
       categoryPrefill: 'Citizen Services',
       tag: 'Civic Services'
@@ -238,8 +238,8 @@ export default function HelpCentre({ citizen = {} }) {
   const faqData = [
     {
       category: 'General',
-      q: 'How do I contact CivicOne Customer Care?',
-      a: 'Use the Customer Care section to submit your support request with the required details, or reach our official support email directly at civicone.official.in@gmail.com. You can also dial our national toll-free helpline at 1800-248-4266.'
+      q: 'How do I contact CIVIQONE Customer Care?',
+      a: 'Use the Customer Care section to submit your support request with the required details, or reach our official support email directly at civiqone.official.in@gmail.com. You can also dial our national toll-free helpline at 1800-248-4266.'
     },
     {
       category: 'Tracking',
@@ -264,7 +264,7 @@ export default function HelpCentre({ citizen = {} }) {
     {
       category: 'Security',
       q: 'What should I do if I suspect unauthorized access or fraud?',
-      a: 'Immediately submit a request under "Complaints & Grievances" or dial our 24/7 National Emergency Fraud Hotline at 1947-CIVIC to freeze compromised digital identity credentials.'
+      a: 'Immediately submit a request under "Complaints & Grievances" or dial our 24/7 National Emergency Fraud Hotline at 1947-CIVIQ to freeze compromised digital identity credentials.'
     }
   ];
 
@@ -278,7 +278,7 @@ export default function HelpCentre({ citizen = {} }) {
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px 12px' }}>
       
-      {/* 1. HERO HEADER: CivicOne Customer Care */}
+      {/* 1. HERO HEADER: CIVIQONE Customer Care */}
       <div style={{
         background: 'linear-gradient(135deg, #071E3D 0%, #0B3C7B 50%, #0B5ED7 100%)',
         color: '#FFFFFF',
@@ -309,13 +309,13 @@ export default function HelpCentre({ citizen = {} }) {
           </div>
 
           <h1 style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.3rem)', fontWeight: 900, color: '#FFFFFF', margin: 0, letterSpacing: '-0.02em' }}>
-            CivicOne Customer Care
+            CIVIQONE Customer Care
           </h1>
           <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#93C5FD', marginTop: '6px', marginBottom: '8px' }}>
             We’re Here to Help You
           </h2>
           <p style={{ fontSize: '0.95rem', color: '#E2E8F0', maxWidth: '780px', lineHeight: 1.55, margin: 0 }}>
-            CivicOne Customer Care is your dedicated support center for assistance with CivicOne services, citizen services, account-related issues, applications, complaints, and general queries.
+            CIVIQONE Customer Care is your dedicated support center for assistance with CIVIQONE services, citizen services, account-related issues, applications, complaints, and general queries.
           </p>
 
           {/* Official Email Strip */}
@@ -366,7 +366,7 @@ export default function HelpCentre({ citizen = {} }) {
               </button>
 
               <a
-                href={`mailto:${OFFICIAL_SUPPORT_EMAIL}?subject=CivicOne%20Citizen%20Support%20Request%20-%20${civicId}&body=Hello%20CivicOne%20Customer%20Care%20Team,%0D%0A%0D%0ACitizen%20Name:%20${encodeURIComponent(citizenName)}%0D%0ACivic%20ID:%20${encodeURIComponent(civicId)}%0D%0AMobile:%20${encodeURIComponent(citizenMobile)}%0D%0A%0D%0ADescription%20of%20the%20Issue:%0D%0A`}
+                href={`mailto:${OFFICIAL_SUPPORT_EMAIL}?subject=CIVIQONE%20Citizen%20Support%20Request%20-%20${civicId}&body=Hello%20CIVIQONE%20Customer%20Care%20Team,%0D%0A%0D%0ACitizen%20Name:%20${encodeURIComponent(citizenName)}%0D%0ACivic%20ID:%20${encodeURIComponent(civicId)}%0D%0AMobile:%20${encodeURIComponent(citizenMobile)}%0D%0A%0D%0ADescription%20of%20the%20Issue:%0D%0A`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{

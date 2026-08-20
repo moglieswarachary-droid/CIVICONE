@@ -1,11 +1,11 @@
-// server/crypto.js - AES-256-GCM Encryption & Cryptographic Tokenization Engine for CivicOne Vault
+// server/crypto.js - AES-256-GCM Encryption & Cryptographic Tokenization Engine for CIVIQONE Vault
 
 import crypto from 'crypto';
 
 const ALGORITHM = 'aes-256-gcm';
 // Default 256-bit encryption key (must be 32 bytes)
 const ENCRYPTION_KEY = Buffer.from(
-  process.env.ENCRYPTION_KEY || 'civicone_secret_key_32bytes_v1!!',
+  process.env.ENCRYPTION_KEY || 'civiqone_secret_key_32bytes_v1!!',
   'utf-8'
 ).slice(0, 32);
 

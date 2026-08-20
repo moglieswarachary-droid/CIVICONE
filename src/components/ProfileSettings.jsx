@@ -24,7 +24,7 @@ export default function ProfileSettings({ citizen = {}, onLogout, onProfileUpdat
   const displayState = citizen.state || 'Andhra Pradesh';
   const displayAddress = citizen.address || `${displayState}, India`;
   const displayMobile = citizen.mobile || citizen.phone || '+91 8121280857';
-  const displayEmail = citizen.email || citizen.emailMasked || 'raghavendra@civicone.gov.in';
+  const displayEmail = citizen.email || citizen.emailMasked || 'raghavendra@civiqone.gov.in';
   const displayAadhaar = citizen.maskedAadhaar || 'XXXX XXXX 8909';
 
   const handleOpenEditModal = (field) => {

@@ -15,7 +15,7 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
   const [selectedOrg, setSelectedOrg] = useState({
     id: initialOrgConfig?.orgType ? `org-${initialOrgConfig.orgType}` : 'org-college',
     roleCode: initialOrgConfig?.roleCode || 'COLLEGE_ACCESS_ADMIN',
-    name: initialOrgConfig?.name || 'CivicOne Demo College',
+    name: initialOrgConfig?.name || 'CIVIQONE Demo College',
     category: initialOrgConfig?.orgType || 'Education',
     regNo: 'EDU-COLLEGE-9048',
     accessLevel: 'VIEW ONLY',
@@ -140,7 +140,7 @@ export default function OrganizationPortal({ initialOrgConfig, onReturnHome }) {
             </div>
             <div>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em' }}>
-                CivicOne Organization Access Portal
+                CIVIQONE Organization Access Portal
               </div>
               <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
                 Recipient-Bound Verification &amp; Least-Privilege Authorized Workspace ({selectedState})

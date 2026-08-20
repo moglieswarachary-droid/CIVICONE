@@ -132,7 +132,7 @@ export default function AuthorityPortal({ officer, onReturnHome }) {
             </div>
             <div>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                CivicOne Government Officer Portal
+                CIVIQONE Government Officer Portal
                 <span style={{ fontSize: '0.65rem', backgroundColor: '#1E3A8A', color: '#60A5FA', padding: '2px 8px', borderRadius: '6px', fontWeight: 800 }}>
                   {officerData.roleTitle || 'LEVEL 1 OFFICER'}
                 </span>

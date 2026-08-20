@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { INDIA_STATES_AND_UTS } from '../data/mockData.js';
 
-export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, onOpenOwnerAdmin, onOpenOrganizationGate, theme = 'light', onToggleTheme }) {
+export default function LandingPage({ onAccessCIVIQONE, onOpenAuthorityPortal, onOpenOwnerAdmin, onOpenOrganizationGate, theme = 'light', onToggleTheme }) {
   const [selectedState, setSelectedState] = useState('Andhra Pradesh');
   const [stateSearch, setStateSearch] = useState('');
 
@@ -50,7 +50,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
             </div>
             <div>
               <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
-                CivicOne
+                CIVIQONE
               </span>
               <span style={{ display: 'block', fontSize: '0.625rem', fontWeight: 700, color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '-3px' }}>
                 National Digital Identity &amp; Vault
@@ -72,7 +72,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
             )}
 
             <button
-              onClick={onAccessCivicOne}
+              onClick={onAccessCIVIQONE}
               style={{
                 backgroundColor: 'var(--primary-blue)',
                 color: '#FFFFFF',
@@ -197,7 +197,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
 
             {/* High-Impact Citizen Login CTA */}
             <button
-              onClick={onAccessCivicOne}
+              onClick={onAccessCIVIQONE}
               style={{
                 width: '100%',
                 maxWidth: '400px',
@@ -236,7 +236,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
               <ShieldCheck size={28} style={{ color: '#0B5ED7' }} />
-              <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#FFFFFF' }}>CivicOne</span>
+              <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#FFFFFF' }}>CIVIQONE</span>
             </div>
             <p style={{ fontSize: '0.85rem', color: '#94A3B8', maxWidth: '320px', lineHeight: 1.5 }}>
               Official National Digital Identity, Sovereign Personal Vault &amp; Consent Control Architecture.
@@ -252,7 +252,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
               <ul style={{ listStyle: 'none', fontSize: '0.825rem', color: '#94A3B8', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <li>
                   <button
-                    onClick={onAccessCivicOne}
+                    onClick={onAccessCIVIQONE}
                     style={{ background: 'none', border: 'none', color: '#60A5FA', fontSize: '0.825rem', fontWeight: 600, textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
                   >
                     Citizen Login
@@ -274,7 +274,7 @@ export default function LandingPage({ onAccessCivicOne, onOpenAuthorityPortal, o
         </div>
 
         <div style={{ maxWidth: '1200px', margin: '16px auto 0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: '#64748B', flexWrap: 'wrap', gap: '8px' }}>
-          <div>© 2026 CivicOne National Identity Platform. All rights reserved.</div>
+          <div>© 2026 CIVIQONE National Identity Platform. All rights reserved.</div>
           <div>End-to-End Cryptographic Security &amp; Authorized Encryption Enabled</div>
         </div>
       </footer>
