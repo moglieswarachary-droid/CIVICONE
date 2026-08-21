@@ -1058,7 +1058,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* TAB 3: DIGITAL VAULT */}
           {activeTab === 'vault' && (
-            <CivicVault documents={documents} initialMemberId={familyVaultMemberId} onGoBack={handleGoBack} />
+            <CivicVault citizen={currentCitizen} documents={documents} initialMemberId={familyVaultMemberId} onGoBack={handleGoBack} />
           )}
 
           {/* TAB: CIVIQONE WORLD TOURISM & DESTINATIONS GUIDE */}
