@@ -8,7 +8,15 @@ import {
 } from 'lucide-react';
 import { DEMO_DOCUMENTS, DEMO_FAMILY_MEMBERS, calculateDocExpiryStatus } from '../data/mockData.js';
 
-export default function CivicVault({ documents: initialDocs, onRefreshDocs, initialMemberId = 'fam-self', onGoBack }) {
+export default function CivicVault({ citizen, documents: initialDocs, onRefreshDocs, initialMemberId = 'fam-self', onGoBack }) {
+  const currentCit = citizen || (() => {
+    try {
+      const active = localStorage.getItem('civiqone_active_citizen');
+      if (active) return JSON.parse(active);
+    } catch (e) {}
+    return null;
+  })();
+
   const [documents, setDocuments] = useState(initialDocs && initialDocs.length > 0 ? initialDocs : DEMO_DOCUMENTS);
 
   // Requirement 3 & 4: Category & Type Filters State
@@ -34,15 +42,15 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
   // Family & Dependent Vault State (Starts empty with Self only for clean new accounts)
   const [familyMembers, setFamilyMembers] = useState(() => {
     try {
-      const cid = citizen?.citizenId;
+      const cid = currentCit?.citizenId;
       if (cid) {
         const cached = localStorage.getItem(`civiqone_family_${cid}`);
         if (cached) return JSON.parse(cached);
       }
     } catch (e) {}
-    if (citizen?.citizenId === 'CIV-DEMO-10001') return DEMO_FAMILY_MEMBERS;
+    if (currentCit?.citizenId === 'CIV-DEMO-10001') return DEMO_FAMILY_MEMBERS;
     return [
-      { id: 'fam-self', name: `${citizen?.fullName || citizen?.name || 'Citizen'} (Self)`, relationship: 'Self', isSelf: true, documents: [] }
+      { id: 'fam-self', name: `${currentCit?.fullName || currentCit?.name || 'Citizen'} (Self)`, relationship: 'Self', isSelf: true, documents: [] }
     ];
   });
   const [selectedMemberId, setSelectedMemberId] = useState(initialMemberId || 'fam-self');
@@ -388,7 +396,7 @@ export default function CivicVault({ documents: initialDocs, onRefreshDocs, init
     const updated = [...familyMembers, newMember];
     setFamilyMembers(updated);
     try {
-      const cid = citizen?.citizenId;
+      const cid = currentCit?.citizenId;
       if (cid) {
         localStorage.setItem(`civiqone_family_${cid}`, JSON.stringify(updated));
       }
