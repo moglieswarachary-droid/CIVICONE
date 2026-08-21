@@ -1436,9 +1436,13 @@ app.get('*', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`=================================================`);
-  console.log(`  CIVIQONE Hosted Web App & API running on:`);
-  console.log(`  👉 http://localhost:${PORT}`);
-  console.log(`=================================================`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`=================================================`);
+    console.log(`  CIVIQONE Hosted Web App & API running on:`);
+    console.log(`  👉 http://0.0.0.0:${PORT}`);
+    console.log(`=================================================`);
+  });
+}
+
+export default app;
