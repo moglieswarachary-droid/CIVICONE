@@ -1135,8 +1135,9 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* TAB: SECURITY CENTRE */}
           {activeTab === 'security' && (
-            <SecurityCentre onGoBack={handleGoBack} />
+            <SecurityCentre citizen={currentCitizen} onGoBack={handleGoBack} />
           )}
+
 
           {/* TAB: HELP CENTRE & 24/7 CUSTOMER CARE */}
           {activeTab === 'help' && (
