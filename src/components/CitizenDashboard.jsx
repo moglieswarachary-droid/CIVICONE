@@ -368,7 +368,19 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
     alert(`🟢 Consent Granted! Your requested credentials (Aadhaar / Academic) were securely shared with ${notifItem.orgName || 'the organization'}.`);
   };
 
-  const handleDeclineConsent = (notifItem) => {
+  const handleDeclineConsent = async (notifItem) => {
+    try {
+      const cid = currentCitizen?.citizenId || citizen?.citizenId;
+      await fetch('/api/consent/decline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: notifItem.requestId || notifItem.id,
+          citizenCivicId: cid
+        })
+      });
+    } catch (err) {}
+
     setNotifications(prev => prev.map(n => (n.id === notifItem.id || (notifItem.requestId && n.requestId === notifItem.requestId)) ? {
       ...n,
       title: '🔴 Consent Declined',
