@@ -981,8 +981,16 @@ app.post('/api/consent/revoke/:shareId', (req, res) => {
 
 // GET Pending Share Requests
 app.get('/api/consent/citizen-requests', (req, res) => {
+  const queryCid = req.query.citizenId;
   const activeCitizenId = db.activeCitizenId;
-  const requests = db.shareRequests.filter(r => r.citizenCivicId === activeCitizenId);
+  const targetId = queryCid || activeCitizenId;
+
+  const requests = (db.shareRequests || []).filter(r => 
+    r.citizenCivicId === targetId || 
+    r.citizenId === targetId || 
+    r.targetCitizenId === targetId ||
+    r.status === 'PENDING'
+  );
   return res.json({ requests });
 });
 
@@ -999,7 +1007,7 @@ app.post('/api/consent/approve', (req, res) => {
   const { requestId, citizenCivicId, citizen, documents } = req.body;
   let reqItem = (db.shareRequests || []).find(r => r.id === requestId);
   if (!reqItem && citizenCivicId) {
-    reqItem = (db.shareRequests || []).find(r => r.citizenCivicId === citizenCivicId && r.status === 'PENDING');
+    reqItem = (db.shareRequests || []).find(r => (r.citizenCivicId === citizenCivicId || r.citizenId === citizenCivicId) && r.status === 'PENDING');
   }
   if (!reqItem && db.shareRequests && db.shareRequests.length > 0) {
     reqItem = db.shareRequests.find(r => r.status === 'PENDING') || db.shareRequests[0];
@@ -1025,7 +1033,6 @@ app.post('/api/consent/approve', (req, res) => {
   if (documents && Array.isArray(documents) && documents.length > 0) {
     if (!db.documents) db.documents = [];
     const targetCid = citizenCivicId || (citizen ? citizen.citizenId : reqItem.citizenCivicId);
-    // Remove existing and insert fresh
     db.documents = db.documents.filter(d => d.citizenId !== targetCid);
     documents.forEach(doc => {
       db.documents.push({
@@ -1039,7 +1046,7 @@ app.post('/api/consent/approve', (req, res) => {
   // Also update corresponding in-app notification status
   if (db.notifications) {
     db.notifications.forEach(n => {
-      if (n.requestId === reqItem.id || n.id === requestId || (citizenCivicId && n.citizenCivicId === citizenCivicId)) {
+      if (n.requestId === reqItem.id || n.id === requestId || (citizenCivicId && (n.citizenCivicId === citizenCivicId || n.citizenId === citizenCivicId))) {
         n.status = "APPROVED";
         n.read = true;
       }
@@ -1063,7 +1070,7 @@ app.post('/api/consent/approve', (req, res) => {
     createdAt: new Date().toLocaleString(),
     expiryDate: expDate.toLocaleDateString('en-GB'),
     status: "ACTIVE",
-    watermarkText: `CONFIDENTIAL — AUTHORIZED FOR ${reqItem.orgName.toUpperCase()} — ${reqItem.purpose.toUpperCase()} — ${new Date().toLocaleDateString('en-GB')}`
+    watermarkText: `CONFIDENTIAL — AUTHORIZED FOR ${(reqItem.orgName || 'ORGANIZATION').toUpperCase()} — ${(reqItem.purpose || 'VERIFICATION').toUpperCase()} — ${new Date().toLocaleDateString('en-GB')}`
   };
 
   db.consentRecords.unshift(consentRecord);
@@ -1071,25 +1078,61 @@ app.post('/api/consent/approve', (req, res) => {
   return res.json({ success: true, consentRecord, request: reqItem });
 });
 
+// Decline Consent Request
+app.post('/api/consent/decline', (req, res) => {
+  const { requestId, citizenCivicId } = req.body;
+  let reqItem = (db.shareRequests || []).find(r => r.id === requestId);
+  if (!reqItem && citizenCivicId) {
+    reqItem = (db.shareRequests || []).find(r => (r.citizenCivicId === citizenCivicId || r.citizenId === citizenCivicId) && r.status === 'PENDING');
+  }
+  if (!reqItem && db.shareRequests && db.shareRequests.length > 0) {
+    reqItem = db.shareRequests.find(r => r.status === 'PENDING') || db.shareRequests[0];
+  }
+
+  if (reqItem) {
+    reqItem.status = "DECLINED";
+  }
+
+  if (db.notifications) {
+    db.notifications.forEach(n => {
+      if (n.requestId === requestId || n.id === requestId || (reqItem && n.requestId === reqItem.id)) {
+        n.status = "DECLINED";
+        n.read = true;
+      }
+    });
+  }
+
+  return res.json({ success: true, message: "Consent request declined.", request: reqItem });
+});
+
 // Organization Creates Document Access Request (Org -> Citizen Alert & Link)
 app.post('/api/consent/request', (req, res) => {
-  const { orgId, citizenCivicId, docId, docName, purpose, expiryDays } = req.body;
-  const org = (db.organizations || []).find(o => o.id === orgId) || { id: orgId || 'org-college-01', name: 'Educational Institution', roleCode: 'COLLEGE_ACCESS_ADMIN' };
+  const { orgId, citizenCivicId, docId, docName, purpose, expiryDays, orgName } = req.body;
   
-  let targetCitizen = (db.citizens || []).find(c => c.citizenId === citizenCivicId);
+  const foundOrg = (db.organizations || []).find(o => o.id === orgId);
+  const resolvedOrgName = orgName || (foundOrg ? foundOrg.name : null) || 'Authorized Organization';
+  const roleCode = foundOrg ? foundOrg.roleCode : 'ORG_ACCESS_ADMIN';
+
+  let targetCitizen = (db.citizens || []).find(c => 
+    c.citizenId === citizenCivicId || 
+    c.civicId === citizenCivicId || 
+    c.aadhaarNo === citizenCivicId || 
+    (c.aadhaarNo && citizenCivicId && c.aadhaarNo.replace(/\D/g, '') === citizenCivicId.replace(/\D/g, ''))
+  );
   const targetId = citizenCivicId || (targetCitizen ? targetCitizen.citizenId : db.activeCitizenId);
 
   const reqItem = {
     id: `req-${Date.now()}`,
     citizenCivicId: targetId,
     citizenId: targetId,
-    orgId: org.id,
-    orgName: org.name,
-    roleCode: org.roleCode,
+    targetCitizenId: targetCitizen?.citizenId || targetId,
+    orgId: orgId || 'org-college-01',
+    orgName: resolvedOrgName,
+    roleCode: roleCode,
     docId: docId || 'doc-gen-01',
     docName: docName || 'Identity Verification Document',
     purpose: purpose || 'Institutional Verification',
-    accessType: org.accessLevel || 'VIEW ONLY',
+    accessType: 'VIEW ONLY',
     expiryDays: expiryDays || '7',
     dateTime: new Date().toLocaleString(),
     status: 'PENDING'
@@ -1104,10 +1147,11 @@ app.post('/api/consent/request', (req, res) => {
     requestId: reqItem.id,
     citizenCivicId: targetId,
     citizenId: targetId,
-    orgId: org.id,
-    orgName: org.name,
-    title: `📩 New Access Request: ${org.name}`,
-    message: `${org.name} has requested authorized access for '${reqItem.docName}'. Purpose: ${reqItem.purpose}.`,
+    targetCitizenId: targetCitizen?.citizenId || targetId,
+    orgId: orgId || 'org-college-01',
+    orgName: resolvedOrgName,
+    title: `📩 New Access Request: ${resolvedOrgName}`,
+    message: `${resolvedOrgName} has requested authorized access for '${reqItem.docName}'. Purpose: ${reqItem.purpose}.`,
     time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
     read: false,
     status: 'PENDING',
@@ -1125,7 +1169,8 @@ app.get('/api/consent/requests/org/:orgId', (req, res) => {
   const list = (db.shareRequests || []).filter(r => 
     r.orgId === orgId || 
     (orgId.includes('college') && (r.orgId.includes('college') || r.orgId.includes('education') || r.orgId.includes('univ'))) || 
-    (orgId.includes('hotel') && r.orgId.includes('hotel'))
+    (orgId.includes('hotel') && r.orgId.includes('hotel')) ||
+    (orgId.includes('police') && r.orgId.includes('police'))
   );
   return res.json({ success: true, requests: list.length > 0 ? list : (db.shareRequests || []) });
 });

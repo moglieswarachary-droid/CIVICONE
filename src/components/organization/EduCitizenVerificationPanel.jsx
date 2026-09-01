@@ -258,9 +258,53 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', onSyn
                   <span>Aadhaar: <strong>{selectedStudent.maskedAadhaar}</strong></span>
                 </div>
               </div>
-              <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '0.7rem', fontWeight: 800, padding: '3px 8px', borderRadius: '8px' }}>
-                ABC ID: {selectedStudent.abcId}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '0.7rem', fontWeight: 800, padding: '3px 8px', borderRadius: '8px' }}>
+                  ABC ID: {selectedStudent.abcId}
+                </span>
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/consent/request', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          orgId: 'org-college-01',
+                          orgName: 'University Academic Verification Dept',
+                          citizenCivicId: selectedStudent.citizenId || searchQuery,
+                          docId: 'doc-academic-suite',
+                          docName: 'Aadhaar & Academic Credentials',
+                          purpose: `Academic History Verification (${selectedStudent.fullName})`,
+                          expiryDays: '7'
+                        })
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        alert(`📩 Access Request sent to student (${selectedStudent.fullName})! A notification has been sent to their app to Accept or Decline.`);
+                      } else {
+                        alert(data.error || 'Failed to dispatch request.');
+                      }
+                    } catch (e) {
+                      alert('Network error sending request.');
+                    }
+                  }}
+                  style={{
+                    backgroundColor: '#2563EB',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '10px',
+                    padding: '6px 12px',
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  📩 Request Credentials Consent
+                </button>
+              </div>
             </div>
           </div>
 
