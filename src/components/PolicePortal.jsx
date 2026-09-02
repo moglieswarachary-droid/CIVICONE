@@ -832,7 +832,48 @@ export default function PolicePortal({ officer, initialState, onReturnHome }) {
 
                   </div>
 
-                  <div style={{ fontSize: '0.75rem', color: '#94A3B8', fontStyle: 'italic' }}>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch('/api/consent/request', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            orgId: 'org-police-01',
+                            orgName: selectedState || 'State Police Department',
+                            citizenCivicId: searchCivicId,
+                            docId: 'doc-police-verification',
+                            docName: 'Identity & Address Verification Records',
+                            purpose: `Police Case / FIR Investigation Clearance (Ref: ${caseRefNo})`,
+                            expiryDays: '7'
+                          })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          alert(`📩 Case Investigation Request sent to citizen (${searchCivicId})! Notification sent to their app to Accept or Decline.`);
+                        }
+                      } catch (e) {
+                        alert('Error sending consent request.');
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      marginTop: '16px',
+                      backgroundColor: '#DC2626',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '12px',
+                      padding: '12px',
+                      fontWeight: 800,
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 14px rgba(220,38,38,0.3)'
+                    }}
+                  >
+                    📢 Register Case / FIR & Request Record Access Consent
+                  </button>
+
+                  <div style={{ fontSize: '0.75rem', color: '#94A3B8', fontStyle: 'italic', marginTop: '8px' }}>
                     🔒 Logged in Police National Audit Log for state department: {selectedState}
                   </div>
                 </div>

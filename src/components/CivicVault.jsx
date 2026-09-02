@@ -17,7 +17,16 @@ export default function CivicVault({ citizen, documents: initialDocs, onRefreshD
     return null;
   })();
 
-  const [documents, setDocuments] = useState(initialDocs && initialDocs.length > 0 ? initialDocs : DEMO_DOCUMENTS);
+  const isDemoCit = currentCit?.citizenId === 'CIV-DEMO-10001' || currentCit?.citizenId === 'CIV-DEMO-10002';
+  const [documents, setDocuments] = useState(() => {
+    if (initialDocs && Array.isArray(initialDocs)) {
+      return initialDocs;
+    }
+    if (isDemoCit) {
+      return DEMO_DOCUMENTS;
+    }
+    return [];
+  });
 
   // Requirement 3 & 4: Category & Type Filters State
   const [activeCategory, setActiveCategory] = useState('all'); // 'all' | 'government' | 'rto' | 'academic'
