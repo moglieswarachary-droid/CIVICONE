@@ -97,7 +97,9 @@ export default function CivicVault({ citizen, documents: initialDocs, onRefreshD
     }
   }, [initialDocs]);
 
-  // Load Vault Documents from REST API backend on mount
+  const [academicCertLocks, setAcademicCertLocks] = useState([]);
+
+  // Load Vault Documents & Academic Cert Locks from REST API backend on mount
   useEffect(() => {
     async function loadVaultData() {
       try {
@@ -109,8 +111,18 @@ export default function CivicVault({ citizen, documents: initialDocs, onRefreshD
         console.log("Using local cached vault dataset");
       }
     }
+    async function loadCertLocks() {
+      try {
+        const cid = currentCit?.citizenId || 'CIV-DEMO-10001';
+        const res = await fetch(`/api/education/cert-locks/${cid}`).then(r => r.json());
+        if (res.locks) setAcademicCertLocks(res.locks);
+      } catch (err) {}
+    }
     loadVaultData();
-  }, []);
+    loadCertLocks();
+    const interval = setInterval(loadCertLocks, 3000);
+    return () => clearInterval(interval);
+  }, [currentCit?.citizenId]);
 
   // Helper 1: Normalize Category into 3 strict standards ('government' | 'rto' | 'academic')
   const getNormCat = (cat) => {
@@ -567,6 +579,113 @@ export default function CivicVault({ citizen, documents: initialDocs, onRefreshD
         boxShadow: 'var(--shadow-sm)',
         marginBottom: '24px'
       }}>
+
+      {/* Toast Banner */}
+      {copyToast && (
+        <div style={{ backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', color: '#065F46', padding: '10px 16px', borderRadius: '12px', marginBottom: '16px', fontWeight: 800, fontSize: '0.85rem', textAlign: 'center' }}>
+          {copyToast}
+        </div>
+      )}
+
+      {/* ACADEMIC CERTIFICATE HOLDING & OTP PASSKEY MANAGER */}
+      {academicCertLocks.length > 0 && (
+        <div style={{
+          backgroundColor: '#064E3B',
+          color: '#FFFFFF',
+          borderRadius: '20px',
+          padding: '24px',
+          marginBottom: '24px',
+          boxShadow: '0 8px 24px rgba(6, 78, 59, 0.25)',
+          border: '1px solid #059669'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>
+                🎓
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#FFFFFF', margin: 0 }}>
+                  Academic Certificate Holding &amp; Security Passkey Manager
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: '#A7F3D0', margin: 0 }}>
+                  Authorized certificate locks for college/university enrollment (Active until course completion)
+                </p>
+              </div>
+            </div>
+            <span style={{ backgroundColor: 'rgba(34, 197, 94, 0.2)', border: '1px solid rgba(74, 222, 128, 0.3)', color: '#4ADE80', fontSize: '0.75rem', fontWeight: 800, padding: '4px 12px', borderRadius: '20px' }}>
+              🔒 CITIZEN SOVEREIGN PROTECTION ACTIVE
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+            {academicCertLocks.map((lock) => (
+              <div key={lock.id} style={{ backgroundColor: '#FFFFFF', color: '#0F172A', borderRadius: '16px', padding: '18px', border: '1px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.725rem', fontWeight: 900, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {lock.certKey} MARKSHEET RECORD
+                  </span>
+                  <span style={{
+                    backgroundColor: lock.status === 'LOCKED' ? '#DCFCE7' : '#FEF3C7',
+                    color: lock.status === 'LOCKED' ? '#166534' : '#92400E',
+                    fontSize: '0.725rem', fontWeight: 800, padding: '3px 8px', borderRadius: '6px'
+                  }}>
+                    {lock.status === 'LOCKED' ? '🔒 LOCKED (ACTIVE ENROLLMENT)' : '🟡 PENDING PASSKEY VERIFICATION'}
+                  </span>
+                </div>
+
+                <h4 style={{ fontSize: '1rem', fontWeight: 900, color: '#0F172A', marginBottom: '6px' }}>
+                  {lock.certName}
+                </h4>
+
+                <div style={{ fontSize: '0.8rem', color: '#475569', display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '14px' }}>
+                  <div>Holding College: <strong>{lock.institutionName}</strong></div>
+                  <div>Enrolled Program: <strong>{lock.courseName}</strong></div>
+                  <div>Lock Period: <strong style={{ color: '#059669' }}>Until Graduation ({lock.completionYear})</strong></div>
+                </div>
+
+                {/* Citizen OTP Passkey Display Box */}
+                <div style={{ backgroundColor: '#F8FAFC', border: '1.5px dashed #CBD5E1', borderRadius: '12px', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>Your Security Passkey OTP (DEMO MODE):</span>
+                    </div>
+                    <div style={{ fontSize: '1.3rem', fontWeight: 900, fontFamily: 'monospace', color: '#059669', letterSpacing: '0.15em', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>{lock.otpPasskey}</span>
+                      <span style={{ fontSize: '0.7rem', backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', color: '#065F46', padding: '2px 6px', borderRadius: '4px', fontFamily: 'sans-serif', fontWeight: 800 }}>
+                        DEMO OTP
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(lock.otpPasskey);
+                        setCopyToast(`Copied Passkey OTP ${lock.otpPasskey} to clipboard!`);
+                        setTimeout(() => setCopyToast(''), 3000);
+                      }}
+                      style={{ backgroundColor: '#059669', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '8px 12px', fontSize: '0.775rem', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', boxShadow: '0 2px 8px rgba(5,150,105,0.25)' }}
+                    >
+                      📋 Copy Passkey
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText("123456");
+                        setCopyToast(`Copied Universal Demo Passkey 123456 to clipboard!`);
+                        setTimeout(() => setCopyToast(''), 3000);
+                      }}
+                      style={{ backgroundColor: '#F1F5F9', color: '#475569', border: '1px solid #CBD5E1', borderRadius: '8px', padding: '8px 10px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}
+                    >
+                      ⚡ Copy Demo 123456
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
