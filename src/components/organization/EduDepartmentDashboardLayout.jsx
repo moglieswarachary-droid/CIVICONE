@@ -8,6 +8,16 @@ import AcademicTimeline from './AcademicTimeline.jsx';
 const UG_COURSES = ['B.Tech', 'B.E.', 'B.Sc', 'B.Com', 'B.A.', 'BCA', 'BBA', 'Other UG Course'];
 const PG_COURSES = ['M.Tech', 'M.E.', 'M.Sc', 'M.Com', 'M.A.', 'MCA', 'MBA', 'Other PG Course'];
 
+// Known Citizen Registry Mapping for Instant Lookup
+const KNOWN_CITIZEN_REGISTRY = {
+  'CIV-DEMO-10001': 'Rajesh Kumar Sharma',
+  'CIV-DEMO-10002': 'Priya Sundaram',
+  'CIV-DEMO-10003': 'Aarav Sharma',
+  'CIV-DEMO-10004': 'Kavya Reddy',
+  'CIV-DEMO-10005': 'Vikram Malhotra',
+  'CIV-DEMO-10006': 'Ananya Deshmukh'
+};
+
 export default function EduDepartmentDashboardLayout({
   session,
   config,
@@ -17,6 +27,7 @@ export default function EduDepartmentDashboardLayout({
   onReturnHome,
   onLogout
 }) {
+  const [localStudents, setLocalStudents] = useState(studentRecords || []);
   const [selectedDept, setSelectedDept] = useState('ALL');
   const [selectedYear, setSelectedYear] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,9 +35,10 @@ export default function EduDepartmentDashboardLayout({
   const [showAdmissionModal, setShowAdmissionModal] = useState(false);
   const [vaultSyncMsg, setVaultSyncMsg] = useState('');
 
-  // Admission Form State (Sections 5 & 20)
-  const [admCivicId, setAdmCivicId] = useState('CIV-DEMO-10001');
-  const [admStudentName, setAdmStudentName] = useState('Rajesh Kumar Sharma');
+  // Admission Form State
+  const [admCivicId, setAdmCivicId] = useState('');
+  const [admStudentName, setAdmStudentName] = useState('');
+  const [lookupStatus, setLookupStatus] = useState(''); // 'FOUND' | 'CUSTOM' | ''
   const [admProgramType, setAdmProgramType] = useState('UG'); // UG | PG
   const [admCourse, setAdmCourse] = useState('B.Tech');
   const [admDept, setAdmDept] = useState('CSE (AI & ML)');
@@ -38,15 +50,26 @@ export default function EduDepartmentDashboardLayout({
   // Handle Citizen ID Lookup in Admission Modal
   const handleLookupCivicId = (id) => {
     setAdmCivicId(id);
-    if (id.toUpperCase() === 'CIV-DEMO-10001') {
-      setAdmStudentName('Rajesh Kumar Sharma');
-    } else if (id.toUpperCase() === 'CIV-DEMO-10002') {
-      setAdmStudentName('Priya Sundaram');
+    const cleanId = (id || '').trim().toUpperCase();
+
+    if (KNOWN_CITIZEN_REGISTRY[cleanId]) {
+      setAdmStudentName(KNOWN_CITIZEN_REGISTRY[cleanId]);
+      setLookupStatus('FOUND');
+    } else if (cleanId.length >= 4) {
+      // Dynamic clean name generation or keep custom typed name
+      const formattedName = cleanId.replace('CIV-', '').replace(/[-_]/g, ' ').toLowerCase()
+        .replace(/\b\w/g, char => char.toUpperCase());
+      if (!admStudentName || admStudentName === 'Rajesh Kumar Sharma' || admStudentName === 'Priya Sundaram') {
+        setAdmStudentName(formattedName.length > 2 ? `${formattedName}` : 'Verified Citizen Student');
+      }
+      setLookupStatus('CUSTOM');
+    } else {
+      setLookupStatus('');
     }
   };
 
-  // Filter Student Worklist
-  const filteredStudents = studentRecords.filter((st) => {
+  // Filter Student Worklist dynamically from local state
+  const filteredStudents = localStudents.filter((st) => {
     if (selectedDept !== 'ALL' && st.department && !st.department.toUpperCase().includes(selectedDept.toUpperCase())) {
       return false;
     }
@@ -64,9 +87,63 @@ export default function EduDepartmentDashboardLayout({
 
   const handleCreateAdmission = (e) => {
     e.preventDefault();
-    setVaultSyncMsg(`✓ Student ${admStudentName} (${admCivicId}) admitted to ${admCourse} - ${admDept} (${admProgramType}). Verified identity & previous academic records retrieved & locked via CIVIQONE ID.`);
+    if (!admCivicId || !admStudentName) return;
+
+    const formattedCivicId = admCivicId.trim().toUpperCase();
+    const generatedRollNo = admRollNo || `KEC-2026-${(admDept || 'CSE').substring(0, 3).toUpperCase()}-${Math.floor(10 + Math.random() * 90)}`;
+
+    const newStudent = {
+      id: `STU-ADM-${Date.now()}`,
+      citizenId: formattedCivicId,
+      rollNo: generatedRollNo,
+      name: admStudentName,
+      programType: admProgramType || 'UG',
+      department: admDept || 'CSE',
+      year: admYear || '1st Year',
+      status: 'CURRENTLY STUDYING',
+      academicHistory: {
+        school: {
+          schoolName: 'Delhi Public School (DPS Vijayawada)',
+          board: 'CBSE (Central Board)',
+          completedClass: 'Class 10 (SSC)',
+          passingYear: '2020',
+          certName: '10th Secondary Board Marksheet',
+          status: 'VERIFIED',
+          locked: true
+        },
+        intermediate: {
+          institutionName: 'Sri Chaitanya Junior College',
+          board: 'AP Board of Intermediate Education',
+          stream: 'MPC (Maths, Physics, Chemistry)',
+          passingYear: '2022',
+          certName: '12th Intermediate Marksheet',
+          status: 'VERIFIED',
+          locked: true
+        },
+        college: {
+          university: session?.universityName || 'Jawaharlal Nehru Technological University (JNTU)',
+          collegeName: session?.name || 'Kuppam Engineering College',
+          course: `${admProgramType} - ${admCourse} (${admDept})`,
+          department: admDept,
+          year: admYear || '1st Year',
+          academicPeriod: '2026 - 2030',
+          status: 'CURRENTLY STUDYING',
+          locked: false
+        }
+      }
+    };
+
+    // Dynamically update student list in portal
+    setLocalStudents((prevStudents) => [newStudent, ...prevStudents]);
+
+    // Set active toast message
+    setVaultSyncMsg(`✓ New Admission Registered: ${admStudentName} (${formattedCivicId}) admitted to ${admCourse} - ${admDept}. Verified identity & academic records synced & added to Student Worklist!`);
+    
+    // Reset modal & select new student
     setShowAdmissionModal(false);
-    setTimeout(() => setVaultSyncMsg(''), 5000);
+    setSelectedStudent(newStudent);
+
+    setTimeout(() => setVaultSyncMsg(''), 6000);
   };
 
   return (
@@ -426,39 +503,42 @@ export default function EduDepartmentDashboardLayout({
             </p>
 
             <form onSubmit={handleCreateAdmission} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {/* Citizen ID Input with Fast Select */}
+              {/* Citizen ID Input with Live Registry Search */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                  Citizen ID <span style={{ color: '#EF4444' }}>*</span>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                  <span>Citizen ID <span style={{ color: '#EF4444' }}>*</span></span>
+                  {lookupStatus === 'FOUND' && (
+                    <span style={{ fontSize: '0.7rem', color: '#059669', fontWeight: 800, backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', padding: '2px 8px', borderRadius: '6px' }}>
+                      ✓ Verified Registry Record
+                    </span>
+                  )}
+                  {lookupStatus === 'CUSTOM' && (
+                    <span style={{ fontSize: '0.7rem', color: '#0284C7', fontWeight: 800, backgroundColor: '#E0F2FE', border: '1px solid #7DD3FC', padding: '2px 8px', borderRadius: '6px' }}>
+                      ⚡ Custom Citizen ID
+                    </span>
+                  )}
                 </label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <input
-                    type="text"
-                    value={admCivicId}
-                    onChange={(e) => handleLookupCivicId(e.target.value)}
-                    style={{ flex: 1, padding: '9px 12px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                    required
-                  />
-                  <select
-                    onChange={(e) => handleLookupCivicId(e.target.value)}
-                    style={{ padding: '9px 10px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.8rem', backgroundColor: '#F8FAFC' }}
-                  >
-                    <option value="CIV-DEMO-10001">CIV-DEMO-10001 (Rajesh)</option>
-                    <option value="CIV-DEMO-10002">CIV-DEMO-10002 (Priya)</option>
-                  </select>
-                </div>
+                <input
+                  type="text"
+                  value={admCivicId}
+                  onChange={(e) => handleLookupCivicId(e.target.value)}
+                  placeholder="e.g. CIV-DEMO-10003 or CIV-2026-9081"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #059669', fontSize: '0.9rem', fontWeight: 700, outline: 'none' }}
+                  required
+                />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                  Student Full Name (Retrieved from Vault)
+                  Student Full Name <span style={{ fontSize: '0.725rem', color: '#64748B', fontWeight: 600 }}>(Auto-retrieved from Vault / Editable)</span>
                 </label>
                 <input
                   type="text"
                   value={admStudentName}
                   onChange={(e) => setAdmStudentName(e.target.value)}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1px solid #CBD5E1', fontSize: '0.85rem', backgroundColor: '#F8FAFC' }}
-                  readOnly
+                  placeholder="Enter student full name"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1.5px solid #CBD5E1', fontSize: '0.875rem', fontWeight: 700, backgroundColor: '#FFFFFF' }}
+                  required
                 />
               </div>
 
