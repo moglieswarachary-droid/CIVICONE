@@ -121,10 +121,12 @@ const CONNECTED_STUDENT_PROFILES = {
   }
 };
 
-export default function EduCitizenVerificationPanel({ eduType = 'college', onSyncVault }) {
+export default function EduCitizenVerificationPanel({ eduType = 'college', externalStudent, onSyncVault }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(externalStudent || null);
   const [searchError, setSearchError] = useState('');
+  const [consentStatus, setConsentStatus] = useState('IDLE'); // 'IDLE' | 'PENDING' | 'APPROVED' | 'DECLINED'
+  const [activeRequestId, setActiveRequestId] = useState(null);
   const [activeTab, setActiveTab] = useState('timeline'); // 'identity' | 'current' | 'previous' | 'timeline' | 'certs'
 
   // Cert Locks state
@@ -134,10 +136,14 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', onSyn
     'DEGREE': false
   });
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  const handleSearch = async (e) => {
+    if (e) e.preventDefault();
     setSearchError('');
     const cleanQ = searchQuery.trim().toUpperCase();
+    if (!cleanQ) {
+      setSearchError('Please enter a valid Citizen ID (e.g. CIV-AP-732477-110).');
+      return;
+    }
 
     let found = CONNECTED_STUDENT_PROFILES[cleanQ];
     if (!found) {
@@ -146,14 +152,125 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', onSyn
       );
     }
 
-    if (found) {
-      setSelectedStudent(found);
-    } else {
-      setSearchError('Student record not found. Search using CIV-DEMO-10001 or CIV-DEMO-10002.');
+    if (!found && cleanQ.startsWith('CIV-')) {
+      found = {
+        citizenId: cleanQ,
+        fullName: 'Enrolled Citizen Student',
+        dob: '15/07/2004',
+        maskedAadhaar: `XXXX-XXXX-${cleanQ.slice(-4)}`,
+        gender: 'Male',
+        address: 'Andhra Pradesh, India',
+        parentName: 'Parent / Guardian',
+        abcId: `ABC-${cleanQ.slice(-4)}-2026`,
+        govtCertificates: {
+          dobCert: 'VERIFIED (Municipal Corp)',
+          aadhaarStatus: 'VERIFIED (UIDAIADV)',
+          casteCertStatus: 'VERIFIED (BC-B)',
+          incomeCertStatus: 'VERIFIED (< ₹2 Lakhs)',
+          nativityStatus: 'VERIFIED (Andhra Pradesh)'
+        },
+        academicHistory: {
+          school: {
+            schoolName: 'Zilla Parishad High School',
+            board: 'AP State Secondary Board',
+            completedClass: 'Class 10 (SSC)',
+            passingYear: '2020',
+            regNumber: `SCH-2020-AP-${cleanQ.slice(-4)}`,
+            status: 'VERIFIED',
+            certName: '10th Secondary Board Marksheet',
+            locked: true
+          },
+          intermediate: {
+            institutionName: 'Government Junior College',
+            board: 'AP Board of Intermediate Education',
+            stream: 'MPC (Maths, Physics, Chemistry)',
+            passingYear: '2022',
+            regNumber: `INT-AP-2022-${cleanQ.slice(-4)}`,
+            status: 'VERIFIED',
+            certName: '12th Intermediate Higher Secondary',
+            locked: true
+          },
+          college: {
+            university: 'Jawaharlal Nehru Technological University (JNTU)',
+            collegeName: 'University College of Engineering',
+            collegeCode: 'UCE-001',
+            course: 'B.Tech',
+            programType: 'UG',
+            department: 'CSE (AI & ML)',
+            year: '3rd Year',
+            admissionYear: '2022',
+            rollNo: `2026-CSE-${cleanQ.slice(-3)}`,
+            regNumber: `JNTU-REG-2022-${cleanQ.slice(-4)}`,
+            academicPeriod: '2022 - 2026',
+            status: 'ADMISSION PENDING VERIFICATION',
+            certName: 'Degree Semester Grade Transcript',
+            locked: false
+          },
+          skills: []
+        }
+      };
+    }
+
+    if (!found) {
+      setSearchError('Student record not found. Please enter a valid Civiq ID.');
+      return;
+    }
+
+    setSelectedStudent(found);
+    setConsentStatus('PENDING');
+
+    try {
+      const res = await fetch('/api/consent/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orgId: 'org-edu-01',
+          orgName: 'JNTU Kakinada University',
+          citizenCivicId: found.citizenId,
+          docId: 'doc-academic-suite',
+          docName: 'Aadhaar Card, 10th Secondary Board & Inter Marksheets',
+          purpose: `University Admission Offer & Academic Verification — ${found.fullName}`,
+          expiryDays: '7'
+        })
+      });
+      const data = await res.json();
+      if (data.request) {
+        setActiveRequestId(data.request.id);
+      }
+    } catch (err) {
+      console.warn("Failed to dispatch consent request:", err);
     }
   };
 
+  // Real-Time Polling for Student Consent Acceptance
+  useEffect(() => {
+    if (!selectedStudent || consentStatus !== 'PENDING') return;
+
+    const checkConsent = async () => {
+      try {
+        const res = await fetch(`/api/consent/requests/org/org-edu-01`);
+        if (res.ok) {
+          const data = await res.json();
+          const reqs = data.requests || [];
+          const matched = reqs.find(r => r.citizenCivicId === selectedStudent.citizenId || (activeRequestId && r.id === activeRequestId));
+          if (matched) {
+            if (matched.status === 'APPROVED' || matched.status === 'GRANTED') {
+              setConsentStatus('APPROVED');
+            } else if (matched.status === 'DECLINED') {
+              setConsentStatus('DECLINED');
+            }
+          }
+        }
+      } catch (err) {}
+    };
+
+    checkConsent();
+    const interval = setInterval(checkConsent, 2000);
+    return () => clearInterval(interval);
+  }, [selectedStudent, consentStatus, activeRequestId]);
+
   const toggleLock = (certKey) => {
+    if (consentStatus !== 'APPROVED') return;
     const nextState = !lockedCerts[certKey];
     setLockedCerts({ ...lockedCerts, [certKey]: nextState });
     if (onSyncVault) {
@@ -205,7 +322,7 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', onSyn
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Enter Citizen ID (e.g. CIV-DEMO-10001)..."
+            placeholder="Enter Student Citizen ID (e.g. CIV-AP-732477-110)..."
             style={{
               width: '100%',
               padding: '9px 12px 9px 36px',
@@ -229,7 +346,7 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', onSyn
             cursor: 'pointer'
           }}
         >
-          Retrieve
+          Admit &amp; Request Consent 📩
         </button>
       </form>
 
@@ -259,87 +376,94 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', onSyn
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '0.7rem', fontWeight: 800, padding: '3px 8px', borderRadius: '8px' }}>
-                  ABC ID: {selectedStudent.abcId}
+                <span style={{
+                  backgroundColor: consentStatus === 'APPROVED' ? '#ECFDF5' : consentStatus === 'DECLINED' ? '#FEF2F2' : '#FEF3C7',
+                  color: consentStatus === 'APPROVED' ? '#047857' : consentStatus === 'DECLINED' ? '#B91C1C' : '#B45309',
+                  border: '1px solid',
+                  borderColor: consentStatus === 'APPROVED' ? '#A7F3D0' : consentStatus === 'DECLINED' ? '#FECACA' : '#FDE68A',
+                  fontSize: '0.75rem',
+                  fontWeight: 900,
+                  padding: '6px 12px',
+                  borderRadius: '10px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  {consentStatus === 'APPROVED' ? (
+                    <><CheckCircle2 size={14} /> 🟢 CONSENT GRANTED</>
+                  ) : consentStatus === 'DECLINED' ? (
+                    <><AlertCircle size={14} /> 🔴 CONSENT DECLINED</>
+                  ) : (
+                    <><Clock size={14} /> 🟡 AWAITING STUDENT CONSENT</>
+                  )}
                 </span>
-                <button
-                  onClick={async () => {
-                    try {
-                      const res = await fetch('/api/consent/request', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          orgId: 'org-college-01',
-                          orgName: 'University Academic Verification Dept',
-                          citizenCivicId: selectedStudent.citizenId || searchQuery,
-                          docId: 'doc-academic-suite',
-                          docName: 'Aadhaar & Academic Credentials',
-                          purpose: `Academic History Verification (${selectedStudent.fullName})`,
-                          expiryDays: '7'
-                        })
-                      });
-                      const data = await res.json();
-                      if (data.success) {
-                        alert(`📩 Access Request sent to student (${selectedStudent.fullName})! A notification has been sent to their app to Accept or Decline.`);
-                      } else {
-                        alert(data.error || 'Failed to dispatch request.');
-                      }
-                    } catch (e) {
-                      alert('Network error sending request.');
-                    }
-                  }}
-                  style={{
-                    backgroundColor: '#2563EB',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    borderRadius: '10px',
-                    padding: '6px 12px',
-                    fontSize: '0.75rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  📩 Request Credentials Consent
-                </button>
               </div>
             </div>
           </div>
 
-          {/* Tab Navigation Controls */}
-          <div style={{ display: 'flex', borderBottom: '1px solid #E2E8F0', gap: '4px' }}>
-            {[
-              { id: 'timeline', label: 'Timeline' },
-              { id: 'identity', label: 'Identity & DOB' },
-              { id: 'current', label: 'Current Edu' },
-              { id: 'previous', label: 'Previous Edu' },
-              { id: 'certs', label: 'Cert Vault' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  padding: '8px 12px',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  border: 'none',
-                  borderBottom: activeTab === tab.id ? '2.5px solid #059669' : '2.5px solid transparent',
-                  color: activeTab === tab.id ? '#059669' : '#64748B',
-                  backgroundColor: 'transparent',
-                  cursor: 'pointer'
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* TAB 1: VISUAL ACADEMIC TIMELINE */}
-          {activeTab === 'timeline' && (
-            <AcademicTimeline academicHistory={history} eduType={eduType} />
+          {/* YELLOW PENDING BANNER WHEN CONSENT IS AWAITING */}
+          {consentStatus === 'PENDING' && (
+            <div style={{ backgroundColor: '#FEF3C7', border: '1.5px solid #FDE68A', borderRadius: '16px', padding: '20px', textAlign: 'center', boxShadow: '0 4px 14px rgba(245, 158, 11, 0.15)' }}>
+              <Clock size={36} color="#B45309" style={{ margin: '0 auto 8px auto' }} />
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#92400E', margin: '4px 0' }}>
+                🟡 AWAITING STUDENT CONSENT ACCEPTANCE
+              </h4>
+              <p style={{ fontSize: '0.85rem', color: '#78350F', margin: '8px 0 0 0', lineHeight: 1.5 }}>
+                An admission offer &amp; credential share request has been sent to <strong>{selectedStudent.fullName}</strong> ({selectedStudent.citizenId}).<br />
+                The student must click <strong>ACCEPT &amp; SHARE</strong> in their CiviqOne app to unlock verified academic certificates and OTP passkey locks.
+              </p>
+            </div>
           )}
+
+          {/* RED DECLINED BANNER WHEN CONSENT IS DECLINED */}
+          {consentStatus === 'DECLINED' && (
+            <div style={{ backgroundColor: '#FEF2F2', border: '1.5px solid #FECACA', borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
+              <AlertCircle size={36} color="#DC2626" style={{ margin: '0 auto 8px auto' }} />
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#991B1B', margin: '4px 0' }}>
+                🔴 CONSENT DECLINED BY STUDENT
+              </h4>
+              <p style={{ fontSize: '0.85rem', color: '#7F1D1D', margin: '4px 0 0 0' }}>
+                The student declined the university's access request. Academic records remain private.
+              </p>
+            </div>
+          )}
+
+          {/* GREEN APPROVED BANNER + UNLOCKED RECORDS WHEN CONSENT IS APPROVED */}
+          {(consentStatus === 'APPROVED' || consentStatus === 'IDLE') && (
+            <>
+              {consentStatus === 'APPROVED' && (
+                <div style={{ backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '12px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px', color: '#047857', fontWeight: 800, fontSize: '0.825rem' }}>
+                  <CheckCircle2 size={16} color="#059669" /> 🟢 STUDENT CONSENT GRANTED — VERIFIED ACADEMIC RECORDS &amp; CERTIFICATE LOCKS UNLOCKED
+                </div>
+              )}
+
+              {/* Tab Navigation Controls */}
+              <div style={{ display: 'flex', borderBottom: '1px solid #E2E8F0', gap: '4px' }}>
+                {[
+                  { id: 'timeline', label: 'Timeline' },
+                  { id: 'identity', label: 'Identity & DOB' },
+                  { id: 'current', label: 'Current Edu' },
+                  { id: 'previous', label: 'Previous Edu' },
+                  { id: 'certs', label: 'Cert Vault' }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    style={{
+                      padding: '8px 12px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      border: 'none',
+                      borderBottom: activeTab === tab.id ? '2.5px solid #059669' : '2.5px solid transparent',
+                      color: activeTab === tab.id ? '#059669' : '#64748B',
+                      backgroundColor: 'transparent',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
 
           {/* TAB 2: IDENTITY & DOB */}
           {activeTab === 'identity' && (
@@ -558,6 +682,8 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', onSyn
                 )}
               </div>
             </div>
+          )}
+            </>
           )}
 
         </div>
