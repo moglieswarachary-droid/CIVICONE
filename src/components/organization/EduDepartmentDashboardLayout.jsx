@@ -45,7 +45,71 @@ export default function EduDepartmentDashboardLayout({
   const [admRollNo, setAdmRollNo] = useState('KEC-2026-CSE-09');
   const [admYear, setAdmYear] = useState('1st Year');
 
+  // OTP Passkey Verification Modal for Profile Modal Timeline Clicks
+  const [profileOtpModal, setProfileOtpModal] = useState(null); // { action, certKey, certName, demoOtp, citizenId, citizenName }
+  const [profileInputOtp, setProfileInputOtp] = useState('');
+  const [profileOtpError, setProfileOtpError] = useState('');
+
   const eduType = config?.id || 'college';
+
+  // Trigger Citizen OTP Passkey Modal when institution clicks Lock/Unlock in Timeline
+  const handleTriggerTimelineLockOtp = (certKey, certName) => {
+    if (!selectedStudent) return;
+    const targetKey = certKey === '10TH' ? 'school' : certKey === '12TH' ? 'intermediate' : 'college';
+    const isCurrentlyLocked = selectedStudent.academicHistory?.[targetKey]?.locked === true;
+    const action = isCurrentlyLocked ? 'UNLOCK' : 'LOCK';
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    setProfileOtpModal({
+      action,
+      certKey,
+      certName,
+      demoOtp: generatedOtp,
+      citizenId: selectedStudent.citizenId,
+      citizenName: selectedStudent.name
+    });
+    setProfileInputOtp(generatedOtp); // Pre-fill with 6-digit generated OTP for demo speed
+    setProfileOtpError('');
+  };
+
+  // Verify Citizen OTP Passkey and update certificate lock status
+  const handleVerifyProfileOtpPasskey = (e) => {
+    e.preventDefault();
+    if (!profileOtpModal || !selectedStudent) return;
+
+    if (profileInputOtp !== '123456' && profileInputOtp !== profileOtpModal.demoOtp) {
+      setProfileOtpError('Invalid 6-digit OTP Passkey. Use demo OTP shown on screen or 123456.');
+      return;
+    }
+
+    const { action, certKey, certName } = profileOtpModal;
+    const newLockState = action === 'LOCK';
+    const targetKey = certKey === '10TH' ? 'school' : certKey === '12TH' ? 'intermediate' : 'college';
+
+    const currentHistory = selectedStudent.academicHistory || {};
+    const updatedHistory = { ...currentHistory };
+    if (updatedHistory[targetKey]) {
+      updatedHistory[targetKey] = { ...updatedHistory[targetKey], locked: newLockState };
+    } else {
+      updatedHistory[targetKey] = {
+        schoolName: 'School Board',
+        institutionName: 'Junior College',
+        collegeName: session?.name || 'College',
+        certName,
+        status: 'VERIFIED',
+        locked: newLockState
+      };
+    }
+
+    const updatedStudent = { ...selectedStudent, academicHistory: updatedHistory };
+    setSelectedStudent(updatedStudent);
+    setLocalStudents(prev => prev.map(s => s.id === selectedStudent.id ? updatedStudent : s));
+
+    setVaultSyncMsg(`✓ ${certName} custody status updated to ${newLockState ? '🔒 LOCKED' : '🔓 UNLOCKED'} for ${selectedStudent.name} via Authorized Passkey OTP!`);
+    setProfileOtpModal(null);
+
+    setTimeout(() => setVaultSyncMsg(''), 5000);
+  };
 
   // Handle Citizen ID Lookup in Admission Modal
   const handleLookupCivicId = (id) => {
@@ -678,26 +742,7 @@ export default function EduDepartmentDashboardLayout({
                   }
                 }}
                 eduType={eduType}
-                onToggleLock={(certKey, certName) => {
-                  // Toggle lock state on selected student profile & update local state
-                  const currentLockState = selectedStudent.academicHistory?.[
-                    certKey === '10TH' ? 'school' : certKey === '12TH' ? 'intermediate' : 'college'
-                  ]?.locked;
-                  
-                  const newLockState = !currentLockState;
-                  const updatedHistory = { ...selectedStudent.academicHistory };
-                  const targetKey = certKey === '10TH' ? 'school' : certKey === '12TH' ? 'intermediate' : 'college';
-                  if (updatedHistory[targetKey]) {
-                    updatedHistory[targetKey] = { ...updatedHistory[targetKey], locked: newLockState };
-                  }
-                  
-                  const updatedStudent = { ...selectedStudent, academicHistory: updatedHistory };
-                  setSelectedStudent(updatedStudent);
-                  setLocalStudents(prev => prev.map(s => s.id === selectedStudent.id ? updatedStudent : s));
-                  
-                  setVaultSyncMsg(`🔑 ${certName} custody status updated to ${newLockState ? '🔒 LOCKED' : '🔓 UNLOCKED'} for ${selectedStudent.name}!`);
-                  setTimeout(() => setVaultSyncMsg(''), 5000);
-                }}
+                onToggleLock={(certKey, certName) => handleTriggerTimelineLockOtp(certKey, certName)}
               />
             </div>
 
@@ -709,6 +754,119 @@ export default function EduDepartmentDashboardLayout({
                 Close Profile
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* CITIZEN OTP PASSKEY VERIFICATION MODAL FOR PROFILE TIMELINE */}
+      {profileOtpModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(5px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px'
+        }}>
+          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', maxWidth: '460px', width: '100%', padding: '28px', border: '1px solid #E2E8F0', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+            
+            <div style={{
+              width: '54px', height: '54px', borderRadius: '16px',
+              backgroundColor: profileOtpModal.action === 'UNLOCK' ? '#E0F2FE' : '#ECFDF5',
+              border: `1px solid ${profileOtpModal.action === 'UNLOCK' ? '#7DD3FC' : '#A7F3D0'}`,
+              color: profileOtpModal.action === 'UNLOCK' ? '#0369A1' : '#059669',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', fontSize: '1.5rem'
+            }}>
+              {profileOtpModal.action === 'UNLOCK' ? '🔓' : '🔑'}
+            </div>
+
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0F172A', textAlign: 'center', marginBottom: '4px' }}>
+              {profileOtpModal.action === 'UNLOCK' ? 'Release & Unlock Digital Certificate' : 'Paperless Admission Certificate Lock'}
+            </h3>
+            <p style={{ fontSize: '0.825rem', color: '#64748B', textAlign: 'center', marginBottom: '16px', lineHeight: 1.45 }}>
+              {profileOtpModal.action === 'UNLOCK'
+                ? <>Releasing <strong>{profileOtpModal.certName}</strong> from institution digital custody for <strong>{profileOtpModal.citizenName}</strong> ({profileOtpModal.citizenId}).</>
+                : <>Locking <strong>{profileOtpModal.certName}</strong> in digital custody (replacing paper submission) for <strong>{profileOtpModal.citizenName}</strong> ({profileOtpModal.citizenId}).</>
+              }
+            </p>
+
+            <div style={{ backgroundColor: '#FEF3C7', border: '1px solid #FDE68A', padding: '12px 16px', borderRadius: '12px', marginBottom: '20px', fontSize: '0.8rem', color: '#92400E' }}>
+              🌱 <strong>Paperless Authorization (DEMO MODE):</strong> Ask student to provide the 6-Digit OTP Passkey sent to their Citizen Portal to authorize {profileOtpModal.action === 'UNLOCK' ? 'certificate release & unlock' : 'digital custody lock'}.
+              <div style={{ marginTop: '8px', fontSize: '0.775rem', color: '#B45309', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                <span>Student Security OTP Passkey: <strong style={{ fontFamily: 'monospace', fontSize: '1.05rem', backgroundColor: '#FFFFFF', padding: '2px 8px', borderRadius: '6px', border: '1px solid #FCD34D', color: '#059669' }}>{profileOtpModal.demoOtp}</strong></span>
+                <button
+                  type="button"
+                  onClick={() => setProfileInputOtp(profileOtpModal.demoOtp)}
+                  style={{ backgroundColor: '#059669', color: '#FFFFFF', border: 'none', borderRadius: '6px', padding: '3px 8px', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}
+                >
+                  ⚡ Auto-Fill Generated OTP
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleVerifyProfileOtpPasskey}>
+              {profileOtpError && (
+                <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', marginBottom: '14px' }}>
+                  {profileOtpError}
+                </div>
+              )}
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 800, color: '#0F172A', marginBottom: '6px' }}>
+                  <span>Enter 6-Digit Citizen Passkey OTP:</span>
+                  <span style={{ fontSize: '0.7rem', color: '#059669', backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', padding: '2px 6px', borderRadius: '4px' }}>
+                    ⚡ DEMO PASSKEY: 123456
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={profileInputOtp}
+                  onChange={(e) => setProfileInputOtp(e.target.value.replace(/\D/g, ''))}
+                  placeholder="e.g. 892104 or 123456"
+                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: `2px solid ${profileOtpModal.action === 'UNLOCK' ? '#0284C7' : '#059669'}`, fontSize: '1.4rem', fontWeight: 900, textAlign: 'center', letterSpacing: '0.3em', fontFamily: 'monospace', outline: 'none' }}
+                  required
+                />
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setProfileInputOtp('123456')}
+                    style={{ backgroundColor: '#F1F5F9', color: '#0F172A', border: '1px solid #CBD5E1', borderRadius: '8px', padding: '4px 10px', fontSize: '0.725rem', fontWeight: 800, cursor: 'pointer' }}
+                  >
+                    🔑 Quick Fill Universal Demo OTP (123456)
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setProfileOtpModal(null)}
+                  style={{ flex: 1, backgroundColor: '#F1F5F9', color: '#64748B', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    flex: 2,
+                    backgroundColor: profileOtpModal.action === 'UNLOCK' ? '#0284C7' : '#059669',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '12px',
+                    borderRadius: '12px',
+                    fontWeight: 800,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    boxShadow: profileOtpModal.action === 'UNLOCK' ? '0 4px 12px rgba(2,132,199,0.3)' : '0 4px 12px rgba(5,150,105,0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  {profileOtpModal.action === 'UNLOCK' ? 'Authorize Certificate Release 🔓' : 'Authorize Digital Custody 🔒'}
+                </button>
+              </div>
+            </form>
+
           </div>
         </div>
       )}
