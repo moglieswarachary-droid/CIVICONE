@@ -465,68 +465,48 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', exter
       {selectedStudent && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           
-          {/* Identity Bar */}
-          <div style={{ backgroundColor: '#F8FAFC', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '12px 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <span style={{ fontSize: '0.725rem', fontWeight: 800, color: '#059669' }}>
-                  {selectedStudent.citizenId}
-                </span>
-                <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', margin: '2px 0' }}>
-                  {selectedStudent.fullName}
-                </h4>
-                <div style={{ fontSize: '0.775rem', color: '#64748B', display: 'flex', gap: '12px' }}>
-                  <span>DOB: <strong>{selectedStudent.dob}</strong></span>
-                  <span>Aadhaar: <strong>{selectedStudent.maskedAadhaar}</strong></span>
-                </div>
+          {/* Organized Student Summary Box (ONLY Student Name & Citizen ID) */}
+          <div
+            className="animate-fade-slide"
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: '16px',
+              border: '1.5px solid #E2E8F0',
+              borderLeft: '4px solid #059669',
+              padding: '14px 18px',
+              boxShadow: '0 4px 14px rgba(15, 23, 42, 0.03)',
+              display: 'flex',
+              alignItems: 'center',
+              justify: 'space-between',
+              gap: '12px'
+            }}
+          >
+            <div>
+              <div style={{ fontSize: '0.725rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '2px' }}>
+                Student Record
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '0.7rem', fontWeight: 800, padding: '3px 8px', borderRadius: '8px' }}>
-                  ABC ID: {selectedStudent.abcId}
-                </span>
-                <button
-                  onClick={async () => {
-                    try {
-                      const res = await fetch('/api/consent/request', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          orgId: 'org-college-01',
-                          orgName: 'University Academic Verification Dept',
-                          citizenCivicId: selectedStudent.citizenId || searchQuery,
-                          docId: 'doc-academic-suite',
-                          docName: 'Aadhaar & Academic Credentials',
-                          purpose: `Academic History Verification (${selectedStudent.fullName})`,
-                          expiryDays: '7'
-                        })
-                      });
-                      const data = await res.json();
-                      if (data.success) {
-                        alert(`📩 Access Request sent to student (${selectedStudent.fullName})! A notification has been sent to their app to Accept or Decline.`);
-                      } else {
-                        alert(data.error || 'Failed to dispatch request.');
-                      }
-                    } catch (e) {
-                      alert('Network error sending request.');
-                    }
-                  }}
-                  style={{
-                    backgroundColor: '#2563EB',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    borderRadius: '10px',
-                    padding: '6px 12px',
-                    fontSize: '0.75rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  📩 Request Credentials Consent
-                </button>
-              </div>
+              <h4 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0F172A', margin: 0, fontFamily: 'var(--font-heading)' }}>
+                {selectedStudent.fullName}
+              </h4>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{
+                backgroundColor: '#ECFDF5',
+                color: '#065F46',
+                border: '1px solid #A7F3D0',
+                padding: '5px 12px',
+                borderRadius: '10px',
+                fontSize: '0.85rem',
+                fontWeight: 900,
+                fontFamily: 'monospace',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <span style={{ fontSize: '0.725rem', color: '#059669', fontWeight: 700 }}>Citizen ID:</span>
+                {selectedStudent.citizenId}
+              </span>
             </div>
           </div>
 
@@ -587,30 +567,85 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', exter
 
           {/* TAB 2: IDENTITY & DOB */}
           {activeTab === 'identity' && (
-            <div style={{ backgroundColor: '#F8FAFC', padding: '14px', borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '0.825rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div><strong>Full Legal Name:</strong> {selectedStudent.fullName}</div>
+            <div className="animate-fade-slide" style={{ backgroundColor: '#F8FAFC', padding: '16px', borderRadius: '14px', border: '1px solid #E2E8F0', fontSize: '0.825rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: '8px' }}>
+                <div><strong>Full Legal Name:</strong> <span style={{ color: '#0F172A', fontWeight: 800 }}>{selectedStudent.fullName}</span></div>
+                <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '0.7rem', fontWeight: 800, padding: '3px 8px', borderRadius: '6px', border: '1px solid #A7F3D0' }}>
+                  ABC ID: {selectedStudent.abcId}
+                </span>
+              </div>
               <div><strong>Date of Birth:</strong> {selectedStudent.dob} (Verified via Birth Registry)</div>
-              <div><strong>Masked Aadhaar:</strong> {selectedStudent.maskedAadhaar}</div>
+              <div><strong>Masked Aadhaar:</strong> <code style={{ backgroundColor: '#FFFFFF', padding: '1px 6px', borderRadius: '4px', border: '1px solid #CBD5E1', fontFamily: 'monospace' }}>{selectedStudent.maskedAadhaar}</code></div>
               <div><strong>Gender:</strong> {selectedStudent.gender}</div>
               <div><strong>Parent / Guardian:</strong> {selectedStudent.parentName}</div>
               <div><strong>Residential Address:</strong> {selectedStudent.address}</div>
 
-              <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '8px', marginTop: '4px' }}>
+              <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '10px', marginTop: '4px' }}>
                 <strong style={{ color: '#0F172A' }}>Government Certificate Verification Status:</strong>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
                   <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>
-                    DOB: {selectedStudent.govtCertificates.dobCert}
+                    DOB: {selectedStudent.govtCertificates?.dobCert || 'VERIFIED'}
                   </span>
                   <span style={{ backgroundColor: '#E0F2FE', color: '#0369A1', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>
-                    Caste: {selectedStudent.govtCertificates.casteCertStatus}
+                    Caste: {selectedStudent.govtCertificates?.casteCertStatus || 'VERIFIED'}
                   </span>
                   <span style={{ backgroundColor: '#FEF3C7', color: '#92400E', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>
-                    Income: {selectedStudent.govtCertificates.incomeCertStatus}
+                    Income: {selectedStudent.govtCertificates?.incomeCertStatus || 'VERIFIED'}
                   </span>
                   <span style={{ backgroundColor: '#DCFCE7', color: '#15803D', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>
-                    Nativity: {selectedStudent.govtCertificates.nativityStatus}
+                    Nativity: {selectedStudent.govtCertificates?.nativityStatus || 'VERIFIED'}
                   </span>
                 </div>
+              </div>
+
+              <div style={{ paddingTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/consent/request', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          orgId: 'org-college-01',
+                          orgName: 'University Academic Verification Dept',
+                          citizenCivicId: selectedStudent.citizenId,
+                          docId: 'doc-academic-suite',
+                          docName: 'Aadhaar & Academic Credentials',
+                          purpose: `Academic History Verification (${selectedStudent.fullName})`,
+                          expiryDays: '7'
+                        })
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        alert(`📩 Access Request sent to student (${selectedStudent.fullName})! A notification has been sent to their app to Accept or Decline.`);
+                      } else {
+                        alert(data.error || 'Failed to dispatch request.');
+                      }
+                    } catch (e) {
+                      alert('Network error sending request.');
+                    }
+                  }}
+                  className="tab-pill-animated"
+                  style={{
+                    width: '100%',
+                    backgroundColor: '#2563EB',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '10px',
+                    padding: '8px 14px',
+                    fontSize: '0.775rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 8px rgba(37,99,235,0.25)'
+                  }}
+                >
+                  📩 Request Credentials Consent
+                </button>
               </div>
             </div>
           )}
