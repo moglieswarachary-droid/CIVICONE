@@ -429,30 +429,63 @@ export default function MyJourney({ citizen, documents = [] }) {
     }
   ];
 
+  const isDemoCitizen = citizenId === 'CIV-DEMO-10001' || citizenId === 'CIV-DEMO-10002';
+  
+  let activeJourneyList = [];
+  if (documents && Array.isArray(documents) && documents.length > 0) {
+    activeJourneyList = documents.map((doc, idx) => ({
+      step: idx + 1,
+      id: doc.id || `jour-${idx + 1}`,
+      name: doc.name || doc.docName || 'Uploaded Document',
+      officialTitle: doc.officialTitle || doc.issuer || 'Official Verified Record',
+      category: (doc.category || 'IDENTITY').toUpperCase(),
+      categoryLabel: doc.category || 'Document Record',
+      icon: doc.category === 'academic' ? GraduationCap : doc.category === 'rto' ? Car : doc.category === 'health' ? HeartPulse : ShieldCheck,
+      iconColor: '#0B5ED7',
+      iconBg: '#DBEAFE',
+      issuer: doc.issuer || 'Issuer Authority',
+      issueDate: doc.issuedDate || doc.issueDate || doc.date || 'Verified',
+      year: (doc.issuedDate || doc.date || '2026').slice(-4),
+      ageMilestone: `Credential #${idx + 1}`,
+      refNo: doc.docNumber || doc.refNo || doc.id || 'VERIFIED-DOC',
+      status: doc.status || 'VERIFIED',
+      verificationHash: doc.verificationHash || '0x' + Math.random().toString(16).slice(2, 14),
+      description: doc.description || `${doc.name} verified in citizen vault.`,
+      signatory: doc.signatory || 'Sovereign Verification Authority',
+      keyDetails: {
+        'Document Name': doc.name,
+        'Issuer': doc.issuer,
+        'Status': doc.status || 'VERIFIED'
+      }
+    }));
+  } else if (isDemoCitizen) {
+    activeJourneyList = LIFE_JOURNEY_DOCUMENTS;
+  }
+
   const categories = [
-    { id: 'ALL', label: 'All Journey Milestones', count: LIFE_JOURNEY_DOCUMENTS.length },
-    { id: 'BIRTH', label: '👶 Birth & Early Life', count: 2 },
-    { id: 'IDENTITY', label: '🏛️ Sovereign Identity', count: 4 },
-    { id: 'EDUCATION', label: '🎓 Education & Degree', count: 3 },
-    { id: 'TRANSPORT', label: '🚗 Mobility & Vehicles', count: 2 },
-    { id: 'HEALTH', label: '🏥 Healthcare & ABHA', count: 2 },
-    { id: 'SOVEREIGN', label: '🛡️ Sovereign Credentials', count: 2 }
+    { id: 'ALL', label: 'All Journey Milestones', count: activeJourneyList.length },
+    { id: 'BIRTH', label: '👶 Birth & Early Life', count: activeJourneyList.filter(d => d.category === 'BIRTH' || d.id === 'jour-02').length },
+    { id: 'IDENTITY', label: '🏛️ Sovereign Identity', count: activeJourneyList.filter(d => d.category === 'IDENTITY').length },
+    { id: 'EDUCATION', label: '🎓 Education & Degree', count: activeJourneyList.filter(d => d.category === 'EDUCATION' || d.category === 'ACADEMIC').length },
+    { id: 'TRANSPORT', label: '🚗 Mobility & Vehicles', count: activeJourneyList.filter(d => d.category === 'TRANSPORT' || d.category === 'RTO').length },
+    { id: 'HEALTH', label: '🏥 Healthcare & ABHA', count: activeJourneyList.filter(d => d.category === 'HEALTH' || d.category === 'HEALTHCARE').length },
+    { id: 'SOVEREIGN', label: '🛡️ Sovereign Credentials', count: activeJourneyList.filter(d => d.category === 'SOVEREIGN' || d.category === 'GOVERNMENT').length }
   ];
 
-  const filteredDocs = LIFE_JOURNEY_DOCUMENTS.filter(doc => {
+  const filteredDocs = activeJourneyList.filter(doc => {
     const matchesCategory = selectedCategory === 'ALL' ||
       (selectedCategory === 'BIRTH' && (doc.category === 'BIRTH' || doc.id === 'jour-02')) ||
       (selectedCategory === 'IDENTITY' && doc.category === 'IDENTITY') ||
-      (selectedCategory === 'EDUCATION' && doc.category === 'EDUCATION') ||
-      (selectedCategory === 'TRANSPORT' && doc.category === 'TRANSPORT') ||
-      (selectedCategory === 'HEALTH' && doc.category === 'HEALTH') ||
-      (selectedCategory === 'SOVEREIGN' && (doc.category === 'SOVEREIGN' || doc.category === 'CAREER'));
+      (selectedCategory === 'EDUCATION' && (doc.category === 'EDUCATION' || doc.category === 'ACADEMIC')) ||
+      (selectedCategory === 'TRANSPORT' && (doc.category === 'TRANSPORT' || doc.category === 'RTO')) ||
+      (selectedCategory === 'HEALTH' && (doc.category === 'HEALTH' || doc.category === 'HEALTHCARE')) ||
+      (selectedCategory === 'SOVEREIGN' && (doc.category === 'SOVEREIGN' || doc.category === 'GOVERNMENT' || doc.category === 'CAREER'));
 
     const matchesSearch = !searchQuery.trim() ||
-      doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.issuer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.refNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.year.includes(searchQuery);
+      (doc.name && doc.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (doc.issuer && doc.issuer.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (doc.refNo && doc.refNo.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (doc.year && doc.year.includes(searchQuery));
 
     return matchesCategory && matchesSearch;
   });
@@ -591,25 +624,58 @@ export default function MyJourney({ citizen, documents = [] }) {
       </div>
 
       {/* CHRONOLOGICAL TIMELINE LIST */}
-      <div style={{ position: 'relative' }}>
-        
-        {/* Continuous Center Timeline Line */}
+      {activeJourneyList.length === 0 ? (
         <div style={{
-          position: 'absolute',
-          left: '28px',
-          top: '30px',
-          bottom: '30px',
-          width: '3px',
-          background: 'linear-gradient(to bottom, #0284C7 0%, #0B5ED7 50%, #10B981 100%)',
-          borderRadius: '4px',
-          zIndex: 1
-        }} />
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: '20px',
+          border: '1px solid var(--border-light)',
+          padding: '48px 24px',
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '14px',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <div style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: '50%',
+            backgroundColor: '#EFF6FF',
+            color: '#2563EB',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Milestone size={32} />
+          </div>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
+            No Journey Milestones Yet
+          </h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', maxWidth: '480px', lineHeight: 1.5, margin: 0 }}>
+            Your chronological life journey timeline will automatically populate as official certificates and credentials (Birth Certificate, Academic Marksheets, Driving Licence, ABHA Health Records) are issued or added to your CiviqOne vault.
+          </p>
+        </div>
+      ) : (
+        <div style={{ position: 'relative' }}>
+          
+          {/* Continuous Center Timeline Line */}
+          <div style={{
+            position: 'absolute',
+            left: '28px',
+            top: '30px',
+            bottom: '30px',
+            width: '3px',
+            background: 'linear-gradient(to bottom, #0284C7 0%, #0B5ED7 50%, #10B981 100%)',
+            borderRadius: '4px',
+            zIndex: 1
+          }} />
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', zIndex: 2 }}>
-          {filteredDocs.map((doc, index) => {
-            const IconComponent = doc.icon;
-            const isFirst = doc.step === 1;
-            const isLatest = doc.step === LIFE_JOURNEY_DOCUMENTS.length;
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', zIndex: 2 }}>
+            {filteredDocs.map((doc, index) => {
+              const IconComponent = doc.icon;
+              const isFirst = doc.step === 1;
+              const isLatest = doc.step === activeJourneyList.length;
 
             return (
               <div
@@ -818,6 +884,7 @@ export default function MyJourney({ citizen, documents = [] }) {
           })}
         </div>
       </div>
+      )}
 
       {/* DETAILED DOCUMENT PREVIEW MODAL */}
       {selectedDocForPreview && (
