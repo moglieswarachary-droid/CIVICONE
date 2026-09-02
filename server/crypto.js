@@ -3,11 +3,9 @@
 import crypto from 'crypto';
 
 const ALGORITHM = 'aes-256-gcm';
-// Default 256-bit encryption key (must be 32 bytes)
-const ENCRYPTION_KEY = Buffer.from(
-  process.env.ENCRYPTION_KEY || 'civiqone_secret_key_32bytes_v1!!',
-  'utf-8'
-).slice(0, 32);
+// Securely derive guaranteed 256-bit (32 bytes) key
+const rawKey = process.env.ENCRYPTION_KEY || 'civiqone_secret_key_32bytes_v1!!';
+const ENCRYPTION_KEY = crypto.createHash('sha256').update(rawKey).digest();
 
 /**
  * Encrypt plain text payload using AES-256-GCM

@@ -97,12 +97,14 @@ body {
   --shadow-blue: 0 8px 24px -4px rgba(59, 130, 246, 0.35);
 }
 
-/* Global Silky-Smooth Theme Transition */
-*, *::before, *::after {
-  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+/* Targeted Smooth Theme & Component Transitions */
+body, header, footer, nav, aside, section, main,
+.theme-transition, .glass-panel, .hover-card-lift,
+button, input, select, textarea, .badge, .modal-backdrop {
+  transition: background-color 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {

@@ -14,17 +14,14 @@ import AdminPortal from './components/AdminPortal.jsx';
 import PublicQRVerification from './components/PublicQRVerification.jsx';
 import DesktopWorkstationGuard from './components/DesktopWorkstationGuard.jsx';
 import { authStorage } from './services/api.js';
+import { useCitizen } from './context/CitizenContext.jsx';
 
 export default function App() {
+  const { activeCitizen, setActiveCitizen, logout: citizenLogout } = useCitizen();
   // Views: 'landing' | 'gate' | 'citizen' | 'organization-gate' | 'organization' | 'authority-gate' | 'authority' | 'police' | 'admin-gate' | 'admin' | 'verify'
   const [currentView, setCurrentView] = useState('landing');
-  const [authenticatedCitizen, setAuthenticatedCitizen] = useState(() => {
-    try {
-      const active = localStorage.getItem('civiqone_active_citizen');
-      if (active) return JSON.parse(active);
-    } catch (e) {}
-    return null;
-  });
+  const [authenticatedCitizen, setAuthenticatedCitizen] = useState(activeCitizen);
+
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState(null);
   const [authenticatedAdmin, setAuthenticatedAdmin] = useState(null);
   const [verifyToken, setVerifyToken] = useState('CIV-TOKEN-CIV-DEMO-10001-SECURE-2026');
@@ -118,15 +115,19 @@ export default function App() {
     };
   }, []);
 
+  // Sync context changes to local authenticatedCitizen state
+  useEffect(() => {
+    if (activeCitizen) {
+      setAuthenticatedCitizen(activeCitizen);
+    }
+  }, [activeCitizen]);
+
   // Handle Citizen Login Authentication Completion
   const handleAuthSuccess = (citizenData) => {
     setAuthenticatedCitizen(citizenData);
-    try {
-      localStorage.setItem('civiqone_active_citizen', JSON.stringify(citizenData));
-      if (citizenData?.citizenId) {
-        localStorage.setItem(`civiqone_citizen_${citizenData.citizenId}`, JSON.stringify(citizenData));
-      }
-    } catch (e) {}
+    if (setActiveCitizen) {
+      setActiveCitizen(citizenData);
+    }
     changeView('citizen');
   };
 
@@ -151,6 +152,9 @@ export default function App() {
     setAuthenticatedCitizen(null);
     setAuthenticatedOfficer(null);
     setAuthenticatedAdmin(null);
+    if (citizenLogout) {
+      citizenLogout();
+    }
     try {
       localStorage.removeItem('civiqone_active_citizen');
       authStorage.clearToken();

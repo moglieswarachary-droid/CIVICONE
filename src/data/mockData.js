@@ -820,15 +820,59 @@ export const DEMO_CITIZENS_LIST = [
 
 export const DEMO_SECURITY_LOGS = [
   {
-    id: "sec-001",
-    event: "Citizen Login — Identity Verified via OTP",
-    device: "Chrome Web Client (Windows)",
-    location: "Mumbai, Maharashtra",
+    id: "SEC-LOG-01",
+    event: "WebAuthn Biometric Passkey Verified (Touch ID)",
+    device: "MacBook Pro (Touch ID Passkey)",
     ip: "49.37.142.90",
-    timestamp: "2026-08-14T09:00:00Z",
-    status: "SUCCESS",
+    location: "Vijayawada, Andhra Pradesh",
+    timestamp: "Today, 10:45 AM",
+    status: "SUCCESS"
+  },
+  {
+    id: "SEC-LOG-02",
+    event: "Citizen Login — Identity Verified via OTP & MPIN",
+    device: "Chrome Web Client (Windows 11)",
+    ip: "49.37.142.90",
+    location: "Vijayawada, Andhra Pradesh",
+    timestamp: "Yesterday, 04:30 PM",
+    status: "SUCCESS"
+  },
+  {
+    id: "SEC-LOG-03",
+    event: "FIDO2 Passkey Registered (Face ID)",
+    device: "iPhone 15 (Face ID Passkey)",
+    ip: "103.212.155.10",
+    location: "Hyderabad, Telangana",
+    timestamp: "14 Aug 2026, 09:15 AM",
+    status: "SUCCESS"
   }
 ];
+
+export const DEMO_PASSKEYS = [
+  {
+    id: "passkey_mac_touchid_01",
+    citizenId: "CIV-DEMO-10001",
+    citizenName: "Aarav Kumar",
+    name: "MacBook Pro (Touch ID)",
+    algorithm: "ES256 (FIDO2 Hardware-Backed)",
+    createdAt: "2026-01-15T10:30:00Z",
+    lastUsed: "2026-08-14T09:15:00Z",
+    isHardwareBacked: true,
+    authenticatorAttachment: "platform"
+  },
+  {
+    id: "passkey_win_hello_02",
+    citizenId: "CIV-DEMO-10001",
+    citizenName: "Aarav Kumar",
+    name: "Windows PC (Windows Hello)",
+    algorithm: "ES256 (FIDO2 Hardware-Backed)",
+    createdAt: "2026-02-10T14:20:00Z",
+    lastUsed: "2026-08-12T16:40:00Z",
+    isHardwareBacked: true,
+    authenticatorAttachment: "platform"
+  }
+];
+
 
 export const GOVERNMENT_DEPARTMENTS = [
   { id: "home", name: "Home Affairs", code: "DEPT-HOME", icon: "ShieldAlert" },
@@ -1318,4 +1362,5 @@ export const DEMO_WEBSITE_USAGE_STATS = {
     { state: "Gujarat", requests: "142,200", activeUsers: "2,840" }
   ]
 };
+
 
