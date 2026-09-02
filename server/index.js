@@ -1557,13 +1557,21 @@ app.post('/api/consent/request', (req, res) => {
 // GET Organization Created Access Requests
 app.get('/api/consent/requests/org/:orgId', (req, res) => {
   const { orgId } = req.params;
-  const list = (db.shareRequests || []).filter(r => 
-    r.orgId === orgId || 
-    (orgId.includes('college') && (r.orgId.includes('college') || r.orgId.includes('education') || r.orgId.includes('univ'))) || 
-    (orgId.includes('hotel') && r.orgId.includes('hotel')) ||
-    (orgId.includes('police') && r.orgId.includes('police'))
-  );
-  return res.json({ success: true, requests: list.length > 0 ? list : (db.shareRequests || []) });
+  const decodedOrgId = decodeURIComponent(orgId || '').toLowerCase();
+
+  const list = (db.shareRequests || []).filter(r => {
+    const reqOrgId = (r.orgId || '').toLowerCase();
+    const reqOrgName = (r.orgName || '').toLowerCase();
+    
+    if (reqOrgId === decodedOrgId || reqOrgName === decodedOrgId) return true;
+    
+    const isEduTarget = decodedOrgId.includes('edu') || decodedOrgId.includes('college') || decodedOrgId.includes('univ') || decodedOrgId.includes('jntu') || decodedOrgId.includes('academic');
+    const isEduReq = reqOrgId.includes('edu') || reqOrgId.includes('college') || reqOrgId.includes('univ') || reqOrgName.includes('univ') || reqOrgName.includes('jntu') || reqOrgName.includes('institution');
+    
+    return isEduTarget && isEduReq;
+  });
+
+  return res.json({ success: true, requests: list });
 });
 
 // GET Student Verified Academic & Aadhaar Records for College
@@ -1929,10 +1937,9 @@ app.get('/api/notifications', (req, res) => {
   const notifs = (db.notifications || []).filter(n => 
     n.citizenId === targetId || 
     n.citizenCivicId === targetId || 
-    !n.citizenId ||
-    (n.type === 'CONSENT_REQUEST' && (!targetId || n.citizenCivicId === targetId))
+    n.targetCitizenId === targetId
   );
-  return res.json({ notifications: notifs.length > 0 ? notifs : (db.notifications || []) });
+  return res.json({ notifications: notifs });
 });
 
 app.get('/api/police/firs', async (req, res) => {
