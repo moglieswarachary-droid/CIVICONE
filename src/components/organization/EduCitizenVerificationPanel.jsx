@@ -122,8 +122,8 @@ const CONNECTED_STUDENT_PROFILES = {
 };
 
 export default function EduCitizenVerificationPanel({ eduType = 'college', onSyncVault }) {
-  const [searchQuery, setSearchQuery] = useState('CIV-DEMO-10001');
-  const [selectedStudent, setSelectedStudent] = useState(CONNECTED_STUDENT_PROFILES['CIV-DEMO-10001']);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [searchError, setSearchError] = useState('');
   const [activeTab, setActiveTab] = useState('timeline'); // 'identity' | 'current' | 'previous' | 'timeline' | 'certs'
 

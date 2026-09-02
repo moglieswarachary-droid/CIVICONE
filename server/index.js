@@ -996,7 +996,7 @@ app.get('/api/consent/citizen-requests', (req, res) => {
 });
 
 // Reset Fresh State Endpoint (Clears all past demo/test records)
-app.post('/api/admin/reset-fresh-state', (req, res) => {
+app.all(['/api/admin/reset-fresh-state', '/api/consent/clear-all'], (req, res) => {
   db.shareRequests = [];
   db.consentRecords = [];
   db.notifications = [];
