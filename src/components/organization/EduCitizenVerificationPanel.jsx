@@ -121,15 +121,15 @@ const CONNECTED_STUDENT_PROFILES = {
   }
 };
 
-export default function EduCitizenVerificationPanel({ eduType = 'college', onSyncVault }) {
+export default function EduCitizenVerificationPanel({ eduType = 'college', externalStudent, onSyncVault }) {
   const [searchQuery, setSearchQuery] = useState('CIV-DEMO-10001');
   const [selectedStudent, setSelectedStudent] = useState(CONNECTED_STUDENT_PROFILES['CIV-DEMO-10001']);
   const [searchError, setSearchError] = useState('');
   const [activeTab, setActiveTab] = useState('timeline'); // 'identity' | 'current' | 'previous' | 'timeline' | 'certs'
   // Cert Locks state & OTP Passkey Modal
   const [lockedCerts, setLockedCerts] = useState({
-    '10TH': true,
-    '12TH': true,
+    '10TH': false,
+    '12TH': false,
     'DEGREE': false
   });
   const [otpModal, setOtpModal] = useState(null); // { certKey, certName, requestId, demoOtp }
@@ -137,13 +137,65 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', onSyn
   const [otpError, setOtpError] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
 
+  // Sync external student when selected in parent dashboard
+  useEffect(() => {
+    if (externalStudent) {
+      setSearchQuery(externalStudent.citizenId || externalStudent.rollNo || '');
+      
+      // Ensure profile format
+      const fullProfile = CONNECTED_STUDENT_PROFILES[externalStudent.citizenId] || {
+        citizenId: externalStudent.citizenId,
+        fullName: externalStudent.name || externalStudent.studentName || 'Student Citizen',
+        dob: '15/08/2004',
+        maskedAadhaar: 'XXXX-XXXX-9012',
+        gender: 'Male',
+        address: 'Vijayawada, Andhra Pradesh',
+        parentName: 'Parent / Guardian',
+        abcId: `ABC-${externalStudent.citizenId}-2026`,
+        academicHistory: externalStudent.academicHistory || {
+          school: {
+            schoolName: 'Delhi Public School (DPS Vijayawada)',
+            board: 'CBSE (Central Board)',
+            completedClass: 'Class 10 (SSC)',
+            passingYear: '2020',
+            certName: '10th Secondary Board Marksheet',
+            status: 'VERIFIED',
+            locked: false
+          },
+          intermediate: {
+            institutionName: 'Sri Chaitanya Junior College',
+            board: 'AP Board of Intermediate Education',
+            stream: 'MPC (Maths, Physics, Chemistry)',
+            passingYear: '2022',
+            certName: '12th Intermediate Marksheet',
+            status: 'VERIFIED',
+            locked: false
+          },
+          college: {
+            university: 'JNTU University',
+            collegeName: 'Kuppam Engineering College',
+            course: externalStudent.department || 'B.Tech CSE',
+            department: externalStudent.department || 'CSE',
+            year: externalStudent.year || '1st Year',
+            academicPeriod: '2026 - 2030',
+            status: externalStudent.status || 'CURRENTLY STUDYING',
+            certName: 'Degree Semester Grade Transcript',
+            locked: false
+          }
+        }
+      };
+
+      setSelectedStudent(fullProfile);
+    }
+  }, [externalStudent]);
+
   // Keep lock states synchronized with student's academic history
   useEffect(() => {
     if (selectedStudent?.academicHistory) {
       setLockedCerts({
-        '10TH': selectedStudent.academicHistory.school?.locked !== false,
-        '12TH': selectedStudent.academicHistory.intermediate?.locked !== false,
-        'DEGREE': selectedStudent.academicHistory.college?.locked !== false
+        '10TH': selectedStudent.academicHistory.school?.locked === true,
+        '12TH': selectedStudent.academicHistory.intermediate?.locked === true,
+        'DEGREE': selectedStudent.academicHistory.college?.locked === true
       });
     }
   }, [selectedStudent]);
@@ -162,8 +214,52 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', onSyn
 
     if (found) {
       setSelectedStudent(found);
+    } else if (cleanQ.length >= 2) {
+      // Dynamic student profile for custom searched Citizen ID starting UNLOCKED
+      const customProfile = {
+        citizenId: cleanQ,
+        fullName: cleanQ.replace('CIV-', '').replace(/[-_]/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) || 'Registered Student',
+        dob: '10/05/2004',
+        maskedAadhaar: 'XXXX-XXXX-7712',
+        gender: 'Male',
+        address: 'Vijayawada, Andhra Pradesh',
+        parentName: 'Parent / Guardian',
+        abcId: `ABC-${cleanQ}-2026`,
+        academicHistory: {
+          school: {
+            schoolName: 'Delhi Public School (DPS Vijayawada)',
+            board: 'CBSE (Central Board)',
+            completedClass: 'Class 10 (SSC)',
+            passingYear: '2020',
+            certName: '10th Secondary Board Marksheet',
+            status: 'VERIFIED',
+            locked: false
+          },
+          intermediate: {
+            institutionName: 'Sri Chaitanya Junior College',
+            board: 'AP Board of Intermediate Education',
+            stream: 'MPC Stream',
+            passingYear: '2022',
+            certName: '12th Intermediate Marksheet',
+            status: 'VERIFIED',
+            locked: false
+          },
+          college: {
+            university: 'JNTU University',
+            collegeName: 'Kuppam Engineering College',
+            course: 'B.Tech CSE',
+            department: 'CSE',
+            year: '1st Year',
+            academicPeriod: '2026 - 2030',
+            status: 'CURRENTLY STUDYING',
+            certName: 'Degree Semester Grade Transcript',
+            locked: false
+          }
+        }
+      };
+      setSelectedStudent(customProfile);
     } else {
-      setSearchError('Student record not found. Search using CIV-DEMO-10001 or CIV-DEMO-10002.');
+      setSearchError('Student record not found. Search using any Citizen ID (e.g. 0012 or CIV-DEMO-10001).');
     }
   };
 

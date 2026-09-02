@@ -109,7 +109,7 @@ export default function EduDepartmentDashboardLayout({
           passingYear: '2020',
           certName: '10th Secondary Board Marksheet',
           status: 'VERIFIED',
-          locked: true
+          locked: false // Starts UNLOCKED as requested - Institution locks via OTP Passkey after registration!
         },
         intermediate: {
           institutionName: 'Sri Chaitanya Junior College',
@@ -118,7 +118,7 @@ export default function EduDepartmentDashboardLayout({
           passingYear: '2022',
           certName: '12th Intermediate Marksheet',
           status: 'VERIFIED',
-          locked: true
+          locked: false // Starts UNLOCKED as requested
         },
         college: {
           university: session?.universityName || 'Jawaharlal Nehru Technological University (JNTU)',
@@ -128,7 +128,7 @@ export default function EduDepartmentDashboardLayout({
           year: admYear || '1st Year',
           academicPeriod: '2026 - 2030',
           status: 'CURRENTLY STUDYING',
-          locked: false
+          locked: false // Starts UNLOCKED as requested
         }
       }
     };
@@ -477,6 +477,7 @@ export default function EduDepartmentDashboardLayout({
           <div style={{ gridColumn: 'span 3', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <EduCitizenVerificationPanel
               eduType={eduType}
+              externalStudent={selectedStudent}
               onSyncVault={(msg) => {
                 setVaultSyncMsg(msg);
                 setTimeout(() => setVaultSyncMsg(''), 4000);
@@ -642,36 +643,61 @@ export default function EduDepartmentDashboardLayout({
               </span>
             </div>
 
-            {/* Visual Timeline Component */}
+            {/* Visual Timeline Component with Dynamic Lock Toggles */}
             <div style={{ marginBottom: '16px' }}>
               <AcademicTimeline
-                academicHistory={{
+                academicHistory={selectedStudent.academicHistory || {
                   school: {
-                    schoolName: 'Delhi Public School',
+                    schoolName: 'Delhi Public School (DPS Vijayawada)',
                     board: 'CBSE Board',
-                    completedClass: 'Class 10',
+                    completedClass: 'Class 10 (SSC)',
                     passingYear: '2020',
-                    status: 'VERIFIED'
+                    certName: '10th Secondary Board Marksheet',
+                    status: 'VERIFIED',
+                    locked: false
                   },
                   intermediate: {
                     institutionName: 'Sri Chaitanya Junior College',
                     board: 'AP Board of Intermediate Education',
                     stream: 'MPC Stream',
                     passingYear: '2022',
-                    status: 'VERIFIED'
+                    certName: '12th Intermediate Marksheet',
+                    status: 'VERIFIED',
+                    locked: false
                   },
                   college: {
-                    university: 'JNTU University',
+                    university: session?.universityName || 'JNTU University',
                     collegeName: session?.name || 'Kuppam Engineering College',
-                    course: selectedStudent.programType ? `${selectedStudent.programType} ${selectedStudent.department}` : 'B.Tech CSE',
-                    programType: selectedStudent.programType || 'UG',
+                    course: selectedStudent.department || 'B.Tech CSE',
                     department: selectedStudent.department || 'CSE',
-                    year: selectedStudent.year || '3rd Year',
-                    academicPeriod: '2022 - 2026',
-                    status: selectedStudent.status
+                    year: selectedStudent.year || '1st Year',
+                    academicPeriod: '2026 - 2030',
+                    status: selectedStudent.status || 'CURRENTLY STUDYING',
+                    certName: 'Degree Semester Grade Transcript',
+                    locked: false
                   }
                 }}
                 eduType={eduType}
+                onToggleLock={(certKey, certName) => {
+                  // Toggle lock state on selected student profile & update local state
+                  const currentLockState = selectedStudent.academicHistory?.[
+                    certKey === '10TH' ? 'school' : certKey === '12TH' ? 'intermediate' : 'college'
+                  ]?.locked;
+                  
+                  const newLockState = !currentLockState;
+                  const updatedHistory = { ...selectedStudent.academicHistory };
+                  const targetKey = certKey === '10TH' ? 'school' : certKey === '12TH' ? 'intermediate' : 'college';
+                  if (updatedHistory[targetKey]) {
+                    updatedHistory[targetKey] = { ...updatedHistory[targetKey], locked: newLockState };
+                  }
+                  
+                  const updatedStudent = { ...selectedStudent, academicHistory: updatedHistory };
+                  setSelectedStudent(updatedStudent);
+                  setLocalStudents(prev => prev.map(s => s.id === selectedStudent.id ? updatedStudent : s));
+                  
+                  setVaultSyncMsg(`🔑 ${certName} custody status updated to ${newLockState ? '🔒 LOCKED' : '🔓 UNLOCKED'} for ${selectedStudent.name}!`);
+                  setTimeout(() => setVaultSyncMsg(''), 5000);
+                }}
               />
             </div>
 
