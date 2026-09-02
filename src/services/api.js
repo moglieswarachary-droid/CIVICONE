@@ -290,3 +290,42 @@ export const notificationService = {
     notifications: DEMO_NOTIFICATIONS
   })
 };
+
+export const familyService = {
+  getFamilyMembers: (citizenId) => {
+    return safeFetch(`/api/family/members?citizenId=${citizenId || ''}`, { headers: authStorage.getHeaders() }, {
+      success: true,
+      members: DEMO_FAMILY_MEMBERS
+    });
+  },
+  addFamilyMember: (memberData) => {
+    return safeFetch('/api/family/add-member', {
+      method: 'POST',
+      headers: authStorage.getHeaders(),
+      body: JSON.stringify(memberData)
+    }, {
+      success: true,
+      member: {
+        id: `fam-${Date.now()}`,
+        ...memberData,
+        documents: []
+      }
+    });
+  }
+};
+
+export const zkpService = {
+  verifyProof: (proofData) => {
+    return safeFetch('/api/zkp/verify', {
+      method: 'POST',
+      headers: authStorage.getHeaders(),
+      body: JSON.stringify(proofData)
+    }, {
+      success: true,
+      verified: true,
+      proofHash: `0xzkp${Date.now().toString(16)}`,
+      timestamp: new Date().toISOString(),
+      disclosedClaims: proofData.claims || ['Age >= 18', 'Resident of India', 'Identity Validated']
+    });
+  }
+};
