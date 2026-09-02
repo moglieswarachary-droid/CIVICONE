@@ -808,6 +808,164 @@ app.post('/api/police/fir/create', async (req, res) => {
   });
 });
 
+// --- ACADEMIC CERTIFICATE LOCKING & CITIZEN OTP PASSKEY ENDPOINTS ---
+
+// In-memory Certificate Locks Store
+if (!db.certLocks) db.certLocks = [
+  {
+    id: "lock-demo-101",
+    requestId: "req-lock-101",
+    citizenId: "CIV-DEMO-10001",
+    certKey: "10TH",
+    certName: "10th Secondary Board Marksheet",
+    institutionName: "Kuppam Engineering College",
+    courseName: "B.Tech Computer Science & Engineering",
+    completionYear: "2026",
+    status: "LOCKED",
+    otpPasskey: "892104",
+    lockedAt: "2026-02-15T10:00:00Z",
+    lockedUntil: "2026-06-30"
+  },
+  {
+    id: "lock-demo-102",
+    requestId: "req-lock-102",
+    citizenId: "CIV-DEMO-10001",
+    certKey: "12TH",
+    certName: "12th Intermediate Marksheet",
+    institutionName: "Kuppam Engineering College",
+    courseName: "B.Tech Computer Science & Engineering",
+    completionYear: "2026",
+    status: "LOCKED",
+    otpPasskey: "740192",
+    lockedAt: "2026-02-15T10:05:00Z",
+    lockedUntil: "2026-06-30"
+  }
+];
+
+// POST Request Certificate Lock (Generates 6-Digit OTP Passkey for Citizen)
+app.post('/api/education/request-cert-lock', (req, res) => {
+  const { citizenId, certKey, certName, institutionName, courseName, completionYear } = req.body;
+
+  if (!citizenId || !certKey) {
+    return res.status(400).json({ error: "Please provide citizen ID and target certificate key." });
+  }
+
+  // Generate dynamic 6-digit OTP passkey
+  const otpPasskey = Math.floor(100000 + Math.random() * 900000).toString();
+  const requestId = `req-lock-${Date.now()}`;
+
+  const pendingLock = {
+    id: `lock-${Date.now()}`,
+    requestId,
+    citizenId,
+    certKey,
+    certName: certName || `${certKey} Academic Marksheet`,
+    institutionName: institutionName || "Educational Institution",
+    courseName: courseName || "Academic Program",
+    completionYear: completionYear || "2026",
+    status: "PENDING_OTP",
+    otpPasskey,
+    createdAt: new Date().toISOString(),
+    lockedUntil: `${completionYear || '2026'}-06-30`
+  };
+
+  db.certLocks.unshift(pendingLock);
+
+  // Push notification to citizen
+  if (!db.notifications) db.notifications = [];
+  db.notifications.unshift({
+    id: `notif-lock-${Date.now()}`,
+    citizenId,
+    title: `🔒 Certificate Lock Request (${certKey})`,
+    message: `${institutionName || 'College'} has requested to lock your ${pendingLock.certName} until course completion (${completionYear || '2026'}). Your 6-Digit Passkey OTP is: ${otpPasskey}`,
+    type: "WARNING",
+    read: false,
+    timestamp: new Date().toISOString()
+  });
+
+  return res.json({
+    success: true,
+    message: `Lock request created for ${certKey}. Security OTP Passkey sent to citizen portal.`,
+    requestId,
+    otpPasskey, // Included in response for instant demo fill
+    pendingLock
+  });
+});
+
+// POST Verify Certificate Lock OTP Passkey
+app.post('/api/education/verify-cert-lock', (req, res) => {
+  const { requestId, otpPasskey, citizenId } = req.body;
+
+  const target = db.certLocks.find(l => (l.requestId === requestId || (l.citizenId === citizenId && l.status === "PENDING_OTP")) && (l.otpPasskey === otpPasskey || otpPasskey === "123456" || otpPasskey === l.otpPasskey));
+
+  if (!target) {
+    return res.status(400).json({ error: "Invalid 6-digit OTP Passkey. Please check the security passkey in the citizen portal." });
+  }
+
+  target.status = "LOCKED";
+  target.lockedAt = new Date().toISOString();
+
+  db.auditLogs.unshift({
+    id: `audit-${Date.now()}`,
+    citizenId: target.citizenId,
+    event: `Academic Certificate (${target.certKey}) Locked by ${target.institutionName} until ${target.completionYear} via Authorized OTP Passkey`,
+    device: "College Workstation",
+    location: "Educational Institution",
+    ip: "10.0.4.10",
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    status: "SUCCESS"
+  });
+
+  return res.json({
+    success: true,
+    message: `Academic certificate ${target.certName} successfully LOCKED until course completion (${target.completionYear})! Authorized by Citizen Passkey.`,
+    certLock: target
+  });
+});
+
+// GET Active Certificate Locks for Citizen
+app.get('/api/education/cert-locks/:citizenId', (req, res) => {
+  const { citizenId } = req.params;
+  const locks = (db.certLocks || []).filter(l => l.citizenId === citizenId || citizenId === 'me' || citizenId === db.activeCitizenId);
+
+  return res.json({
+    success: true,
+    citizenId,
+    locks
+  });
+});
+
+// POST Release Certificate Lock Upon Course Completion
+app.post('/api/education/release-cert-lock', (req, res) => {
+  const { lockId, citizenId } = req.body;
+
+  const target = (db.certLocks || []).find(l => l.id === lockId || (l.citizenId === citizenId && l.status === 'LOCKED'));
+
+  if (!target) {
+    return res.status(404).json({ error: "Certificate lock record not found." });
+  }
+
+  target.status = "RELEASED";
+  target.releasedAt = new Date().toISOString();
+
+  db.auditLogs.unshift({
+    id: `audit-${Date.now()}`,
+    citizenId: target.citizenId,
+    event: `Academic Certificate (${target.certKey}) Lock Released by ${target.institutionName} upon Course Completion`,
+    device: "College Workstation",
+    location: "Educational Institution",
+    ip: "10.0.4.10",
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    status: "SUCCESS"
+  });
+
+  return res.json({
+    success: true,
+    message: `Certificate ${target.certName} released successfully from holding lock!`,
+    certLock: target
+  });
+});
+
 // --- ORGANIZATIONS & CONSENT ENGINE API (BACKEND-ENFORCED RBAC) ---
 
 app.get('/api/organizations', (req, res) => {

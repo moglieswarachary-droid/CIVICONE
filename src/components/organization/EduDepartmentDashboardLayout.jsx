@@ -64,7 +64,7 @@ export default function EduDepartmentDashboardLayout({
 
   const handleCreateAdmission = (e) => {
     e.preventDefault();
-    setVaultSyncMsg(`✓ Student ${admStudentName} (${admCivicId}) admitted to ${admCourse} - ${admDept} (${admProgramType}). Verified identity & previous academic records retrieved & locked via CivicOne ID.`);
+    setVaultSyncMsg(`✓ Student ${admStudentName} (${admCivicId}) admitted to ${admCourse} - ${admDept} (${admProgramType}). Verified identity & previous academic records retrieved & locked via CIVIQONE ID.`);
     setShowAdmissionModal(false);
     setTimeout(() => setVaultSyncMsg(''), 5000);
   };
@@ -419,7 +419,7 @@ export default function EduDepartmentDashboardLayout({
         }}>
           <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', maxWidth: '520px', width: '100%', padding: '28px' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', marginBottom: '6px' }}>
-              New Student Admission via CivicOne Citizen ID
+              New Student Admission via CIVIQONE Citizen ID
             </h3>
             <p style={{ fontSize: '0.825rem', color: '#64748B', marginBottom: '18px' }}>
               Verified identity &amp; previous academic records will be retrieved automatically.

@@ -3,7 +3,7 @@
 import React from 'react';
 import { GraduationCap, School, BookOpen, Award, CheckCircle2, Lock, Clock } from 'lucide-react';
 
-export default function AcademicTimeline({ academicHistory, eduType = 'college' }) {
+export default function AcademicTimeline({ academicHistory, eduType = 'college', onToggleLock }) {
   if (!academicHistory) return null;
 
   const { school, intermediate, college, skills } = academicHistory;
@@ -14,6 +14,7 @@ export default function AcademicTimeline({ academicHistory, eduType = 'college' 
   // 1. School (Visible to all)
   if (school) {
     timelineItems.push({
+      certKey: '10TH',
       level: 'School / 10th (SSC)',
       icon: <School size={18} color="#0284C7" />,
       color: '#0284C7',
@@ -30,6 +31,7 @@ export default function AcademicTimeline({ academicHistory, eduType = 'college' 
   // 2. Intermediate / PUC (Visible to PUC, College, Tech)
   if (intermediate && (eduType === 'intermediate' || eduType === 'college' || eduType === 'technology')) {
     timelineItems.push({
+      certKey: '12TH',
       level: 'PUC / Intermediate (+12)',
       icon: <BookOpen size={18} color="#7C3AED" />,
       color: '#7C3AED',
@@ -46,6 +48,7 @@ export default function AcademicTimeline({ academicHistory, eduType = 'college' 
   // 3. College / University (Visible to College, Tech)
   if (college && (eduType === 'college' || eduType === 'technology')) {
     timelineItems.push({
+      certKey: 'DEGREE',
       level: `${college.programType || 'UG'} - ${college.course}`,
       icon: <GraduationCap size={18} color="#059669" />,
       color: '#059669',
@@ -63,6 +66,7 @@ export default function AcademicTimeline({ academicHistory, eduType = 'college' 
   if (skills && skills.length > 0 && (eduType === 'technology' || eduType === 'college')) {
     skills.forEach((sk) => {
       timelineItems.push({
+        certKey: 'SKILL',
         level: `Technical Skill: ${sk.name}`,
         icon: <Award size={18} color="#D97706" />,
         color: '#D97706',
@@ -159,8 +163,8 @@ export default function AcademicTimeline({ academicHistory, eduType = 'college' 
                 {item.details}
               </div>
 
-              {/* Status and Lock Badges */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+              {/* Status and Interactive Lock / Unlock Controls */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px', flexWrap: 'wrap', gap: '6px' }}>
                 <span style={{
                   fontSize: '0.7rem',
                   fontWeight: 800,
@@ -175,21 +179,37 @@ export default function AcademicTimeline({ academicHistory, eduType = 'college' 
                   <CheckCircle2 size={12} /> {item.status}
                 </span>
 
-                {item.locked && (
-                  <span style={{
-                    fontSize: '0.7rem',
-                    fontWeight: 800,
-                    backgroundColor: '#EFF6FF',
-                    color: '#1E40AF',
-                    padding: '2px 8px',
-                    borderRadius: '6px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    border: '1px solid #BFDBFE'
-                  }}>
-                    <Lock size={11} /> Locked in CivicOne Vault
-                  </span>
+                {/* Educational Institution Lock / Unlock Action Button */}
+                {item.certKey !== 'SKILL' && (
+                  <button
+                    type="button"
+                    onClick={() => onToggleLock && onToggleLock(item.certKey, item.certName)}
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 800,
+                      backgroundColor: item.locked ? '#FEF2F2' : '#ECFDF5',
+                      color: item.locked ? '#991B1B' : '#065F46',
+                      padding: '3px 9px',
+                      borderRadius: '8px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      border: `1px solid ${item.locked ? '#FCA5A5' : '#A7F3D0'}`,
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
+                    }}
+                    title="Click to Lock/Unlock certificate custody"
+                  >
+                    {item.locked ? (
+                      <>
+                        <Lock size={11} /> 🔒 Locked in CIVICONE Vault (Click to Unlock)
+                      </>
+                    ) : (
+                      <>
+                        <Lock size={11} /> 🔑 Unlock / Lock via OTP
+                      </>
+                    )}
+                  </button>
                 )}
               </div>
             </div>
