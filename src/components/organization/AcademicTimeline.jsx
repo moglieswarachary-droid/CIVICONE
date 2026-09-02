@@ -101,61 +101,70 @@ export default function AcademicTimeline({ academicHistory, eduType = 'college',
         <GraduationCap size={18} color="#059669" /> Verified Student Academic Progression Timeline
       </h4>
 
-      <div style={{ position: 'relative', paddingLeft: '24px' }}>
-        {/* Vertical Connecting Line */}
+      <div style={{ position: 'relative', paddingLeft: '26px' }}>
+        {/* Vibrant Gradient Connecting Line */}
         <div style={{
           position: 'absolute',
-          left: '9px',
-          top: '10px',
-          bottom: '20px',
-          width: '2px',
-          backgroundColor: '#CBD5E1',
+          left: '10px',
+          top: '12px',
+          bottom: '24px',
+          width: '3px',
+          background: 'linear-gradient(180deg, #0284C7 0%, #7C3AED 50%, #059669 100%)',
+          borderRadius: '99px',
           zIndex: 0
         }} />
 
         {timelineItems.map((item, idx) => (
           <div
             key={idx}
+            className="animate-fade-slide"
             style={{
               position: 'relative',
-              marginBottom: idx === timelineItems.length - 1 ? 0 : '16px',
-              zIndex: 1
+              marginBottom: idx === timelineItems.length - 1 ? 0 : '18px',
+              zIndex: 1,
+              animationDelay: `${idx * 0.1}s`
             }}
           >
-            {/* Timeline Node Icon */}
+            {/* Timeline Node Icon with Ring & Glow */}
             <div style={{
               position: 'absolute',
-              left: '-24px',
-              top: '2px',
-              width: '20px',
-              height: '20px',
+              left: '-26px',
+              top: '4px',
+              width: '22px',
+              height: '22px',
               borderRadius: '50%',
               backgroundColor: item.bgColor,
               border: `2px solid ${item.color}`,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              boxShadow: `0 0 10px ${item.color}40`
             }}>
               {item.icon}
             </div>
 
             {/* Timeline Card Content */}
-            <div style={{
-              backgroundColor: '#F8FAFC',
-              borderRadius: '12px',
-              border: '1px solid #E2E8F0',
-              padding: '10px 14px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: item.color }}>
+            <div
+              className="card-hover-lift"
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '14px',
+                border: '1px solid #E2E8F0',
+                borderLeft: `4px solid ${item.color}`,
+                padding: '12px 16px',
+                boxShadow: '0 2px 8px rgba(15, 23, 42, 0.02)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <span style={{ fontSize: '0.825rem', fontWeight: 900, color: item.color, fontFamily: 'var(--font-heading)' }}>
                   {item.level}
                 </span>
-                <span style={{ fontSize: '0.725rem', color: '#64748B', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.725rem', color: '#64748B', fontWeight: 700, backgroundColor: '#F1F5F9', padding: '2px 8px', borderRadius: '6px' }}>
                   {item.year}
                 </span>
               </div>
 
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F172A' }}>
+              <div style={{ fontSize: '0.875rem', fontWeight: 800, color: '#0F172A' }}>
                 {item.institution}
               </div>
 
@@ -164,19 +173,19 @@ export default function AcademicTimeline({ academicHistory, eduType = 'college',
               </div>
 
               {/* Status and Interactive Lock / Unlock Controls */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px', flexWrap: 'wrap', gap: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', flexWrap: 'wrap', gap: '8px' }}>
                 <span style={{
                   fontSize: '0.7rem',
                   fontWeight: 800,
                   backgroundColor: item.status === 'CURRENTLY STUDYING' ? '#FEF3C7' : '#DCFCE7',
                   color: item.status === 'CURRENTLY STUDYING' ? '#92400E' : '#166534',
-                  padding: '2px 8px',
-                  borderRadius: '6px',
+                  padding: '3px 9px',
+                  borderRadius: '8px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '5px'
                 }}>
-                  <CheckCircle2 size={12} /> {item.status}
+                  <CheckCircle2 size={13} /> {item.status}
                 </span>
 
                 {/* Educational Institution Lock / Unlock Action Button */}
@@ -184,29 +193,30 @@ export default function AcademicTimeline({ academicHistory, eduType = 'college',
                   <button
                     type="button"
                     onClick={() => onToggleLock && onToggleLock(item.certKey, item.certName)}
+                    className="tab-pill-animated"
                     style={{
-                      fontSize: '0.7rem',
+                      fontSize: '0.725rem',
                       fontWeight: 800,
                       backgroundColor: item.locked ? '#FEF2F2' : '#ECFDF5',
                       color: item.locked ? '#991B1B' : '#065F46',
-                      padding: '3px 9px',
-                      borderRadius: '8px',
+                      padding: '5px 12px',
+                      borderRadius: '10px',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '4px',
-                      border: `1px solid ${item.locked ? '#FCA5A5' : '#A7F3D0'}`,
+                      gap: '5px',
+                      border: `1.5px solid ${item.locked ? '#FCA5A5' : '#A7F3D0'}`,
                       cursor: 'pointer',
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
+                      boxShadow: item.locked ? '0 2px 6px rgba(239, 68, 68, 0.15)' : '0 2px 6px rgba(5, 150, 105, 0.15)'
                     }}
-                    title="Click to Lock/Unlock certificate custody"
+                    title="Click to Lock/Unlock certificate custody via OTP Passkey"
                   >
                     {item.locked ? (
                       <>
-                        <Lock size={11} /> 🔒 Locked in CIVICONE Vault (Click to Unlock)
+                        <Lock size={12} /> 🔒 Locked in CIVICONE Vault (Click to Unlock)
                       </>
                     ) : (
                       <>
-                        <Lock size={11} /> 🔑 Unlock / Lock via OTP
+                        <Lock size={12} /> 🔑 Unlock / Lock via OTP
                       </>
                     )}
                   </button>

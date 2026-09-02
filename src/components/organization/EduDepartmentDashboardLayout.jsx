@@ -326,18 +326,20 @@ export default function EduDepartmentDashboardLayout({
           {stats.map((st, i) => (
             <div
               key={i}
+              className="card-hover-lift animate-fade-slide"
               style={{
                 backgroundColor: '#FFFFFF',
                 borderRadius: '16px',
-                padding: '18px',
+                padding: '18px 20px',
                 border: '1px solid #E2E8F0',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
+                boxShadow: '0 4px 14px rgba(15, 23, 42, 0.03)',
+                animationDelay: `${i * 0.08}s`
               }}
             >
-              <div style={{ fontSize: '0.775rem', color: '#64748B', fontWeight: 600, marginBottom: '6px' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
                 {st.label}
               </div>
-              <div style={{ fontSize: '1.45rem', fontWeight: 800, color: st.color || '#0F172A' }}>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: st.color || '#0F172A', fontFamily: 'var(--font-heading)' }}>
                 {st.value}
               </div>
             </div>
@@ -353,43 +355,55 @@ export default function EduDepartmentDashboardLayout({
           
           {/* LEFT SIDE PANEL: Institution Details & Departments (3 Columns) */}
           <div style={{ gridColumn: 'span 3', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: '20px',
-              border: '1px solid #E2E8F0',
-              padding: '20px',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.03)'
-            }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0F172A', marginBottom: '12px' }}>
-                Institution Details
-              </h3>
-              <div style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.6, marginBottom: '16px' }}>
-                <strong>Name:</strong> {session?.name}<br />
-                <strong>Affiliation:</strong> {session?.universityName || session?.boardName || 'State Board'}<br />
-                <strong>Code:</strong> {session?.code || 'KEC-001'}<br />
-                <strong>Accreditation:</strong> NAAC Grade A+ / Approved<br />
-                <strong>Clearance:</strong> Verified Academic Entity
+            <div
+              className="animate-fade-slide"
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '20px',
+                border: '1px solid #E2E8F0',
+                padding: '22px',
+                boxShadow: '0 10px 25px rgba(15, 23, 42, 0.03)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <h3 className="heading-gradient-title" style={{ fontSize: '1.05rem', fontWeight: 800, margin: 0 }}>
+                  Institution Details
+                </h3>
+                <span style={{ backgroundColor: '#ECFDF5', color: '#059669', fontSize: '0.675rem', fontWeight: 800, padding: '3px 8px', borderRadius: '6px', border: '1px solid #A7F3D0' }}>
+                  ✓ VERIFIED
+                </span>
+              </div>
+
+              <div style={{ fontSize: '0.825rem', color: '#334155', lineHeight: 1.65, marginBottom: '18px', backgroundColor: '#F8FAFC', padding: '14px', borderRadius: '14px', border: '1px solid #F1F5F9' }}>
+                <div style={{ marginBottom: '4px' }}><strong>Institution:</strong> <span style={{ color: '#0F172A', fontWeight: 700 }}>{session?.name}</span></div>
+                <div style={{ marginBottom: '4px' }}><strong>Affiliation:</strong> {session?.universityName || session?.boardName || 'State Board'}</div>
+                <div style={{ marginBottom: '4px' }}><strong>Entity Code:</strong> <code style={{ backgroundColor: '#FFFFFF', padding: '1px 6px', borderRadius: '4px', border: '1px solid #CBD5E1', color: '#059669', fontWeight: 800 }}>{session?.code || 'KEC-001'}</code></div>
+                <div style={{ marginBottom: '4px' }}><strong>Accreditation:</strong> NAAC Grade A+ / Approved</div>
+                <div><strong>Status:</strong> <span style={{ color: '#059669', fontWeight: 800 }}>Active Academic Entity</span></div>
               </div>
 
               {/* Department / Stream Quick Selector */}
-              <h4 style={{ fontSize: '0.825rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px', borderTop: '1px solid #F1F5F9', paddingTop: '12px' }}>
-                Departments / Streams:
+              <h4 style={{ fontSize: '0.825rem', fontWeight: 800, color: '#0F172A', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>Departments / Streams:</span>
+                <span style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 600 }}>({departmentsOrClasses.length})</span>
               </h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {['ALL', ...departmentsOrClasses].map((dept) => (
                   <button
                     key={dept}
                     onClick={() => setSelectedDept(dept)}
+                    className="tab-pill-animated"
                     style={{
-                      padding: '4px 10px',
-                      borderRadius: '8px',
+                      padding: '5px 12px',
+                      borderRadius: '10px',
                       fontSize: '0.75rem',
-                      fontWeight: 700,
-                      border: '1px solid',
+                      fontWeight: 800,
+                      border: '1.5px solid',
                       borderColor: selectedDept === dept ? '#059669' : '#E2E8F0',
-                      backgroundColor: selectedDept === dept ? '#ECFDF5' : '#F8FAFC',
+                      backgroundColor: selectedDept === dept ? '#ECFDF5' : '#FFFFFF',
                       color: selectedDept === dept ? '#065F46' : '#475569',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      boxShadow: selectedDept === dept ? '0 2px 8px rgba(5,150,105,0.15)' : 'none'
                     }}
                   >
                     {dept}
@@ -401,48 +415,58 @@ export default function EduDepartmentDashboardLayout({
 
           {/* CENTER PANEL: Student Records & Filters (6 Columns) */}
           <div style={{ gridColumn: 'span 6', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: '20px',
-              border: '1px solid #E2E8F0',
-              padding: '20px',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.03)'
-            }}>
+            <div
+              className="animate-fade-slide"
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '20px',
+                border: '1px solid #E2E8F0',
+                padding: '22px',
+                boxShadow: '0 10px 25px rgba(15, 23, 42, 0.03)'
+              }}
+            >
               {/* Center Header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0F172A' }}>
-                    Student Worklist ({filteredStudents.length})
-                  </h3>
-                  <span style={{ fontSize: '0.775rem', color: '#64748B' }}>
-                    Cross-Institution Academic Records
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 className="heading-gradient-title" style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0 }}>
+                      Student Worklist
+                    </h3>
+                    <span style={{ backgroundColor: '#059669', color: '#FFFFFF', fontSize: '0.725rem', fontWeight: 900, padding: '2px 8px', borderRadius: '99px' }}>
+                      {filteredStudents.length}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.775rem', color: '#64748B', fontWeight: 500 }}>
+                    Verified Cross-Institution Academic Records &amp; Custody
                   </span>
                 </div>
 
                 {/* Quick Admission Trigger */}
                 <button
                   onClick={() => setShowAdmissionModal(true)}
+                  className="card-hover-lift"
                   style={{
                     backgroundColor: '#059669',
                     color: '#FFFFFF',
                     border: 'none',
-                    borderRadius: '10px',
-                    padding: '8px 14px',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
+                    borderRadius: '12px',
+                    padding: '9px 16px',
+                    fontSize: '0.825rem',
+                    fontWeight: 800,
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px'
+                    gap: '6px',
+                    boxShadow: '0 4px 14px rgba(5,150,105,0.3)'
                   }}
                 >
-                  <UserPlus size={16} /> New Admission
+                  <UserPlus size={16} /> + New Admission
                 </button>
               </div>
 
               {/* Search Bar */}
-              <div style={{ position: 'relative', marginBottom: '16px' }}>
-                <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+              <div style={{ position: 'relative', marginBottom: '18px' }}>
+                <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#059669' }} />
                 <input
                   type="text"
                   value={searchQuery}
@@ -450,90 +474,101 @@ export default function EduDepartmentDashboardLayout({
                   placeholder="Search by student name, roll number, or Citizen ID..."
                   style={{
                     width: '100%',
-                    padding: '9px 12px 9px 36px',
-                    borderRadius: '12px',
+                    padding: '11px 14px 11px 42px',
+                    borderRadius: '14px',
                     border: '1.5px solid #CBD5E1',
-                    fontSize: '0.85rem',
-                    outline: 'none'
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    outline: 'none',
+                    backgroundColor: '#F8FAFC',
+                    transition: 'all 0.2s ease'
                   }}
                 />
               </div>
 
               {/* Student List */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {filteredStudents.map((st) => (
+                {filteredStudents.map((st, idx) => (
                   <div
                     key={st.id || st.rollNo}
+                    className="card-hover-lift"
                     style={{
-                      backgroundColor: '#F8FAFC',
-                      borderRadius: '14px',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '16px',
                       border: '1px solid #E2E8F0',
-                      padding: '14px 16px',
+                      borderLeft: '4px solid #059669',
+                      padding: '16px 18px',
                       display: 'flex',
                       alignItems: 'center',
-                      justify: 'space-between',
-                      gap: '12px'
+                      justifyContent: 'space-between',
+                      gap: '12px',
+                      boxShadow: '0 2px 8px rgba(15, 23, 42, 0.02)'
                     }}
                   >
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#059669' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#059669', fontFamily: 'monospace' }}>
                           {st.rollNo}
                         </span>
                         {st.programType && (
-                          <span style={{ backgroundColor: '#ECFDF5', color: '#065F46', fontSize: '0.7rem', fontWeight: 800, padding: '2px 6px', borderRadius: '6px' }}>
+                          <span style={{ backgroundColor: '#ECFDF5', color: '#065F46', fontSize: '0.7rem', fontWeight: 800, padding: '2px 6px', borderRadius: '6px', border: '1px solid #A7F3D0' }}>
                             {st.programType}
                           </span>
                         )}
-                        <span style={{ backgroundColor: '#E2E8F0', color: '#334155', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>
+                        <span style={{ backgroundColor: '#F1F5F9', color: '#334155', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>
                           {st.department || 'General'}
                         </span>
                       </div>
-                      
-                      <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0F172A', marginTop: '2px' }}>
+
+                      <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#0F172A', marginBottom: '2px' }}>
                         {st.name}
                       </div>
-                      
-                      <div style={{ fontSize: '0.775rem', color: '#64748B', marginTop: '2px' }}>
-                        Citizen ID: <strong>{st.citizenId}</strong> • Year: {st.year}
+
+                      <div style={{ fontSize: '0.775rem', color: '#64748B', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span>Citizen ID: <strong style={{ color: '#0F172A', fontFamily: 'monospace' }}>{st.citizenId}</strong></span>
+                        <span>• Year: <strong>{st.year}</strong></span>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
                       <span style={{
-                        backgroundColor: st.status === 'VERIFIED' || st.status === 'CURRENTLY STUDYING' ? '#DCFCE7' : '#FEF3C7',
-                        color: st.status === 'VERIFIED' || st.status === 'CURRENTLY STUDYING' ? '#166534' : '#92400E',
-                        fontSize: '0.725rem',
-                        fontWeight: 800,
-                        padding: '4px 10px',
-                        borderRadius: '10px'
+                        backgroundColor: '#DCFCE7',
+                        color: '#166534',
+                        fontSize: '0.7rem',
+                        fontWeight: 900,
+                        padding: '3px 9px',
+                        borderRadius: '99px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
                       }}>
+                        <span className="animate-pulse-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16A34A', display: 'inline-block' }} />
                         {st.status}
                       </span>
 
                       <button
                         onClick={() => setSelectedStudent(st)}
+                        className="tab-pill-animated"
                         style={{
-                          backgroundColor: '#FFFFFF',
-                          border: '1px solid #CBD5E1',
-                          borderRadius: '10px',
-                          padding: '6px 12px',
-                          fontSize: '0.775rem',
-                          fontWeight: 700,
+                          backgroundColor: '#F8FAFC',
                           color: '#0F172A',
+                          border: '1.5px solid #CBD5E1',
+                          borderRadius: '10px',
+                          padding: '6px 14px',
+                          fontSize: '0.775rem',
+                          fontWeight: 800,
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '4px'
+                          gap: '6px'
                         }}
                       >
-                        <Eye size={14} /> View History
+                        <Eye size={14} color="#059669" /> View History
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
-
             </div>
           </div>
 

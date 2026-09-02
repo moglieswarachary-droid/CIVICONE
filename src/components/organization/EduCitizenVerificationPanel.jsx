@@ -530,41 +530,59 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', exter
             </div>
           </div>
 
-          {/* Tab Navigation Controls */}
-          <div style={{ display: 'flex', borderBottom: '1px solid #E2E8F0', gap: '4px' }}>
+          {/* Tab Navigation Controls (Segmented Pill Tabs with Micro-Animations) */}
+          <div style={{
+            display: 'flex',
+            backgroundColor: '#F1F5F9',
+            padding: '4px',
+            borderRadius: '14px',
+            gap: '4px',
+            overflowX: 'auto'
+          }}>
             {[
-              { id: 'timeline', label: 'Timeline' },
-              { id: 'identity', label: 'Identity & DOB' },
-              { id: 'current', label: 'Current Edu' },
-              { id: 'previous', label: 'Previous Edu' },
-              { id: 'certs', label: 'Cert Vault' }
+              { id: 'timeline', label: 'Timeline', icon: '📅' },
+              { id: 'identity', label: 'Identity', icon: '👤' },
+              { id: 'current', label: 'Current', icon: '🎓' },
+              { id: 'previous', label: 'Previous', icon: '📚' },
+              { id: 'certs', label: 'Cert Vault', icon: '🔐' }
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
+                className="tab-pill-animated"
                 style={{
-                  padding: '8px 12px',
+                  flex: 1,
+                  padding: '8px 10px',
                   fontSize: '0.75rem',
-                  fontWeight: 700,
+                  fontWeight: 800,
                   border: 'none',
-                  borderBottom: activeTab === tab.id ? '2.5px solid #059669' : '2.5px solid transparent',
-                  color: activeTab === tab.id ? '#059669' : '#64748B',
-                  backgroundColor: 'transparent',
-                  cursor: 'pointer'
+                  borderRadius: '10px',
+                  color: activeTab === tab.id ? '#065F46' : '#64748B',
+                  backgroundColor: activeTab === tab.id ? '#FFFFFF' : 'transparent',
+                  boxShadow: activeTab === tab.id ? '0 2px 8px rgba(15, 23, 42, 0.08)' : 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                {tab.label}
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
               </button>
             ))}
           </div>
 
           {/* TAB 1: VISUAL ACADEMIC TIMELINE */}
           {activeTab === 'timeline' && (
-            <AcademicTimeline
-              academicHistory={history}
-              eduType={eduType}
-              onToggleLock={(certKey, certName) => initiateLockOrUnlockRequest(certKey, certName)}
-            />
+            <div className="animate-fade-slide">
+              <AcademicTimeline
+                academicHistory={history}
+                eduType={eduType}
+                onToggleLock={(certKey, certName) => initiateLockOrUnlockRequest(certKey, certName)}
+              />
+            </div>
           )}
 
           {/* TAB 2: IDENTITY & DOB */}
