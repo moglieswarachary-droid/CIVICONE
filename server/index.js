@@ -538,8 +538,9 @@ app.post('/api/payment/webhook', (req, res) => {
 
 // GET Virtual Card Details
 app.get('/api/card/me', async (req, res) => {
-  const citizen = await dbService.getCitizenById(db.activeCitizenId);
-  const card = await dbService.getVirtualCard(db.activeCitizenId);
+  const targetId = req.query.citizenId || req.headers['x-citizen-id'] || db.activeCitizenId;
+  const citizen = await dbService.getCitizenById(targetId);
+  const card = await dbService.getVirtualCard(targetId);
   return res.json({
     card,
     citizen
