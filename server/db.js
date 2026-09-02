@@ -214,12 +214,31 @@ export const dbService = {
   // Get Active Card
   async getVirtualCard(citizenId) {
     try {
-      if (prisma) {
+      if (prisma && citizenId) {
         const card = await prisma.virtualCard.findUnique({ where: { citizenId } });
         if (card) return card;
       }
     } catch (err) {
       console.warn("DB Query fallback to in-memory virtual card");
+    }
+
+    if (citizenId) {
+      const cit = await this.getCitizenById(citizenId);
+      if (cit) {
+        return {
+          citizenId: cit.citizenId,
+          civicId: cit.citizenId,
+          fullName: cit.fullName,
+          maskedAadhaar: cit.maskedAadhaar || `XXXX XXXX ${cit.citizenId.slice(-4)}`,
+          dob: cit.dateOfBirth || cit.dob || '15-07-2004',
+          gender: cit.gender || 'Male',
+          state: cit.state || 'Andhra Pradesh',
+          address: cit.address || 'India',
+          identityStatus: cit.identityStatus || 'Verified',
+          verificationStatus: cit.verificationStatus || 'Verified Citizen',
+          qrToken: `CIV-TOKEN-${cit.citizenId}-SECURE`
+        };
+      }
     }
     return fallbackDb.card;
   },

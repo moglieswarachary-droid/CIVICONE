@@ -116,6 +116,13 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
     setOpenGroups(prev => ({ ...prev, [groupKey]: !prev[groupKey] }));
   };
 
+  // Sync currentCitizen when prop updates externally
+  useEffect(() => {
+    if (citizen && citizen.citizenId && citizen.citizenId !== currentCitizen?.citizenId) {
+      setCurrentCitizen(citizen);
+    }
+  }, [citizen?.citizenId]);
+
   // Fetch initial dashboard data & demo accounts from REST API backend
   useEffect(() => {
     const fetchJsonSafe = async (url) => {
@@ -132,7 +139,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       try {
         const cid = currentCitizen?.citizenId || citizen?.citizenId || '';
         const [cardRes, docsRes, notifRes, govtRes, newsRes, demoRes] = await Promise.all([
-          fetchJsonSafe('/api/card/me'),
+          fetchJsonSafe(`/api/card/me${cid ? `?citizenId=${cid}` : ''}`),
           fetchJsonSafe(`/api/vault/documents${cid ? `?citizenId=${cid}` : ''}`),
           fetchJsonSafe(`/api/notifications${cid ? `?citizenId=${cid}` : ''}`),
           fetchJsonSafe('/api/updates/govt'),
@@ -140,7 +147,9 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           fetchJsonSafe('/api/citizens/demo')
         ]);
 
-        if (cardRes.citizen) setCurrentCitizen(cardRes.citizen);
+        if (cardRes.citizen && cardRes.citizen.citizenId === cid) {
+          setCurrentCitizen(cardRes.citizen);
+        }
         if (cardRes.card) setCardData(cardRes.card);
         if (docsRes.documents) setDocuments(docsRes.documents);
         if (notifRes.notifications) setNotifications(notifRes.notifications);
