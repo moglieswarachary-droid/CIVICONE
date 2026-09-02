@@ -12,16 +12,16 @@ import {
 
 export const authStorage = {
   setToken: (token) => {
-    if (token) localStorage.setItem('civicone_token', token);
+    if (token) localStorage.setItem('civiqone_token', token);
   },
   getToken: () => {
-    return localStorage.getItem('civicone_token') || '';
+    return localStorage.getItem('civiqone_token') || '';
   },
   clearToken: () => {
-    localStorage.removeItem('civicone_token');
+    localStorage.removeItem('civiqone_token');
   },
   getHeaders: () => {
-    const token = localStorage.getItem('civicone_token');
+    const token = localStorage.getItem('civiqone_token');
     const headers = { 'Content-Type': 'application/json' };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -87,7 +87,7 @@ export const cardService = {
     orderId: `ORD-GP-${Date.now()}`,
     amount,
     currency: 'INR',
-    keyId: 'rzp_test_civicone_demo'
+    keyId: 'rzp_test_civiqone_demo'
   }),
   verifyWebhookPayment: (orderId, paymentId, status) => safeFetch('/api/payment/webhook', {
     method: 'POST',
@@ -158,8 +158,30 @@ export const privacyService = {
   getActiveConsents: () => safeFetch('/api/consent/active', { headers: authStorage.getHeaders() }, {
     success: true,
     consents: [
-      { id: 'cs-01', orgName: 'State Bank of India', purpose: 'Savings Account KYC', expiresAt: '30 Days', status: 'ACTIVE' },
-      { id: 'cs-02', orgName: 'Apollo Hospitals', purpose: 'ABHA Health Profile Access', expiresAt: '12 Hours', status: 'ACTIVE' }
+      {
+        id: 'cs-01',
+        orgName: 'State Bank of India',
+        docName: 'Aadhaar & PAN Card Credentials',
+        purpose: 'Savings Account KYC & Identity Verification',
+        accessType: 'View Only',
+        createdAt: '14 Aug 2026',
+        expiryDate: '13 Sep 2026 (30 Days)',
+        expiresAt: '30 Days',
+        status: 'ACTIVE',
+        authorizedFields: ['Full Name', 'Date of Birth', 'Masked Aadhaar Number', 'Permanent Address']
+      },
+      {
+        id: 'cs-02',
+        orgName: 'Apollo Hospitals',
+        docName: 'ABHA Health Profile & Vaccination Records',
+        purpose: 'ABHA Health Profile Access & Hospital Admission',
+        accessType: 'View Only',
+        createdAt: '18 Aug 2026',
+        expiryDate: '19 Aug 2026 (12 Hours)',
+        expiresAt: '12 Hours',
+        status: 'ACTIVE',
+        authorizedFields: ['ABHA ID', 'Immunization History', 'Blood Group', 'Emergency Contact']
+      }
     ]
   }),
   getPendingRequests: () => safeFetch('/api/consent/citizen-requests', { headers: authStorage.getHeaders() }, {
@@ -244,7 +266,7 @@ export const aiService = {
     headers: authStorage.getHeaders(),
     body: JSON.stringify({ prompt })
   }, {
-    reply: `I am CivicOne AI. Your queries are processed securely. Your identity profile and documents are verified with 100% cryptographic integrity.`
+    reply: `I am CIVIQONE AI. Your queries are processed securely. Your identity profile and documents are verified with 100% cryptographic integrity.`
   })
 };
 

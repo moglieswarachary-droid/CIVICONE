@@ -189,7 +189,7 @@ export default function FinancialDashboardLayout({
                 <strong>Code:</strong> {session?.code}<br />
                 <strong>State:</strong> {session?.state}<br />
                 <strong>Clearance:</strong> {session?.clearanceStatus || 'VERIFIED ENTITY'}<br />
-                <strong>API Gateway:</strong> CivicOne ADV eKYC
+                <strong>API Gateway:</strong> CIVIQONE ADV eKYC
               </div>
 
               <div style={{

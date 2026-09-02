@@ -134,7 +134,7 @@ export default function UpdatesAndNews({ govtUpdates: initialGovt, dailyNews: in
 
       {/* TAB 2: DAILY NEWS & MEDIA */}
       {activeTab === 'news' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: '20px' }}>
           {dailyNews.map(item => (
             <div
               key={item.id}

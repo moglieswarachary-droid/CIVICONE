@@ -1,5 +1,5 @@
 """
-CivicOne High-Assurance Python Citizen Authentication Engine
+CIVIQONE High-Assurance Python Citizen Authentication Engine
 ============================================================
 Implements 4 core algorithms for secure Citizen Login:
 1. Algorithm 1: Sliding Window Rate-Limited Mobile Challenge (SendMobileOTP)
@@ -53,7 +53,7 @@ class DataVault:
             citizen_id="SYSTEM-GENESIS",
             event_type="AUDIT_LEDGER_INITIALIZED",
             ip="127.0.0.1",
-            details="CivicOne Cryptographic Audit Ledger Started"
+            details="CIVIQONE Cryptographic Audit Ledger Started"
         )
 
     def _append_audit_log(self, citizen_id, event_type, ip, details):
@@ -348,7 +348,7 @@ class AuthRequestHandler(BaseHTTPRequestHandler):
 
 def run_self_tests():
     print("=" * 60)
-    print(" [START] RUNNING CIVICONE PYTHON AUTHENTICATION ENGINE SELF-TESTS")
+    print(" [START] RUNNING CIVIQONE PYTHON AUTHENTICATION ENGINE SELF-TESTS")
     print("=" * 60)
 
     # Test 1: Send Mobile OTP (Algorithm 1)
@@ -396,7 +396,7 @@ if __name__ == '__main__':
 
     port = int(os.environ.get("PORT", 8000))
     server = HTTPServer(('0.0.0.0', port), AuthRequestHandler)
-    print(f"[CivicOne Python Auth Engine] Running on http://localhost:{port}")
+    print(f"[CIVIQONE Python Auth Engine] Running on http://localhost:{port}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

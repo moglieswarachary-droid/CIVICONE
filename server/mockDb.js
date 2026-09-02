@@ -16,8 +16,8 @@ export const db = {
       profileImage: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=400",
       mobile: "+91-90000-00001",
       mobileMasked: "+91 90000 00001",
-      email: "aarav.demo@civicone.example",
-      emailMasked: "aarav.demo@civicone.example",
+      email: "aarav.demo@civiqone.example",
+      emailMasked: "aarav.demo@civiqone.example",
       address: "Door 4-12, MG Road, Vijayawada, Andhra Pradesh 520002",
       addressSummary: "Vijayawada, Andhra Pradesh",
       state: "Andhra Pradesh",
@@ -35,11 +35,11 @@ export const db = {
       isDemo: true,
       demoLabel: "DEMO DATA — NOT A REAL CITIZEN",
       educationInfo: {
-        institution: "CivicOne Demo Institute",
+        institution: "CIVIQONE Demo Institute",
         course: "B.Tech Computer Science",
         year: "2023–2027",
         status: "Pursuing",
-        school: "CivicOne Model School",
+        school: "CIVIQONE Model School",
         transferCertificate: "Available",
         marksheets: "Available"
       },
@@ -73,8 +73,8 @@ export const db = {
       profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
       mobile: "+91-90000-00002",
       mobileMasked: "+91 90000 00002",
-      email: "priya.demo@civicone.example",
-      emailMasked: "priya.demo@civicone.example",
+      email: "priya.demo@civiqone.example",
+      emailMasked: "priya.demo@civiqone.example",
       address: "Flat 302, Cyber Heights, Gachibowli, Hyderabad, Telangana 500032",
       addressSummary: "Hyderabad, Telangana",
       state: "Telangana",
@@ -93,7 +93,7 @@ export const db = {
       isDemo: true,
       demoLabel: "DEMO DATA — NOT A REAL CITIZEN",
       educationInfo: {
-        institution: "CivicOne Tech University",
+        institution: "CIVIQONE Tech University",
         course: "M.Tech Data Science",
         year: "2024–2026",
         status: "Graduated",
@@ -131,8 +131,8 @@ export const db = {
       profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
       mobile: "+91-90000-00003",
       mobileMasked: "+91 90000 00003",
-      email: "rajesh.demo@civicone.example",
-      emailMasked: "rajesh.demo@civicone.example",
+      email: "rajesh.demo@civiqone.example",
+      emailMasked: "rajesh.demo@civiqone.example",
       address: "Plot 88, CG Road, Navrangpura, Ahmedabad, Gujarat 380009",
       addressSummary: "Ahmedabad, Gujarat",
       state: "Gujarat",
@@ -206,7 +206,7 @@ export const db = {
       isDemo: true,
       demoLabel: "DEMO DATA — NOT A REAL CITIZEN",
       educationInfo: {
-        institution: "CivicOne School of Planning",
+        institution: "CIVIQONE School of Planning",
         course: "B.Arch Architecture",
         year: "2021–2026",
         status: "Pursuing",
@@ -261,7 +261,7 @@ export const db = {
       isDemo: true,
       demoLabel: "DEMO DATA — NOT A REAL CITIZEN",
       educationInfo: {
-        institution: "CivicOne Institute of Technology",
+        institution: "CIVIQONE Institute of Technology",
         course: "M.Tech Mechanical Engineering",
         year: "2020–2022",
         status: "Graduated",
@@ -301,7 +301,7 @@ export const db = {
       name: "Class X Secondary Marksheet",
       category: "academic",
       type: "document",
-      issuer: "CivicOne Model School / Board of Secondary Education",
+      issuer: "CIVIQONE Model School / Board of Secondary Education",
       status: "Verified",
       issueDate: "10-06-2020",
       expiryDate: "N/A",
@@ -321,7 +321,7 @@ export const db = {
       name: "Intermediate Class XII Certificate",
       category: "academic",
       type: "certificate",
-      issuer: "CivicOne Model School / Board of Intermediate Education",
+      issuer: "CIVIQONE Model School / Board of Intermediate Education",
       status: "Verified",
       issueDate: "05-06-2022",
       expiryDate: "N/A",
@@ -340,7 +340,7 @@ export const db = {
       name: "School Transfer Certificate (TC)",
       category: "academic",
       type: "document",
-      issuer: "CivicOne Model School",
+      issuer: "CIVIQONE Model School",
       status: "Verified",
       issueDate: "15-06-2023",
       expiryDate: "N/A",
@@ -359,7 +359,7 @@ export const db = {
       name: "B.Tech Degree Certificate",
       category: "academic",
       type: "certificate",
-      issuer: "CivicOne Demo Institute",
+      issuer: "CIVIQONE Demo Institute",
       status: "Verified",
       issueDate: "01-08-2023",
       expiryDate: "31-07-2027",
@@ -615,7 +615,7 @@ export const db = {
       citizenId: "CIV-DEMO-10001",
       name: "Travel Identity Verification & Booking Token",
       category: "Travel",
-      issuer: "CivicOne Travel Gateway",
+      issuer: "CIVIQONE Travel Gateway",
       status: "Verified",
       issueDate: "01-08-2026",
       expiryDate: "31-08-2026",
@@ -653,7 +653,7 @@ export const db = {
       citizenId: "CIV-DEMO-10002",
       name: "M.Tech Data Science Degree",
       category: "Education",
-      issuer: "CivicOne Tech University",
+      issuer: "CIVIQONE Tech University",
       status: "Verified",
       issueDate: "12-07-2026",
       expiryDate: "N/A",
@@ -696,7 +696,7 @@ export const db = {
       civicIdStatus: "Verified",
       identityStatus: "Verified",
       accountStatus: "Active",
-      issuer: "CivicOne National Identity Authority",
+      issuer: "CIVIQONE National Identity Authority",
       verifiedAt: "2026-08-14T09:00:00Z",
       trustScore: "100% Tokenized Security Verification",
       verificationRef: "VER-2026-DEMO-10001",
@@ -709,7 +709,7 @@ export const db = {
       civicIdStatus: "Verified",
       identityStatus: "Verified",
       accountStatus: "Active",
-      issuer: "CivicOne National Identity Authority",
+      issuer: "CIVIQONE National Identity Authority",
       verifiedAt: "2026-08-14T09:15:00Z",
       trustScore: "100% Tokenized Security Verification",
       verificationRef: "VER-2026-DEMO-10002",
@@ -723,7 +723,7 @@ export const db = {
     {
       id: "org-college",
       roleCode: "COLLEGE_ACCESS_ADMIN",
-      name: "CivicOne Demo College",
+      name: "CIVIQONE Demo College",
       category: "Education",
       regNo: "EDU-COLLEGE-9048",
       contactEmail: "admissions@democollege.edu.in",
@@ -737,7 +737,7 @@ export const db = {
     {
       id: "org-school",
       roleCode: "SCHOOL_ACCESS_ADMIN",
-      name: "CivicOne Model School",
+      name: "CIVIQONE Model School",
       category: "Education",
       regNo: "EDU-SCHOOL-1102",
       contactEmail: "principal@modelschool.edu.in",
@@ -751,7 +751,7 @@ export const db = {
     {
       id: "org-mobile",
       roleCode: "MOBILE_SHOP_ACCESS_ADMIN",
-      name: "CivicOne Mobile Store",
+      name: "CIVIQONE Mobile Store",
       category: "Telecom / KYC",
       regNo: "TEL-STORE-4401",
       contactEmail: "kyc@civicmobilestore.com",
@@ -766,7 +766,7 @@ export const db = {
     {
       id: "org-hotel",
       roleCode: "HOTEL_ACCESS_ADMIN",
-      name: "CivicOne Grand Hotel",
+      name: "CIVIQONE Grand Hotel",
       category: "Hospitality",
       regNo: "HOSP-HOTEL-8820",
       contactEmail: "frontdesk@civicgrandhotel.com",
@@ -780,7 +780,7 @@ export const db = {
     {
       id: "org-hospital",
       roleCode: "HEALTHCARE_ACCESS_ADMIN",
-      name: "CivicOne Demo Hospital",
+      name: "CIVIQONE Demo Hospital",
       category: "Healthcare",
       regNo: "HLTH-HOSP-9910",
       contactEmail: "records@civichospital.org",
@@ -794,10 +794,10 @@ export const db = {
     {
       id: "org-rto",
       roleCode: "RTO_ACCESS_ADMIN",
-      name: "CivicOne RTO Office",
+      name: "CIVIQONE RTO Office",
       category: "Transport",
       regNo: "RTO-AP-16-OFFICE",
-      contactEmail: "rto.ap16@civicone.gov.in",
+      contactEmail: "rto.ap16@civiqone.gov.in",
       accessLevel: "VIEW ONLY — RTO",
       badgeText: "RTO VERIFICATION — TRANSPORT & DRIVING RECORDS",
       allowedCategories: ["Vehicle/RTO", "Identity"],
@@ -816,14 +816,14 @@ export const db = {
       docId: "doc-aarav-08",
       docName: "B.Tech Computer Science Course Admission Record",
       orgId: "org-college",
-      orgName: "CivicOne Demo College",
+      orgName: "CIVIQONE Demo College",
       roleCode: "COLLEGE_ACCESS_ADMIN",
       purpose: "B.Tech Admission Verification",
       accessType: "View Only (Academic)",
       createdAt: "14 Aug 2026, 08:30 AM",
       expiryDate: "21 Aug 2026",
       status: "ACTIVE",
-      watermarkText: "CONFIDENTIAL — AUTHORIZED FOR CIVICONE DEMO COLLEGE — ADMISSION VERIFICATION — 14 AUG 2026",
+      watermarkText: "CONFIDENTIAL — AUTHORIZED FOR CIVIQONE DEMO COLLEGE — ADMISSION VERIFICATION — 14 AUG 2026",
       isDemo: true
     },
     {
@@ -833,14 +833,14 @@ export const db = {
       docId: "doc-aarav-01",
       docName: "Tokenized Aadhaar Record (KYC Only)",
       orgId: "org-mobile",
-      orgName: "CivicOne Mobile Store",
+      orgName: "CIVIQONE Mobile Store",
       roleCode: "MOBILE_SHOP_ACCESS_ADMIN",
       purpose: "SIM Activation KYC Verification",
       accessType: "Minimum KYC View Only",
       createdAt: "14 Aug 2026, 09:10 AM",
       expiryDate: "15 Aug 2026",
       status: "ACTIVE",
-      watermarkText: "CONFIDENTIAL — MINIMUM KYC SHARED FOR CIVICONE MOBILE STORE — 14 AUG 2026",
+      watermarkText: "CONFIDENTIAL — MINIMUM KYC SHARED FOR CIVIQONE MOBILE STORE — 14 AUG 2026",
       isDemo: true
     }
   ],
@@ -849,7 +849,7 @@ export const db = {
     {
       id: "req-demo-201",
       orgId: "org-hotel",
-      orgName: "CivicOne Grand Hotel",
+      orgName: "CIVIQONE Grand Hotel",
       roleCode: "HOTEL_ACCESS_ADMIN",
       citizenCivicId: "CIV-DEMO-10001",
       docId: "doc-aarav-04",
@@ -868,7 +868,7 @@ export const db = {
     {
       id: "sec-demo-01",
       citizenId: "CIV-DEMO-10001",
-      event: "CivicOne Demo Session Initialized for Aarav Kumar",
+      event: "CIVIQONE Demo Session Initialized for Aarav Kumar",
       device: "Web Browser",
       location: "Vijayawada, India",
       ip: "49.37.142.90",
@@ -878,7 +878,7 @@ export const db = {
     {
       id: "sec-demo-02",
       citizenId: "CIV-DEMO-10001",
-      event: "Academic Access Granted to CivicOne Demo College",
+      event: "Academic Access Granted to CIVIQONE Demo College",
       device: "Citizen Consent Engine",
       location: "Vijayawada, India",
       ip: "49.37.142.90",
@@ -892,9 +892,9 @@ export const db = {
     {
       id: "notif-demo-01",
       citizenId: "CIV-DEMO-10001",
-      title: "New Access Request: CivicOne Grand Hotel",
+      title: "New Access Request: CIVIQONE Grand Hotel",
       category: "Consent",
-      message: "CivicOne Grand Hotel requested limited guest verification access to your Passport for Hotel Check-in.",
+      message: "CIVIQONE Grand Hotel requested limited guest verification access to your Passport for Hotel Check-in.",
       timestamp: "15 minutes ago",
       read: false,
       type: "info"
@@ -904,14 +904,14 @@ export const db = {
       citizenId: "CIV-DEMO-10001",
       title: "Academic Access Granted",
       category: "Consent",
-      message: "CivicOne Demo College was granted View Only access to your Course Admission Record.",
+      message: "CIVIQONE Demo College was granted View Only access to your Course Admission Record.",
       timestamp: "1 hour ago",
       read: true,
       type: "success"
     }
   ],
 
-  // 8. TOURISM DESTINATIONS DATASET (CIVICONE WORLD)
+  // 8. TOURISM DESTINATIONS DATASET (CIVIQONE WORLD)
   destinations: [
     {
       id: "dest-dubai",
@@ -1005,11 +1005,11 @@ export const db = {
 
   // 9. TRAVEL PROVIDER ADAPTERS & INTEGRATION STATE
   travelProviders: [
-    { id: "prov-air", name: "CivicOne Flight Engine (IndiGo, Air India, Emirates)", category: "Flights", status: "ADAPTER_READY", connected: false },
-    { id: "prov-bus", name: "CivicOne Bus Gateway (RedBus, KSRTC, APSRTC)", category: "Buses", status: "ADAPTER_READY", connected: false },
+    { id: "prov-air", name: "CIVIQONE Flight Engine (IndiGo, Air India, Emirates)", category: "Flights", status: "ADAPTER_READY", connected: false },
+    { id: "prov-bus", name: "CIVIQONE Bus Gateway (RedBus, KSRTC, APSRTC)", category: "Buses", status: "ADAPTER_READY", connected: false },
     { id: "prov-rail", name: "IRCTC Rail Link", category: "Railway", status: "ADAPTER_READY", connected: false },
-    { id: "prov-cab", name: "CivicOne Cabs (Uber, Ola, Rapido)", category: "Cabs", status: "ADAPTER_READY", connected: false },
-    { id: "prov-bike", name: "CivicOne Rentals (Bounce, Royal Brothers)", category: "Bike Rental", status: "ADAPTER_READY", connected: false }
+    { id: "prov-cab", name: "CIVIQONE Cabs (Uber, Ola, Rapido)", category: "Cabs", status: "ADAPTER_READY", connected: false },
+    { id: "prov-bike", name: "CIVIQONE Rentals (Bounce, Royal Brothers)", category: "Bike Rental", status: "ADAPTER_READY", connected: false }
   ],
 
   // 10. RECENT OFFICIAL GOVERNMENT UPDATES
@@ -1048,7 +1048,7 @@ export const db = {
       department: "Railway Recruitment Boards (RRB) & State Education Boards",
       source: "Indian Railways Recruitment Desk / State TET Cell",
       category: "Recruitment & Exams",
-      content: "Official notification for RRB NTPC Non-Technical, Group D, and State Level Teachers Eligibility Test (TET) 2026. Hall tickets and city intimation slips are available for download on CivicOne Citizen Portal.",
+      content: "Official notification for RRB NTPC Non-Technical, Group D, and State Level Teachers Eligibility Test (TET) 2026. Hall tickets and city intimation slips are available for download on CIVIQONE Citizen Portal.",
       summary: "RRB Recruitment & State TET Exam 2026 admit cards released.",
       publishedAt: "2026-08-13T09:30:00Z",
       date: "13 Aug 2026",
@@ -1077,7 +1077,7 @@ export const db = {
       id: "news-up-001",
       title: "India Advances Unified Citizen Services Platform Framework",
       headline: "India Advances Unified Citizen Services Platform Framework",
-      source: "CivicOne News Network",
+      source: "CIVIQONE News Network",
       category: "Technology",
       snippet: "India's digital identity landscape achieves new milestones with unified privacy-first consent frameworks and least-privilege organization access.",
       summary: "India advances unified citizen service framework with consent-driven security.",
@@ -1159,7 +1159,7 @@ export const db = {
       verificationTrace: [
         { step: "Ownership Transfer Initiated", time: "13 Aug 03:00 PM", actor: "Priya Sharma" },
         { step: "NOC Issued by RTO Mumbai", time: "14 Aug 08:30 AM", actor: "RTO Officer" },
-        { step: "Cryptographic Certificate Generated", time: "14 Aug 09:30 AM", actor: "CivicOne Vault Service" }
+        { step: "Cryptographic Certificate Generated", time: "14 Aug 09:30 AM", actor: "CIVIQONE Vault Service" }
       ]
     },
     {
@@ -1245,7 +1245,7 @@ export const db = {
       securityToken: "HASH-UGC-774019-KA",
       verificationTrace: [
         { step: "University Convocation Record Sync", time: "12 Aug 02:00 PM", actor: "VTU Registrar" },
-        { step: "Digital Signature Stamped with RSA-4096", time: "14 Aug 09:10 AM", actor: "CivicOne Education Gateway" }
+        { step: "Digital Signature Stamped with RSA-4096", time: "14 Aug 09:10 AM", actor: "CIVIQONE Education Gateway" }
       ]
     },
     {
@@ -1309,7 +1309,7 @@ export const db = {
       securityToken: "HASH-FIN-990412-GJ",
       verificationTrace: [
         { step: "Bank KYC Consent Granted by Citizen", time: "14 Aug 09:50 AM", actor: "Rajesh Patel" },
-        { step: "Tokenized Data Streamed via Encrypted Tunnel", time: "14 Aug 10:00 AM", actor: "CivicOne Banking Engine" },
+        { step: "Tokenized Data Streamed via Encrypted Tunnel", time: "14 Aug 10:00 AM", actor: "CIVIQONE Banking Engine" },
         { step: "Bank Underwriting Verification Complete", time: "14 Aug 10:05 AM", actor: "SBI Credit Desk" }
       ]
     },
@@ -1330,7 +1330,7 @@ export const db = {
       purpose: "New Enterprise 5G SIM Connection KYC",
       securityToken: "HASH-TEL-441890-DL",
       verificationTrace: [
-        { step: "Retailer Scanned CivicOne QR", time: "14 Aug 08:15 AM", actor: "Mobile Retail Outlet" },
+        { step: "Retailer Scanned CIVIQONE QR", time: "14 Aug 08:15 AM", actor: "Mobile Retail Outlet" },
         { step: "Zero-Knowledge Consent Verified", time: "14 Aug 08:20 AM", actor: "DoT TAFCOP Engine" }
       ]
     }

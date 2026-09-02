@@ -7,7 +7,7 @@ import {
   Lock, RefreshCw, Sparkles, ExternalLink, Shield, AlertCircle, X, Check, Eye, Download, Share2
 } from 'lucide-react';
 
-export default function ServicesSection({ services: initialServices }) {
+export default function ServicesSection({ services: initialServices, onGoBack }) {
   // Navigation & Category View: null (All Services Grid) | 'government' | 'healthcare' | 'rto' | 'finance' | 'education' | 'professional' | 'organization' | 'personal'
   const [activeCategoryKey, setActiveCategoryKey] = useState(null);
   const [categoryData, setCategoryData] = useState(null);
@@ -31,14 +31,52 @@ export default function ServicesSection({ services: initialServices }) {
   const [submitting, setSubmitting] = useState(false);
   const [workflowSuccess, setWorkflowSuccess] = useState(null);
 
+  // Return to All Services Handler
+  const handleReturnToServices = () => {
+    setActiveCategoryKey(null);
+    setCategoryData(null);
+    if (window.location.hash.includes('services/')) {
+      try {
+        window.history.pushState({ view: 'citizen', tab: 'services' }, '', '#citizen/services');
+      } catch (e) {
+        window.location.hash = '#citizen/services';
+      }
+    }
+  };
+
+  // Sync category view with browser back/forward buttons
+  useEffect(() => {
+    const handleSyncCategoryFromUrl = () => {
+      const rawHash = window.location.hash.replace('#', '');
+      if (rawHash.startsWith('citizen/services/')) {
+        const catKey = rawHash.replace('citizen/services/', '');
+        if (catKey && catKey !== activeCategoryKey) {
+          executeFetchCategoryService(catKey, false);
+        }
+      } else if (rawHash === 'citizen/services' || rawHash === 'citizen') {
+        if (activeCategoryKey) {
+          setActiveCategoryKey(null);
+          setCategoryData(null);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handleSyncCategoryFromUrl);
+    window.addEventListener('hashchange', handleSyncCategoryFromUrl);
+    return () => {
+      window.removeEventListener('popstate', handleSyncCategoryFromUrl);
+      window.removeEventListener('hashchange', handleSyncCategoryFromUrl);
+    };
+  }, [activeCategoryKey]);
+
   const handleDownloadRecord = (rec) => {
     setDownloadMsg(`Preparing cryptographically signed PDF for ${rec.name}...`);
     setTimeout(() => {
       setDownloadMsg('');
       const element = document.createElement("a");
-      const file = new Blob([`CivicOne Verified Credential Record\nDocument: ${rec.name}\nIssuer: ${rec.issuer}\nRef: ${rec.maskedId}\nStatus: VERIFIED\nTimestamp: ${new Date().toISOString()}`], {type: 'text/plain'});
+      const file = new Blob([`CIVIQONE Verified Credential Record\nDocument: ${rec.name}\nIssuer: ${rec.issuer}\nRef: ${rec.maskedId}\nStatus: VERIFIED\nTimestamp: ${new Date().toISOString()}`], {type: 'text/plain'});
       element.href = URL.createObjectURL(file);
-      element.download = `${rec.name.replace(/\s+/g, '_')}_CivicOne_Verified.txt`;
+      element.download = `${rec.name.replace(/\s+/g, '_')}_CIVIQONE_Verified.txt`;
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
@@ -108,9 +146,16 @@ export default function ServicesSection({ services: initialServices }) {
   };
 
   // Execute REST API Fetch for Scoped Category Service Dashboard
-  const executeFetchCategoryService = async (catKey) => {
+  const executeFetchCategoryService = async (catKey, pushHistory = true) => {
     setActiveCategoryKey(catKey);
     setLoading(true);
+    if (pushHistory) {
+      try {
+        window.history.pushState({ view: 'citizen', tab: 'services', cat: catKey }, '', `#citizen/services/${catKey}`);
+      } catch (e) {
+        window.location.hash = `#citizen/services/${catKey}`;
+      }
+    }
     try {
       const res = await fetch(`/api/services/category/${catKey}`);
       if (res.ok) {
@@ -142,9 +187,9 @@ export default function ServicesSection({ services: initialServices }) {
           { id: 'log-2', accessor: 'AIIMS New Delhi', purpose: 'Prescription Sync', timestamp: '12 Aug 2026, 11:15 AM', permission: 'GRANTED' }
         ] : null,
         qualificationTimeline: catKey === 'education' ? [
-          { year: '2020', level: 'Secondary School (10th CBSE)', board: 'CivicOne Model School — 94.2%' },
+          { year: '2020', level: 'Secondary School (10th CBSE)', board: 'CIVIQONE Model School — 94.2%' },
           { year: '2022', level: 'Senior Secondary (12th MPC)', board: 'Board of Intermediate Education — 96.0%' },
-          { year: '2026', level: 'B.Tech Computer Science & Engineering', board: 'CivicOne Demo Institute (CGPA 8.9)' }
+          { year: '2026', level: 'B.Tech Computer Science & Engineering', board: 'CIVIQONE Demo Institute (CGPA 8.9)' }
         ] : null
       });
     }
@@ -198,7 +243,7 @@ export default function ServicesSection({ services: initialServices }) {
         status: activeWorkflowService.title.includes("Sync") ? "Active Sync" : "Submitted / In Progress",
         appliedAt: "Just now",
         referenceNo: `${activeWorkflowService.category.substring(0, 3)}-REF-${Math.floor(10000 + Math.random() * 90000)}`,
-        notes: workflowNotes || "Application submitted via verified CivicOne credential link."
+        notes: workflowNotes || "Application submitted via verified CIVIQONE credential link."
       };
       setWorkflowSuccess(fallbackActivity);
       setActivities([fallbackActivity, ...activities]);
@@ -215,7 +260,7 @@ export default function ServicesSection({ services: initialServices }) {
           {/* Dashboard Navigation Toolbar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
             <button
-              onClick={() => { setActiveCategoryKey(null); setCategoryData(null); }}
+              onClick={handleReturnToServices}
               style={{
                 backgroundColor: '#FFFFFF',
                 color: '#0B1F3A',
@@ -293,7 +338,7 @@ export default function ServicesSection({ services: initialServices }) {
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0B1F3A', marginBottom: '14px' }}>
                     My Registered Vehicles (MoRTH / VAHAN Sync)
                   </h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '16px' }}>
                     {categoryData.vehicles.map((v, idx) => (
                       <div key={idx} style={{ backgroundColor: '#FFFFFF', borderRadius: '20px', padding: '20px', border: '1px solid #E2E8F0', boxShadow: 'var(--shadow-sm)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
@@ -373,12 +418,33 @@ export default function ServicesSection({ services: initialServices }) {
                       Issuer: <strong>{rec.issuer}</strong> | Ref: <strong>{rec.maskedId}</strong>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
-                      <button onClick={() => setSelectedRecordModal(rec)} style={{ backgroundColor: '#EAF3FF', color: '#0B5ED7', border: 'none', padding: '8px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>
-                        View Record
-                      </button>
-                      <button onClick={() => handleDownloadRecord(rec)} style={{ backgroundColor: '#F1F5F9', color: '#475569', border: 'none', padding: '8px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer' }}>
-                        Download PDF
+                    <div style={{ fontSize: '0.75rem', color: '#64748B', marginBottom: '12px' }}>
+                      Ref No: <strong style={{ color: '#0B1F3A' }}>{rec.refNo}</strong>
+                    </div>
+
+                    <div style={{ backgroundColor: '#F8FAFC', padding: '10px 14px', borderRadius: '10px', fontSize: '0.75rem', color: '#475569', marginBottom: '14px', border: '1px solid #E2E8F0' }}>
+                      {rec.details}
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.7rem', color: '#94A3B8' }}>Issued: {rec.issuedDate}</span>
+                      <button
+                        onClick={() => handleTriggerWorkflow(rec)}
+                        style={{
+                          backgroundColor: '#EFF6FF',
+                          color: '#0B5ED7',
+                          border: '1px solid #BFDBFE',
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        Launch Service →
                       </button>
                     </div>
                   </div>
@@ -394,9 +460,35 @@ export default function ServicesSection({ services: initialServices }) {
       {/* VIEW 2: 8 CATEGORY SERVICE ENTRY POINTS GRID (Default Overview) */}
       {!activeCategoryKey && (
         <>
+          {onGoBack && (
+            <div style={{ marginBottom: '16px' }}>
+              <button
+                type="button"
+                onClick={onGoBack}
+                style={{
+                  backgroundColor: 'var(--bg-card)',
+                  color: 'var(--text-main)',
+                  border: '1.5px solid var(--border-light)',
+                  borderRadius: '12px',
+                  padding: '8px 16px',
+                  fontSize: '0.85rem',
+                  fontWeight: 800,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <ArrowLeft size={16} style={{ color: 'var(--primary-blue)' }} /> Back to Dashboard
+              </button>
+            </div>
+          )}
+
           <div style={{ marginBottom: '32px' }}>
             <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#0B1F3A', letterSpacing: '-0.02em', marginBottom: '4px' }}>
-              CivicOne Department Services & Record Hubs
+              CIVIQONE Department Services & Record Hubs
             </h1>
             <p style={{ fontSize: '0.9rem', color: '#475569' }}>
               Select a service category to authenticate session, grant consent & enter dedicated department dashboard.
@@ -404,7 +496,7 @@ export default function ServicesSection({ services: initialServices }) {
           </div>
 
           {/* 8 Category Entry Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))', gap: '20px', marginBottom: '40px' }}>
             {categoryModules.map(cat => {
               const IconComp = cat.icon;
               return (
@@ -527,7 +619,7 @@ export default function ServicesSection({ services: initialServices }) {
             </div>
 
             <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0B1F3A', textAlign: 'center', marginBottom: '6px' }}>
-              Allow CivicOne to access {showConsentModal.label}?
+              Allow CIVIQONE to access {showConsentModal.label}?
             </h3>
             <p style={{ fontSize: '0.825rem', color: '#475569', textAlign: 'center', marginBottom: '20px' }}>
               Explicit citizen consent is required before querying sensitive department records.

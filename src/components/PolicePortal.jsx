@@ -219,7 +219,7 @@ export default function PolicePortal({ officer, initialState, onReturnHome }) {
             </div>
             <div>
               <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                CivicOne Law Enforcement &amp; Police Verification Workspace
+                CIVIQONE Law Enforcement &amp; Police Verification Workspace
               </div>
               <div style={{ fontSize: '0.75rem', color: '#6FFFE9' }}>
                 Authorized Police Portal — All 28 States &amp; 8 Union Territories
@@ -364,7 +364,7 @@ export default function PolicePortal({ officer, initialState, onReturnHome }) {
             <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
               
               {/* LEFT COLUMN: PASSPORT APPLICATIONS QUEUE */}
-              <div style={{ flex: '1 1 54%', backgroundColor: '#1C2541', borderRadius: '24px', border: '1px solid #3A506B', padding: '24px', minWidth: '340px' }}>
+              <div style={{ flex: '1 1 54%', backgroundColor: '#1C2541', borderRadius: '24px', border: '1px solid #3A506B', padding: '24px', minWidth: 'min(340px, 100%)' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   📋 Passport Applications Queue (Select Row)
                 </h3>
@@ -438,7 +438,7 @@ export default function PolicePortal({ officer, initialState, onReturnHome }) {
               </div>
 
               {/* RIGHT COLUMN: ACTIVE PASSPORT APPLICANT VERIFICATION & APPROVAL WORKSPACE */}
-              <div style={{ flex: '1 1 42%', minWidth: '320px', sticky: 'top', top: '90px' }}>
+              <div style={{ flex: '1 1 42%', minWidth: 'min(320px, 100%)', sticky: 'top', top: '90px' }}>
                 {selectedPassportApp ? (
                   <div id="passport-workspace-panel" style={{ backgroundColor: '#1C2541', borderRadius: '24px', border: '2px solid #2563EB', padding: '24px', boxShadow: '0 12px 36px rgba(0,0,0,0.3)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
@@ -623,7 +623,7 @@ export default function PolicePortal({ officer, initialState, onReturnHome }) {
 
         {/* TAB 1: PURPOSE-BASED CITIZEN VERIFICATION */}
         {activeTab === 'verify' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '28px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: '28px' }}>
             
             {/* Form */}
             <div style={{ backgroundColor: '#1C2541', borderRadius: '20px', border: '1px solid #3A506B', padding: '28px' }}>

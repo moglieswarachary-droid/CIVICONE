@@ -22,7 +22,7 @@ export default function PublicQRVerification({ token, onBackToPortal }) {
           identityStatus: "Verified",
           accountStatus: "Active",
           holderName: "Authorized viewer only",
-          issuingAuthority: "CivicOne National Identity Authority",
+          issuingAuthority: "CIVIQONE National Identity Authority",
           cryptographicSignature: "VALID - SHA256 AUTHORIZED",
           timestamp: new Date().toISOString()
         });
@@ -67,11 +67,11 @@ export default function PublicQRVerification({ token, onBackToPortal }) {
           }}>
             <ShieldCheck size={24} />
           </div>
-          <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0B1F3A' }}>CivicOne</span>
+          <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0B1F3A' }}>CIVIQONE</span>
         </div>
 
         <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '6px' }}>
-          CivicOne Tokenized Verification
+          CIVIQONE Tokenized Verification
         </h1>
         <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '24px' }}>
           Official Cryptographic Token Verification Desk
@@ -113,7 +113,7 @@ export default function PublicQRVerification({ token, onBackToPortal }) {
             }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', fontSize: '0.85rem' }}>
                 <div>
-                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>CivicOne ID Status</span>
+                  <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>CIVIQONE ID Status</span>
                   <strong style={{ color: '#059669', fontSize: '0.95rem' }}>{verificationResult.civicIdStatus || "Verified"}</strong>
                 </div>
 
@@ -134,7 +134,7 @@ export default function PublicQRVerification({ token, onBackToPortal }) {
 
                 <div style={{ gridColumn: '1 / -1' }}>
                   <span style={{ color: '#64748B', display: 'block', fontSize: '0.75rem' }}>Issuing Authority</span>
-                  <strong style={{ color: '#0B1F3A' }}>{verificationResult.issuingAuthority || "CivicOne National Identity Authority"}</strong>
+                  <strong style={{ color: '#0B1F3A' }}>{verificationResult.issuingAuthority || "CIVIQONE National Identity Authority"}</strong>
                 </div>
               </div>
             </div>
@@ -187,7 +187,7 @@ export default function PublicQRVerification({ token, onBackToPortal }) {
             gap: '8px'
           }}
         >
-          <ArrowLeft size={16} /> Return to CivicOne Portal
+          <ArrowLeft size={16} /> Return to CIVIQONE Portal
         </button>
 
       </div>

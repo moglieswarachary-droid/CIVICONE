@@ -1,4 +1,4 @@
-// prisma/seed.js - Seed Script for CivicOne Relational Database
+// prisma/seed.js - Seed Script for CIVIQONE Relational Database
 
 import { PrismaClient } from '@prisma/client';
 import { db } from '../server/mockDb.js';
@@ -7,7 +7,7 @@ import { DEMO_POLICE_FIRS, DEMO_HOTEL_GUESTS } from '../src/data/mockData.js';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding CivicOne Relational Database...');
+  console.log('🌱 Seeding CIVIQONE Relational Database...');
 
   // 1. Seed Citizens & Virtual Cards
   for (const c of db.citizens) {
@@ -23,8 +23,8 @@ async function main() {
         profileImage: c.profileImage,
         mobile: c.mobile,
         mobileMasked: c.mobileMasked,
-        email: c.email || `${c.citizenId.toLowerCase()}@civicone.example`,
-        emailMasked: c.emailMasked || `${c.citizenId.toLowerCase()}@civicone.example`,
+        email: c.email || `${c.citizenId.toLowerCase()}@civiqone.example`,
+        emailMasked: c.emailMasked || `${c.citizenId.toLowerCase()}@civiqone.example`,
         address: c.address,
         addressSummary: c.addressSummary,
         state: c.state,

@@ -1,14 +1,14 @@
-// src/components/CitizenDashboard.jsx - Main Authenticated Citizen Portal Layout with Document Expiry Alerts & Attention Widget
-
 import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Search, Bell, User, LayoutDashboard, Ticket, FolderClosed,
   Grid, Landmark, Newspaper, Shield, HelpCircle, LogOut, Sun, Moon, CheckCircle2,
-  ChevronRight, ChevronDown, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, Zap, Radio, Share2, FileText,
-  Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw
+  ChevronRight, ChevronDown, Menu, X, Crown, Sparkles, HelpCircle as HelpIcon, ArrowRight, ArrowLeft, Zap, Radio, Share2, FileText,
+  Lock, Compass, Plane, MoreHorizontal, Activity, Eye, AlertTriangle, Clock, RefreshCw, Milestone, Users,
+  Headphones, PhoneCall, Mail
 } from 'lucide-react';
 import VirtualCard from './VirtualCard.jsx';
 import CivicVault from './CivicVault.jsx';
+import MyJourney from './MyJourney.jsx';
 import ServicesSection from './ServicesSection.jsx';
 import UpdatesAndNews from './UpdatesAndNews.jsx';
 import SecurityCentre from './SecurityCentre.jsx';
@@ -20,13 +20,23 @@ import TourismGuide from './TourismGuide.jsx';
 import TravelBookingHub from './TravelBookingHub.jsx';
 import {
   DEMO_CARD, DEMO_DOCUMENTS, DEMO_GOVT_UPDATES, DEMO_NEWS,
-  DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST, calculateDocExpiryStatus
+  DEMO_NOTIFICATIONS, DEMO_CITIZENS_LIST, DEMO_FAMILY_MEMBERS, calculateDocExpiryStatus
 } from '../data/mockData.js';
 
-export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification }) {
+export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerification, theme: initialTheme = 'light', onToggleTheme }) {
   // Navigation View: 'home' | 'card' | 'vault' | 'services' | 'activity' | 'privacy' | 'notifications' | 'tourism' | 'travel' | 'govt-updates' | 'news' | 'security' | 'help' | 'ai' | 'profile'
-  const [activeTab, setActiveTab] = useState('home');
-  const [theme, setTheme] = useState('light');
+  const getTabFromUrl = () => {
+    try {
+      const rawHash = window.location.hash.replace('#', '');
+      if (rawHash.startsWith('citizen/')) return rawHash.replace('citizen/', '') || 'home';
+      if (rawHash.startsWith('citizen-')) return rawHash.replace('citizen-', '') || 'home';
+    } catch (e) {}
+    return 'home';
+  };
+
+  const [activeTab, setActiveTab] = useState(getTabFromUrl);
+  const [tabHistory, setTabHistory] = useState(() => [getTabFromUrl()]);
+  const [theme, setTheme] = useState(() => initialTheme || localStorage.getItem('civiqone_theme') || 'light');
   const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
   const [documents, setDocuments] = useState(DEMO_DOCUMENTS);
@@ -36,13 +46,54 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
   const [globalSearch, setGlobalSearch] = useState('');
   const [mobileMoreDrawerOpen, setMobileMoreDrawerOpen] = useState(false);
   const [demoCitizens, setDemoCitizens] = useState(DEMO_CITIZENS_LIST);
-  const [currentCitizen, setCurrentCitizen] = useState(citizen);
+  const [currentCitizen, setCurrentCitizen] = useState(() => {
+    try {
+      const cid = citizen?.citizenId;
+      if (cid) {
+        const cached = localStorage.getItem(`civiqone_citizen_${cid}`);
+        if (cached) return JSON.parse(cached);
+      }
+      const active = localStorage.getItem('civiqone_active_citizen');
+      if (active) {
+        const parsed = JSON.parse(active);
+        if (parsed?.citizenId === citizen?.citizenId) return parsed;
+      }
+    } catch (e) {}
+    return citizen;
+  });
   const [targetTravelCity, setTargetTravelCity] = useState('');
+  const [familyVaultMemberId, setFamilyVaultMemberId] = useState('fam-self');
+
+  const handleProfileUpdate = (updatedCitizen) => {
+    setCurrentCitizen(prev => {
+      const merged = { ...prev, ...updatedCitizen };
+      try {
+        localStorage.setItem(`civiqone_citizen_${merged.citizenId}`, JSON.stringify(merged));
+        localStorage.setItem('civiqone_active_citizen', JSON.stringify(merged));
+      } catch (e) {}
+      return merged;
+    });
+  };
+
+  // Sync with prop if it updates externally
+  useEffect(() => {
+    if (initialTheme && initialTheme !== theme) {
+      setTheme(initialTheme);
+    }
+  }, [initialTheme]);
+
+  const handleToggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('civiqone_theme', nextTheme);
+    if (onToggleTheme) onToggleTheme();
+  };
 
   // Collapsible Group States for Desktop Sidebar
   const [openGroups, setOpenGroups] = useState({
     main: true,
-    myCivicOne: true,
+    myCIVIQONE: true,
     explore: true,
     support: true,
     account: true
@@ -133,15 +184,17 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       title: 'MAIN',
       items: [
         { id: 'home', label: 'Home', icon: LayoutDashboard },
+        { id: 'journey', label: 'My Journey', icon: Milestone },
         { id: 'card', label: 'My Civic Card', icon: Ticket },
         { id: 'vault', label: 'My Vault', icon: FolderClosed },
         { id: 'services', label: 'Services', icon: Grid }
       ]
     },
     {
-      key: 'myCivicOne',
-      title: 'MY CIVICONE',
+      key: 'myCIVIQONE',
+      title: 'MY CIVIQONE',
       items: [
+        { id: 'family-vault', label: 'Family Vault', icon: Users },
         { id: 'activity', label: 'My Activity', icon: Activity },
         { id: 'privacy', label: 'My Access & Consent', icon: Lock },
         { id: 'notifications', label: 'Notifications', icon: Bell }
@@ -151,6 +204,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       key: 'explore',
       title: 'EXPLORE',
       items: [
+        { id: 'tourism', label: 'CIVIQONE World', icon: Compass },
         { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
         { id: 'news', label: 'Daily News', icon: Newspaper }
       ]
@@ -159,10 +213,9 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
       key: 'support',
       title: 'SECURITY & SUPPORT',
       items: [
+        { id: 'help', label: 'Customer Care', icon: Headphones },
         { id: 'security', label: 'Security Centre', icon: Shield },
-        { id: 'privacy', label: 'Privacy Centre', icon: Lock },
-        { id: 'help', label: 'CivicOne AI', icon: Sparkles },
-        { id: 'help', label: 'Help Centre', icon: HelpCircle }
+        { id: 'privacy', label: 'Privacy Centre', icon: Lock }
       ]
     },
     {
@@ -176,17 +229,106 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
   const unreadNotifCount = notifications.filter(n => !n.read).length;
 
-  const handleSelectTab = (tabId) => {
-    setActiveTab(tabId);
+  const handleSelectTab = (tabId, memberId = 'fam-self', pushHistory = true) => {
+    let resolvedTab = tabId;
+    if (tabId === 'family-vault') {
+      setFamilyVaultMemberId(memberId === 'fam-self' ? 'fam-child-1' : memberId);
+      resolvedTab = 'vault';
+    } else {
+      if (tabId === 'vault') {
+        setFamilyVaultMemberId(memberId);
+      }
+    }
+    setActiveTab(resolvedTab);
     setMobileMoreDrawerOpen(false);
+
+    setTabHistory(prev => (prev[prev.length - 1] === resolvedTab ? prev : [...prev, resolvedTab]));
+
+    if (pushHistory) {
+      const targetHash = resolvedTab === 'home' ? '#citizen' : `#citizen/${resolvedTab}`;
+      if (window.location.hash !== targetHash) {
+        try {
+          window.history.pushState({ view: 'citizen', tab: resolvedTab }, '', targetHash);
+        } catch (e) {
+          window.location.hash = targetHash;
+        }
+      }
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const handleGoBack = () => {
+    if (tabHistory.length > 1) {
+      const updated = [...tabHistory];
+      updated.pop();
+      const previousTab = updated[updated.length - 1] || 'home';
+      setTabHistory(updated);
+      handleSelectTab(previousTab, 'fam-self', true);
+    } else {
+      handleSelectTab('home', 'fam-self', true);
+    }
+  };
+
+  // Sync tab with browser URL hash and handle browser back/forward buttons
+  useEffect(() => {
+    const handleSyncTabFromHash = () => {
+      const rawHash = window.location.hash.replace('#', '');
+      let targetTab = 'home';
+      if (rawHash.startsWith('citizen/')) {
+        targetTab = rawHash.replace('citizen/', '') || 'home';
+      } else if (rawHash.startsWith('citizen-')) {
+        targetTab = rawHash.replace('citizen-', '') || 'home';
+      } else if (rawHash === 'citizen' || !rawHash) {
+        targetTab = 'home';
+      }
+
+      if (targetTab && targetTab !== activeTab) {
+        handleSelectTab(targetTab, 'fam-self', false);
+      }
+    };
+
+    window.addEventListener('popstate', handleSyncTabFromHash);
+    window.addEventListener('hashchange', handleSyncTabFromHash);
+    return () => {
+      window.removeEventListener('popstate', handleSyncTabFromHash);
+      window.removeEventListener('hashchange', handleSyncTabFromHash);
+    };
+  }, [activeTab]);
 
   // Requirement 22: Documents Requiring Attention Widget Calculation
   const docsRequiringAttention = documents.filter(d => {
     const expInfo = calculateDocExpiryStatus(d);
     return expInfo.status === 'EXPIRING SOON' || expInfo.status === 'EXPIRED';
   });
+
+  const handleApproveConsent = async (notifItem) => {
+    try {
+      await fetch('/api/consent/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: notifItem.requestId || 'req-demo-hotel-1' })
+      });
+    } catch (err) {}
+    setNotifications(notifications.map(n => n.id === notifItem.id ? {
+      ...n,
+      title: '🟢 Consent Approved!',
+      message: `${n.message} (Status: ACCEPTED & Masked Aadhaar Shared)`,
+      read: true,
+      status: 'APPROVED'
+    } : n));
+    alert('🟢 Consent Granted! Your Masked Aadhaar Card was shared with the organization for check-in verification.');
+  };
+
+  const handleDeclineConsent = (notifItem) => {
+    setNotifications(notifications.map(n => n.id === notifItem.id ? {
+      ...n,
+      title: '🔴 Consent Declined',
+      message: `${n.message} (Status: DECLINED BY CITIZEN)`,
+      read: true,
+      status: 'DECLINED'
+    } : n));
+    alert('🔴 Consent Declined. Access request was denied.');
+  };
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', display: 'flex', flexDirection: 'column' }}>
@@ -221,7 +363,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
               </div>
               <div>
                 <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                  CivicOne
+                  CIVIQONE
                 </span>
                 <span style={{ display: 'block', fontSize: '0.6rem', fontWeight: 800, color: '#0B5ED7', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '-4px' }}>
                   Citizen Portal
@@ -256,6 +398,40 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           {/* Header Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
+            {/* Customer Care Quick Access */}
+            <button
+              onClick={() => handleSelectTab('help')}
+              title="National Citizen Customer Care Desk"
+              style={{
+                backgroundColor: activeTab === 'help' ? 'var(--primary-blue)' : 'var(--bg-main)',
+                color: activeTab === 'help' ? '#FFFFFF' : 'var(--text-main)',
+                border: '1px solid var(--border-light)',
+                borderRadius: '10px',
+                padding: '7px 12px',
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+            >
+              <Headphones size={15} style={{ color: activeTab === 'help' ? '#FFFFFF' : 'var(--primary-blue)' }} />
+              <span className="hidden-mobile">Customer Care</span>
+            </button>
+
+            {/* Theme Toggle Button */}
+            <button
+              onClick={handleToggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+              className="theme-toggle-btn"
+              style={{ width: '38px', height: '38px', borderRadius: '10px' }}
+            >
+              {theme === 'dark' ? <Sun size={17} style={{ color: '#F59E0B' }} /> : <Moon size={17} style={{ color: '#0B5ED7' }} />}
+            </button>
+
             {/* Notifications */}
             <div style={{ position: 'relative' }}>
               <button
@@ -285,7 +461,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
               {showNotifPopover && (
                 <div style={{
-                  position: 'absolute', top: '48px', right: 0, width: '300px', maxHeight: '380px',
+                  position: 'absolute', top: '48px', right: 0, width: '320px', maxHeight: '420px',
                   backgroundColor: 'var(--bg-card)', borderRadius: '16px', boxShadow: 'var(--shadow-lg)',
                   border: '1px solid var(--border-light)', padding: '16px', zIndex: 100
                 }}>
@@ -293,11 +469,29 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>Notifications</strong>
                     <button onClick={() => setShowNotifPopover(false)} style={{ background: 'none', color: 'var(--text-light)', border: 'none' }}><X size={16} /></button>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '250px', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
                     {notifications.map(n => (
-                      <div key={n.id} style={{ padding: '10px', borderRadius: '8px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', fontSize: '0.8rem' }}>
-                        <strong style={{ color: 'var(--text-main)', display: 'block' }}>{n.title}</strong>
+                      <div key={n.id} style={{ padding: '12px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)', fontSize: '0.8rem' }}>
+                        <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '2px' }}>{n.title}</strong>
                         <span style={{ color: 'var(--text-muted)' }}>{n.message}</span>
+
+                        {/* ACCEPT / DECLINE BUTTONS FOR CONSENT REQUESTS */}
+                        {(n.type === 'CONSENT_REQUEST' || n.title.includes('Request') || n.title.includes('Access') || n.title.includes('Guest')) && n.status !== 'APPROVED' && n.status !== 'DECLINED' && (
+                          <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                            <button
+                              onClick={() => handleApproveConsent(n)}
+                              style={{ flex: 1, backgroundColor: '#059669', color: '#FFFFFF', padding: '6px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, border: 'none', cursor: 'pointer' }}
+                            >
+                              🟢 ACCEPT
+                            </button>
+                            <button
+                              onClick={() => handleDeclineConsent(n)}
+                              style={{ flex: 1, backgroundColor: '#DC2626', color: '#FFFFFF', padding: '6px 10px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, border: 'none', cursor: 'pointer' }}
+                            >
+                              🔴 DECLINE
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -365,7 +559,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                             key={item.id}
                             onClick={() => handleSelectTab(item.id)}
                             style={{
-                              backgroundColor: isSelected ? '#0B5ED7' : 'transparent',
+                              backgroundColor: isSelected ? 'var(--primary-blue)' : 'transparent',
                               color: isSelected ? '#FFFFFF' : 'var(--text-muted)',
                               padding: '10px 14px',
                               borderRadius: '10px',
@@ -376,10 +570,30 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                               gap: '12px',
                               textAlign: 'left',
                               border: 'none',
-                              cursor: 'pointer'
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease'
                             }}
                           >
-                            <Icon size={18} /> {item.label}
+                            <Icon size={18} />
+                            <span>{item.label}</span>
+                            {item.badge && (
+                              <span style={{
+                                marginLeft: 'auto',
+                                fontSize: '0.625rem',
+                                backgroundColor: isSelected ? 'rgba(255, 255, 255, 0.25)' : 'rgba(16, 185, 129, 0.15)',
+                                color: isSelected ? '#FFFFFF' : 'var(--success)',
+                                border: `1px solid ${isSelected ? 'rgba(255, 255, 255, 0.4)' : 'rgba(16, 185, 129, 0.3)'}`,
+                                padding: '1px 6px',
+                                borderRadius: '8px',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}>
+                                {item.isLive && <span className="live-pulse-dot" style={{ width: '5px', height: '5px' }} />}
+                                {item.badge}
+                              </span>
+                            )}
                           </button>
                         );
                       })}
@@ -415,6 +629,53 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
         {/* MAIN DISPLAY PANEL (Synced Window Scroll) */}
         <main style={{ flex: 1, padding: '20px 24px', minWidth: 0 }}>
           
+          {/* BACK TO DASHBOARD NAVIGATION BAR (When inside any sub-section) */}
+          {activeTab !== 'home' && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              padding: '12px 18px',
+              backgroundColor: 'var(--bg-card)',
+              borderRadius: '16px',
+              border: '1px solid var(--border-light)',
+              boxShadow: 'var(--shadow-sm)',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <button
+                  type="button"
+                  onClick={handleGoBack}
+                  style={{
+                    backgroundColor: 'var(--light-blue)',
+                    color: 'var(--primary-blue)',
+                    border: '1px solid var(--border-blue)',
+                    borderRadius: '10px',
+                    padding: '7px 14px',
+                    fontSize: '0.825rem',
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <ArrowLeft size={16} /> Back to Dashboard
+                </button>
+                <span style={{ fontSize: '0.825rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                  Citizen Portal / <strong style={{ color: 'var(--text-main)', textTransform: 'capitalize' }}>{activeTab.replace('-', ' ')}</strong>
+                </span>
+              </div>
+
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', fontWeight: 700 }}>
+                CIVIQONE Verified Citizen Session
+              </div>
+            </div>
+          )}
+
           {/* TAB 1: CITIZEN HOME DASHBOARD (Requirement 16 & 22) */}
           {activeTab === 'home' && (
             <div>
@@ -441,7 +702,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     </h1>
                   </div>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-light)', marginTop: '2px' }}>
-                    CivicOne ID: <strong>{currentCitizen.citizenId}</strong> | Aadhaar Ref: <strong>{currentCitizen.maskedAadhaar}</strong>
+                    CIVIQONE ID: <strong>{currentCitizen.citizenId}</strong> | Aadhaar Ref: <strong>{currentCitizen.maskedAadhaar}</strong>
                   </p>
                   <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
                     <span style={{ backgroundColor: '#D1E7DD', color: '#0F5132', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
@@ -464,13 +725,14 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 </span>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
                   {[
-                    { label: 'View Civic Card', icon: Ticket, action: () => handleSelectTab('card'), color: '#0B5ED7' },
-                    { label: 'Open Vault', icon: FolderClosed, action: () => handleSelectTab('vault'), color: '#059669' },
+                    { label: 'My Journey', icon: Milestone, action: () => handleSelectTab('journey'), color: '#0B5ED7' },
+                    { label: 'Family Vault', icon: Users, action: () => handleSelectTab('family-vault', 'fam-child-1'), color: '#4F46E5' },
+                    { label: 'View Civic Card', icon: Ticket, action: () => handleSelectTab('card'), color: '#0284C7' },
+                    { label: 'Open Vault', icon: FolderClosed, action: () => handleSelectTab('vault', 'fam-self'), color: '#059669' },
                     { label: 'Verify Document', icon: CheckCircle2, action: () => handleSelectTab('vault'), color: '#7C3AED' },
                     { label: 'Share Access', icon: Share2, action: () => handleSelectTab('privacy'), color: '#DC2626' },
                     { label: 'Check Services', icon: Grid, action: () => handleSelectTab('services'), color: '#D97706' },
-                    { label: 'Travel', icon: Plane, action: () => handleSelectTab('travel'), color: '#0284C7' },
-                    { label: 'CivicOne World', icon: Compass, action: () => handleSelectTab('tourism'), color: '#166534' },
+                    { label: 'CIVIQONE World', icon: Compass, action: () => handleSelectTab('tourism'), color: '#166534' },
                     { label: 'Ask AI', icon: Sparkles, action: () => handleSelectTab('help'), color: '#8B5CF6' }
                   ].map((act, i) => (
                     <button
@@ -495,6 +757,122 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                       <act.icon size={22} style={{ color: act.color }} />
                       <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-main)', textAlign: 'center' }}>{act.label}</span>
                     </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* FAMILY & DEPENDENT DOCUMENTS HUB WIDGET */}
+              <div style={{
+                backgroundColor: 'var(--bg-card)',
+                borderRadius: '20px',
+                border: '1.5px solid var(--border-light)',
+                padding: '22px',
+                marginBottom: '24px',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '12px', backgroundColor: '#EEF2FF', color: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Users size={20} />
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--text-main)' }}>
+                        Family &amp; Dependent Vaults ({DEMO_FAMILY_MEMBERS.filter(m => m.id !== 'fam-self').length})
+                      </h3>
+                      <p style={{ fontSize: '0.775rem', color: 'var(--text-light)', marginTop: '2px' }}>
+                        Manage official credentials for minor children &amp; senior parents under legal sovereign guardianship
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleSelectTab('family-vault', 'fam-child-1')}
+                    style={{
+                      backgroundColor: '#4F46E5',
+                      color: '#FFFFFF',
+                      padding: '8px 14px',
+                      borderRadius: '10px',
+                      fontSize: '0.775rem',
+                      fontWeight: 800,
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    Open Family Vault →
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                  {DEMO_FAMILY_MEMBERS.filter(m => m.id !== 'fam-self').map(member => (
+                    <div
+                      key={member.id}
+                      style={{
+                        backgroundColor: 'var(--bg-main)',
+                        borderRadius: '16px',
+                        border: '1px solid var(--border-light)',
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        gap: '12px'
+                      }}
+                      className="hover-card"
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '44px',
+                          height: '44px',
+                          borderRadius: '12px',
+                          backgroundColor: member.themeColor || '#4F46E5',
+                          color: '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 900,
+                          fontSize: '1rem',
+                          boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)',
+                          flexShrink: 0
+                        }}>
+                          {member.initials || (member.name ? member.name.substring(0, 2).toUpperCase() : 'FM')}
+                        </div>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>{member.name}</strong>
+                            <span style={{ backgroundColor: '#EEF2FF', color: '#4F46E5', fontSize: '0.675rem', fontWeight: 800, padding: '2px 6px', borderRadius: '6px' }}>
+                              {member.relationship}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginTop: '2px' }}>
+                            Civic ID: <strong>{member.civicId}</strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-light)', paddingTop: '10px' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <CheckCircle2 size={13} /> {member.documents?.length || member.docCount || 0} Verified Documents
+                        </span>
+
+                        <button
+                          onClick={() => handleSelectTab('family-vault', member.id)}
+                          style={{
+                            backgroundColor: '#4F46E5',
+                            color: '#FFFFFF',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            border: 'none',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          View Vault →
+                        </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -590,6 +968,11 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
             </div>
           )}
 
+          {/* TAB: MY JOURNEY (CHRONOLOGICAL DOCUMENT LIFECYCLE) */}
+          {activeTab === 'journey' && (
+            <MyJourney citizen={currentCitizen} documents={documents} onGoBack={handleGoBack} />
+          )}
+
           {/* TAB 2: VIRTUAL CIVIC CARD */}
           {activeTab === 'card' && (
             <div style={{ maxWidth: '520px', margin: '0 auto', paddingTop: '12px' }}>
@@ -598,18 +981,24 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 card={cardData || DEMO_CARD}
                 onNavigateToVerification={onNavigateToVerification}
                 onCardUpdate={(updatedCard) => setCardData(updatedCard)}
+                onGoBack={handleGoBack}
               />
             </div>
           )}
 
           {/* TAB 3: DIGITAL VAULT */}
           {activeTab === 'vault' && (
-            <CivicVault documents={documents} />
+            <CivicVault documents={documents} initialMemberId={familyVaultMemberId} onGoBack={handleGoBack} />
+          )}
+
+          {/* TAB: CIVIQONE WORLD TOURISM & DESTINATIONS GUIDE */}
+          {activeTab === 'tourism' && (
+            <TourismGuide onGoBack={handleGoBack} />
           )}
 
           {/* TAB 4: PRIVACY & ACCESS CONSENT */}
           {activeTab === 'privacy' && (
-            <PrivacyCenter citizen={currentCitizen} />
+            <PrivacyCenter citizen={currentCitizen} onGoBack={handleGoBack} />
           )}
 
           {/* TAB: NOTIFICATIONS HUB */}
@@ -668,7 +1057,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* TAB 7: PUBLIC SERVICES */}
           {activeTab === 'services' && (
-            <ServicesSection />
+            <ServicesSection onGoBack={handleGoBack} />
           )}
 
           {/* TAB: MY ACTIVITY LOG & AUDIT HISTORY */}
@@ -692,7 +1081,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                 {[
                   { title: "Tokenized Identity Verification Completed", category: "UIDAI Verification", time: "Today, 10:42 AM", ip: "49.37.142.90", location: "Vijayawada, AP", status: "SUCCESS" },
                   { title: "Civic Card Aadhaar Unmasked Toggle", category: "Privacy Audit", time: "Today, 10:38 AM", ip: "49.37.142.90", location: "Web App", status: "SUCCESS" },
-                  { title: "Access Request Dispatched by CivicOne Grand Hotel", category: "Consent Request", time: "Today, 08:21 PM", ip: "164.100.42.10", location: "Hotel Check-in Desk", status: "PENDING" },
+                  { title: "Access Request Dispatched by CIVIQONE Grand Hotel", category: "Consent Request", time: "Today, 08:21 PM", ip: "164.100.42.10", location: "Hotel Check-in Desk", status: "PENDING" },
                   { title: "Civic ID Session Login Authenticated", category: "Security Auth", time: "18 Aug 2026, 07:15 PM", ip: "49.37.142.90", location: "Chrome / Windows", status: "SUCCESS" },
                   { title: "Driving Licence (DL-AP-2024-9984) Credential Issued", category: "Government Issuance", time: "15 Aug 2026, 03:20 PM", ip: "164.100.42.10", location: "RTO AP Headquarters", status: "VERIFIED" },
                   { title: "Consent Token Approved for State Health Registry", category: "Consent Clearance", time: "14 Aug 2026, 11:05 AM", ip: "49.37.142.90", location: "Health Portal", status: "ACTIVE" }
@@ -703,7 +1092,7 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     borderRadius: '14px',
                     padding: '16px 20px',
                     display: 'flex',
-                    justify: 'space-between',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
                     gap: '12px'
@@ -741,22 +1130,29 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
           {/* TAB: GOVT UPDATES & DAILY NEWS */}
           {(activeTab === 'govt-updates' || activeTab === 'news') && (
-            <UpdatesAndNews govtUpdates={govtUpdates} dailyNews={dailyNews} initialTab={activeTab === 'news' ? 'news' : 'govt'} />
+            <UpdatesAndNews govtUpdates={govtUpdates} dailyNews={dailyNews} initialTab={activeTab === 'news' ? 'news' : 'govt'} onGoBack={handleGoBack} />
           )}
 
           {/* TAB: SECURITY CENTRE */}
           {activeTab === 'security' && (
-            <SecurityCentre />
+            <SecurityCentre onGoBack={handleGoBack} />
           )}
 
-          {/* TAB: HELP CENTRE */}
+          {/* TAB: HELP CENTRE & 24/7 CUSTOMER CARE */}
           {activeTab === 'help' && (
-            <HelpCentre />
+            <HelpCentre citizen={currentCitizen} onGoBack={handleGoBack} />
           )}
 
           {/* TAB: PROFILE SETTINGS */}
           {activeTab === 'profile' && (
-            <ProfileSettings citizen={currentCitizen} onLogout={onLogout} card={cardData} onCardUpdate={(updatedCard) => setCardData(updatedCard)} />
+            <ProfileSettings
+              citizen={currentCitizen}
+              onLogout={onLogout}
+              card={cardData}
+              onCardUpdate={(updatedCard) => setCardData(updatedCard)}
+              onProfileUpdate={handleProfileUpdate}
+              onGoBack={handleGoBack}
+            />
           )}
 
         </main>
@@ -803,22 +1199,20 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
           }}>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <strong style={{ fontSize: '1.1rem', color: 'var(--text-main)' }}>CivicOne Features</strong>
+                <strong style={{ fontSize: '1.1rem', color: 'var(--text-main)' }}>CIVIQONE Features</strong>
                 <button onClick={() => setMobileMoreDrawerOpen(false)} style={{ background: 'none', color: 'var(--text-muted)', border: 'none' }}><X size={22} /></button>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {[
-
+                  { id: 'help', label: 'Customer Care', icon: Headphones },
+                  { id: 'journey', label: 'My Journey', icon: Milestone },
                   { id: 'activity', label: 'My Activity', icon: Activity },
                   { id: 'privacy', label: 'Access & Consent', icon: Lock },
-                  { id: 'tourism', label: 'CivicOne World', icon: Compass },
-                  { id: 'travel', label: 'Travel & Bookings', icon: Plane },
+                  { id: 'tourism', label: 'CIVIQONE World', icon: Compass },
                   { id: 'govt-updates', label: 'Government Updates', icon: Landmark },
                   { id: 'news', label: 'Daily News', icon: Newspaper },
                   { id: 'security', label: 'Security Centre', icon: Shield },
-                  { id: 'privacy', label: 'Privacy Centre', icon: Lock },
-                  { id: 'help', label: 'Help Centre', icon: HelpCircle },
                   { id: 'profile', label: 'Profile Settings', icon: User }
                 ].map(item => (
                   <button
@@ -827,12 +1221,26 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
                     style={{
                       padding: '12px 14px', borderRadius: '10px', fontWeight: 700, fontSize: '0.875rem',
                       display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left',
-                      backgroundColor: activeTab === item.id ? '#0B5ED7' : 'transparent',
+                      backgroundColor: activeTab === item.id ? 'var(--primary-blue)' : 'transparent',
                       color: activeTab === item.id ? '#FFFFFF' : 'var(--text-main)',
                       border: 'none', cursor: 'pointer'
                     }}
                   >
-                    <item.icon size={18} /> {item.label}
+                    <item.icon size={18} />
+                    <span>{item.label}</span>
+                    {item.badge && (
+                      <span style={{
+                        marginLeft: 'auto',
+                        fontSize: '0.625rem',
+                        backgroundColor: activeTab === item.id ? 'rgba(255, 255, 255, 0.25)' : 'rgba(16, 185, 129, 0.15)',
+                        color: activeTab === item.id ? '#FFFFFF' : 'var(--success)',
+                        padding: '1px 6px',
+                        borderRadius: '6px',
+                        fontWeight: 800
+                      }}>
+                        {item.badge}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -855,7 +1263,11 @@ export default function CitizenDashboard({ citizen, onLogout, onNavigateToVerifi
 
 
 
-      <AiAgentFloating />
+      <AiAgentFloating
+        citizen={currentCitizen}
+        documents={documents}
+        onNavigateTab={handleSelectTab}
+      />
 
     </div>
   );

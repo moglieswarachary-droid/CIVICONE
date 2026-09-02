@@ -116,7 +116,7 @@ export default function DocumentViewerModal({ document, consentRecord, onClose }
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #0B1F3A', paddingBottom: '16px', marginBottom: '24px' }}>
               <div>
                 <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#0B5ED7', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                  CIVICONE VERIFIED CREDENTIAL DOCUMENT
+                  CIVIQONE VERIFIED CREDENTIAL DOCUMENT
                 </div>
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0B1F3A', marginTop: '2px' }}>
                   {document.name}

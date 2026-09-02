@@ -12,15 +12,36 @@ import PolicePortal from './components/PolicePortal.jsx';
 import AdminGate from './components/AdminGate.jsx';
 import AdminPortal from './components/AdminPortal.jsx';
 import PublicQRVerification from './components/PublicQRVerification.jsx';
+import DesktopWorkstationGuard from './components/DesktopWorkstationGuard.jsx';
 
 export default function App() {
   // Views: 'landing' | 'gate' | 'citizen' | 'organization-gate' | 'organization' | 'authority-gate' | 'authority' | 'police' | 'admin-gate' | 'admin' | 'verify'
   const [currentView, setCurrentView] = useState('landing');
-  const [authenticatedCitizen, setAuthenticatedCitizen] = useState(null);
+  const [authenticatedCitizen, setAuthenticatedCitizen] = useState(() => {
+    try {
+      const active = localStorage.getItem('civiqone_active_citizen');
+      if (active) return JSON.parse(active);
+    } catch (e) {}
+    return null;
+  });
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState(null);
   const [authenticatedAdmin, setAuthenticatedAdmin] = useState(null);
   const [verifyToken, setVerifyToken] = useState('CIV-TOKEN-CIV-DEMO-10001-SECURE-2026');
   const [selectedOrgConfig, setSelectedOrgConfig] = useState(null);
+
+  // Global Persistent Theme State (Synced across all portals and gates)
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('civiqone_theme') || 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('civiqone_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   // Helper to change view and push browser history state
   const changeView = (newView, customHash = '') => {
@@ -43,6 +64,14 @@ export default function App() {
       const searchParams = new URLSearchParams(window.location.search);
       const token = searchParams.get('token');
 
+      let activeCitizenData = authenticatedCitizen;
+      if (!activeCitizenData) {
+        try {
+          const cached = localStorage.getItem('civiqone_active_citizen');
+          if (cached) activeCitizenData = JSON.parse(cached);
+        } catch (e) {}
+      }
+
       if (rawHash === 'organization-gate' || rawHash === 'organization-access') {
         setCurrentView('organization-gate');
       } else if (rawHash === 'organization' || rawHash === 'org' || rawHash.startsWith('org-') || path.startsWith('/org')) {
@@ -54,14 +83,22 @@ export default function App() {
       } else if (rawHash === 'authority-gate' || rawHash === 'authority' || path.startsWith('/authority')) {
         setCurrentView('authority-gate');
       } else if (rawHash === 'gate' || rawHash === 'citizen-login') {
-        setCurrentView('gate');
-      } else if (rawHash === 'citizen') {
+        if (activeCitizenData) {
+          setCurrentView('citizen');
+        } else {
+          setCurrentView('gate');
+        }
+      } else if (rawHash === 'citizen' || rawHash.startsWith('citizen')) {
         setCurrentView('citizen');
       } else if (path.startsWith('/verify') || rawHash === 'verify' || token) {
         if (token) setVerifyToken(token);
         setCurrentView('verify');
       } else if (!rawHash) {
-        setCurrentView('landing');
+        if (activeCitizenData) {
+          setCurrentView('citizen');
+        } else {
+          setCurrentView('landing');
+        }
       }
     };
 
@@ -86,6 +123,12 @@ export default function App() {
   // Handle Citizen Login Authentication Completion
   const handleAuthSuccess = (citizenData) => {
     setAuthenticatedCitizen(citizenData);
+    try {
+      localStorage.setItem('civiqone_active_citizen', JSON.stringify(citizenData));
+      if (citizenData?.citizenId) {
+        localStorage.setItem(`civiqone_citizen_${citizenData.citizenId}`, JSON.stringify(citizenData));
+      }
+    } catch (e) {}
     changeView('citizen');
   };
 
@@ -110,6 +153,9 @@ export default function App() {
     setAuthenticatedCitizen(null);
     setAuthenticatedOfficer(null);
     setAuthenticatedAdmin(null);
+    try {
+      localStorage.removeItem('civiqone_active_citizen');
+    } catch (e) {}
     changeView('landing');
   };
 
@@ -125,6 +171,8 @@ export default function App() {
         <PreEntryGate
           onAuthenticated={handleAuthSuccess}
           onGoBackToLanding={() => changeView('landing')}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       );
 
@@ -137,80 +185,155 @@ export default function App() {
             setVerifyToken(token);
             changeView('verify');
           }}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       ) : (
         <PreEntryGate
           onAuthenticated={handleAuthSuccess}
           onGoBackToLanding={() => changeView('landing')}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       );
 
     case 'organization-gate':
       return (
-        <OrganizationGate
-          onAuthenticated={handleOpenOrgPortal}
+        <DesktopWorkstationGuard
+          portalType="organization"
+          portalTitle="Organization Access Gateway"
+          onSwitchToCitizen={() => changeView('gate')}
           onGoBackToLanding={() => changeView('landing')}
-          onOpenSuperAdmin={() => changeView('admin-gate')}
-        />
+        >
+          <OrganizationGate
+            onAuthenticated={handleOpenOrgPortal}
+            onGoBackToLanding={() => changeView('landing')}
+            onOpenSuperAdmin={() => changeView('admin-gate')}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
+        </DesktopWorkstationGuard>
       );
 
     case 'organization':
       return (
-        <OrganizationPortal
-          initialOrgConfig={selectedOrgConfig}
-          onReturnHome={() => changeView('organization-gate')}
-        />
+        <DesktopWorkstationGuard
+          portalType="organization"
+          portalTitle="Organization Verification Workspace"
+          onSwitchToCitizen={() => changeView('gate')}
+          onGoBackToLanding={() => changeView('landing')}
+        >
+          <OrganizationPortal
+            initialOrgConfig={selectedOrgConfig}
+            onReturnHome={() => changeView('organization-gate')}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
+        </DesktopWorkstationGuard>
       );
 
     case 'authority-gate':
       return (
-        <AuthorityGate
-          onAuthenticated={handleOfficerAuthSuccess}
+        <DesktopWorkstationGuard
+          portalType="authority"
+          portalTitle="Government Officer Portal Gateway"
+          onSwitchToCitizen={() => changeView('gate')}
           onGoBackToLanding={() => changeView('landing')}
-        />
+        >
+          <AuthorityGate
+            onAuthenticated={handleOfficerAuthSuccess}
+            onGoBackToLanding={() => changeView('landing')}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
+        </DesktopWorkstationGuard>
       );
 
     case 'authority':
-      return authenticatedOfficer ? (
-        <AuthorityPortal
-          officer={authenticatedOfficer}
-          onReturnHome={handleLogout}
-        />
-      ) : (
-        <AuthorityGate
-          onAuthenticated={handleOfficerAuthSuccess}
+      return (
+        <DesktopWorkstationGuard
+          portalType="authority"
+          portalTitle="Government Officer Supervision Portal"
+          onSwitchToCitizen={() => changeView('gate')}
           onGoBackToLanding={() => changeView('landing')}
-        />
+        >
+          {authenticatedOfficer ? (
+            <AuthorityPortal
+              officer={authenticatedOfficer}
+              onReturnHome={handleLogout}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+            />
+          ) : (
+            <AuthorityGate
+              onAuthenticated={handleOfficerAuthSuccess}
+              onGoBackToLanding={() => changeView('landing')}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+            />
+          )}
+        </DesktopWorkstationGuard>
       );
 
     case 'police':
       return (
-        <PolicePortal
-          officer={authenticatedOfficer}
-          initialState={selectedOrgConfig?.state}
-          onReturnHome={handleLogout}
-        />
+        <DesktopWorkstationGuard
+          portalType="police"
+          portalTitle="Police & Law Enforcement Investigation Desk"
+          onSwitchToCitizen={() => changeView('gate')}
+          onGoBackToLanding={() => changeView('landing')}
+        >
+          <PolicePortal
+            officer={authenticatedOfficer}
+            initialState={selectedOrgConfig?.state}
+            onReturnHome={handleLogout}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
+        </DesktopWorkstationGuard>
       );
 
     case 'admin-gate':
       return (
-        <AdminGate
-          onAuthenticated={handleAdminAuthSuccess}
+        <DesktopWorkstationGuard
+          portalType="admin"
+          portalTitle="Super Admin Control Gate"
+          onSwitchToCitizen={() => changeView('gate')}
           onGoBackToLanding={() => changeView('landing')}
-        />
+        >
+          <AdminGate
+            onAuthenticated={handleAdminAuthSuccess}
+            onGoBackToLanding={() => changeView('landing')}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
+        </DesktopWorkstationGuard>
       );
 
     case 'admin':
-      return authenticatedAdmin ? (
-        <AdminPortal
-          admin={authenticatedAdmin}
-          onReturnHome={handleLogout}
-        />
-      ) : (
-        <AdminGate
-          onAuthenticated={handleAdminAuthSuccess}
+      return (
+        <DesktopWorkstationGuard
+          portalType="admin"
+          portalTitle="National Super Admin Supervision Console"
+          onSwitchToCitizen={() => changeView('gate')}
           onGoBackToLanding={() => changeView('landing')}
-        />
+        >
+          {authenticatedAdmin ? (
+            <AdminPortal
+              admin={authenticatedAdmin}
+              onReturnHome={handleLogout}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+            />
+          ) : (
+            <AdminGate
+              onAuthenticated={handleAdminAuthSuccess}
+              onGoBackToLanding={() => changeView('landing')}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+            />
+          )}
+        </DesktopWorkstationGuard>
       );
 
     case 'verify':
@@ -224,6 +347,8 @@ export default function App() {
               changeView('landing');
             }
           }}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       );
 
@@ -231,11 +356,14 @@ export default function App() {
     default:
       return (
         <LandingPage
-          onAccessCivicOne={() => changeView('gate')}
+          onAccessCIVIQONE={() => changeView('gate')}
           onOpenAuthorityPortal={() => changeView('authority-gate')}
           onOpenOwnerAdmin={() => changeView('admin-gate')}
           onOpenOrganizationGate={() => changeView('organization-gate')}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       );
   }
 }
+

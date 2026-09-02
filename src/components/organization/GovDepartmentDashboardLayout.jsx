@@ -28,7 +28,7 @@ export default function GovDepartmentDashboardLayout({
   });
 
   const triggerCitizenSync = (actionName, citizenId) => {
-    setSyncNotice(`Record successfully synchronized with CivicOne Citizen ID (${citizenId}).`);
+    setSyncNotice(`Record successfully synchronized with CIVIQONE Citizen ID (${citizenId}).`);
     setTimeout(() => setSyncNotice(''), 4000);
   };
 

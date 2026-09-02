@@ -1,27 +1,55 @@
-// src/components/VirtualCard.jsx - Sleek Modern Digital Civic Card & Dynamic Features
+// src/components/VirtualCard.jsx - Official CIVIQONE Digital Citizen Identity Card
+// High-Reliability 3D Card Architecture (Card Wrapper -> Card Inner -> Card Face Front / Back)
+// Indian Identity Signature: Deep Indigo (#101B3D) + Ivory (#F8F7F2) + Ashoka Blue (#1A4F9C) + Tricolor Security Filament
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   ShieldCheck, QrCode, RotateCw, Share2, Download, CheckCircle2,
-  Copy, X, Eye, EyeOff, Radio, Mail, MapPin, Calendar, Phone
+  Copy, X, Radio, MapPin, Calendar, Phone, Lock, Fingerprint,
+  ExternalLink, Shield, Key, Sparkles, Check, Info
 } from 'lucide-react';
 
-export default function VirtualCard({ citizen, card, onNavigateToVerification, onCardUpdate }) {
+export default function VirtualCard({ citizen = {}, card = {}, onNavigateToVerification, onCardUpdate }) {
+  // Single boolean state controlling the 3D flip
   const [isFlipped, setIsFlipped] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showNfcModal, setShowNfcModal] = useState(false);
-  const [showFullAadhaar, setShowFullAadhaar] = useState(false);
-  
+
   const [nfcScanning, setNfcScanning] = useState(false);
   const [nfcSuccess, setNfcSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
   const [downloadingImage, setDownloadingImage] = useState(false);
 
+  // Dynamic Citizen Information from authenticated user profile / props
   const civicId = citizen?.citizenId || card?.civicId || citizen?.civicId || 'CIV-AP-710646-823';
-  const cardRef = useRef(null);
+  const citizenName = citizen?.fullName || citizen?.name || citizen?.displayName || 'Raghavendra';
+  const photoUrl = citizen?.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300";
+  const dob = citizen?.dob || citizen?.dateOfBirth || '15/08/1995';
+  const gender = citizen?.gender || 'Male';
+  const state = citizen?.state || 'Andhra Pradesh';
+  const jurisdiction = `${state}, India`;
+  const validFrom = card?.issueDate || '15/01/2024';
+  const validUntil = card?.expiryDate || '14/01/2034';
+  const ledgerHash = card?.ledgerHash || '0x99a4c82b710e64b8a15c3d2e';
+  const verificationRef = `REF-${civicId.replace(/[^A-Z0-9]/g, '')}-SEC`;
+  const verificationUrl = `https://verify.civiqone.gov.in/card/${encodeURIComponent(civicId)}`;
 
-  // Simulate NFC Tap Scan
+  // Copy helper
+  const copyToClipboard = (text) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Flip Toggle
+  const handleFlipCard = () => {
+    setIsFlipped(prev => !prev);
+  };
+
+  // NFC Simulation Trigger with Honest Demonstration Feedback
   const handleTriggerNfc = () => {
     setShowNfcModal(true);
     setNfcScanning(true);
@@ -30,551 +58,853 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
     setTimeout(() => {
       setNfcScanning(false);
       setNfcSuccess(true);
-    }, 2000);
+    }, 1800);
   };
 
-  // Real Scannable QR Code generator bound to Civic ID
-  const renderQrSvg = (size = 140, idValue = civicId) => {
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(idValue)}&color=0B1F3A&bgcolor=FFFFFF`;
-    return (
-      <img
-        src={qrUrl}
-        alt={`QR Code for ${idValue}`}
-        style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          display: 'block',
-          margin: '0 auto',
-          backgroundColor: '#FFFFFF',
-          padding: '6px',
-          borderRadius: '10px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-        }}
-      />
-    );
+  // Web Share API with Modal Fallback
+  const handleShareCard = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `CIVIQONE Official Digital Citizen Identity - ${citizenName}`,
+          text: `Official CIVIQONE Verified Citizen Identity Card for ${citizenName}. Civic ID: ${civicId}`,
+          url: verificationUrl
+        });
+        return;
+      } catch (err) {
+        // User cancelled or share failed, fallback to modal
+      }
+    }
+    setShowShareModal(true);
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Generate Image Download of Civic Card
+  // High-Resolution PNG Card Download
   const handleDownloadCardImage = () => {
     setDownloadingImage(true);
-    
-    // Create an offscreen canvas to render the card image
     const canvas = document.createElement('canvas');
-    canvas.width = 600;
-    canvas.height = 380;
+    canvas.width = 1000;
+    canvas.height = 630; // CR80 standard ID aspect ratio 1.586
     const ctx = canvas.getContext('2d');
 
-    // Background Gradient
-    const gradient = ctx.createLinearGradient(0, 0, 600, 380);
-    gradient.addColorStop(0, '#0B1F3A');
-    gradient.addColorStop(0.5, '#073B8C');
-    gradient.addColorStop(1, '#0B5ED7');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 600, 380);
+    // 1. Background Gradient (Deep Indigo Navy)
+    const grad = ctx.createLinearGradient(0, 0, 1000, 630);
+    grad.addColorStop(0, '#101B3D');
+    grad.addColorStop(0.6, '#1E2F6B');
+    grad.addColorStop(1, '#0C1530');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 1000, 630);
 
-    // Card Header
-    ctx.fillStyle = '#FFFFFF';
+    // Soft Silver Perimeter Border
+    ctx.strokeStyle = '#D9DEE8';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(16, 16, 968, 598);
+
+    // Indian Tricolor Security Filament Line
+    const triGrad = ctx.createLinearGradient(16, 105, 984, 105);
+    triGrad.addColorStop(0, '#FF9933');
+    triGrad.addColorStop(0.33, '#FF9933');
+    triGrad.addColorStop(0.33, '#FFFFFF');
+    triGrad.addColorStop(0.66, '#FFFFFF');
+    triGrad.addColorStop(0.66, '#138808');
+    triGrad.addColorStop(1, '#138808');
+    ctx.fillStyle = triGrad;
+    ctx.fillRect(16, 105, 968, 4);
+
+    // 2. Header
+    ctx.fillStyle = '#F8F7F2';
+    ctx.font = 'bold 34px Inter, sans-serif';
+    ctx.fillText('CIVIQONE DIGITAL CITIZEN IDENTITY', 50, 70);
+
+    ctx.fillStyle = '#93C5FD';
+    ctx.font = 'bold 15px Inter, sans-serif';
+    ctx.fillText('VERIFIED CITIZEN CREDENTIAL • NATIONAL DIGITAL IDENTITY', 50, 95);
+
+    // 3. Status Badge
+    ctx.fillStyle = '#064E3B';
+    ctx.fillRect(730, 42, 220, 44);
+    ctx.strokeStyle = '#34D399';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(730, 42, 220, 44);
+    ctx.fillStyle = '#A7F3D0';
+    ctx.font = 'bold 16px Inter, sans-serif';
+    ctx.fillText('✓ VERIFIED', 780, 70);
+
+    // 4. Citizen Info
+    ctx.fillStyle = '#F8F7F2';
+    ctx.font = 'bold 42px Inter, sans-serif';
+    ctx.fillText(citizenName, 220, 220);
+
+    ctx.fillStyle = '#93C5FD';
+    ctx.font = 'bold 24px monospace';
+    ctx.fillText(`CIVIC ID: ${civicId}`, 220, 265);
+
+    ctx.fillStyle = '#D9DEE8';
+    ctx.font = '20px Inter, sans-serif';
+    ctx.fillText(`DOB: ${dob}   |   GENDER: ${gender}`, 220, 310);
+    ctx.fillText(`STATE / REGION: ${jurisdiction}`, 220, 350);
+    ctx.fillText(`VALIDITY: ${validFrom} – ${validUntil}`, 220, 390);
+
+    // 5. Tier Label Bottom
+    ctx.fillStyle = '#93C5FD';
     ctx.font = 'bold 22px Inter, sans-serif';
-    ctx.fillText('CivicOne Digital Identity', 30, 45);
-    ctx.fillStyle = '#60A5FA';
-    ctx.font = '12px Inter, sans-serif';
-    ctx.fillText('VERIFIED CITIZEN CREDENTIAL', 30, 65);
+    ctx.fillText('● NORMAL CITIZEN', 50, 560);
 
-    // Name & IDs
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 24px Inter, sans-serif';
-    const nameStr = citizen?.fullName || citizen?.name || 'Raghavendra';
-    ctx.fillText(nameStr, 30, 140);
+    ctx.fillStyle = 'rgba(217, 222, 232, 0.65)';
+    ctx.font = '14px monospace';
+    ctx.fillText(`PKI: ${verificationRef} • LEDGER: ${ledgerHash.slice(0, 16)}...`, 50, 590);
 
-    ctx.fillStyle = '#BFDBFE';
-    ctx.font = 'bold 16px Monospace, sans-serif';
-    ctx.fillText(`Civic ID: ${civicId}`, 30, 175);
-
-    ctx.fillStyle = '#E2E8F0';
-    ctx.font = '14px Inter, sans-serif';
-    ctx.fillText(`Aadhaar: ${citizen?.maskedAadhaar || 'XXXX XXXX 8909'}`, 30, 205);
-    ctx.fillText(`DOB: ${citizen?.dob || '15/08/1995'}`, 30, 230);
-    ctx.fillText(`Mobile: ${citizen?.mobile || citizen?.phone || '+91 8121280857'}`, 30, 255);
-    ctx.fillText(`Email: ${citizen?.email || 'raghavendra@gmail.com'}`, 30, 280);
-
-    // Footer
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.font = '11px Inter, sans-serif';
-    ctx.fillText('Official Digital Identity Card — Government of Andhra Pradesh | CivicOne Platform', 30, 345);
-
-    // Convert to Image Download
     setTimeout(() => {
       const link = document.createElement('a');
-      link.download = `CivicOne_Card_${civicId}.png`;
+      link.download = `CIVIQONE_Citizen_Card_${civicId}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
       setDownloadingImage(false);
     }, 400);
   };
 
+  // Reusable Scannable Dynamic QR Code
+  const renderQrCode = (size = 100, labelUnder = true) => {
+    const qrPayload = `https://verify.civiqone.gov.in/verify?id=${encodeURIComponent(civicId)}&tier=NORMAL&name=${encodeURIComponent(citizenName)}&v=${encodeURIComponent(ledgerHash.slice(0, 10))}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrPayload)}&color=101B3D&bgcolor=F8F7F2`;
+
+    return (
+      <div style={{
+        position: 'relative',
+        backgroundColor: '#F8F7F2',
+        padding: '6px',
+        borderRadius: '10px',
+        border: '1.5px solid #D9DEE8',
+        boxShadow: '0 4px 12px rgba(16, 27, 61, 0.15)',
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <img
+          src={qrUrl}
+          alt={`Official QR Code for Civic ID ${civicId}`}
+          style={{ width: `${size}px`, height: `${size}px`, display: 'block', borderRadius: '4px' }}
+        />
+        {labelUnder && (
+          <div style={{
+            fontSize: '6.5px',
+            fontWeight: 900,
+            color: '#101B3D',
+            letterSpacing: '0.6px',
+            textTransform: 'uppercase',
+            marginTop: '3px',
+            whiteSpace: 'nowrap'
+          }}>
+            SCAN TO VERIFY
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div style={{ maxWidth: '460px', width: '100%', margin: '0 auto' }}>
+    <div style={{ maxWidth: '540px', width: '100%', margin: '0 auto' }}>
 
-      {/* 3D CARD CONTAINER */}
+      {/* 3D ROTATABLE DIGITAL IDENTITY CARD WRAPPER */}
       <div
-        ref={cardRef}
-        className={`card-container-3d ${isFlipped ? 'flipped' : ''}`}
-        style={{ width: '100%', minHeight: '240px', aspectRatio: '1.586', position: 'relative', cursor: 'pointer' }}
-        onClick={() => setIsFlipped(!isFlipped)}
+        tabIndex={0}
+        role="region"
+        aria-label="CIVIQONE Normal Citizen Digital Identity Card. Press Enter or Space to flip."
+        className="card-wrapper"
+        onClick={handleFlipCard}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleFlipCard();
+          }
+        }}
+        style={{ cursor: 'pointer' }}
       >
-        <div className="card-inner-3d">
+        {/* CARD INNER ELEMENT — Sole element rotated via rotateY(180deg) */}
+        <div className={`card-inner ${isFlipped ? 'is-flipped' : ''}`}>
 
-          {/* FRONT OF VIRTUAL CIVICONE CARD */}
+          {/* =========================================================================
+              FRONT FACE (Deep Indigo Navy Surface)
+              ========================================================================= */}
           <div
-            className="card-front-3d security-pattern-bg"
+            className="card-face card-front security-pattern-bg"
             style={{
-              background: 'linear-gradient(135deg, #0B1F3A 0%, #073B8C 55%, #0B5ED7 100%)',
-              padding: '20px 24px',
-              color: '#FFFFFF',
-              borderRadius: '20px',
-              boxShadow: '0 20px 40px -10px rgba(11, 31, 58, 0.45)',
+              background: 'linear-gradient(135deg, #101B3D 0%, #1E2F6B 55%, #0C1530 100%)',
+              padding: '22px 24px',
+              color: '#F8F7F2',
+              border: '1.5px solid rgba(217, 222, 232, 0.4)',
+              boxShadow: '0 20px 45px -10px rgba(16, 27, 61, 0.5), 0 0 15px rgba(26, 79, 156, 0.2)',
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'space-between',
-              border: '1px solid rgba(255,255,255,0.25)',
-              position: 'relative',
-              overflow: 'hidden'
+              justifyContent: 'space-between'
             }}
           >
-            {/* Shimmer Overlay */}
+            {/* Subtle Hologram Shimmer */}
             <div className="hologram-shimmer" />
 
-            {/* Card Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Fine Guilloche Micro-Security Pattern Overlay (SVG) */}
+            <svg
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: 0.07 }}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <pattern id="civic-guilloche" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M0 20 Q 10 0, 20 20 T 40 20" fill="none" stroke="#D9DEE8" strokeWidth="0.5" />
+                  <path d="M20 0 Q 30 20, 20 40 T 20 0" fill="none" stroke="#1A4F9C" strokeWidth="0.5" />
+                  <circle cx="20" cy="20" r="7" fill="none" stroke="#38BDF8" strokeWidth="0.4" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#civic-guilloche)" />
+            </svg>
+
+            {/* CARD HEADER SECTION */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                
+                {/* Left: CIVIQONE Logo & Identity Title */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                  <div style={{
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(26, 79, 156, 0.4)',
+                    border: '1px solid rgba(217, 222, 232, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                  }}>
+                    <ShieldCheck size={20} style={{ color: '#38BDF8' }} />
+                  </div>
+                  <div>
+                    <div style={{
+                      fontWeight: 900,
+                      fontSize: '0.95rem',
+                      letterSpacing: '0.04em',
+                      lineHeight: 1.1,
+                      color: '#F8F7F2'
+                    }}>
+                      CIVIQONE <span style={{ fontSize: '0.725rem', fontWeight: 800, color: '#93C5FD' }}>DIGITAL CITIZEN IDENTITY</span>
+                    </div>
+                    <div style={{
+                      fontSize: '0.575rem',
+                      color: '#38BDF8',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.08em',
+                      fontWeight: 700
+                    }}>
+                      VERIFIED CITIZEN
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Compact Verification Badge */}
                 <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
-                  backgroundColor: 'rgba(255,255,255,0.18)',
+                  backgroundColor: 'rgba(19, 136, 8, 0.2)',
+                  border: '1.5px solid #34D399',
+                  padding: '3px 10px',
+                  borderRadius: '20px',
+                  fontSize: '0.675rem',
+                  fontWeight: 800,
+                  color: '#A7F3D0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                }}>
+                  ✓ VERIFIED
+                </div>
+              </div>
+
+              {/* Signature Indian Tricolor Security Filament Line */}
+              <div className="tricolor-filament-line" />
+            </div>
+
+            {/* CARD MAIN PROFILE SECTION (Two-Column Layout) */}
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', margin: '4px 0' }}>
+              
+              {/* Left Column: Citizen Portrait Photograph */}
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+                <img
+                  src={photoUrl}
+                  alt={citizenName}
+                  style={{
+                    width: '74px',
+                    height: '88px', // 4:5 portrait aspect ratio
+                    borderRadius: '11px',
+                    objectFit: 'cover',
+                    border: '1.5px solid #F8F7F2',
+                    boxShadow: '0 4px 14px rgba(16, 27, 61, 0.4)'
+                  }}
+                />
+                {/* Official Photo Verification Seal Overlay */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-3px',
+                  right: '-3px',
+                  backgroundColor: '#101B3D',
+                  border: '1px solid #38BDF8',
+                  borderRadius: '50%',
+                  width: '18px',
+                  height: '18px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <ShieldCheck size={22} style={{ color: '#60A5FA' }} />
-                </div>
-                <div>
-                  <div style={{ fontWeight: 900, fontSize: '1.1rem', letterSpacing: '0.04em', lineHeight: 1, color: '#FFFFFF' }}>
-                    CivicOne
-                  </div>
-                  <div style={{ fontSize: '0.65rem', color: '#93C5FD', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>
-                    Digital Identity
-                  </div>
+                  <Shield size={11} style={{ color: '#38BDF8' }} />
                 </div>
               </div>
 
-              {/* Status Badge */}
+              {/* Right Column: Citizen Identity Information */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {/* Citizen Full Name */}
+                <h2 style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 900,
+                  color: '#F8F7F2',
+                  letterSpacing: '-0.01em',
+                  marginBottom: '3px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {citizenName}
+                </h2>
+
+                {/* Civic ID with Copy Helper */}
+                <div style={{
+                  fontSize: '0.775rem',
+                  fontWeight: 800,
+                  color: '#93C5FD',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  marginBottom: '2px'
+                }}>
+                  <span style={{ color: '#D9DEE8', fontSize: '0.7rem', fontWeight: 700 }}>CIVIC ID:</span>
+                  <span style={{ fontFamily: 'monospace', fontWeight: 900, letterSpacing: '0.3px', color: '#F8F7F2' }}>{civicId}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); copyToClipboard(civicId); }}
+                    style={{ background: 'none', color: '#93C5FD', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.85 }}
+                    title="Copy Civic ID"
+                    aria-label="Copy Civic ID"
+                  >
+                    <Copy size={11} />
+                  </button>
+                </div>
+
+                {/* DOB & Gender */}
+                <div style={{ fontSize: '0.7rem', color: '#D9DEE8', marginBottom: '2px' }}>
+                  <span style={{ color: '#93C5FD', fontWeight: 700 }}>DOB:</span> <strong style={{ color: '#F8F7F2' }}>{dob}</strong> &bull; <span style={{ color: '#93C5FD', fontWeight: 700 }}>GENDER:</span> <strong style={{ color: '#F8F7F2' }}>{gender}</strong>
+                </div>
+
+                {/* State / Region */}
+                <div style={{
+                  fontSize: '0.675rem',
+                  color: '#38BDF8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <MapPin size={11} />
+                  <span><strong>STATE / REGION:</strong> {jurisdiction}</span>
+                </div>
+              </div>
+
+              {/* Integrated Front QR Code Area */}
+              <div
+                onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
+                style={{ cursor: 'pointer', flexShrink: 0 }}
+                title="Click to view scannable QR verification modal"
+              >
+                {renderQrCode(46, true)}
+              </div>
+            </div>
+
+            {/* CARD FOOTER & DIGITAL CITIZEN SIGNATURE */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              borderTop: '1px solid rgba(217, 222, 232, 0.25)',
+              paddingTop: '6px',
+              fontSize: '0.65rem'
+            }}>
+              
+              {/* Left: Citizen Status & Security Reference */}
+              <div>
+                <div style={{
+                  fontWeight: 900,
+                  fontSize: '0.725rem',
+                  letterSpacing: '0.06em',
+                  color: '#93C5FD',
+                  textTransform: 'uppercase',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <ShieldCheck size={12} />
+                  NORMAL CITIZEN
+                </div>
+                <div style={{
+                  fontSize: '0.55rem',
+                  color: 'rgba(217, 222, 232, 0.65)',
+                  fontFamily: 'monospace'
+                }}>
+                  PKI: {verificationRef}
+                </div>
+              </div>
+
+              {/* Right: Interactive Flip Hint */}
               <div style={{
-                backgroundColor: 'rgba(25, 135, 84, 0.25)',
-                border: '1px solid rgba(74, 222, 128, 0.4)',
-                padding: '4px 12px',
-                borderRadius: '20px',
-                fontSize: '0.725rem',
-                fontWeight: 700,
-                color: '#4ADE80',
+                fontSize: '0.65rem',
+                color: '#38BDF8',
+                fontWeight: 800,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px'
               }}>
-                🟢 Verified Identity
+                <RotateCw size={11} /> Tap to Flip
               </div>
-            </div>
-
-            {/* Card Main Profile Section */}
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', margin: '14px 0' }}>
-              <img
-                src={citizen?.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200"}
-                alt={citizen?.fullName || 'Citizen'}
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '14px',
-                  objectFit: 'cover',
-                  border: '2px solid rgba(255,255,255,0.9)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.25)'
-                }}
-              />
-
-              <div style={{ flex: 1 }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.01em', marginBottom: '4px' }}>
-                  {citizen?.fullName || citizen?.name || citizen?.displayName || 'Raghavendra'}
-                </h2>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#BFDBFE', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  Civic ID: <span style={{ fontFamily: 'monospace', fontWeight: 900, letterSpacing: '0.5px' }}>{civicId}</span>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); copyToClipboard(civicId); }}
-                    style={{ background: 'none', color: '#BFDBFE', opacity: 0.85, cursor: 'pointer', border: 'none', padding: 0 }}
-                    title="Copy Civic ID"
-                  >
-                    <Copy size={13} />
-                  </button>
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.85)', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span>Aadhaar: <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{showFullAadhaar ? (citizen?.aadhaarNumber || '8121 4981 8909') : (citizen?.maskedAadhaar || 'XXXX XXXX 8909')}</span></span>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setShowFullAadhaar(!showFullAadhaar); }}
-                    style={{ background: 'none', border: 'none', color: '#BFDBFE', cursor: 'pointer', padding: 0, opacity: 0.95, display: 'flex', alignItems: 'center' }}
-                    title={showFullAadhaar ? "Hide Aadhaar Number" : "Reveal Aadhaar Number"}
-                  >
-                    {showFullAadhaar ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Mini Interactive QR Code Icon */}
-              <div
-                onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
-                style={{
-                  backgroundColor: '#FFFFFF',
-                  padding: '6px',
-                  borderRadius: '10px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.18)',
-                  cursor: 'pointer'
-                }}
-                title="Click to view enlarged dynamic QR code"
-              >
-                {renderQrSvg(46, civicId)}
-              </div>
-            </div>
-
-            {/* Card Footer Bar */}
-            <div style={{
-              display: 'flex',
-              justify: 'space-between',
-              alignItems: 'center',
-              borderTop: '1px solid rgba(255,255,255,0.18)',
-              paddingTop: '10px',
-              fontSize: '0.725rem',
-              color: 'rgba(255,255,255,0.85)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{
-                  width: '24px',
-                  height: '18px',
-                  borderRadius: '4px',
-                  background: 'linear-gradient(135deg, #FDE047 0%, #CA8A04 100%)',
-                  border: '1px solid #FEF08A'
-                }} />
-                <span style={{ fontWeight: 600 }}>Valid: {card?.issueDate || "15 Jan 2024"} - {card?.expiryDate || "14 Jan 2034"}</span>
-              </div>
-              <span style={{ fontSize: '0.7rem', color: '#93C5FD', fontWeight: 700 }}>
-                Tap Card to Flip 🔄
-              </span>
             </div>
 
           </div>
 
-          {/* BACK OF VIRTUAL CIVICONE CARD */}
+
+          {/* =========================================================================
+              BACK FACE (Ivory White #F8F7F2 Surface)
+              ========================================================================= */}
           <div
-            className="card-back-3d security-pattern-bg"
+            className="card-face card-back security-pattern-ivory"
             style={{
-              background: 'linear-gradient(135deg, #0B1F3A 0%, #0F172A 100%)',
+              backgroundColor: '#F8F7F2',
               padding: '20px 24px',
-              color: '#FFFFFF',
-              borderRadius: '20px',
-              boxShadow: '0 20px 40px -10px rgba(11, 31, 58, 0.45)',
+              color: '#172033',
+              border: '1.5px solid #D9DEE8',
+              boxShadow: '0 20px 45px -10px rgba(16, 27, 61, 0.35)',
               display: 'flex',
               flexDirection: 'column',
-              justify: 'space-between',
-              border: '1px solid rgba(255,255,255,0.2)'
+              justifyContent: 'space-between'
             }}
           >
+            {/* Header Section */}
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#93C5FD', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Registered Identity Details
-                </span>
-                <span style={{ fontSize: '0.7rem', color: '#4ADE80', fontWeight: 700 }}>
-                  CIVIC-SECURE VERIFIED
-                </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <div>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 900,
+                    color: '#101B3D',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}>
+                    <Lock size={13} style={{ color: '#1A4F9C' }} />
+                    SECURITY & VERIFICATION
+                  </div>
+                  <div style={{ fontSize: '0.575rem', color: '#64748B', fontWeight: 700 }}>
+                    CIVIQONE DIGITAL IDENTITY
+                  </div>
+                </div>
+
+                <div style={{
+                  fontSize: '0.625rem',
+                  fontWeight: 800,
+                  color: '#1A4F9C',
+                  backgroundColor: '#EAF3FF',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  border: '1px solid #BFDBFE'
+                }}>
+                  SECURE IDENTITY
+                </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem', color: '#E2E8F0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Calendar size={14} style={{ color: '#60A5FA' }} />
-                  <span><strong>Date of Birth:</strong> {citizen?.dob || '15-08-1995'}</span>
+              {/* Signature Indian Tricolor Security Filament Line */}
+              <div className="tricolor-filament-line" />
+            </div>
+
+            {/* Back Main Content (Split Grid: Left Structured Cards, Right Large QR Code) */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '14px', alignItems: 'center', margin: '4px 0' }}>
+              
+              {/* Left Column: Structured Identity Security Specifications */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.675rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#172033' }}>
+                  <Fingerprint size={12} style={{ color: '#1A4F9C' }} />
+                  <span><strong>Multi-Factor Identity:</strong> <span style={{ color: '#101B3D' }}>Grade-A Verified</span></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                  <MapPin size={14} style={{ color: '#60A5FA', marginTop: '2px' }} />
-                  <div><strong>Registered Address:</strong> {citizen?.address || 'H.No 12-4-89, M.G. Road, Vijayawada, Andhra Pradesh - 520001'}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#172033' }}>
+                  <Key size={12} style={{ color: '#1A4F9C' }} />
+                  <span><strong>Digital Authentication:</strong> <span style={{ color: '#101B3D' }}>Dual-Key PKI Token</span></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Phone size={14} style={{ color: '#60A5FA' }} />
-                  <span><strong>Mobile Number:</strong> {citizen?.mobile || citizen?.phone || '+91 8121280857'}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#172033' }}>
+                  <ShieldCheck size={12} style={{ color: '#1A4F9C' }} />
+                  <span><strong>Verification Ref:</strong> <span style={{ fontFamily: 'monospace', color: '#101B3D' }}>{verificationRef.slice(0, 16)}</span></span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Mail size={14} style={{ color: '#60A5FA' }} />
-                  <span><strong>Email Address:</strong> {citizen?.email || 'raghavendra@gmail.com'}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#172033' }}>
+                  <Radio size={12} style={{ color: '#1A4F9C' }} />
+                  <span><strong>NFC Authentication:</strong> <span style={{ color: '#101B3D' }}>ISO/IEC 14443 Type A</span></span>
                 </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#172033' }}>
+                  <Phone size={12} style={{ color: '#DC2626' }} />
+                  <span><strong>Emergency Contact:</strong> <strong style={{ color: '#DC2626' }}>112</strong> (National Helpline)</span>
+                </div>
+              </div>
+
+              {/* Right Column: Large Dynamic Scannable QR Code */}
+              <div
+                onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
+                style={{ textAlign: 'center', cursor: 'pointer' }}
+                title="Click to view high-resolution QR modal"
+              >
+                {renderQrCode(72, true)}
               </div>
             </div>
 
-            {/* Help & Support Contact Footer */}
+            {/* Back Footer */}
             <div style={{
-              backgroundColor: 'rgba(255,255,255,0.06)',
-              borderRadius: '10px',
-              padding: '10px 14px',
-              fontSize: '0.725rem',
-              color: '#BFDBFE',
-              border: '1px solid rgba(255,255,255,0.1)',
+              backgroundColor: '#EFF6FF',
+              borderRadius: '8px',
+              padding: '6px 10px',
+              fontSize: '0.625rem',
+              color: '#1E2F6B',
+              border: '1px solid #DBEAFE',
               display: 'flex',
               alignItems: 'center',
-              justify: 'space-between'
+              justifyContent: 'space-between'
             }}>
-              <span>For queries or help, please contact us:</span>
-              <strong style={{ color: '#FFFFFF' }}>civicone@gmail.com</strong>
+              <span>VERIFY CIVIQONE DIGITAL IDENTITY: <strong style={{ color: '#101B3D' }}>verify.civiqone.gov.in</strong></span>
+              <span style={{ fontFamily: 'monospace', color: '#101B3D', fontWeight: 800 }}>{civicId}</span>
             </div>
+
           </div>
 
         </div>
       </div>
 
-      {/* CARD ACTION BUTTON BAR (4 BUTTONS: FLIP, VIEW QR, NFC TAP, SHARE) */}
+
+      {/* =========================================================================
+          CARD ACTION BAR (4 BUTTONS: FLIP CARD | VIEW QR | NFC TAP | SHARE)
+          ========================================================================= */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(68px, 1fr))',
         gap: '8px',
         marginTop: '16px'
       }}>
+        
+        {/* Button 1: Flip Card */}
         <button
-          onClick={() => setIsFlipped(!isFlipped)}
+          type="button"
+          onClick={handleFlipCard}
+          aria-label="Flip Digital Identity Card"
           style={{
             backgroundColor: '#FFFFFF',
-            border: '1px solid #E2E8F0',
+            border: '1.5px solid #E2E8F0',
             borderRadius: '12px',
-            padding: '10px 6px',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            color: '#0B1F3A',
+            padding: '12px 6px',
+            fontSize: '0.775rem',
+            fontWeight: 800,
+            color: '#101B3D',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-            cursor: 'pointer'
+            gap: '5px',
+            boxShadow: '0 2px 6px rgba(16, 27, 61, 0.06)',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
           }}
+          className="hover-card"
         >
-          <RotateCw size={16} style={{ color: '#0B5ED7' }} /> Flip Card
+          <RotateCw size={18} style={{ color: '#1A4F9C' }} />
+          <span>Flip Card</span>
         </button>
 
+        {/* Button 2: View QR */}
         <button
-          onClick={() => setShowQrModal(true)}
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setShowQrModal(true); }}
+          aria-label="View Enlarged QR Code"
           style={{
             backgroundColor: '#FFFFFF',
-            border: '1px solid #E2E8F0',
+            border: '1.5px solid #E2E8F0',
             borderRadius: '12px',
-            padding: '10px 6px',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            color: '#0B1F3A',
+            padding: '12px 6px',
+            fontSize: '0.775rem',
+            fontWeight: 800,
+            color: '#101B3D',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-            cursor: 'pointer'
+            gap: '5px',
+            boxShadow: '0 2px 6px rgba(16, 27, 61, 0.06)',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
           }}
+          className="hover-card"
         >
-          <QrCode size={16} style={{ color: '#0B5ED7' }} /> View QR
+          <QrCode size={18} style={{ color: '#1A4F9C' }} />
+          <span>View QR</span>
         </button>
 
+        {/* Button 3: NFC Tap */}
         <button
-          onClick={handleTriggerNfc}
+          type="button"
+          onClick={(e) => { e.stopPropagation(); handleTriggerNfc(); }}
+          aria-label="Simulate NFC Tap Contactless Verification"
           style={{
             backgroundColor: '#FFFFFF',
-            border: '1px solid #E2E8F0',
+            border: '1.5px solid #E2E8F0',
             borderRadius: '12px',
-            padding: '10px 6px',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            color: '#0B1F3A',
+            padding: '12px 6px',
+            fontSize: '0.775rem',
+            fontWeight: 800,
+            color: '#101B3D',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-            cursor: 'pointer'
+            gap: '5px',
+            boxShadow: '0 2px 6px rgba(16, 27, 61, 0.06)',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
           }}
+          className="hover-card"
         >
-          <Radio size={16} style={{ color: '#0B5ED7' }} /> NFC Tap
+          <Radio size={18} style={{ color: '#1A4F9C' }} />
+          <span>NFC Tap</span>
         </button>
 
+        {/* Button 4: Share */}
         <button
-          onClick={() => setShowShareModal(true)}
+          type="button"
+          onClick={(e) => { e.stopPropagation(); handleShareCard(); }}
+          aria-label="Share or Export Identity Card"
           style={{
             backgroundColor: '#FFFFFF',
-            border: '1px solid #E2E8F0',
+            border: '1.5px solid #E2E8F0',
             borderRadius: '12px',
-            padding: '10px 6px',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            color: '#0B1F3A',
+            padding: '12px 6px',
+            fontSize: '0.775rem',
+            fontWeight: 800,
+            color: '#101B3D',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '4px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-            cursor: 'pointer'
+            gap: '5px',
+            boxShadow: '0 2px 6px rgba(16, 27, 61, 0.06)',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
           }}
+          className="hover-card"
         >
-          <Share2 size={16} style={{ color: '#0B5ED7' }} /> Share
+          <Share2 size={18} style={{ color: '#1A4F9C' }} />
+          <span>Share</span>
         </button>
       </div>
 
-      {/* MODAL 1: ENLARGED QR CODE WITH EXACT CIVIC ID */}
+
+      {/* =========================================================================
+          MODAL 1: VIEW ENLARGED HIGH-SECURITY QR LIGHTBOX
+          ========================================================================= */}
       {showQrModal && (
         <div style={{
           position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.75)',
+          inset: 0,
+          backgroundColor: 'rgba(16, 27, 61, 0.82)',
           backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 100,
+          zIndex: 250,
           padding: '16px'
         }}>
           <div style={{
             backgroundColor: '#FFFFFF',
             borderRadius: '24px',
             padding: '32px',
-            maxWidth: '420px',
+            maxWidth: '440px',
             width: '100%',
             position: 'relative',
             textAlign: 'center',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.3)'
+            boxShadow: '0 25px 50px rgba(16, 27, 61, 0.35)',
+            border: '2px solid #DBEAFE'
           }}>
             <button
+              type="button"
               onClick={() => setShowQrModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', color: '#64748B', cursor: 'pointer', border: 'none' }}
+              aria-label="Close QR modal"
+              style={{ position: 'absolute', top: '18px', right: '18px', background: 'none', color: '#64748B', cursor: 'pointer', border: 'none', padding: '4px' }}
             >
               <X size={22} />
             </button>
 
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <ShieldCheck size={26} style={{ color: '#0B5ED7' }} />
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0B1F3A' }}>
-                CivicOne Verification QR Code
-              </h3>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#1A4F9C', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', backgroundColor: '#EFF6FF', padding: '4px 12px', borderRadius: '12px', marginBottom: '10px' }}>
+              <ShieldCheck size={14} /> OFFICIAL VERIFICATION QR
             </div>
-            <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '20px' }}>
-              Official cryptographic QR code bound to your Civic ID for instant verification.
+
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#101B3D', marginBottom: '4px' }}>
+              SCAN TO VERIFY THIS CIVIQONE DIGITAL IDENTITY
+            </h3>
+            <p style={{ fontSize: '0.825rem', color: '#64748B', marginBottom: '20px' }}>
+              Scan with any authorized reader to instantly verify <strong>{citizenName}</strong>'s digital identity credential.
             </p>
 
+            {/* High Resolution Scannable QR */}
             <div style={{
-              padding: '18px',
-              backgroundColor: '#F6F9FC',
-              borderRadius: '18px',
+              padding: '20px',
+              backgroundColor: '#F8F7F2',
+              borderRadius: '20px',
               display: 'inline-block',
               marginBottom: '20px',
-              border: '2px solid #E2E8F0',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
+              border: '2px solid #D9DEE8',
+              boxShadow: '0 4px 16px rgba(16, 27, 61, 0.08)'
             }}>
-              {renderQrSvg(200, civicId)}
+              {renderQrCode(200, false)}
             </div>
 
+            {/* Token Info Box */}
             <div style={{
-              fontSize: '0.85rem',
-              color: '#073B8C',
+              fontSize: '0.8rem',
+              color: '#1E2F6B',
               backgroundColor: '#EAF3FF',
               padding: '12px 16px',
               borderRadius: '12px',
               marginBottom: '16px',
               fontWeight: 800,
               fontFamily: 'monospace',
-              letterSpacing: '0.5px'
+              letterSpacing: '0.5px',
+              border: '1px solid #BFDBFE'
             }}>
-              CIVIC ID TOKEN: {civicId}
+              TOKEN: {civicId}
             </div>
 
-            <button
-              onClick={() => { copyToClipboard(civicId); }}
-              style={{
-                width: '100%',
-                backgroundColor: copied ? '#198754' : '#0B5ED7',
-                color: '#FFFFFF',
-                padding: '12px',
-                borderRadius: '12px',
-                fontWeight: 800,
-                fontSize: '0.9rem',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-            >
-              {copied ? <CheckCircle2 size={18} /> : <Copy size={18} />}
-              {copied ? 'Civic ID Copied!' : 'Copy Civic ID Token'}
-            </button>
+            {/* Action Buttons inside QR Modal */}
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => copyToClipboard(verificationUrl)}
+                style={{
+                  flex: 1,
+                  backgroundColor: copied ? '#198754' : '#1A4F9C',
+                  color: '#FFFFFF',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
+              >
+                {copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
+                {copied ? 'Link Copied!' : 'Copy Verify URL'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowQrModal(false)}
+                style={{
+                  padding: '12px 20px',
+                  backgroundColor: '#F1F5F9',
+                  color: '#334155',
+                  borderRadius: '12px',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* MODAL 2: NFC TOUCH SIMULATION */}
+
+      {/* =========================================================================
+          MODAL 2: NFC TAP SIMULATION (With Honest Demonstration Disclaimer)
+          ========================================================================= */}
       {showNfcModal && (
         <div style={{
           position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.75)',
+          inset: 0,
+          backgroundColor: 'rgba(16, 27, 61, 0.82)',
           backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 100,
+          zIndex: 250,
           padding: '16px'
         }}>
           <div style={{
             backgroundColor: '#FFFFFF',
             borderRadius: '24px',
             padding: '32px',
-            maxWidth: '380px',
+            maxWidth: '400px',
             width: '100%',
             position: 'relative',
-            textAlign: 'center'
+            textAlign: 'center',
+            boxShadow: '0 25px 50px rgba(16, 27, 61, 0.35)',
+            border: '2px solid #DBEAFE'
           }}>
             <button
+              type="button"
               onClick={() => setShowNfcModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', color: '#64748B', cursor: 'pointer', border: 'none' }}
+              aria-label="Close NFC modal"
+              style={{ position: 'absolute', top: '18px', right: '18px', background: 'none', color: '#64748B', cursor: 'pointer', border: 'none' }}
             >
               <X size={20} />
             </button>
 
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0B1F3A', marginBottom: '8px' }}>
-              NFC Tap Identity Verification
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#EFF6FF', color: '#1A4F9C', padding: '4px 12px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 800, marginBottom: '12px' }}>
+              <Radio size={14} /> CONTACTLESS NFC AUTHENTICATION
+            </div>
+
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#101B3D', marginBottom: '6px' }}>
+              NFC Contactless Simulation
             </h3>
-            <p style={{ fontSize: '0.8rem', color: '#64748B', marginBottom: '24px' }}>
-              NFC scanning feature is coming soon for physical terminal tapping.
-            </p>
+
+            {/* Clear Disclaimer as requested */}
+            <div style={{
+              fontSize: '0.725rem',
+              color: '#64748B',
+              backgroundColor: '#F8FAFC',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              border: '1px solid #E2E8F0',
+              marginBottom: '20px'
+            }}>
+              ℹ️ <em>Visual terminal demonstration for browsers and devices without direct Web-NFC hardware access.</em>
+            </div>
 
             {nfcScanning && (
-              <div style={{ padding: '24px 0' }}>
+              <div style={{ padding: '20px 0' }}>
                 <div style={{
-                  width: '80px', height: '80px',
+                  width: '88px',
+                  height: '88px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(11, 94, 215, 0.15)',
-                  border: '3px solid #0B5ED7',
+                  backgroundColor: 'rgba(26, 79, 156, 0.12)',
+                  border: '3px solid #1A4F9C',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  margin: '0 auto 16px auto'
+                  margin: '0 auto 16px auto',
+                  animation: 'pulseGlow 1.5s infinite ease-in-out'
                 }}>
-                  <Radio size={40} style={{ color: '#0B5ED7' }} />
+                  <Radio size={42} style={{ color: '#1A4F9C' }} />
                 </div>
-                <div style={{ fontWeight: 700, color: '#0B5ED7', fontSize: '0.9rem' }}>
-                  Testing NFC Terminal Signal...
+                <div style={{ fontWeight: 800, color: '#1A4F9C', fontSize: '0.9rem' }}>
+                  Emitting Contactless Signal...
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '4px' }}>
+                  Hold near sovereign identity terminal
                 </div>
               </div>
             )}
@@ -582,32 +912,45 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
             {nfcSuccess && (
               <div style={{ padding: '16px 0' }}>
                 <div style={{
-                  width: '70px', height: '70px',
+                  width: '76px',
+                  height: '76px',
                   borderRadius: '50%',
                   backgroundColor: '#D1E7DD',
                   color: '#0F5132',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  margin: '0 auto 14px auto'
+                  margin: '0 auto 14px auto',
+                  boxShadow: '0 4px 14px rgba(15, 81, 50, 0.2)'
                 }}>
-                  <CheckCircle2 size={42} />
+                  <CheckCircle2 size={44} />
                 </div>
-                <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0F5132' }}>
-                  NFC Terminal Simulated!
+                <h4 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0F5132' }}>
+                  NFC Terminal Handshake Verified!
                 </h4>
-                <p style={{ fontSize: '0.8rem', color: '#475569', marginTop: '4px', marginBottom: '20px' }}>
-                  Civic ID {civicId} verified for contactless check-in.
-                </p>
+                <div style={{
+                  fontSize: '0.8rem',
+                  color: '#334155',
+                  backgroundColor: '#F0FDF4',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  border: '1px solid #BBF7D0',
+                  marginTop: '10px',
+                  marginBottom: '20px'
+                }}>
+                  <strong>Payload:</strong> CIVIQONE Citizen Card ({civicId}) validated for contactless transit / terminal check-in.
+                </div>
                 <button
+                  type="button"
                   onClick={() => setShowNfcModal(false)}
                   style={{
                     width: '100%',
-                    backgroundColor: '#0B5ED7',
+                    backgroundColor: '#1A4F9C',
                     color: '#FFFFFF',
-                    padding: '10px',
-                    borderRadius: '10px',
-                    fontWeight: 700,
+                    padding: '11px',
+                    borderRadius: '12px',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
                     border: 'none',
                     cursor: 'pointer'
                   }}
@@ -620,17 +963,20 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
         </div>
       )}
 
-      {/* MODAL 3: SHARE CIVIC CARD IMAGE & TOKEN */}
+
+      {/* =========================================================================
+          MODAL 3: SHARE & EXPORT HIGH-RES PNG CARD
+          ========================================================================= */}
       {showShareModal && (
         <div style={{
           position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(11, 31, 58, 0.75)',
+          inset: 0,
+          backgroundColor: 'rgba(16, 27, 61, 0.82)',
           backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 100,
+          zIndex: 250,
           padding: '16px'
         }}>
           <div style={{
@@ -640,41 +986,46 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
             maxWidth: '440px',
             width: '100%',
             position: 'relative',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.3)'
+            boxShadow: '0 25px 50px rgba(16, 27, 61, 0.35)',
+            border: '2px solid #DBEAFE'
           }}>
             <button
+              type="button"
               onClick={() => setShowShareModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', color: '#64748B', cursor: 'pointer', border: 'none' }}
+              aria-label="Close Share modal"
+              style={{ position: 'absolute', top: '18px', right: '18px', background: 'none', color: '#64748B', cursor: 'pointer', border: 'none' }}
             >
               <X size={22} />
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#0B5ED7', fontWeight: 900, fontSize: '1.2rem', marginBottom: '8px' }}>
-              <Share2 size={24} /> Share Civic Card
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1A4F9C', fontWeight: 900, fontSize: '1.25rem', marginBottom: '6px' }}>
+              <Share2 size={22} /> Share & Export Citizen Identity Card
             </div>
-            <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '20px' }}>
-              Export or share an official high-resolution image of your Civic Card.
+            <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '20px' }}>
+              Export an official high-resolution image of your <strong>CIVIQONE Digital Citizen Card</strong>.
             </p>
 
-            <div style={{ backgroundColor: '#F8FAFC', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0', marginBottom: '20px' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748B', marginBottom: '6px' }}>YOUR CIVIC ID TOKEN</div>
-              <div style={{ fontSize: '1rem', fontWeight: 900, color: '#0B1F3A', fontFamily: 'monospace' }}>
-                {civicId}
+            <div style={{ backgroundColor: '#F8FAFC', padding: '14px', borderRadius: '14px', border: '1px solid #E2E8F0', marginBottom: '20px' }}>
+              <div style={{ fontSize: '0.725rem', fontWeight: 700, color: '#64748B', marginBottom: '4px' }}>OFFICIAL VERIFICATION LINK</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#101B3D', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                {verificationUrl}
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {/* Download PNG Button */}
               <button
+                type="button"
                 onClick={handleDownloadCardImage}
                 disabled={downloadingImage}
                 style={{
                   width: '100%',
-                  backgroundColor: '#0B5ED7',
+                  backgroundColor: '#1A4F9C',
                   color: '#FFFFFF',
-                  padding: '14px',
+                  padding: '13px',
                   borderRadius: '12px',
                   fontWeight: 800,
-                  fontSize: '0.925rem',
+                  fontSize: '0.9rem',
                   border: 'none',
                   cursor: 'pointer',
                   display: 'flex',
@@ -684,19 +1035,21 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
                 }}
               >
                 <Download size={18} />
-                {downloadingImage ? 'Generating Image...' : 'Download Card PNG Image'}
+                {downloadingImage ? 'Generating High-Res PNG...' : 'Download Citizen Card PNG'}
               </button>
 
+              {/* Copy URL Button */}
               <button
-                onClick={() => copyToClipboard(civicId)}
+                type="button"
+                onClick={() => copyToClipboard(verificationUrl)}
                 style={{
                   width: '100%',
                   backgroundColor: copied ? '#198754' : '#F1F5F9',
-                  color: copied ? '#FFFFFF' : '#0B1F3A',
-                  padding: '12px',
+                  color: copied ? '#FFFFFF' : '#101B3D',
+                  padding: '11px',
                   borderRadius: '12px',
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
+                  fontWeight: 800,
+                  fontSize: '0.85rem',
                   border: '1px solid #CBD5E1',
                   cursor: 'pointer',
                   display: 'flex',
@@ -706,7 +1059,7 @@ export default function VirtualCard({ citizen, card, onNavigateToVerification, o
                 }}
               >
                 {copied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
-                {copied ? 'Civic ID Copied!' : 'Copy Civic ID String'}
+                {copied ? 'Verification Link Copied!' : 'Copy Verification URL'}
               </button>
             </div>
           </div>

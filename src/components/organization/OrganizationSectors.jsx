@@ -33,7 +33,7 @@ export default function OrganizationSectors({ onSelectSector, onGoBack }) {
           marginBottom: '16px',
           border: '1px solid #BFDBFE'
         }}>
-          <ShieldCheck size={16} /> CivicOne National Organization Verification Network
+          <ShieldCheck size={16} /> CIVIQONE National Organization Verification Network
         </div>
 
         <h2 style={{
@@ -55,7 +55,7 @@ export default function OrganizationSectors({ onSelectSector, onGoBack }) {
       {/* 5 Sectors Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
         gap: '24px',
         alignItems: 'stretch'
       }}>

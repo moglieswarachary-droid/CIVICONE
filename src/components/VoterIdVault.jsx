@@ -17,7 +17,7 @@ export default function VoterIdVault({ citizen, onOpenShareModal }) {
     verificationStatus: "OFFICIALLY VERIFIED (ECI REFERENCE)",
     issuingAuthority: "Election Commission of India",
     verificationDate: "15-01-2024",
-    civiconeVerificationId: "CIV-VOTER-ECI-2026-904812",
+    civiqoneVerificationId: "CIV-VOTER-ECI-2026-904812",
     accessHistory: [
       { id: "vlog-1", accessor: "Self Access via CivicVault", date: "Today, 10:15 AM", purpose: "Identity Verification" },
       { id: "vlog-2", accessor: "Passport Seva Verification Portal", date: "12 May 2026", purpose: "Address Proof Check" }
@@ -37,7 +37,7 @@ export default function VoterIdVault({ citizen, onOpenShareModal }) {
   }, []);
 
   const handleCopyVerificationId = () => {
-    navigator.clipboard.writeText(voter.civiconeVerificationId);
+    navigator.clipboard.writeText(voter.civiqoneVerificationId);
     setCopiedToken(true);
     setTimeout(() => setCopiedToken(false), 2500);
   };
@@ -267,8 +267,8 @@ export default function VoterIdVault({ citizen, onOpenShareModal }) {
               <div style={{ fontWeight: 800, color: '#0B1F3A' }}>{voter.verificationDate}</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>CivicOne Token</span>
-              <div style={{ fontWeight: 800, fontFamily: 'monospace', color: '#0B5ED7' }}>{voter.civiconeVerificationId}</div>
+              <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>CIVIQONE Token</span>
+              <div style={{ fontWeight: 800, fontFamily: 'monospace', color: '#0B5ED7' }}>{voter.civiqoneVerificationId}</div>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-// server/seedData.js - Relational Synthetic Seed Data Generator for CivicOne Vault
+// server/seedData.js - Relational Synthetic Seed Data Generator for CIVIQONE Vault
 
 export function generateSyntheticCitizens() {
   const firstNames = ["Rajesh", "Ananya", "Vikramaditya", "Priya", "Devendra", "Sunita", "Amit", "Kavita", "Siddharth", "Meera", "Rohan", "Sneha", "Arjun", "Pooja", "Varun", "Deepika", "Karan", "Ritu", "Alok", "Divya"];
@@ -24,7 +24,7 @@ export function generateSyntheticCitizens() {
         ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
         : "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
       mobileMasked: `+91 98${i.toString().padStart(2, '0')}4 56789`,
-      emailMasked: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@civicone.gov.in`,
+      emailMasked: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@civiqone.gov.in`,
       addressSummary: `Flat ${(i + 1) * 102}, Civic Heights, ${city}, India`,
       trustLevel: isGold ? "VIP Tier Gold" : "Standard Verified",
       verificationStatus: "VERIFIED",

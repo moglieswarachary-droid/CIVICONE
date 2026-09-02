@@ -141,7 +141,7 @@ export default function CitizenPatientVerificationPanel({ hospitalSession, onSyn
             <HeartPulse size={20} color="#DC2626" /> Patient Verification &amp; Transfer
           </h3>
           <p style={{ fontSize: '0.75rem', color: '#64748B' }}>
-            Authorized CivicOne Health Network Gateway
+            Authorized CIVIQONE Health Network Gateway
           </p>
         </div>
         <span style={{

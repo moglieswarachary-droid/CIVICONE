@@ -1,4 +1,4 @@
-// src/config/organizationConfig.js - Centralized CivicOne Organization Portal Configuration & Sector Taxonomy
+// src/config/organizationConfig.js - Centralized CIVIQONE Organization Portal Configuration & Sector Taxonomy
 
 export const ORGANIZATION_SECTORS = [
   {
@@ -499,6 +499,27 @@ export const ORGANIZATION_CONFIGS = {
     ],
     allowedCategories: ['Identity', 'Education', 'Employment'],
     allowedDocTypes: ['Degree Certificate', 'Relieving Letter', 'Aadhaar Identity']
+  },
+  'hotel': {
+    id: 'hotel',
+    slug: 'hotel-hospitality',
+    sector: 'private_sector',
+    sectorTitle: 'Private Sector',
+    name: 'Hotel & Hospitality',
+    roleCode: 'HOTEL_ACCESS_ADMIN',
+    logoEmoji: '🏨',
+    categoryName: 'Hospitality & Guest Check-In',
+    integrationStatus: 'Prototype / Simulated',
+    description: 'Hotels, resorts, and hospitality lodges for guest check-in e-KYC verification and sovereign identity validation.',
+    roles: ['Hotel Admin', 'Reception Desk', 'Guest Manager', 'Auditor'],
+    capabilities: [
+      'Guest Identity Verification',
+      'e-KYC Check-In Verification',
+      'Masked Aadhaar Authorization',
+      'Guest Consent Logs'
+    ],
+    allowedCategories: ['Identity'],
+    allowedDocTypes: ['Masked Aadhaar Identity', 'Passport Record']
   }
 };
 

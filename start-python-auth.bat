@@ -1,7 +1,7 @@
 @echo off
-TITLE CivicOne Python Citizen Authentication Engine Launcher
+TITLE CIVIQONE Python Citizen Authentication Engine Launcher
 echo =================================================================
-echo   CivicOne Python High-Assurance Citizen Authentication Engine
+echo   CIVIQONE Python High-Assurance Citizen Authentication Engine
 echo =================================================================
 echo.
 

@@ -89,7 +89,7 @@ export default function EmployerDashboardLayout({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <h1 style={{ fontSize: '1.25rem', fontWeight: 900, margin: 0, color: '#FFFFFF' }}>
-                  {session?.companyName || 'CivicOne Technologies Pvt. Ltd.'}
+                  {session?.companyName || 'CIVIQONE Technologies Pvt. Ltd.'}
                 </h1>
                 <span style={{ fontSize: '0.675rem', fontWeight: 800, backgroundColor: 'rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '6px' }}>
                   {session?.companyType || 'IT / Software'}
@@ -184,7 +184,7 @@ export default function EmployerDashboardLayout({
               </h3>
               
               <div style={{ fontSize: '0.825rem', color: '#475569', lineHeight: 1.6, marginBottom: '14px' }}>
-                <strong>Name:</strong> {session?.companyName || 'CivicOne Technologies'}<br />
+                <strong>Name:</strong> {session?.companyName || 'CIVIQONE Technologies'}<br />
                 <strong>Industry:</strong> {session?.companyType || 'IT / Software'}<br />
                 <strong>Code:</strong> {session?.employerCode || 'EMP-CIVIC-001'}<br />
                 <strong>State:</strong> {session?.state || 'Andhra Pradesh'}<br />
@@ -483,7 +483,7 @@ export default function EmployerDashboardLayout({
                 {detailTab === 'history' && (
                   <EmploymentTimeline
                     history={[
-                      { companyName: 'CivicOne Technologies', designation: selectedEmployee.designation, joiningDate: '2026', leavingDate: 'Present', duration: '7 Months', verificationStatus: '✓ Verified' },
+                      { companyName: 'CIVIQONE Technologies', designation: selectedEmployee.designation, joiningDate: '2026', leavingDate: 'Present', duration: '7 Months', verificationStatus: '✓ Verified' },
                       { companyName: 'ABC Technologies', designation: 'Software Engineer', joiningDate: '2024', leavingDate: '2026', duration: '2 Years', verificationStatus: '✓ Verified' },
                       { companyName: 'XYZ Solutions', designation: 'Junior Developer', joiningDate: '2022', leavingDate: '2024', duration: '2 Years', verificationStatus: '✓ Verified' }
                     ]}
