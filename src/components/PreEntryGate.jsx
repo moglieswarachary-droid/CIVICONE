@@ -75,14 +75,15 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
       } catch (e) {}
 
       if (!localCitizen) {
+        const fallbackName = (registeredCitizen && registeredCitizen.fullName) || (regName && regName.trim()) || (cleanPhone === '9000000001' ? 'Aarav Kumar' : `Citizen ${cleanPhone.slice(-4)}`);
         localCitizen = {
           id: `cit-${cleanPhone}`,
           citizenId: cleanPhone === '9000000001' ? 'CIV-DEMO-10001' : `CIV-IND-${cleanPhone.slice(-5)}`,
-          fullName: cleanPhone === '9000000001' ? 'Aarav Kumar' : 'Verified Citizen',
-          displayName: cleanPhone === '9000000001' ? 'Aarav' : 'Citizen',
-          name: cleanPhone === '9000000001' ? 'Aarav Kumar' : 'Verified Citizen',
+          fullName: fallbackName,
+          displayName: fallbackName.split(' ')[0],
+          name: fallbackName,
           mobile: `+91 ${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`,
-          email: cleanPhone === '9000000001' ? 'aarav.demo@civiqone.example' : `citizen.${cleanPhone.slice(-4)}@civiqone.in`,
+          email: cleanPhone === '9000000001' ? 'aarav.demo@civiqone.example' : `${fallbackName.toLowerCase().replace(/\s+/g, '.')}@civiqone.in`,
           dateOfBirth: '15-07-2004',
           dob: '15-07-2004',
           gender: 'Male',

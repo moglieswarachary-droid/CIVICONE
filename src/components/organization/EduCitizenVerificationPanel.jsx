@@ -465,8 +465,13 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', exter
                 ))}
               </div>
 
-          {/* TAB 2: IDENTITY & DOB */}
-          {activeTab === 'identity' && (
+              {/* TAB 1: VISUAL ACADEMIC TIMELINE */}
+              {activeTab === 'timeline' && (
+                <AcademicTimeline academicHistory={history} eduType={eduType} />
+              )}
+
+              {/* TAB 2: IDENTITY & DOB */}
+              {activeTab === 'identity' && (
             <div style={{ backgroundColor: '#F8FAFC', padding: '14px', borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '0.825rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div><strong>Full Legal Name:</strong> {selectedStudent.fullName}</div>
               <div><strong>Date of Birth:</strong> {selectedStudent.dob} (Verified via Birth Registry)</div>
