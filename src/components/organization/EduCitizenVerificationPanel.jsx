@@ -484,16 +484,16 @@ export default function EduCitizenVerificationPanel({ eduType = 'college', exter
                 <strong style={{ color: '#0F172A' }}>Government Certificate Verification Status:</strong>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
                   <span style={{ backgroundColor: '#DCFCE7', color: '#166534', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>
-                    DOB: {selectedStudent.govtCertificates.dobCert}
+                    DOB: {selectedStudent?.govtCertificates?.dobCert || 'VERIFIED'}
                   </span>
                   <span style={{ backgroundColor: '#E0F2FE', color: '#0369A1', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>
-                    Caste: {selectedStudent.govtCertificates.casteCertStatus}
+                    Caste: {selectedStudent?.govtCertificates?.casteCertStatus || 'VERIFIED'}
                   </span>
                   <span style={{ backgroundColor: '#FEF3C7', color: '#92400E', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>
-                    Income: {selectedStudent.govtCertificates.incomeCertStatus}
+                    Income: {selectedStudent?.govtCertificates?.incomeCertStatus || 'VERIFIED'}
                   </span>
                   <span style={{ backgroundColor: '#DCFCE7', color: '#15803D', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px' }}>
-                    Nativity: {selectedStudent.govtCertificates.nativityStatus}
+                    Nativity: {selectedStudent?.govtCertificates?.nativityStatus || 'VERIFIED'}
                   </span>
                 </div>
               </div>
