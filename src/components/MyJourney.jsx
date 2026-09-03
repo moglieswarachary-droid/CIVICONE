@@ -188,33 +188,6 @@ export default function MyJourney({ citizen, documents = [] }) {
     {
       step: 7,
       id: 'jour-07',
-      name: 'Voter ID Card (EPIC - Electors Photo Identity)',
-      officialTitle: 'Election Commission of India — National Voter Registry',
-      category: 'IDENTITY',
-      categoryLabel: 'Democratic Suffrage',
-      icon: Landmark,
-      iconColor: '#DC2626',
-      iconBg: '#FEE2E2',
-      issuer: 'Election Commission of India (ECI)',
-      issueDate: '15-01-2024',
-      year: '2024',
-      ageMilestone: 'Age 19',
-      refNo: 'DEMO-VOTER-10001',
-      status: 'VERIFIED',
-      verificationHash: '0x88e1a3c09f4b75d261e49b01',
-      description: 'Electoral photo identity card establishing national franchise and voting rights in sovereign parliamentary elections.',
-      signatory: 'Electoral Registration Officer (ERO)',
-      keyDetails: {
-        'Elector Name': citizenName,
-        'EPIC Number': 'DEMO-VOTER-10001',
-        'Constituency': 'Vijayawada Central (AC-079)',
-        'Polling Station': 'PS-42 Community Hall',
-        'Status': 'Active Registered Voter'
-      }
-    },
-    {
-      step: 8,
-      id: 'jour-08',
       name: 'Smart Driving Licence (LMV & Motorcycle)',
       officialTitle: 'Ministry of Road Transport & Highways — Smart Card DL',
       category: 'TRANSPORT',
@@ -237,6 +210,33 @@ export default function MyJourney({ citizen, documents = [] }) {
         'Vehicle Class': 'MCWG / LMV (Car & Motorcycle)',
         'Valid Until': '10-09-2026',
         'Issuing RTO': 'RTO Vijayawada (AP-16)'
+      }
+    },
+    {
+      step: 8,
+      id: 'jour-08',
+      name: 'Voter ID Card (EPIC - Electors Photo Identity)',
+      officialTitle: 'Election Commission of India — National Voter Registry',
+      category: 'IDENTITY',
+      categoryLabel: 'Democratic Suffrage',
+      icon: Landmark,
+      iconColor: '#DC2626',
+      iconBg: '#FEE2E2',
+      issuer: 'Election Commission of India (ECI)',
+      issueDate: '15-01-2024',
+      year: '2024',
+      ageMilestone: 'Age 19',
+      refNo: 'DEMO-VOTER-10001',
+      status: 'VERIFIED',
+      verificationHash: '0x88e1a3c09f4b75d261e49b01',
+      description: 'Electoral photo identity card establishing national franchise and voting rights in sovereign parliamentary elections.',
+      signatory: 'Electoral Registration Officer (ERO)',
+      keyDetails: {
+        'Elector Name': citizenName,
+        'EPIC Number': 'DEMO-VOTER-10001',
+        'Constituency': 'Vijayawada Central (AC-079)',
+        'Polling Station': 'PS-42 Community Hall',
+        'Status': 'Active Registered Voter'
       }
     },
     {
@@ -296,33 +296,6 @@ export default function MyJourney({ citizen, documents = [] }) {
     {
       step: 11,
       id: 'jour-11',
-      name: 'State Domicile & Permanent Residence Certificate',
-      officialTitle: 'Revenue Department — State Government Residence Pass',
-      category: 'IDENTITY',
-      categoryLabel: 'State Domicile',
-      icon: Building2,
-      iconColor: '#4B5563',
-      iconBg: '#F3F4F6',
-      issuer: 'Revenue Department, Govt of Andhra Pradesh',
-      issueDate: '18-05-2024',
-      year: '2024',
-      ageMilestone: 'Age 19',
-      refNo: 'DEMO-DOM-2024-9002',
-      status: 'VERIFIED',
-      verificationHash: '0x11b5e9c42d78a630f982c771',
-      description: 'Official revenue certificate validating state domicile and local residency for competitive opportunities and civil welfare.',
-      signatory: 'Tahsildar / Mandal Revenue Officer',
-      keyDetails: {
-        'Citizen Name': citizenName,
-        'Resident State': citizenState,
-        'District': 'Krishna District',
-        'Residence Period': 'Continuous Resident since Birth',
-        'Validity': 'Permanent Sovereign Record'
-      }
-    },
-    {
-      step: 12,
-      id: 'jour-12',
       name: 'Vehicle Registration Certificate (RC: AP-DEMO-1001)',
       officialTitle: 'Ministry of Road Transport & Highways — Motor Vehicle RC',
       category: 'TRANSPORT',
@@ -345,6 +318,33 @@ export default function MyJourney({ citizen, documents = [] }) {
         'Vehicle Model': 'Hyundai Creta SX (White)',
         'Fuel Type': 'Petrol / BS-VI',
         'Validity': '01-09-2026'
+      }
+    },
+    {
+      step: 12,
+      id: 'jour-12',
+      name: 'State Domicile & Permanent Residence Certificate',
+      officialTitle: 'Revenue Department — State Government Residence Pass',
+      category: 'IDENTITY',
+      categoryLabel: 'State Domicile',
+      icon: Building2,
+      iconColor: '#4B5563',
+      iconBg: '#F3F4F6',
+      issuer: 'Revenue Department, Govt of Andhra Pradesh',
+      issueDate: '18-05-2024',
+      year: '2024',
+      ageMilestone: 'Age 19',
+      refNo: 'DEMO-DOM-2024-9002',
+      status: 'VERIFIED',
+      verificationHash: '0x11b5e9c42d78a630f982c771',
+      description: 'Official revenue certificate validating state domicile and local residency for competitive opportunities and civil welfare.',
+      signatory: 'Tahsildar / Mandal Revenue Officer',
+      keyDetails: {
+        'Citizen Name': citizenName,
+        'Resident State': citizenState,
+        'District': 'Krishna District',
+        'Residence Period': 'Continuous Resident since Birth',
+        'Validity': 'Permanent Sovereign Record'
       }
     },
     {
@@ -431,55 +431,253 @@ export default function MyJourney({ citizen, documents = [] }) {
 
   const isDemoCitizen = citizenId === 'CIV-DEMO-10001' || citizenId === 'CIV-DEMO-10002';
   
-  let activeJourneyList = [];
-  if (documents && Array.isArray(documents) && documents.length > 0) {
-    activeJourneyList = documents.map((doc, idx) => ({
-      step: idx + 1,
-      id: doc.id || `jour-${idx + 1}`,
-      name: doc.name || doc.docName || 'Uploaded Document',
-      officialTitle: doc.officialTitle || doc.issuer || 'Official Verified Record',
-      category: (doc.category || 'IDENTITY').toUpperCase(),
-      categoryLabel: doc.category || 'Document Record',
-      icon: doc.category === 'academic' ? GraduationCap : doc.category === 'rto' ? Car : doc.category === 'health' ? HeartPulse : ShieldCheck,
-      iconColor: '#0B5ED7',
-      iconBg: '#DBEAFE',
-      issuer: doc.issuer || 'Issuer Authority',
-      issueDate: doc.issuedDate || doc.issueDate || doc.date || 'Verified',
-      year: (doc.issuedDate || doc.date || '2026').slice(-4),
-      ageMilestone: `Credential #${idx + 1}`,
-      refNo: doc.docNumber || doc.refNo || doc.id || 'VERIFIED-DOC',
-      status: doc.status || 'VERIFIED',
-      verificationHash: doc.verificationHash || '0x' + Math.random().toString(16).slice(2, 14),
-      description: doc.description || `${doc.name} verified in citizen vault.`,
-      signatory: doc.signatory || 'Sovereign Verification Authority',
+  // 1. Helper to safely parse dates in various formats (DD-MM-YYYY, YYYY-MM-DD, etc.)
+  const parseDocDate = (dateStr, fallbackYear = 2024) => {
+    if (!dateStr) return new Date(fallbackYear, 0, 1);
+    if (dateStr instanceof Date) return dateStr;
+    const str = String(dateStr).trim();
+    // DD-MM-YYYY or DD/MM/YYYY
+    const dmyMatch = str.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+    if (dmyMatch) {
+      return new Date(parseInt(dmyMatch[3], 10), parseInt(dmyMatch[2], 10) - 1, parseInt(dmyMatch[1], 10));
+    }
+    // YYYY-MM-DD or YYYY/MM/DD
+    const ymdMatch = str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+    if (ymdMatch) {
+      return new Date(parseInt(ymdMatch[1], 10), parseInt(ymdMatch[2], 10) - 1, parseInt(ymdMatch[3], 10));
+    }
+    const parsed = Date.parse(str);
+    if (!isNaN(parsed)) return new Date(parsed);
+    const yearMatch = str.match(/\b(19\d\d|20\d\d)\b/);
+    if (yearMatch) return new Date(parseInt(yearMatch[1], 10), 0, 1);
+    return new Date(fallbackYear, 0, 1);
+  };
+
+  const citizenDobDate = parseDocDate(citizenDob, 2004);
+
+  const getAgeMilestone = (issueDateStr) => {
+    const docDate = parseDocDate(issueDateStr, 2024);
+    const diffYears = docDate.getFullYear() - citizenDobDate.getFullYear();
+    if (diffYears <= 0) return 'At Birth (Age 0)';
+    if (diffYears === 1) return 'Age 1 (Infancy)';
+    if (diffYears >= 21) return `Age ${diffYears} (Present / Active)`;
+    return `Age ${diffYears}`;
+  };
+
+  // 2. Assemble the Chronological Life Journey
+  let rawJourneyList = [];
+
+  if (isDemoCitizen) {
+    // For Demo Citizen, use the comprehensive 15-milestone journey starting with Birth Certificate as the baseline
+    const baseList = [...LIFE_JOURNEY_DOCUMENTS];
+
+    // If there are additional custom documents in vault (uploaded or created in session), integrate them
+    if (documents && Array.isArray(documents) && documents.length > 0) {
+      const knownRefs = new Set(LIFE_JOURNEY_DOCUMENTS.map(d => (d.refNo || '').toLowerCase()));
+      const knownNames = new Set(LIFE_JOURNEY_DOCUMENTS.map(d => (d.name || '').toLowerCase()));
+      
+      const customDocs = documents.filter(doc => {
+        const ref = (doc.refNo || doc.id || '').toLowerCase();
+        const name = (doc.name || '').toLowerCase();
+        return !knownRefs.has(ref) && !knownNames.has(name) && !baseList.some(b => b.id === doc.id);
+      });
+
+      customDocs.forEach((doc, idx) => {
+        const docDate = parseDocDate(doc.issuedDate || doc.issueDate || doc.date || '2025');
+        baseList.push({
+          id: doc.id || `custom-jour-${idx}`,
+          name: doc.name || 'Verified Certificate',
+          officialTitle: doc.officialTitle || doc.issuer || 'Official Verified Credential',
+          category: (doc.category || 'IDENTITY').toUpperCase(),
+          categoryLabel: doc.category === 'academic' ? 'Academic Credential' : doc.category === 'rto' ? 'Transport Record' : doc.category === 'health' ? 'Health Credential' : 'Verified Document',
+          icon: doc.category === 'academic' ? GraduationCap : doc.category === 'rto' ? Car : doc.category === 'health' ? HeartPulse : FileText,
+          iconColor: '#0B5ED7',
+          iconBg: '#DBEAFE',
+          issuer: doc.issuer || 'Official Authority',
+          issueDate: doc.issuedDate || doc.issueDate || doc.date || '15-01-2025',
+          year: String(docDate.getFullYear()),
+          ageMilestone: getAgeMilestone(doc.issuedDate || doc.issueDate || doc.date),
+          refNo: doc.refNo || doc.docNumber || doc.id || 'VERIFIED-DOC',
+          status: doc.status || 'VERIFIED',
+          verificationHash: doc.verificationHash || '0x' + Math.random().toString(16).slice(2, 14),
+          description: doc.description || `${doc.name} verified in sovereign vault.`,
+          signatory: doc.signatory || 'Sovereign Verification Authority',
+          keyDetails: {
+            'Document Name': doc.name,
+            'Issuer': doc.issuer || 'Authority',
+            'Issue Date': doc.issuedDate || doc.issueDate || doc.date || 'Verified',
+            'Status': doc.status || 'VERIFIED'
+          }
+        });
+      });
+    }
+
+    rawJourneyList = baseList;
+  } else {
+    // For Registered / Custom Citizens: Build full chronological journey from birth to present
+    const birthCert = {
+      id: 'reg-jour-birth',
+      name: 'Birth Registration Certificate',
+      officialTitle: 'Official Certificate of Birth Registration — Municipal Corporation',
+      category: 'BIRTH',
+      categoryLabel: 'Birth & Early Life',
+      icon: User,
+      iconColor: '#0284C7',
+      iconBg: '#E0F2FE',
+      issuer: `Registrar of Births & Deaths, Govt of ${citizenState}`,
+      issueDate: citizenDob,
+      year: String(citizenDobDate.getFullYear()),
+      ageMilestone: 'At Birth (Age 0)',
+      refNo: `BC-${citizenDobDate.getFullYear()}-${citizenState.substring(0, 2).toUpperCase()}-8849201`,
+      status: 'VERIFIED',
+      verificationHash: '0x8f2d91a4b73e6c012845c39a',
+      description: `Official Certificate of Birth Registration establishing sovereign Indian citizenship and legal identity for ${citizenName}.`,
+      signatory: `Chief Registrar of Births & Deaths, ${citizenState}`,
       keyDetails: {
-        'Document Name': doc.name,
-        'Issuer': doc.issuer,
-        'Status': doc.status || 'VERIFIED'
+        'Child Name': citizenName,
+        'Date of Birth': citizenDob,
+        'Place of Birth': `${citizenState}, India`,
+        'Registration Date': citizenDob,
+        'Status': 'Sovereign Verified'
       }
-    }));
-  } else if (isDemoCitizen) {
-    activeJourneyList = LIFE_JOURNEY_DOCUMENTS;
+    };
+
+    rawJourneyList.push(birthCert);
+
+    // If citizen has Aadhaar, add Sovereign Aadhaar Enrolment
+    if (citizen?.maskedAadhaar || citizen?.aadhaar) {
+      rawJourneyList.push({
+        id: 'reg-jour-aadhaar',
+        name: 'Aadhaar Sovereign Biometric Enrolment',
+        officialTitle: 'Unique Identification Authority of India (UIDAI)',
+        category: 'IDENTITY',
+        categoryLabel: 'Sovereign Identity',
+        icon: ShieldCheck,
+        iconColor: '#0B5ED7',
+        iconBg: '#DBEAFE',
+        issuer: 'UIDAI — Unique Identification Authority of India',
+        issueDate: `12-11-${citizenDobDate.getFullYear() + 6}`,
+        year: String(citizenDobDate.getFullYear() + 6),
+        ageMilestone: 'Age 6 (Biometric Milestone)',
+        refNo: citizen.maskedAadhaar || 'XXXX XXXX 1001',
+        status: 'VERIFIED',
+        verificationHash: '0x99a4c82b1d3e750f5892c431',
+        description: 'National 12-digit biometric identity enrolment establishing sovereign identification.',
+        signatory: 'Registrar General, UIDAI',
+        keyDetails: {
+          'Aadhaar Holder': citizenName,
+          'Aadhaar Ref': citizen.maskedAadhaar || 'XXXX XXXX 1001',
+          'Biometrics': 'Hardware Enclave Verified'
+        }
+      });
+    }
+
+    // Map all vault documents
+    if (documents && Array.isArray(documents)) {
+      documents.forEach((doc, idx) => {
+        // Avoid duplicating birth certificate if already in documents
+        if (doc.name?.toLowerCase().includes('birth') || doc.id?.includes('birth')) return;
+
+        const docDate = parseDocDate(doc.issuedDate || doc.issueDate || doc.date || '2024');
+        rawJourneyList.push({
+          id: doc.id || `doc-jour-${idx}`,
+          name: doc.name || 'Verified Credential',
+          officialTitle: doc.officialTitle || doc.issuer || 'Official Verified Credential',
+          category: (doc.category || 'IDENTITY').toUpperCase(),
+          categoryLabel: doc.category === 'academic' ? 'Academic' : doc.category === 'rto' ? 'Transport' : doc.category === 'health' ? 'Healthcare' : 'Government',
+          icon: doc.category === 'academic' ? GraduationCap : doc.category === 'rto' ? Car : doc.category === 'health' ? HeartPulse : FileText,
+          iconColor: '#0B5ED7',
+          iconBg: '#DBEAFE',
+          issuer: doc.issuer || 'Official Authority',
+          issueDate: doc.issuedDate || doc.issueDate || doc.date || '15-01-2024',
+          year: String(docDate.getFullYear()),
+          ageMilestone: getAgeMilestone(doc.issuedDate || doc.issueDate || doc.date),
+          refNo: doc.refNo || doc.docNumber || doc.id || 'VERIFIED-DOC',
+          status: doc.status || 'VERIFIED',
+          verificationHash: doc.verificationHash || '0x' + Math.random().toString(16).slice(2, 14),
+          description: doc.description || `${doc.name} verified in sovereign vault.`,
+          signatory: doc.signatory || 'Sovereign Verification Authority',
+          keyDetails: {
+            'Document Name': doc.name,
+            'Issuer': doc.issuer || 'Authority',
+            'Issue Date': doc.issuedDate || doc.issueDate || doc.date || 'Verified',
+            'Status': doc.status || 'VERIFIED'
+          }
+        });
+      });
+    }
+
+    // Add Present Active Milestone
+    rawJourneyList.push({
+      id: 'reg-jour-civiqone',
+      name: 'CIVIQONE Sovereign Digital Identity Pass',
+      officialTitle: 'CIVIQONE National Sovereign Identity Authority',
+      category: 'SOVEREIGN',
+      categoryLabel: 'Sovereign Milestone',
+      icon: ShieldCheck,
+      iconColor: '#0B5ED7',
+      iconBg: '#EFF6FF',
+      issuer: 'CIVIQONE Sovereign Digital Gateway',
+      issueDate: '15-08-2026',
+      year: '2026',
+      ageMilestone: `${getAgeMilestone('15-08-2026')} (Present)`,
+      refNo: `${citizenId}-SOV-PASS`,
+      status: 'ACTIVE CITIZEN TIER',
+      verificationHash: '0x99f4c1a82d0e76b5193e449a',
+      description: 'Official sovereign digital identity credential with QR verification and encrypted document vault.',
+      signatory: 'CIVIQONE Sovereign Authority',
+      keyDetails: {
+        'Citizen': citizenName,
+        'Civic ID': citizenId,
+        'Status': 'ACTIVE & PROTECTED'
+      }
+    });
   }
+
+  // 3. SORT CHRONOLOGICALLY FROM BIRTH (Earliest Date) TO CURRENT (Latest Date)
+  rawJourneyList.sort((a, b) => {
+    // Birth Certificate is always the root starting milestone #1
+    const isABirth = a.category === 'BIRTH' || a.id === 'jour-01' || a.id === 'reg-jour-birth' || a.name?.toLowerCase().includes('birth');
+    const isBBirth = b.category === 'BIRTH' || b.id === 'jour-01' || b.id === 'reg-jour-birth' || b.name?.toLowerCase().includes('birth');
+    if (isABirth && !isBBirth) return -1;
+    if (!isABirth && isBBirth) return 1;
+
+    // CIVIQONE present pass is always the terminal milestone
+    const isACivic = a.category === 'SOVEREIGN' || a.id === 'jour-15' || a.id === 'reg-jour-civiqone';
+    const isBCivic = b.category === 'SOVEREIGN' || b.id === 'jour-15' || b.id === 'reg-jour-civiqone';
+    if (isACivic && !isBCivic) return 1;
+    if (!isACivic && isBCivic) return -1;
+
+    const dateA = parseDocDate(a.issueDate, 2024).getTime();
+    const dateB = parseDocDate(b.issueDate, 2024).getTime();
+    return dateA - dateB;
+  });
+
+  // 4. Assign Sequential Steps (1, 2, 3...)
+  const activeJourneyList = rawJourneyList.map((doc, idx) => ({
+    ...doc,
+    step: idx + 1
+  }));
 
   const categories = [
     { id: 'ALL', label: 'All Journey Milestones', count: activeJourneyList.length },
-    { id: 'BIRTH', label: '👶 Birth & Early Life', count: activeJourneyList.filter(d => d.category === 'BIRTH' || d.id === 'jour-02').length },
-    { id: 'IDENTITY', label: '🏛️ Sovereign Identity', count: activeJourneyList.filter(d => d.category === 'IDENTITY').length },
+    { id: 'BIRTH', label: '👶 Birth & Early Life', count: activeJourneyList.filter(d => d.category === 'BIRTH' || d.id === 'jour-01' || d.id === 'jour-02' || d.id === 'reg-jour-birth').length },
+    { id: 'IDENTITY', label: '🏛️ Sovereign Identity', count: activeJourneyList.filter(d => d.category === 'IDENTITY' || d.category === 'GOVERNMENT').length },
     { id: 'EDUCATION', label: '🎓 Education & Degree', count: activeJourneyList.filter(d => d.category === 'EDUCATION' || d.category === 'ACADEMIC').length },
     { id: 'TRANSPORT', label: '🚗 Mobility & Vehicles', count: activeJourneyList.filter(d => d.category === 'TRANSPORT' || d.category === 'RTO').length },
     { id: 'HEALTH', label: '🏥 Healthcare & ABHA', count: activeJourneyList.filter(d => d.category === 'HEALTH' || d.category === 'HEALTHCARE').length },
-    { id: 'SOVEREIGN', label: '🛡️ Sovereign Credentials', count: activeJourneyList.filter(d => d.category === 'SOVEREIGN' || d.category === 'GOVERNMENT').length }
+    { id: 'SOVEREIGN', label: '🛡️ Sovereign Credentials', count: activeJourneyList.filter(d => d.category === 'SOVEREIGN' || d.category === 'CAREER').length }
   ];
 
   const filteredDocs = activeJourneyList.filter(doc => {
+    const cat = (doc.category || '').toUpperCase();
     const matchesCategory = selectedCategory === 'ALL' ||
-      (selectedCategory === 'BIRTH' && (doc.category === 'BIRTH' || doc.id === 'jour-02')) ||
-      (selectedCategory === 'IDENTITY' && doc.category === 'IDENTITY') ||
-      (selectedCategory === 'EDUCATION' && (doc.category === 'EDUCATION' || doc.category === 'ACADEMIC')) ||
-      (selectedCategory === 'TRANSPORT' && (doc.category === 'TRANSPORT' || doc.category === 'RTO')) ||
-      (selectedCategory === 'HEALTH' && (doc.category === 'HEALTH' || doc.category === 'HEALTHCARE')) ||
-      (selectedCategory === 'SOVEREIGN' && (doc.category === 'SOVEREIGN' || doc.category === 'GOVERNMENT' || doc.category === 'CAREER'));
+      (selectedCategory === 'BIRTH' && (cat === 'BIRTH' || doc.id === 'jour-01' || doc.id === 'jour-02' || doc.id === 'reg-jour-birth')) ||
+      (selectedCategory === 'IDENTITY' && (cat === 'IDENTITY' || cat === 'GOVERNMENT')) ||
+      (selectedCategory === 'EDUCATION' && (cat === 'EDUCATION' || cat === 'ACADEMIC')) ||
+      (selectedCategory === 'TRANSPORT' && (cat === 'TRANSPORT' || cat === 'RTO')) ||
+      (selectedCategory === 'HEALTH' && (cat === 'HEALTH' || cat === 'HEALTHCARE')) ||
+      (selectedCategory === 'SOVEREIGN' && (cat === 'SOVEREIGN' || cat === 'CAREER'));
 
     const matchesSearch = !searchQuery.trim() ||
       (doc.name && doc.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -535,20 +733,26 @@ export default function MyJourney({ citizen, documents = [] }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginTop: '24px' }}>
             <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(6px)', padding: '12px 16px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <div style={{ fontSize: '0.7rem', color: '#BFDBFE', fontWeight: 700, textTransform: 'uppercase' }}>First Milestone</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FFFFFF', marginTop: '2px' }}>👶 Birth Certificate</div>
-              <div style={{ fontSize: '0.7rem', color: '#93C5FD' }}>15 Jul 2004</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FFFFFF', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                👶 {activeJourneyList[0]?.name || 'Birth Certificate'}
+              </div>
+              <div style={{ fontSize: '0.7rem', color: '#93C5FD' }}>{activeJourneyList[0]?.issueDate || citizenDob}</div>
             </div>
 
             <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(6px)', padding: '12px 16px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <div style={{ fontSize: '0.7rem', color: '#BFDBFE', fontWeight: 700, textTransform: 'uppercase' }}>Total Milestones</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FFFFFF', marginTop: '2px' }}>15 Verified Documents</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FFFFFF', marginTop: '2px' }}>
+                {activeJourneyList.length} Verified Documents
+              </div>
               <div style={{ fontSize: '0.7rem', color: '#86EFAC' }}>● 100% Verified Chain</div>
             </div>
 
             <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(6px)', padding: '12px 16px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
               <div style={{ fontSize: '0.7rem', color: '#BFDBFE', fontWeight: 700, textTransform: 'uppercase' }}>Current Milestone</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FEF08A', marginTop: '2px' }}>✨ Gold Pass Tier</div>
-              <div style={{ fontSize: '0.7rem', color: '#BFDBFE' }}>15 Aug 2026 (Active)</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#FEF08A', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                ✨ {activeJourneyList[activeJourneyList.length - 1]?.name || 'Sovereign Credential'}
+              </div>
+              <div style={{ fontSize: '0.7rem', color: '#BFDBFE' }}>{activeJourneyList[activeJourneyList.length - 1]?.issueDate || 'Present'} (Active)</div>
             </div>
 
             <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(6px)', padding: '12px 16px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
@@ -591,7 +795,7 @@ export default function MyJourney({ citizen, documents = [] }) {
           </div>
 
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-            Showing <strong>{filteredDocs.length}</strong> of <strong>{LIFE_JOURNEY_DOCUMENTS.length}</strong> Milestones
+            Showing <strong>{filteredDocs.length}</strong> of <strong>{activeJourneyList.length}</strong> Milestones
           </div>
         </div>
 

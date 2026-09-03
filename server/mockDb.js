@@ -294,6 +294,27 @@ export const db = {
   // 2. STRUCTURED DIGITAL VAULT RECORDS (Tied by citizenId across all required categories)
   documents: [
     // --- CITIZEN 1: CIV-DEMO-10001 (Aarav Kumar) ---
+    // 0. Primary Birth & Sovereign Identity Milestone
+    {
+      id: "doc-aarav-00",
+      citizenId: "CIV-DEMO-10001",
+      name: "Birth Registration Certificate",
+      category: "government",
+      type: "certificate",
+      issuer: "Registrar of Births & Deaths — Municipal Corporation",
+      status: "Verified",
+      issueDate: "15-07-2004",
+      expiryDate: "Permanent",
+      refNo: "BC-2004-AP-8849201",
+      fileType: "PDF",
+      fileSize: "1.2 MB",
+      icon: "User",
+      description: "Official Certificate of Birth Registration establishing sovereign citizenship and legal identity.",
+      securitySeal: "MUNICIPAL-REGISTRAR-AP-VERIFIED",
+      isFavorite: true,
+      tags: ["government", "Birth", "Primary", "Demo"],
+      isDemo: true
+    },
     // 1. Academic Documents & Certificates
     {
       id: "doc-aarav-05",
