@@ -117,11 +117,11 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
     });
     setLoading(false);
 
-    if (res.ok && res.data.success) {
+    if (res.ok && res.data?.success) {
       if (res.data.token) authStorage.setToken(res.data.token);
       onAuthenticated(res.data.citizen);
-    } else if (res.status === 404 || res.status === 0 || !res.ok) {
-      // Graceful client fallback for static hosting (Netlify) & offline demo
+    } else if (res.status === 0) {
+      // Graceful client fallback strictly for offline demo / pure static hosting without backend
       const cleanPhone = loginPhone.replace(/\D/g, '').slice(-10);
       let localCitizen = null;
       try {
@@ -157,7 +157,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
       authStorage.setToken(`CIV-TOKEN-${localCitizen.citizenId}-SECURE`);
       onAuthenticated(localCitizen);
     } else {
-      setErrorMsg(res.data.error || "Login failed. Please check your credentials.");
+      setErrorMsg(res.data?.error || "Login failed. Please check your credentials.");
     }
   };
 
@@ -592,6 +592,43 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
             </div>
 
             <form onSubmit={handleLoginSubmit}>
+              {/* Quick Demo Credentials Helper */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '9px 12px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(11, 94, 215, 0.08)',
+                border: '1px solid rgba(11, 94, 215, 0.2)',
+                marginBottom: '16px'
+              }}>
+                <div style={{ fontSize: '0.78rem', color: 'var(--primary-blue)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={14} /> Demo: +91 9000000001 | MPIN: 1234
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginPhone('9000000001');
+                    setLoginMpin('1234');
+                    setErrorMsg('');
+                  }}
+                  style={{
+                    backgroundColor: '#0B5ED7',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(11, 94, 215, 0.25)'
+                  }}
+                >
+                  Auto Fill
+                </button>
+              </div>
+
               <div style={{ marginBottom: '18px' }}>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '8px', letterSpacing: '0.04em' }}>
                   REGISTERED MOBILE NUMBER
@@ -657,21 +694,31 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
                   width: '100%',
                   padding: '14px',
                   borderRadius: '12px',
-                  background: 'linear-gradient(135deg, var(--primary-blue) 0%, var(--sky-blue) 100%)',
+                  backgroundColor: '#0B5ED7',
+                  backgroundImage: 'linear-gradient(135deg, #0B5ED7 0%, #0284C7 100%)',
                   color: '#FFFFFF',
                   fontWeight: 800,
                   border: 'none',
-                  cursor: 'pointer',
+                  cursor: loading ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
                   fontSize: '1rem',
-                  boxShadow: 'var(--shadow-blue)',
+                  boxShadow: '0 8px 24px -4px rgba(11, 94, 215, 0.4)',
+                  opacity: loading ? 0.75 : 1,
                   transition: 'transform 0.15s, box-shadow 0.15s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 12px 28px -4px rgba(11, 94, 215, 0.5)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px -4px rgba(11, 94, 215, 0.4)';
+                }}
               >
                 {loading ? <RefreshCw className="animate-spin" size={20} /> : <>Login to Citizen Vault <ArrowRight size={18} /></>}
               </button>
@@ -1045,12 +1092,22 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
                     width: '100%',
                     padding: '14px',
                     borderRadius: '12px',
-                    background: 'linear-gradient(135deg, var(--primary-blue) 0%, var(--sky-blue) 100%)',
+                    backgroundColor: '#0B5ED7',
+                    backgroundImage: 'linear-gradient(135deg, #0B5ED7 0%, #0284C7 100%)',
                     color: '#FFFFFF',
                     fontWeight: 800,
                     border: 'none',
                     cursor: 'pointer',
-                    boxShadow: 'var(--shadow-blue)'
+                    boxShadow: '0 8px 24px -4px rgba(11, 94, 215, 0.4)',
+                    transition: 'transform 0.15s, box-shadow 0.15s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 12px 28px -4px rgba(11, 94, 215, 0.5)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px -4px rgba(11, 94, 215, 0.4)';
                   }}
                 >
                   Enter My Civic Dashboard →
