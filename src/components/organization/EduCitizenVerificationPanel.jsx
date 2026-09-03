@@ -1,6 +1,6 @@
 // src/components/organization/EduCitizenVerificationPanel.jsx - Education Student Verification, Academic History & Scoped Vault
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, ShieldCheck, UserCheck, Lock, Unlock, CheckCircle2, Award, BookOpen, Clock, Calendar, Building2, School, GraduationCap, Eye, FileText, Check, AlertCircle } from 'lucide-react';
 import AcademicTimeline from './AcademicTimeline.jsx';
 
