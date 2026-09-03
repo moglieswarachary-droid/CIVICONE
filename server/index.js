@@ -1498,7 +1498,7 @@ app.post('/api/consent/decline', (req, res) => {
 
 // Organization Creates Document Access Request (Org -> Citizen Alert & Link)
 app.post('/api/consent/request', (req, res) => {
-  const { orgId, citizenCivicId, docId, docName, purpose, expiryDays, orgName } = req.body;
+  const { orgId, citizenCivicId, citizenName, caseType, department, severity, docId, docName, purpose, expiryDays, orgName } = req.body;
   
   const foundOrg = (db.organizations || []).find(o => o.id === orgId);
   const resolvedOrgName = orgName || (foundOrg ? foundOrg.name : null) || 'Authorized Organization';
@@ -1517,6 +1517,10 @@ app.post('/api/consent/request', (req, res) => {
     citizenCivicId: targetId,
     citizenId: targetId,
     targetCitizenId: targetCitizen?.citizenId || targetId,
+    citizenName: citizenName || targetCitizen?.fullName || targetCitizen?.name || null,
+    caseType: caseType || 'Accident Emergency',
+    department: department || 'Emergency',
+    severity: severity || 'Moderate',
     orgId: orgId || 'org-college-01',
     orgName: resolvedOrgName,
     roleCode: roleCode,

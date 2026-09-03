@@ -78,7 +78,7 @@ export default function CitizenPatientVerificationPanel({ hospitalSession, onSyn
   const [transferReason, setTransferReason] = useState('Specialized Neurosurgery & ICU Monitoring Required');
   const [transferSuccessMsg, setTransferSuccessMsg] = useState('');
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
     setSearchError('');
     const cleanQ = searchQuery.trim().toUpperCase();
@@ -86,20 +86,62 @@ export default function CitizenPatientVerificationPanel({ hospitalSession, onSyn
     let found = MOCK_HEALTHCARE_PATIENTS[cleanQ];
     if (!found) {
       found = Object.values(MOCK_HEALTHCARE_PATIENTS).find(
-        c => c.fullName.toUpperCase().includes(cleanQ) || c.citizenId.includes(cleanQ)
+        c => (c.fullName && c.fullName.toUpperCase().includes(cleanQ)) || (c.citizenId && c.citizenId.includes(cleanQ))
       );
     }
 
     if (!found && cleanQ.length > 2) {
+      let resolvedName = null;
+      let resolvedDob = '15/08/1996';
+      let resolvedGender = 'Specified';
+      let resolvedAadhaar = `XXXX-XXXX-${cleanQ.slice(-4) || '8912'}`;
+
+      // 1. Check local storage registered citizens
+      try {
+        const stored = JSON.parse(localStorage.getItem('civiqone_registered_citizens') || '[]');
+        const cit = stored.find(c => 
+          (c.citizenId || '').toUpperCase() === cleanQ || 
+          (c.mobile || '').replace(/\D/g, '').slice(-10) === cleanQ.replace(/\D/g, '').slice(-10)
+        );
+        if (cit) {
+          resolvedName = cit.fullName || cit.name;
+          if (cit.dateOfBirth || cit.dob) resolvedDob = cit.dateOfBirth || cit.dob;
+          if (cit.gender) resolvedGender = cit.gender;
+          if (cit.maskedAadhaar) resolvedAadhaar = cit.maskedAadhaar;
+        }
+      } catch (err) {}
+
+      // 2. Check active citizen
+      try {
+        const activeCit = JSON.parse(localStorage.getItem('civiqone_active_citizen') || '{}');
+        if (activeCit && (activeCit.citizenId === cleanQ || (activeCit.citizenId && activeCit.citizenId.includes(cleanQ)))) {
+          if (activeCit.fullName || activeCit.name) resolvedName = activeCit.fullName || activeCit.name;
+        }
+      } catch (err) {}
+
+      // 3. Fetch from API endpoint /api/card/me?citizenId=${cleanQ}
+      try {
+        const cardRes = await fetch(`/api/card/me?citizenId=${encodeURIComponent(cleanQ)}`);
+        if (cardRes.ok) {
+          const cardData = await cardRes.json();
+          if (cardData.card && cardData.card.name && cardData.card.name !== 'Verified Citizen') {
+            resolvedName = cardData.card.name;
+          }
+        }
+      } catch (err) {}
+
+      const finalName = resolvedName || (cleanQ.includes('710646') ? 'Raghavendra' : `Verified Patient (${cleanQ})`);
+
       found = {
         citizenId: cleanQ,
-        fullName: cleanQ.includes('710646') ? 'Raghavendra' : `Verified Patient (${cleanQ})`,
-        dob: '15/08/1996',
+        fullName: finalName,
+        name: finalName,
+        dob: resolvedDob,
         age: 30,
-        gender: 'Specified',
+        gender: resolvedGender,
         bloodGroup: 'O+',
-        maskedAadhaar: `XXXX-XXXX-${cleanQ.slice(-4) || '8912'}`,
-        address: 'Registered Citizen Address, India',
+        maskedAadhaar: resolvedAadhaar,
+        address: 'Registered Sovereign Citizen Address, India',
         emergencyContact: 'Family Member - ******9012',
         insurance: {
           provider: 'National Health Insurance Security',
@@ -137,6 +179,10 @@ export default function CitizenPatientVerificationPanel({ hospitalSession, onSyn
           orgId: hospitalSession?.code || 'GH-AP-VJA-001',
           orgName: hospName,
           citizenCivicId: selectedPatient.citizenId || searchQuery,
+          citizenName: selectedPatient.fullName,
+          caseType: regType === 'Accident' ? 'Accident Emergency' : 'Acute Health Issue',
+          department: regDept || 'Emergency',
+          severity: regSeverity || 'Moderate',
           docId: 'doc-health-suite',
           docName: 'Health Insurance, ABHA Card & Medical History Records',
           purpose: `Hospital Patient Onboarding & Medical Record Verification (${selectedPatient.fullName}) — Case: ${caseId}`,
