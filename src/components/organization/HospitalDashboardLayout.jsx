@@ -23,6 +23,7 @@ export default function HospitalDashboardLayout({
 
   const [allPatients, setAllPatients] = useState(patientRecords);
 
+  const isGov = session?.hospitalType === 'government' || session?.code?.startsWith('GH') || session?.hospId === 'gov_hospital';
   const orgId = session?.code || 'GH-AP-VJA-001';
 
   // Live Polling for Approved Patient Consent Requests
