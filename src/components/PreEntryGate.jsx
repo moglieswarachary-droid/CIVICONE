@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   ShieldCheck, Lock, Smartphone, ArrowRight, RefreshCw, CheckCircle2,
   AlertCircle, Fingerprint, User, UserPlus, KeyRound, MapPin, Calendar, FileText,
-  Sun, Moon, ArrowLeft, Check, Shield
+  Sun, Moon, ArrowLeft, Sparkles, Check, Shield
 } from 'lucide-react';
 import { INDIA_STATES_AND_UTS } from '../data/mockData.js';
 import { authStorage } from '../services/api.js';
