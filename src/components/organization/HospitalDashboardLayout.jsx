@@ -1,6 +1,6 @@
 // src/components/organization/HospitalDashboardLayout.jsx - Unified 3-Column Workspace for Hospitals
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HeartPulse, LogOut, Search, Filter, Plus, Activity, CheckCircle2, AlertTriangle, Eye, ArrowRightLeft, Lock, ShieldAlert, Droplet, UserCheck, Stethoscope } from 'lucide-react';
 import CitizenPatientVerificationPanel from './CitizenPatientVerificationPanel.jsx';
 
