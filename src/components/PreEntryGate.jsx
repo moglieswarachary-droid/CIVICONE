@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   ShieldCheck, Lock, Smartphone, ArrowRight, RefreshCw, CheckCircle2,
   AlertCircle, Fingerprint, User, UserPlus, KeyRound, MapPin, Calendar, FileText,
-  Sun, Moon, ArrowLeft, Sparkles, Check, Shield
+  Sun, Moon, ArrowLeft, Check, Shield
 } from 'lucide-react';
 import { INDIA_STATES_AND_UTS } from '../data/mockData.js';
 import { authStorage } from '../services/api.js';
@@ -16,8 +16,8 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
   const [regStep, setRegStep] = useState('FORM');
 
   // Form Fields for Login
-  const [loginPhone, setLoginPhone] = useState('9000000001');
-  const [loginMpin, setLoginMpin] = useState('1234');
+  const [loginPhone, setLoginPhone] = useState('');
+  const [loginMpin, setLoginMpin] = useState('');
 
   // WebAuthn Biometric Passkey States
   const [biometricScanning, setBiometricScanning] = useState(false);
@@ -592,43 +592,6 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
             </div>
 
             <form onSubmit={handleLoginSubmit}>
-              {/* Quick Demo Credentials Helper */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '9px 12px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(11, 94, 215, 0.08)',
-                border: '1px solid rgba(11, 94, 215, 0.2)',
-                marginBottom: '16px'
-              }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--primary-blue)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Sparkles size={14} /> Demo: +91 9000000001 | MPIN: 1234
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginPhone('9000000001');
-                    setLoginMpin('1234');
-                    setErrorMsg('');
-                  }}
-                  style={{
-                    backgroundColor: '#0B5ED7',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    padding: '4px 10px',
-                    borderRadius: '8px',
-                    fontSize: '0.72rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(11, 94, 215, 0.25)'
-                  }}
-                >
-                  Auto Fill
-                </button>
-              </div>
-
               <div style={{ marginBottom: '18px' }}>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '8px', letterSpacing: '0.04em' }}>
                   REGISTERED MOBILE NUMBER
