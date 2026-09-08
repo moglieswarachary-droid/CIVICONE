@@ -414,6 +414,23 @@ export const DEMO_FAMILY_MEMBERS = [
 ];
 
 export const DEMO_DOCUMENTS = [
+  // 0. Primary Birth Registration & Sovereign Identity Record
+  {
+    id: "doc-000",
+    name: "Birth Registration Certificate",
+    category: "government",
+    type: "certificate",
+    issuer: "Municipal Corporation — Registrar of Births & Deaths",
+    refNo: "BC-2004-AP-8849201",
+    status: "Verified",
+    issueDate: "15-07-2004",
+    addedDate: "15-07-2004",
+    expiryDate: "Permanent",
+    lastVerified: "14 Aug 2026",
+    isPrivate: false,
+    description: "Official Certificate of Birth Registration establishing sovereign Indian citizenship and legal identity.",
+    isDemo: true,
+  },
   // 1. Academic Documents & Certificates
   {
     id: "doc-006",

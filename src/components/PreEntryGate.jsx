@@ -16,8 +16,8 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
   const [regStep, setRegStep] = useState('FORM');
 
   // Form Fields for Login
-  const [loginPhone, setLoginPhone] = useState('9000000001');
-  const [loginMpin, setLoginMpin] = useState('1234');
+  const [loginPhone, setLoginPhone] = useState('');
+  const [loginMpin, setLoginMpin] = useState('');
 
   // WebAuthn Biometric Passkey States
   const [biometricScanning, setBiometricScanning] = useState(false);
@@ -117,11 +117,11 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
     });
     setLoading(false);
 
-    if (res.ok && res.data.success) {
+    if (res.ok && res.data?.success) {
       if (res.data.token) authStorage.setToken(res.data.token);
       onAuthenticated(res.data.citizen);
-    } else if (res.status === 404 || res.status === 0 || !res.ok) {
-      // Graceful client fallback for static hosting (Netlify) & offline demo
+    } else if (res.status === 0) {
+      // Graceful client fallback strictly for offline demo / pure static hosting without backend
       const cleanPhone = loginPhone.replace(/\D/g, '').slice(-10);
       let localCitizen = null;
       try {
@@ -157,7 +157,7 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
       authStorage.setToken(`CIV-TOKEN-${localCitizen.citizenId}-SECURE`);
       onAuthenticated(localCitizen);
     } else {
-      setErrorMsg(res.data.error || "Login failed. Please check your credentials.");
+      setErrorMsg(res.data?.error || "Login failed. Please check your credentials.");
     }
   };
 
@@ -657,21 +657,31 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
                   width: '100%',
                   padding: '14px',
                   borderRadius: '12px',
-                  background: 'linear-gradient(135deg, var(--primary-blue) 0%, var(--sky-blue) 100%)',
+                  backgroundColor: '#0B5ED7',
+                  backgroundImage: 'linear-gradient(135deg, #0B5ED7 0%, #0284C7 100%)',
                   color: '#FFFFFF',
                   fontWeight: 800,
                   border: 'none',
-                  cursor: 'pointer',
+                  cursor: loading ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
                   fontSize: '1rem',
-                  boxShadow: 'var(--shadow-blue)',
+                  boxShadow: '0 8px 24px -4px rgba(11, 94, 215, 0.4)',
+                  opacity: loading ? 0.75 : 1,
                   transition: 'transform 0.15s, box-shadow 0.15s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 12px 28px -4px rgba(11, 94, 215, 0.5)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px -4px rgba(11, 94, 215, 0.4)';
+                }}
               >
                 {loading ? <RefreshCw className="animate-spin" size={20} /> : <>Login to Citizen Vault <ArrowRight size={18} /></>}
               </button>
@@ -1045,12 +1055,22 @@ export default function PreEntryGate({ onAuthenticated, onGoBackToLanding, theme
                     width: '100%',
                     padding: '14px',
                     borderRadius: '12px',
-                    background: 'linear-gradient(135deg, var(--primary-blue) 0%, var(--sky-blue) 100%)',
+                    backgroundColor: '#0B5ED7',
+                    backgroundImage: 'linear-gradient(135deg, #0B5ED7 0%, #0284C7 100%)',
                     color: '#FFFFFF',
                     fontWeight: 800,
                     border: 'none',
                     cursor: 'pointer',
-                    boxShadow: 'var(--shadow-blue)'
+                    boxShadow: '0 8px 24px -4px rgba(11, 94, 215, 0.4)',
+                    transition: 'transform 0.15s, box-shadow 0.15s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 12px 28px -4px rgba(11, 94, 215, 0.5)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 8px 24px -4px rgba(11, 94, 215, 0.4)';
                   }}
                 >
                   Enter My Civic Dashboard →

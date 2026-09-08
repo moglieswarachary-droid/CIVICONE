@@ -152,7 +152,7 @@ app.post('/api/auth/citizen-login', async (req, res) => {
       isValidMpin = await comparePassword(mpin, citizen.mpinHash);
     } else {
       // Seed demo fallback
-      isValidMpin = (mpin === '1234' || mpin === '123456' || mpin.length >= 4);
+      isValidMpin = (mpin === '1234' || mpin === '123456');
     }
 
     if (!isValidMpin) {

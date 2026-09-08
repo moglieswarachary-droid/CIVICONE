@@ -20,6 +20,8 @@ body {
   --white: #FFFFFF;
   --light-blue: #EAF3FF;
   --light-blue-hover: #dbe9fc;
+  --sky-blue: #0284C7;
+  --sky-blue-hover: #0369A1;
   --bg-main: #F6F9FC;
   --bg-card: #FFFFFF;
   --bg-input: #FFFFFF;
@@ -78,6 +80,8 @@ body {
   --border-blue: #1E3A8A;
   --light-blue: #112544;
   --light-blue-hover: #1A365D;
+  --sky-blue: #38BDF8;
+  --sky-blue-hover: #0EA5E9;
   
   --success: #34D399;
   --success-bg: rgba(16, 185, 129, 0.15);
